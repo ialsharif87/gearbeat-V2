@@ -973,3 +973,19 @@ textarea.input {
     min-height: 320px;
   }
 }
+.login-help-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 0 18px;
+}
+
+.login-help-row a {
+  color: var(--cyan);
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-shadow: 0 0 14px rgba(53, 216, 255, 0.3);
+}
+
+.login-help-row a:hover {
+  color: white;
+}
