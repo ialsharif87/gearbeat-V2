@@ -1,7 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
-import { getCurrentProfile, getDashboardPath } from "@/lib/auth";
-import LogoutButton from "@/components/logout-button";
+import { getCurrentProfile, getDashboardPath } from "../lib/auth";
+import LogoutButton from "../components/logout-button";
 
 export const metadata = {
   title: "GearBeat",
