@@ -170,7 +170,7 @@ export default async function CustomerBookingsPage() {
 
                 {studio?.slug ? (
                   <Link
-                    href={/studios/${studio.slug}}
+                    href={`/studios/${studio.slug}`}
                     className="btn btn-secondary"
                   >
                     View studio
