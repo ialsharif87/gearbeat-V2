@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/auth";
+import { requireRole } from "../../lib/auth";
 
 export default async function OwnerPage() {
   const { profile } = await requireRole("owner");
