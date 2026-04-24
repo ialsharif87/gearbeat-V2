@@ -3,6 +3,52 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
 import { requireRole } from "../../../lib/auth";
 
+function statusLabel(status: string) {
+  if (status === "confirmed") return "Confirmed";
+  if (status === "cancelled") return "Cancelled";
+  if (status === "completed") return "Completed";
+  return "Pending";
+}
+
+function paymentLabel(status: string) {
+  if (status === "paid") return "Paid";
+  if (status === "failed") return "Failed";
+  if (status === "refunded") return "Refunded";
+  return "Unpaid";
+}
+
+function badgeStyle(type: "booking" | "payment", status: string) {
+  const green = {
+    background: "rgba(30, 215, 96, 0.18)",
+    color: "#1ed760",
+    border: "1px solid rgba(30, 215, 96, 0.45)"
+  };
+
+  const yellow = {
+    background: "rgba(255, 193, 7, 0.18)",
+    color: "#ffc107",
+    border: "1px solid rgba(255, 193, 7, 0.45)"
+  };
+
+  const red = {
+    background: "rgba(255, 75, 75, 0.18)",
+    color: "#ff4b4b",
+    border: "1px solid rgba(255, 75, 75, 0.45)"
+  };
+
+  if (type === "booking") {
+    if (status === "confirmed" || status === "completed") return green;
+    if (status === "cancelled") return red;
+    return yellow;
+  }
+
+  if (status === "paid") return green;
+  if (status === "unpaid" || status === "failed") return red;
+  if (status === "refunded") return yellow;
+
+  return yellow;
+}
+
 export default async function OwnerBookingsPage() {
   const { user } = await requireRole("owner");
   const supabase = await createClient();
@@ -109,7 +155,21 @@ export default async function OwnerBookingsPage() {
 
             return (
               <article className="card" key={booking.id}>
-                <span className="badge">{booking.status}</span>
+                <div className="actions" style={{ marginTop: 0 }}>
+                  <span
+                    className="badge"
+                    style={badgeStyle("booking", booking.status)}
+                  >
+                    Booking: {statusLabel(booking.status)}
+                  </span>
+
+                  <span
+                    className="badge"
+                    style={badgeStyle("payment", booking.payment_status)}
+                  >
+                    Payment: {paymentLabel(booking.payment_status)}
+                  </span>
+                </div>
 
                 <h2>{studio?.name || "Studio booking"}</h2>
 
@@ -129,10 +189,6 @@ export default async function OwnerBookingsPage() {
 
                 <p>
                   Amount: <strong>{booking.total_amount} SAR</strong>
-                </p>
-
-                <p>
-                  Payment: <strong>{booking.payment_status}</strong>
                 </p>
 
                 {booking.notes ? <p>Notes: {booking.notes}</p> : null}
@@ -166,7 +222,7 @@ export default async function OwnerBookingsPage() {
                     </>
                   ) : (
                     <p>
-                      Current status: <strong>{booking.status}</strong>
+                      Current status: <strong>{statusLabel(booking.status)}</strong>
                     </p>
                   )}
 
