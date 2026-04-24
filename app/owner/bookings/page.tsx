@@ -1,10 +1,43 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
 import { requireRole } from "../../../lib/auth";
 
 export default async function OwnerBookingsPage() {
   const { user } = await requireRole("owner");
   const supabase = await createClient();
+
+  async function updateBookingStatus(formData: FormData) {
+    "use server";
+
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const bookingId = String(formData.get("booking_id"));
+    const status = String(formData.get("status"));
+
+    if (!bookingId || !["confirmed", "cancelled"].includes(status)) {
+      throw new Error("Invalid booking update");
+    }
+
+    const { error } = await supabase
+      .from("bookings")
+      .update({ status })
+      .eq("id", bookingId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/owner/bookings");
+  }
 
   const { data: bookings, error } = await supabase
     .from("bookings")
@@ -54,7 +87,7 @@ export default async function OwnerBookingsPage() {
       <div className="section-head">
         <span className="badge">Studio Owner</span>
         <h1>Bookings</h1>
-        <p>Review booking requests for your studios.</p>
+        <p>Review, confirm, or cancel booking requests for your studios.</p>
       </div>
 
       <div className="actions" style={{ marginBottom: 24 }}>
@@ -104,14 +137,48 @@ export default async function OwnerBookingsPage() {
 
                 {booking.notes ? <p>Notes: {booking.notes}</p> : null}
 
-                {studio?.slug ? (
-                  <Link
-                    href={`/studios/${studio.slug}`}
-                    className="btn btn-small"
-                  >
-                    View Studio
-                  </Link>
-                ) : null}
+                <div className="actions">
+                  {booking.status === "pending" ? (
+                    <>
+                      <form action={updateBookingStatus}>
+                        <input
+                          type="hidden"
+                          name="booking_id"
+                          value={booking.id}
+                        />
+                        <input type="hidden" name="status" value="confirmed" />
+                        <button className="btn" type="submit">
+                          Confirm
+                        </button>
+                      </form>
+
+                      <form action={updateBookingStatus}>
+                        <input
+                          type="hidden"
+                          name="booking_id"
+                          value={booking.id}
+                        />
+                        <input type="hidden" name="status" value="cancelled" />
+                        <button className="btn btn-secondary" type="submit">
+                          Cancel
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <p>
+                      Current status: <strong>{booking.status}</strong>
+                    </p>
+                  )}
+
+                  {studio?.slug ? (
+                    <Link
+                      href={`/studios/${studio.slug}`}
+                      className="btn btn-small"
+                    >
+                      View Studio
+                    </Link>
+                  ) : null}
+                </div>
               </article>
             );
           })
