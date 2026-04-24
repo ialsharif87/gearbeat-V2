@@ -125,7 +125,7 @@ img {
 }
 
 .nav {
-  min-height: 86px;
+  min-height: 92px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -135,34 +135,139 @@ img {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-size: clamp(1.7rem, 3vw, 2.25rem);
-  font-weight: 900;
-  letter-spacing: -0.07em;
-  color: white;
-  text-shadow: 0 0 22px rgba(255, 255, 255, 0.25);
+  gap: 14px;
 }
 
-.brand span {
+.brand-text {
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
+  font-weight: 950;
+  letter-spacing: -0.08em;
+  color: #ffffff;
+  text-shadow:
+    0 0 16px rgba(255, 255, 255, 0.28),
+    0 0 30px rgba(53, 216, 255, 0.18);
+}
+
+.brand-text span {
   background: linear-gradient(90deg, var(--green), var(--cyan), var(--purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: none;
 }
 
-.brand-mark {
-  width: 46px;
-  height: 46px;
+.brand-logo {
+  width: 62px;
+  height: 62px;
   display: inline-grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 22px;
   background:
-    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.38), transparent 28%),
-    linear-gradient(135deg, var(--purple), var(--cyan), var(--green));
-  box-shadow: var(--glow-cyan), var(--glow-purple);
-  color: #07101d;
-  font-size: 1.5rem;
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.38), transparent 22%),
+    linear-gradient(135deg, rgba(184, 50, 255, 0.95), rgba(53, 216, 255, 0.95));
+  box-shadow:
+    0 0 18px rgba(184, 50, 255, 0.65),
+    0 0 34px rgba(53, 216, 255, 0.45),
+    0 0 46px rgba(30, 215, 96, 0.18);
+  position: relative;
+}
+
+.brand-logo::before,
+.brand-logo::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 26px;
+  border: 2px solid rgba(30, 215, 96, 0.45);
+  filter: blur(1px);
+  opacity: 0.85;
+}
+
+.brand-logo::after {
+  inset: 5px;
+  border-color: rgba(255, 63, 212, 0.55);
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+.logo-gear {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  position: relative;
+  background:
+    radial-gradient(circle, #07101d 0 35%, transparent 36%),
+    conic-gradient(
+      from 0deg,
+      #07101d 0deg 18deg,
+      transparent 18deg 30deg,
+      #07101d 30deg 48deg,
+      transparent 48deg 60deg,
+      #07101d 60deg 78deg,
+      transparent 78deg 90deg,
+      #07101d 90deg 108deg,
+      transparent 108deg 120deg,
+      #07101d 120deg 138deg,
+      transparent 138deg 150deg,
+      #07101d 150deg 168deg,
+      transparent 168deg 180deg,
+      #07101d 180deg 198deg,
+      transparent 198deg 210deg,
+      #07101d 210deg 228deg,
+      transparent 228deg 240deg,
+      #07101d 240deg 258deg,
+      transparent 258deg 270deg,
+      #07101d 270deg 288deg,
+      transparent 288deg 300deg,
+      #07101d 300deg 318deg,
+      transparent 318deg 330deg,
+      #07101d 330deg 348deg,
+      transparent 348deg 360deg
+    );
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+
+.logo-wave {
+  width: 32px;
+  height: 20px;
+  display: block;
+  position: relative;
+  z-index: 3;
+}
+
+.logo-wave::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 5%, #35d8ff 5% 9%, transparent 9% 14%),
+    linear-gradient(90deg, transparent 0 18%, #ff3fd4 18% 22%, transparent 22% 28%),
+    linear-gradient(90deg, transparent 0 34%, #1ed760 34% 38%, transparent 38% 44%),
+    linear-gradient(90deg, transparent 0 50%, #ffffff 50% 54%, transparent 54% 60%),
+    linear-gradient(90deg, transparent 0 66%, #35d8ff 66% 70%, transparent 70% 76%),
+    linear-gradient(90deg, transparent 0 82%, #ff3fd4 82% 86%, transparent 86% 100%);
+  clip-path: polygon(
+    0 55%,
+    8% 55%,
+    12% 15%,
+    18% 90%,
+    25% 35%,
+    32% 65%,
+    39% 10%,
+    47% 95%,
+    55% 30%,
+    63% 70%,
+    70% 18%,
+    78% 82%,
+    86% 45%,
+    100% 45%,
+    100% 100%,
+    0 100%
+  );
+  filter:
+    drop-shadow(0 0 6px rgba(53, 216, 255, 0.9))
+    drop-shadow(0 0 10px rgba(255, 63, 212, 0.65));
 }
 
 .nav-links {
@@ -384,8 +489,7 @@ img {
   min-height: 48px;
   padding: 0 24px;
   border-radius: 999px;
-  background:
-    linear-gradient(135deg, var(--green), #54ff95);
+  background: linear-gradient(135deg, var(--green), #54ff95);
   color: #04110a;
   font-weight: 900;
   letter-spacing: 0.01em;
@@ -477,7 +581,9 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.55s ease, filter 0.55s ease;
+  transition:
+    transform 0.55s ease,
+    filter 0.55s ease;
 }
 
 .card:hover .studio-cover img {
@@ -693,13 +799,24 @@ textarea.input {
     border-radius: 22px;
   }
 
-  .brand {
-    font-size: 1.8rem;
+  .brand-logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
   }
 
-  .brand-mark {
-    width: 40px;
-    height: 40px;
+  .logo-gear {
+    width: 34px;
+    height: 34px;
+  }
+
+  .logo-wave {
+    width: 24px;
+    height: 15px;
+  }
+
+  .brand-text {
+    font-size: 1.8rem;
   }
 
   .actions {
