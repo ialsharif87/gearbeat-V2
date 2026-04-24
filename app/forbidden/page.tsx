@@ -4,7 +4,9 @@ export default function ForbiddenPage() {
   return (
     <div className="card">
       <span className="badge">Access denied</span>
+
       <h1>Forbidden</h1>
+
       <p>
         You do not have permission to access this area. Please login with the
         correct account type.
@@ -21,3 +23,4 @@ export default function ForbiddenPage() {
       </div>
     </div>
   );
+}
