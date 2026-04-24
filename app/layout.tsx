@@ -5,7 +5,7 @@ import LogoutButton from "../components/logout-button";
 
 export const metadata = {
   title: "GearBeat",
-  description: "Premium studio booking marketplace"
+  description: "Premium music studio booking marketplace"
 };
 
 export default async function RootLayout({
@@ -21,15 +21,28 @@ export default async function RootLayout({
         <header className="site-header">
           <div className="container nav">
             <Link href="/" className="brand">
+              <span className="brand-mark">♫</span>
               Gear<span>Beat</span>
             </Link>
 
             <nav className="nav-links">
-              <Link href="/studios">Studios</Link>
+              <Link href="/studios">Browse Studios</Link>
 
               {profile ? (
                 <>
                   <Link href={getDashboardPath(profile.role)}>Dashboard</Link>
+
+                  {profile.role === "customer" ? (
+                    <Link href="/customer/bookings">My Bookings</Link>
+                  ) : null}
+
+                  {profile.role === "owner" ? (
+                    <>
+                      <Link href="/owner/studios">My Studios</Link>
+                      <Link href="/owner/bookings">Bookings</Link>
+                    </>
+                  ) : null}
+
                   <LogoutButton />
                 </>
               ) : (
