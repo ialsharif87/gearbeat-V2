@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
+import T from "../../../../components/t";
 
 export default async function BookStudioPage({
   params
@@ -73,34 +74,48 @@ export default async function BookStudioPage({
       throw new Error(bookingError.message);
     }
 
-    redirect("/customer");
+    redirect("/customer/bookings");
   }
 
   return (
     <section>
-      <div className="card">
-        <span className="badge">Booking</span>
+      <div className="section-head">
+        <span className="badge">
+          <T en="Booking" ar="الحجز" />
+        </span>
 
-        <h1>Book {studioName}</h1>
+        <h1>
+          <T en="Book" ar="احجز" /> {studioName}
+        </h1>
 
         <p>
-          {studioCity}
-          {studioDistrict ? ` · ${studioDistrict}` : ""}
+          <T
+            en="Choose your preferred date and time. The studio owner will review and confirm your request."
+            ar="اختر التاريخ والوقت المناسبين لك. سيقوم صاحب الاستوديو بمراجعة طلبك وتأكيده."
+          />
         </p>
+      </div>
 
-        <p>Starting from {studioPriceFrom} SAR / hour</p>
-
-        <form className="form" action={createBooking}>
-          <label>Booking date</label>
+      <div className="studio-booking-layout">
+        <form className="card form" action={createBooking}>
+          <label>
+            <T en="Booking date" ar="تاريخ الحجز" />
+          </label>
           <input className="input" type="date" name="booking_date" required />
 
-          <label>Start time</label>
+          <label>
+            <T en="Start time" ar="وقت البداية" />
+          </label>
           <input className="input" type="time" name="start_time" required />
 
-          <label>End time</label>
+          <label>
+            <T en="End time" ar="وقت النهاية" />
+          </label>
           <input className="input" type="time" name="end_time" required />
 
-          <label>Notes</label>
+          <label>
+            <T en="Notes" ar="ملاحظات" />
+          </label>
           <textarea
             className="input"
             name="notes"
@@ -109,15 +124,42 @@ export default async function BookStudioPage({
           />
 
           <button className="btn" type="submit">
-            Create booking request
+            <T en="Create booking request" ar="إرسال طلب الحجز" />
           </button>
         </form>
 
-        <div className="actions">
-          <Link href={`/studios/${studioSlug}`} className="btn btn-secondary">
-            Back to studio
-          </Link>
-        </div>
+        <aside className="card booking-summary-card">
+          <span className="badge">
+            <T en="Booking Summary" ar="ملخص الحجز" />
+          </span>
+
+          <h2>{studioName}</h2>
+
+          <p>
+            {studioCity}
+            {studioDistrict ? ` · ${studioDistrict}` : ""}
+          </p>
+
+          <div className="studio-price-box">
+            <span>
+              <T en="Starting from" ar="يبدأ من" />
+            </span>
+            <strong>{studioPriceFrom} SAR / hour</strong>
+          </div>
+
+          <p>
+            <T
+              en="Your request will be sent as pending first. After the owner confirms it, you can complete payment from My Bookings."
+              ar="سيتم إرسال طلبك أولًا بحالة انتظار. بعد تأكيد صاحب الاستوديو، يمكنك إكمال الدفع من صفحة حجوزاتي."
+            />
+          </p>
+
+          <div className="actions">
+            <Link href={`/studios/${studioSlug}`} className="btn btn-secondary">
+              <T en="Back to Studio" ar="العودة إلى الاستوديو" />
+            </Link>
+          </div>
+        </aside>
       </div>
     </section>
   );
