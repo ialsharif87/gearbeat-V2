@@ -108,7 +108,7 @@ export default async function BookStudioPage({
         </form>
 
         <div className="actions">
-          <Link href={/studios/${studio.slug}} className="btn btn-secondary">
+          <Link href={`/studios/${studio.slug}`} className="btn btn-secondary">
             Back to studio
           </Link>
         </div>
