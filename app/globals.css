@@ -1063,3 +1063,25 @@ html[dir="rtl"] .login-help-row {
     width: fit-content;
   }
 }
+.studio-booking-layout {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.booking-summary-card {
+  position: sticky;
+  top: 120px;
+}
+
+@media (max-width: 960px) {
+  .studio-booking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-summary-card {
+    position: relative;
+    top: auto;
+  }
+}
