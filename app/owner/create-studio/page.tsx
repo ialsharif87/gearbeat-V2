@@ -39,7 +39,7 @@ export default async function CreateStudioPage() {
     }
 
     const baseSlug = slugify(name);
-    const slug = ${baseSlug}-${Date.now()};
+    const slug = `${baseSlug}-${Date.now()}`;
 
     const { error } = await supabase.from("studios").insert({
       owner_auth_user_id: user.id,
