@@ -16,6 +16,38 @@ function paymentLabel(status: string) {
   return "Unpaid";
 }
 
+function badgeStyle(type: "booking" | "payment", status: string) {
+  const green = {
+    background: "rgba(30, 215, 96, 0.18)",
+    color: "#1ed760",
+    border: "1px solid rgba(30, 215, 96, 0.45)"
+  };
+
+  const yellow = {
+    background: "rgba(255, 193, 7, 0.18)",
+    color: "#ffc107",
+    border: "1px solid rgba(255, 193, 7, 0.45)"
+  };
+
+  const red = {
+    background: "rgba(255, 75, 75, 0.18)",
+    color: "#ff4b4b",
+    border: "1px solid rgba(255, 75, 75, 0.45)"
+  };
+
+  if (type === "booking") {
+    if (status === "confirmed" || status === "completed") return green;
+    if (status === "cancelled") return red;
+    return yellow;
+  }
+
+  if (status === "paid") return green;
+  if (status === "unpaid" || status === "failed") return red;
+  if (status === "refunded") return yellow;
+
+  return yellow;
+}
+
 export default async function CustomerBookingsPage() {
   const supabase = await createClient();
 
@@ -87,11 +119,17 @@ export default async function CustomerBookingsPage() {
             return (
               <article className="card" key={booking.id}>
                 <div className="actions" style={{ marginTop: 0 }}>
-                  <span className="badge">
+                  <span
+                    className="badge"
+                    style={badgeStyle("booking", booking.status)}
+                  >
                     Booking: {statusLabel(booking.status)}
                   </span>
 
-                  <span className="badge">
+                  <span
+                    className="badge"
+                    style={badgeStyle("payment", booking.payment_status)}
+                  >
                     Payment: {paymentLabel(booking.payment_status)}
                   </span>
                 </div>
@@ -117,28 +155,22 @@ export default async function CustomerBookingsPage() {
                 </p>
 
                 {booking.status === "pending" ? (
-                  <p>
-                    Your request is waiting for the studio owner to confirm.
-                  </p>
+                  <p>Your request is waiting for the studio owner to confirm.</p>
                 ) : null}
 
                 {booking.status === "confirmed" ? (
-                  <p>
-                    Your booking is confirmed. Payment step will be added next.
-                  </p>
+                  <p>Your booking is confirmed. Payment step will be added next.</p>
                 ) : null}
 
                 {booking.status === "cancelled" ? (
-                  <p>
-                    This booking was cancelled by the studio owner.
-                  </p>
+                  <p>This booking was cancelled by the studio owner.</p>
                 ) : null}
 
                 {booking.notes ? <p>Notes: {booking.notes}</p> : null}
 
                 {studio?.slug ? (
                   <Link
-                    href={`/studios/${studio.slug}`}
+                    href={/studios/${studio.slug}}
                     className="btn btn-secondary"
                   >
                     View studio
