@@ -2,6 +2,20 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 
+function statusLabel(status: string) {
+  if (status === "confirmed") return "Confirmed";
+  if (status === "cancelled") return "Cancelled";
+  if (status === "completed") return "Completed";
+  return "Pending";
+}
+
+function paymentLabel(status: string) {
+  if (status === "paid") return "Paid";
+  if (status === "failed") return "Failed";
+  if (status === "refunded") return "Refunded";
+  return "Unpaid";
+}
+
 export default async function CustomerBookingsPage() {
   const supabase = await createClient();
 
@@ -50,7 +64,17 @@ export default async function CustomerBookingsPage() {
       <div className="section-head">
         <span className="badge">Customer Area</span>
         <h1>My Bookings</h1>
-        <p>Your studio booking requests and status.</p>
+        <p>Track your studio booking requests and payment status.</p>
+      </div>
+
+      <div className="actions" style={{ marginBottom: 24 }}>
+        <Link href="/customer" className="btn btn-secondary">
+          Back to Dashboard
+        </Link>
+
+        <Link href="/studios" className="btn">
+          Browse Studios
+        </Link>
       </div>
 
       <div className="grid">
@@ -62,7 +86,15 @@ export default async function CustomerBookingsPage() {
 
             return (
               <article className="card" key={booking.id}>
-                <span className="badge">{booking.status}</span>
+                <div className="actions" style={{ marginTop: 0 }}>
+                  <span className="badge">
+                    Booking: {statusLabel(booking.status)}
+                  </span>
+
+                  <span className="badge">
+                    Payment: {paymentLabel(booking.payment_status)}
+                  </span>
+                </div>
 
                 <h2>{studio?.name || "Studio"}</h2>
 
@@ -84,9 +116,23 @@ export default async function CustomerBookingsPage() {
                   Amount: <strong>{booking.total_amount} SAR</strong>
                 </p>
 
-                <p>
-                  Payment: <strong>{booking.payment_status}</strong>
-                </p>
+                {booking.status === "pending" ? (
+                  <p>
+                    Your request is waiting for the studio owner to confirm.
+                  </p>
+                ) : null}
+
+                {booking.status === "confirmed" ? (
+                  <p>
+                    Your booking is confirmed. Payment step will be added next.
+                  </p>
+                ) : null}
+
+                {booking.status === "cancelled" ? (
+                  <p>
+                    This booking was cancelled by the studio owner.
+                  </p>
+                ) : null}
 
                 {booking.notes ? <p>Notes: {booking.notes}</p> : null}
 
