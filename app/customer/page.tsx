@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "../../lib/auth";
 
 export default async function CustomerPage() {
@@ -14,14 +15,18 @@ export default async function CustomerPage() {
       </p>
 
       <p>
-        This is your customer area. Later we will add your bookings, favorites,
-        reviews, payments, and profile settings here.
+        This is your customer area. You can browse studios, check your bookings,
+        and later we will add favorites, reviews, payments, and profile settings.
       </p>
 
       <div className="actions">
-        <a href="/studios" className="btn">
+        <Link href="/studios" className="btn">
           Browse studios
-        </a>
+        </Link>
+
+        <Link href="/customer/bookings" className="btn btn-secondary">
+          My Bookings
+        </Link>
       </div>
     </div>
   );
