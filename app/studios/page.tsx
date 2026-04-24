@@ -22,16 +22,28 @@ export default async function StudiosPage() {
 
   return (
     <section>
-      <div className="section-head">
-        <span className="badge">Browse</span>
-        <h1>Studios</h1>
-        <p>Discover premium creative and music spaces.</p>
+      <div className="section-head studios-hero-head">
+        <span className="badge">Browse Studios</span>
+
+        <h1>
+          Find a studio that matches your <span className="neon-text">sound</span>.
+        </h1>
+
+        <p>
+          Explore premium recording rooms, podcast spaces, rehearsal studios,
+          and production suites available on GearBeat.
+        </p>
+
+        <div className="visual-search studios-search">
+          <span>Search by city, studio name, vibe, or price...</span>
+          <span className="search-icon">⌕</span>
+        </div>
       </div>
 
       <div className="grid">
         {studios?.length ? (
           studios.map((studio) => (
-            <article className="card" key={studio.id}>
+            <article className="card studio-card" key={studio.id}>
               <div className="studio-cover">
                 {studio.cover_image_url ? (
                   <img src={studio.cover_image_url} alt={studio.name} />
@@ -40,18 +52,27 @@ export default async function StudiosPage() {
                 )}
               </div>
 
-              <h2>{studio.name}</h2>
+              <div className="studio-card-body">
+                <div>
+                  <span className="badge">Available</span>
+                  <h2>{studio.name}</h2>
 
-              <p>
-                {studio.city}
-                {studio.district ? ` · ${studio.district}` : ""}
-              </p>
+                  <p>
+                    {studio.city}
+                    {studio.district ? ` · ${studio.district}` : ""}
+                  </p>
+                </div>
 
-              <p>From {studio.price_from ?? 0} SAR</p>
+                <div className="studio-card-footer">
+                  <p>
+                    From <strong>{studio.price_from ?? 0} SAR</strong>
+                  </p>
 
-              <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                View studio
-              </Link>
+                  <Link href={`/studios/${studio.slug}`} className="btn btn-small">
+                    View Details
+                  </Link>
+                </div>
+              </div>
             </article>
           ))
         ) : (
