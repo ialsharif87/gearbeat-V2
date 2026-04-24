@@ -145,7 +145,10 @@ export default function HomePage() {
             </p>
 
             <p>
-              <T en="Price:" ar="السعر:" /> <strong><T en="From 250 SAR" ar="من 250 ريال" /></strong>
+              <T en="Price:" ar="السعر:" />{" "}
+              <strong>
+                <T en="From 250 SAR" ar="من 250 ريال" />
+              </strong>
             </p>
 
             <Link href="/studios" className="btn btn-small">
@@ -173,7 +176,10 @@ export default function HomePage() {
             </p>
 
             <p>
-              <T en="Price:" ar="السعر:" /> <strong><T en="From 300 SAR" ar="من 300 ريال" /></strong>
+              <T en="Price:" ar="السعر:" />{" "}
+              <strong>
+                <T en="From 300 SAR" ar="من 300 ريال" />
+              </strong>
             </p>
 
             <Link href="/studios" className="btn btn-small">
@@ -201,7 +207,10 @@ export default function HomePage() {
             </p>
 
             <p>
-              <T en="Price:" ar="السعر:" /> <strong><T en="From 180 SAR" ar="من 180 ريال" /></strong>
+              <T en="Price:" ar="السعر:" />{" "}
+              <strong>
+                <T en="From 180 SAR" ar="من 180 ريال" />
+              </strong>
             </p>
 
             <Link href="/studios" className="btn btn-small">
@@ -244,4 +253,16 @@ export default function HomePage() {
 
           <p>
             <T
-              en="Create studios, review booking requests, confirm or
+              en="Create studios, review booking requests, confirm or cancel bookings, and track customer payment status."
+              ar="أنشئ الاستوديوهات، راجع طلبات الحجز، أكد أو ألغِ الحجوزات، وتابع حالة دفع العميل."
+            />
+          </p>
+
+          <Link href="/signup" className="btn btn-secondary">
+            <T en="Create Owner Account" ar="إنشاء حساب مالك استوديو" />
+          </Link>
+        </div>
+      </section>
+    </>
+  );
+}
