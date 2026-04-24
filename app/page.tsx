@@ -1,4 +1,5 @@
 import Link from "next/link";
+import T from "../components/t";
 
 function Waveform() {
   return (
@@ -16,40 +17,65 @@ export default function HomePage() {
       <section className="hero">
         <div className="hero-grid">
           <div className="hero-content">
-            <span className="badge">Premium Music Studio Marketplace</span>
+            <span className="badge">
+              <T
+                en="Premium Music Studio Marketplace"
+                ar="منصة فاخرة لحجز الاستوديوهات الموسيقية"
+              />
+            </span>
 
             <h1 className="glow-title">
-              Find Your Perfect <span className="neon-text">Sound Space</span>
+              <T en="Find Your Perfect" ar="اعثر على" />{" "}
+              <span className="neon-text">
+                <T en="Sound Space" ar="مساحتك الصوتية المثالية" />
+              </span>
             </h1>
 
             <p>
-              Book recording studios, podcast rooms, rehearsal spaces, and
-              production rooms with a premium music-tech experience built for
-              creators, artists, and studio owners.
+              <T
+                en="Book recording studios, podcast rooms, rehearsal spaces, and production rooms with a premium music-tech experience built for creators, artists, and studio owners."
+                ar="احجز استوديوهات التسجيل، غرف البودكاست، مساحات التدريب، وغرف الإنتاج من خلال تجربة فاخرة مخصصة للمبدعين والفنانين وأصحاب الاستوديوهات."
+              />
             </p>
 
             <div className="visual-search">
-              <span>Advanced search for studios, city, vibe, or price...</span>
+              <span>
+                <T
+                  en="Advanced search for studios, city, vibe, or price..."
+                  ar="ابحث عن الاستوديو، المدينة، الأجواء، أو السعر..."
+                />
+              </span>
               <span className="search-icon">⌕</span>
             </div>
 
             <div className="actions">
               <Link href="/studios" className="btn">
-                Book Your Next Studio
+                <T en="Book Your Next Studio" ar="احجز استوديوك القادم" />
               </Link>
 
               <Link href="/signup" className="btn btn-secondary">
-                Join GearBeat
+                <T en="Join GearBeat" ar="انضم إلى GearBeat" />
               </Link>
             </div>
           </div>
 
           <div className="card wave-card">
-            <span className="badge">Live Studio Pulse</span>
-            <h2>Creator demand is moving fast.</h2>
+            <span className="badge">
+              <T en="Live Studio Pulse" ar="نبض الاستوديو المباشر" />
+            </span>
+
+            <h2>
+              <T
+                en="Creator demand is moving fast."
+                ar="طلب المبدعين يتحرك بسرعة."
+              />
+            </h2>
+
             <p>
-              Track bookings, studio activity, payment status, and owner
-              confirmations from one clean marketplace flow.
+              <T
+                en="Track bookings, studio activity, payment status, and owner confirmations from one clean marketplace flow."
+                ar="تابع الحجوزات، نشاط الاستوديو، حالة الدفع، وموافقات المالك من خلال مسار واضح واحد."
+              />
             </p>
 
             <Waveform />
@@ -57,17 +83,23 @@ export default function HomePage() {
             <div className="stats-row">
               <div className="stat">
                 <b>24/7</b>
-                <span>Booking access</span>
+                <span>
+                  <T en="Booking access" ar="إتاحة الحجز" />
+                </span>
               </div>
 
               <div className="stat">
                 <b>3</b>
-                <span>User roles</span>
+                <span>
+                  <T en="User roles" ar="أنواع مستخدمين" />
+                </span>
               </div>
 
               <div className="stat">
                 <b>Live</b>
-                <span>Supabase data</span>
+                <span>
+                  <T en="Supabase data" ar="بيانات مباشرة" />
+                </span>
               </div>
             </div>
           </div>
@@ -76,11 +108,19 @@ export default function HomePage() {
 
       <section className="featured-grid">
         <div className="section-head">
-          <span className="badge">Featured Experience</span>
-          <h1>Built for music spaces.</h1>
+          <span className="badge">
+            <T en="Featured Experience" ar="تجربة مميزة" />
+          </span>
+
+          <h1>
+            <T en="Built for music spaces." ar="مصمم للمساحات الموسيقية." />
+          </h1>
+
           <p>
-            GearBeat connects customers and studio owners in one booking flow:
-            discover, request, confirm, and pay.
+            <T
+              en="GearBeat connects customers and studio owners in one booking flow: discover, request, confirm, and pay."
+              ar="GearBeat يربط العملاء وأصحاب الاستوديوهات في مسار حجز واحد: استكشاف، طلب، تأكيد، ودفع."
+            />
           </p>
         </div>
 
@@ -93,14 +133,23 @@ export default function HomePage() {
               />
             </div>
 
-            <h2>The Echo Chamber</h2>
-            <p>Premium recording room with neon ambience and studio-grade gear.</p>
+            <h2>
+              <T en="The Echo Chamber" ar="غرفة الصدى" />
+            </h2>
+
             <p>
-              Price: <strong>From 250 SAR</strong>
+              <T
+                en="Premium recording room with neon ambience and studio-grade gear."
+                ar="غرفة تسجيل فاخرة بأجواء نيون ومعدات احترافية."
+              />
+            </p>
+
+            <p>
+              <T en="Price:" ar="السعر:" /> <strong><T en="From 250 SAR" ar="من 250 ريال" /></strong>
             </p>
 
             <Link href="/studios" className="btn btn-small">
-              View Details
+              <T en="View Details" ar="عرض التفاصيل" />
             </Link>
           </article>
 
@@ -112,14 +161,23 @@ export default function HomePage() {
               />
             </div>
 
-            <h2>Producer Suite</h2>
-            <p>Creative production space for artists, producers, and writers.</p>
+            <h2>
+              <T en="Producer Suite" ar="جناح المنتج" />
+            </h2>
+
             <p>
-              Price: <strong>From 300 SAR</strong>
+              <T
+                en="Creative production space for artists, producers, and writers."
+                ar="مساحة إنتاج إبداعية للفنانين والمنتجين والكتّاب."
+              />
+            </p>
+
+            <p>
+              <T en="Price:" ar="السعر:" /> <strong><T en="From 300 SAR" ar="من 300 ريال" /></strong>
             </p>
 
             <Link href="/studios" className="btn btn-small">
-              View Details
+              <T en="View Details" ar="عرض التفاصيل" />
             </Link>
           </article>
 
@@ -131,14 +189,23 @@ export default function HomePage() {
               />
             </div>
 
-            <h2>Podcast Lab</h2>
-            <p>Clean spoken-word studio for podcasts, interviews, and content.</p>
+            <h2>
+              <T en="Podcast Lab" ar="مختبر البودكاست" />
+            </h2>
+
             <p>
-              Price: <strong>From 180 SAR</strong>
+              <T
+                en="Clean spoken-word studio for podcasts, interviews, and content."
+                ar="استوديو واضح ومجهز للبودكاست والمقابلات وصناعة المحتوى."
+              />
+            </p>
+
+            <p>
+              <T en="Price:" ar="السعر:" /> <strong><T en="From 180 SAR" ar="من 180 ريال" /></strong>
             </p>
 
             <Link href="/studios" className="btn btn-small">
-              View Details
+              <T en="View Details" ar="عرض التفاصيل" />
             </Link>
           </article>
         </div>
@@ -146,31 +213,35 @@ export default function HomePage() {
 
       <section className="pulse-panel">
         <div className="card">
-          <span className="badge">For Customers</span>
-          <h2>Book with confidence.</h2>
+          <span className="badge">
+            <T en="For Customers" ar="للعملاء" />
+          </span>
+
+          <h2>
+            <T en="Book with confidence." ar="احجز بثقة." />
+          </h2>
+
           <p>
-            Browse studios, create booking requests, track confirmation status,
-            and simulate payment after owner approval.
+            <T
+              en="Browse studios, create booking requests, track confirmation status, and simulate payment after owner approval."
+              ar="تصفح الاستوديوهات، أنشئ طلبات الحجز، تابع حالة التأكيد، وادفع بعد موافقة صاحب الاستوديو."
+            />
           </p>
 
           <Link href="/studios" className="btn">
-            Browse Studios
+            <T en="Browse Studios" ar="تصفح الاستوديوهات" />
           </Link>
         </div>
 
         <div className="card">
-          <span className="badge">For Studio Owners</span>
-          <h2>Manage your studio flow.</h2>
-          <p>
-            Create studios, review booking requests, confirm or cancel bookings,
-            and track customer payment status.
-          </p>
+          <span className="badge">
+            <T en="For Studio Owners" ar="لأصحاب الاستوديوهات" />
+          </span>
 
-          <Link href="/signup" className="btn btn-secondary">
-            Create Owner Account
-          </Link>
-        </div>
-      </section>
-    </>
-  );
-}
+          <h2>
+            <T en="Manage your studio flow." ar="أدر مسار استوديوك." />
+          </h2>
+
+          <p>
+            <T
+              en="Create studios, review booking requests, confirm or
