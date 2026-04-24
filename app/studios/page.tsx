@@ -49,7 +49,7 @@ export default async function StudiosPage() {
 
               <p>From {studio.price_from ?? 0} SAR</p>
 
-              <Link href={/studios/${studio.slug}} className="btn btn-small">
+              <Link href={`/studios/${studio.slug}`} className="btn btn-small">
                 View studio
               </Link>
             </article>
