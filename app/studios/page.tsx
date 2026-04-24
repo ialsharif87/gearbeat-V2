@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "../../lib/supabase/server";
+import T from "../../components/t";
 
 export default async function StudiosPage() {
   const supabase = await createClient();
@@ -13,8 +14,12 @@ export default async function StudiosPage() {
   if (error) {
     return (
       <div className="card">
-        <span className="badge">Error</span>
-        <h1>Studios</h1>
+        <span className="badge">
+          <T en="Error" ar="خطأ" />
+        </span>
+        <h1>
+          <T en="Studios" ar="الاستوديوهات" />
+        </h1>
         <p>{error.message}</p>
       </div>
     );
@@ -23,19 +28,31 @@ export default async function StudiosPage() {
   return (
     <section>
       <div className="section-head studios-hero-head">
-        <span className="badge">Browse Studios</span>
+        <span className="badge">
+          <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+        </span>
 
         <h1>
-          Find a studio that matches your <span className="neon-text">sound</span>.
+          <T en="Find a studio that matches your" ar="اعثر على استوديو يناسب" />{" "}
+          <span className="neon-text">
+            <T en="sound." ar="صوتك." />
+          </span>
         </h1>
 
         <p>
-          Explore premium recording rooms, podcast spaces, rehearsal studios,
-          and production suites available on GearBeat.
+          <T
+            en="Explore premium recording rooms, podcast spaces, rehearsal studios, and production suites available on GearBeat."
+            ar="استكشف غرف التسجيل الفاخرة، مساحات البودكاست، استوديوهات التدريب، وغرف الإنتاج المتاحة على GearBeat."
+          />
         </p>
 
         <div className="visual-search studios-search">
-          <span>Search by city, studio name, vibe, or price...</span>
+          <span>
+            <T
+              en="Search by city, studio name, vibe, or price..."
+              ar="ابحث حسب المدينة، اسم الاستوديو، الأجواء، أو السعر..."
+            />
+          </span>
           <span className="search-icon">⌕</span>
         </div>
       </div>
@@ -48,13 +65,18 @@ export default async function StudiosPage() {
                 {studio.cover_image_url ? (
                   <img src={studio.cover_image_url} alt={studio.name} />
                 ) : (
-                  <div className="placeholder">No Image</div>
+                  <div className="placeholder">
+                    <T en="No Image" ar="لا توجد صورة" />
+                  </div>
                 )}
               </div>
 
               <div className="studio-card-body">
                 <div>
-                  <span className="badge">Available</span>
+                  <span className="badge">
+                    <T en="Available" ar="متاح" />
+                  </span>
+
                   <h2>{studio.name}</h2>
 
                   <p>
@@ -65,11 +87,12 @@ export default async function StudiosPage() {
 
                 <div className="studio-card-footer">
                   <p>
-                    From <strong>{studio.price_from ?? 0} SAR</strong>
+                    <T en="From" ar="من" />{" "}
+                    <strong>{studio.price_from ?? 0} SAR</strong>
                   </p>
 
                   <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                    View Details
+                    <T en="View Details" ar="عرض التفاصيل" />
                   </Link>
                 </div>
               </div>
@@ -77,9 +100,14 @@ export default async function StudiosPage() {
           ))
         ) : (
           <div className="card">
-            <h2>No studios yet</h2>
+            <h2>
+              <T en="No studios yet" ar="لا توجد استوديوهات بعد" />
+            </h2>
             <p>
-              Once studios are approved by the admin, they will appear here.
+              <T
+                en="Once studios are approved by the admin, they will appear here."
+                ar="بعد اعتماد الاستوديوهات من الإدارة، ستظهر هنا."
+              />
             </p>
           </div>
         )}
