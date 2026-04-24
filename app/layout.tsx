@@ -20,16 +20,12 @@ export default async function RootLayout({
       <body>
         <header className="site-header">
           <div className="container nav">
-            <Link href="/" className="brand">
-              <span className="brand-logo" aria-hidden="true">
-                <span className="logo-gear">
-                  <span className="logo-wave"></span>
-                </span>
-              </span>
-
-              <span className="brand-text">
-                Gear<span>Beat</span>
-              </span>
+            <Link href="/" className="brand brand-image-link">
+              <img
+                src="/gearbeat-logo.png"
+                alt="GearBeat"
+                className="brand-image"
+              />
             </Link>
 
             <nav className="nav-links">
