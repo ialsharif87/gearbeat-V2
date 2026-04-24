@@ -58,7 +58,7 @@ export default async function StudioDetailsPage({
         <h2>From {studio.price_from ?? 0} SAR / hour</h2>
 
         <div className="actions">
-          <Link href={/studios/${studio.slug}/book} className="btn">
+          <Link href={`/studios/${studio.slug}/book`} className="btn">
             Book now
           </Link>
 
