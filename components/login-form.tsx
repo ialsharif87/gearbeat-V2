@@ -1,14 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { createClient } from "../lib/supabase/client";
-
-function getDashboardPath(role?: string | null) {
-  if (role === "admin") return "/admin";
-  if (role === "owner") return "/owner";
-  return "/customer";
-}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -17,14 +12,14 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorText, setErrorText] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
+    setErrorMessage("");
     setLoading(true);
-    setErrorText("");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -32,56 +27,95 @@ export default function LoginForm() {
     });
 
     if (error) {
-      setErrorText(error.message);
       setLoading(false);
+      setErrorMessage(error.message);
+      return;
+    }
+
+    const user = data.user;
+
+    if (!user) {
+      setLoading(false);
+      setErrorMessage("Login failed. Please try again.");
       return;
     }
 
     const { data: profile, error: profileError } = await supabase
       .from("users")
       .select("role")
-      .eq("auth_user_id", data.user.id)
-      .single();
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    setLoading(false);
 
     if (profileError) {
-      setErrorText(profileError.message);
-      setLoading(false);
+      setErrorMessage(profileError.message);
       return;
     }
 
-    router.push(getDashboardPath(profile?.role));
+    if (profile?.role === "owner") {
+      router.push("/owner");
+      router.refresh();
+      return;
+    }
+
+    if (profile?.role === "admin") {
+      router.push("/admin");
+      router.refresh();
+      return;
+    }
+
+    router.push("/customer");
     router.refresh();
   }
 
   return (
-    <form className="card form" onSubmit={handleSubmit}>
-      <h1>Login</h1>
+    <section>
+      <div className="card form">
+        <span className="badge">Welcome Back</span>
 
-      <label>Email</label>
-      <input
-        className="input"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@email.com"
-        required
-      />
+        <h1>Login</h1>
 
-      <label>Password</label>
-      <input
-        className="input"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="••••••••"
-        required
-      />
+        <p>Access your GearBeat account.</p>
 
-      {errorText ? <p className="error">{errorText}</p> : null}
+        <form onSubmit={handleLogin}>
+          <label>Email</label>
+          <input
+            className="input"
+            type="email"
+            placeholder="your@email.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
 
-      <button className="btn" type="submit" disabled={loading}>
-        {loading ? "Logging in..." : "Login"}
-      </button>
-    </form>
+          <label>Password</label>
+          <input
+            className="input"
+            type="password"
+            placeholder="Your password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+
+          <div className="login-help-row">
+            <Link href="/forgot-password">Forgot password?</Link>
+          </div>
+
+          {errorMessage ? <p className="error">{errorMessage}</p> : null}
+
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        <div className="actions">
+          <Link href="/signup" className="btn btn-secondary">
+            Create account
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
