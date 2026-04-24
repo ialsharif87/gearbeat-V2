@@ -835,3 +835,25 @@ textarea.input {
     gap: 8px;
   }
 }
+.brand-image-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  line-height: 0;
+}
+
+.brand-image {
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter:
+    drop-shadow(0 0 12px rgba(53, 216, 255, 0.55))
+    drop-shadow(0 0 20px rgba(184, 50, 255, 0.35));
+}
+
+@media (max-width: 640px) {
+  .brand-image {
+    height: 54px;
+  }
+}
