@@ -1,27 +1,29 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "../lib/supabase/client";
+import T from "./t";
 
 export default function SignupForm() {
+  const router = useRouter();
   const supabase = createClient();
 
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<"customer" | "owner">("customer");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("customer");
   const [password, setPassword] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorText, setErrorText] = useState("");
-  const [successText, setSuccessText] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
+    setErrorMessage("");
     setLoading(true);
-    setErrorText("");
-    setSuccessText("");
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -35,82 +37,114 @@ export default function SignupForm() {
       }
     });
 
+    setLoading(false);
+
     if (error) {
-      setErrorText(error.message);
-      setLoading(false);
+      setErrorMessage(error.message);
       return;
     }
 
-    setSuccessText(
-      "Account created successfully. If email confirmation is enabled, confirm your email first, then login."
-    );
-
-    setFullName("");
-    setPhone("");
-    setEmail("");
-    setPassword("");
-    setRole("customer");
-    setLoading(false);
+    router.push("/login");
+    router.refresh();
   }
 
   return (
-    <form className="card form" onSubmit={handleSubmit}>
-      <h1>Create Account</h1>
+    <section>
+      <div className="card form">
+        <span className="badge">
+          <T en="Join GearBeat" ar="انضم إلى GearBeat" />
+        </span>
 
-      <label>Full name</label>
-      <input
-        className="input"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-        placeholder="Full name"
-        required
-      />
+        <h1>
+          <T en="Create Account" ar="إنشاء حساب" />
+        </h1>
 
-      <label>Phone</label>
-      <input
-        className="input"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        placeholder="+966 5X XXX XXXX"
-        required
-      />
+        <p>
+          <T
+            en="Create your account as a customer, studio owner, or vendor."
+            ar="أنشئ حسابك كعميل أو صاحب استوديو أو متجر."
+          />
+        </p>
 
-      <label>Account type</label>
-      <select
-        className="input"
-        value={role}
-        onChange={(e) => setRole(e.target.value as "customer" | "owner")}
-      >
-        <option value="customer">Customer</option>
-        <option value="owner">Studio Owner</option>
-      </select>
+        <form onSubmit={handleSignup}>
+          <label>
+            <T en="Full name" ar="الاسم الكامل" />
+          </label>
+          <input
+            className="input"
+            type="text"
+            placeholder="Your full name"
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            required
+          />
 
-      <label>Email</label>
-      <input
-        className="input"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@email.com"
-        required
-      />
+          <label>
+            <T en="Email" ar="البريد الإلكتروني" />
+          </label>
+          <input
+            className="input"
+            type="email"
+            placeholder="your@email.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
 
-      <label>Password</label>
-      <input
-        className="input"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="At least 8 characters"
-        required
-      />
+          <label>
+            <T en="Phone" ar="رقم الجوال" />
+          </label>
+          <input
+            className="input"
+            type="tel"
+            placeholder="+966..."
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+          />
 
-      {errorText ? <p className="error">{errorText}</p> : null}
-      {successText ? <p className="success">{successText}</p> : null}
+          <label>
+            <T en="Account type" ar="نوع الحساب" />
+          </label>
+          <select
+            className="input"
+            value={role}
+            onChange={(event) => setRole(event.target.value)}
+            required
+          >
+            <option value="customer">Customer</option>
+            <option value="owner">Studio Owner</option>
+            <option value="vendor">Vendor / Store</option>
+          </select>
 
-      <button className="btn" type="submit" disabled={loading}>
-        {loading ? "Creating..." : "Sign up"}
-      </button>
-    </form>
+          <label>
+            <T en="Password" ar="كلمة المرور" />
+          </label>
+          <input
+            className="input"
+            type="password"
+            placeholder="Create a password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+
+          {errorMessage ? <p className="error">{errorMessage}</p> : null}
+
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? (
+              <T en="Creating account..." ar="جاري إنشاء الحساب..." />
+            ) : (
+              <T en="Create Account" ar="إنشاء حساب" />
+            )}
+          </button>
+        </form>
+
+        <div className="actions">
+          <Link href="/login" className="btn btn-secondary">
+            <T en="Already have an account?" ar="لديك حساب بالفعل؟" />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
