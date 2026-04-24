@@ -29,6 +29,13 @@ export default async function BookStudioPage({
     notFound();
   }
 
+  const studioId = studio.id;
+  const studioSlug = studio.slug;
+  const studioName = studio.name;
+  const studioCity = studio.city;
+  const studioDistrict = studio.district;
+  const studioPriceFrom = Number(studio.price_from || 0);
+
   async function createBooking(formData: FormData) {
     "use server";
 
@@ -47,11 +54,10 @@ export default async function BookStudioPage({
     const endTime = String(formData.get("end_time"));
     const notes = String(formData.get("notes") || "");
 
-    const priceFrom = Number(studio.price_from || 0);
-    const totalAmount = priceFrom;
+    const totalAmount = studioPriceFrom;
 
     const { error: bookingError } = await supabase.from("bookings").insert({
-      studio_id: studio.id,
+      studio_id: studioId,
       customer_auth_user_id: user.id,
       booking_date: bookingDate,
       start_time: startTime,
@@ -75,14 +81,14 @@ export default async function BookStudioPage({
       <div className="card">
         <span className="badge">Booking</span>
 
-        <h1>Book {studio.name}</h1>
+        <h1>Book {studioName}</h1>
 
         <p>
-          {studio.city}
-          {studio.district ? ` · ${studio.district}` : ""}
+          {studioCity}
+          {studioDistrict ? ` · ${studioDistrict}` : ""}
         </p>
 
-        <p>Starting from {studio.price_from ?? 0} SAR / hour</p>
+        <p>Starting from {studioPriceFrom} SAR / hour</p>
 
         <form className="form" action={createBooking}>
           <label>Booking date</label>
@@ -108,7 +114,7 @@ export default async function BookStudioPage({
         </form>
 
         <div className="actions">
-          <Link href={`/studios/${studio.slug}`} className="btn btn-secondary">
+          <Link href={`/studios/${studioSlug}`} className="btn btn-secondary">
             Back to studio
           </Link>
         </div>
