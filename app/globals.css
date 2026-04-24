@@ -857,3 +857,46 @@ textarea.input {
     height: 54px;
   }
 }
+.studios-hero-head {
+  max-width: 860px;
+  margin-bottom: 36px;
+}
+
+.studios-hero-head h1 {
+  max-width: 820px;
+}
+
+.studios-search {
+  margin-top: 24px;
+}
+
+.studio-card {
+  padding: 18px;
+}
+
+.studio-card-body {
+  padding: 8px 4px 2px;
+}
+
+.studio-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.studio-card-footer p {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .studio-card-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .studio-card-footer .btn {
+    width: 100%;
+  }
+}
