@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
-import { requireRole } from "../../../lib/auth";
 
 function statusLabel(status: string) {
   if (status === "confirmed") return "Confirmed";
@@ -49,11 +49,18 @@ function badgeStyle(type: "booking" | "payment", status: string) {
   return yellow;
 }
 
-export default async function OwnerBookingsPage() {
-  const { user } = await requireRole("owner");
+export default async function CustomerBookingsPage() {
   const supabase = await createClient();
 
-  async function updateBookingStatus(formData: FormData) {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  async function markBookingAsPaid(formData: FormData) {
     "use server";
 
     const supabase = await createClient();
@@ -63,26 +70,27 @@ export default async function OwnerBookingsPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Not authenticated");
+      redirect("/login");
     }
 
     const bookingId = String(formData.get("booking_id"));
-    const status = String(formData.get("status"));
 
-    if (!bookingId || !["confirmed", "cancelled"].includes(status)) {
-      throw new Error("Invalid booking update");
+    if (!bookingId) {
+      throw new Error("Missing booking ID");
     }
 
     const { error } = await supabase
       .from("bookings")
-      .update({ status })
-      .eq("id", bookingId);
+      .update({ payment_status: "paid" })
+      .eq("id", bookingId)
+      .eq("customer_auth_user_id", user.id)
+      .eq("status", "confirmed");
 
     if (error) {
       throw new Error(error.message);
     }
 
-    revalidatePath("/owner/bookings");
+    revalidatePath("/customer/bookings");
   }
 
   const { data: bookings, error } = await supabase
@@ -98,60 +106,53 @@ export default async function OwnerBookingsPage() {
       notes,
       created_at,
       studios (
-        id,
         name,
-        slug,
         city,
         district,
-        owner_auth_user_id
+        slug
       )
     `)
-    .eq("studios.owner_auth_user_id", user.id)
+    .eq("customer_auth_user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
     return (
       <div className="card">
         <span className="badge">Error</span>
-        <h1>Owner Bookings</h1>
+        <h1>My Bookings</h1>
         <p>{error.message}</p>
       </div>
     );
   }
 
-  const ownerBookings =
-    bookings?.filter((booking) => {
-      const studio = Array.isArray(booking.studios)
-        ? booking.studios[0]
-        : booking.studios;
-
-      return studio?.owner_auth_user_id === user.id;
-    }) || [];
-
   return (
     <section>
       <div className="section-head">
-        <span className="badge">Studio Owner</span>
-        <h1>Bookings</h1>
-        <p>Review, confirm, or cancel booking requests for your studios.</p>
+        <span className="badge">Customer Area</span>
+        <h1>My Bookings</h1>
+        <p>Track your studio booking requests and payment status.</p>
       </div>
 
       <div className="actions" style={{ marginBottom: 24 }}>
-        <Link href="/owner" className="btn btn-secondary">
+        <Link href="/customer" className="btn btn-secondary">
           Back to Dashboard
         </Link>
 
-        <Link href="/owner/studios" className="btn">
-          My Studios
+        <Link href="/studios" className="btn">
+          Browse Studios
         </Link>
       </div>
 
       <div className="grid">
-        {ownerBookings.length ? (
-          ownerBookings.map((booking) => {
+        {bookings?.length ? (
+          bookings.map((booking) => {
             const studio = Array.isArray(booking.studios)
               ? booking.studios[0]
               : booking.studios;
+
+            const canPay =
+              booking.status === "confirmed" &&
+              booking.payment_status === "unpaid";
 
             return (
               <article className="card" key={booking.id}>
@@ -171,7 +172,7 @@ export default async function OwnerBookingsPage() {
                   </span>
                 </div>
 
-                <h2>{studio?.name || "Studio booking"}</h2>
+                <h2>{studio?.name || "Studio"}</h2>
 
                 <p>
                   {studio?.city || ""}
@@ -191,47 +192,46 @@ export default async function OwnerBookingsPage() {
                   Amount: <strong>{booking.total_amount} SAR</strong>
                 </p>
 
+                {booking.status === "pending" ? (
+                  <p>Your request is waiting for the studio owner to confirm.</p>
+                ) : null}
+
+                {booking.status === "confirmed" &&
+                booking.payment_status === "unpaid" ? (
+                  <p>Your booking is confirmed. Please complete the payment.</p>
+                ) : null}
+
+                {booking.status === "confirmed" &&
+                booking.payment_status === "paid" ? (
+                  <p>Your booking is confirmed and paid.</p>
+                ) : null}
+
+                {booking.status === "cancelled" ? (
+                  <p>This booking was cancelled by the studio owner.</p>
+                ) : null}
+
                 {booking.notes ? <p>Notes: {booking.notes}</p> : null}
 
                 <div className="actions">
-                  {booking.status === "pending" ? (
-                    <>
-                      <form action={updateBookingStatus}>
-                        <input
-                          type="hidden"
-                          name="booking_id"
-                          value={booking.id}
-                        />
-                        <input type="hidden" name="status" value="confirmed" />
-                        <button className="btn" type="submit">
-                          Confirm
-                        </button>
-                      </form>
-
-                      <form action={updateBookingStatus}>
-                        <input
-                          type="hidden"
-                          name="booking_id"
-                          value={booking.id}
-                        />
-                        <input type="hidden" name="status" value="cancelled" />
-                        <button className="btn btn-secondary" type="submit">
-                          Cancel
-                        </button>
-                      </form>
-                    </>
-                  ) : (
-                    <p>
-                      Current status: <strong>{statusLabel(booking.status)}</strong>
-                    </p>
-                  )}
+                  {canPay ? (
+                    <form action={markBookingAsPaid}>
+                      <input
+                        type="hidden"
+                        name="booking_id"
+                        value={booking.id}
+                      />
+                      <button className="btn" type="submit">
+                        Pay Now
+                      </button>
+                    </form>
+                  ) : null}
 
                   {studio?.slug ? (
                     <Link
                       href={`/studios/${studio.slug}`}
-                      className="btn btn-small"
+                      className="btn btn-secondary"
                     >
-                      View Studio
+                      View studio
                     </Link>
                   ) : null}
                 </div>
@@ -241,10 +241,10 @@ export default async function OwnerBookingsPage() {
         ) : (
           <div className="card">
             <h2>No bookings yet</h2>
-            <p>No customer bookings have been made for your studios yet.</p>
+            <p>You have not created any booking requests yet.</p>
 
-            <Link href="/owner/studios" className="btn">
-              My Studios
+            <Link href="/studios" className="btn">
+              Browse studios
             </Link>
           </div>
         )}
