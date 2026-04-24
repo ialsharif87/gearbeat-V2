@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "../../lib/auth";
 
 export default async function OwnerPage() {
@@ -14,18 +15,23 @@ export default async function OwnerPage() {
       </p>
 
       <p>
-        This is your studio owner area. Later we will add studio onboarding,
-        studio management, pricing, availability, bookings, and earnings here.
+        This is your studio owner area. You can create studios, manage your
+        studios, review bookings, and later we will add pricing, availability,
+        and earnings here.
       </p>
 
       <div className="actions">
-        <a href="/owner/create-studio" className="btn">
-          Create studio
-        </a>
+        <Link href="/owner/create-studio" className="btn">
+          Create Studio
+        </Link>
 
-        <a href="/owner/bookings" className="btn btn-secondary">
-          View bookings
-        </a>
+        <Link href="/owner/studios" className="btn btn-secondary">
+          My Studios
+        </Link>
+
+        <Link href="/owner/bookings" className="btn btn-secondary">
+          View Bookings
+        </Link>
       </div>
     </div>
   );
