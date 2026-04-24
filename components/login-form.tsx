@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "../lib/supabase/client";
+import T from "./t";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -59,6 +60,12 @@ export default function LoginForm() {
       return;
     }
 
+    if (profile?.role === "vendor") {
+      router.push("/vendor");
+      router.refresh();
+      return;
+    }
+
     if (profile?.role === "admin") {
       router.push("/admin");
       router.refresh();
@@ -72,14 +79,22 @@ export default function LoginForm() {
   return (
     <section>
       <div className="card form">
-        <span className="badge">Welcome Back</span>
+        <span className="badge">
+          <T en="Welcome Back" ar="مرحبًا بعودتك" />
+        </span>
 
-        <h1>Login</h1>
+        <h1>
+          <T en="Login" ar="تسجيل الدخول" />
+        </h1>
 
-        <p>Access your GearBeat account.</p>
+        <p>
+          <T en="Access your GearBeat account." ar="ادخل إلى حسابك في GearBeat." />
+        </p>
 
         <form onSubmit={handleLogin}>
-          <label>Email</label>
+          <label>
+            <T en="Email" ar="البريد الإلكتروني" />
+          </label>
           <input
             className="input"
             type="email"
@@ -89,7 +104,9 @@ export default function LoginForm() {
             required
           />
 
-          <label>Password</label>
+          <label>
+            <T en="Password" ar="كلمة المرور" />
+          </label>
           <input
             className="input"
             type="password"
@@ -100,19 +117,25 @@ export default function LoginForm() {
           />
 
           <div className="login-help-row">
-            <Link href="/forgot-password">Forgot password?</Link>
+            <Link href="/forgot-password">
+              <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
+            </Link>
           </div>
 
           {errorMessage ? <p className="error">{errorMessage}</p> : null}
 
           <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? (
+              <T en="Logging in..." ar="جاري تسجيل الدخول..." />
+            ) : (
+              <T en="Login" ar="تسجيل الدخول" />
+            )}
           </button>
         </form>
 
         <div className="actions">
           <Link href="/signup" className="btn btn-secondary">
-            Create account
+            <T en="Create account" ar="إنشاء حساب" />
           </Link>
         </div>
       </div>
