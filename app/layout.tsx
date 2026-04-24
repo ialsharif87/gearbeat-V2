@@ -2,6 +2,7 @@ import "./globals.css";
 import Link from "next/link";
 import { getCurrentProfile, getDashboardPath } from "../lib/auth";
 import LogoutButton from "../components/logout-button";
+import LanguageSwitcher from "../components/language-switcher";
 
 export const metadata = {
   title: "GearBeat",
@@ -16,16 +17,20 @@ export default async function RootLayout({
   const { profile } = await getCurrentProfile();
 
   return (
-    <html lang="en">
+    <html lang="en" dir="ltr">
       <body>
         <header className="site-header">
           <div className="container nav">
-            <Link href="/" className="brand brand-image-link">
-              <img
-                src="/gearbeat-logo.png"
-                alt="GearBeat"
-                className="brand-image"
-              />
+            <Link href="/" className="brand">
+              <span className="brand-logo" aria-hidden="true">
+                <span className="logo-gear">
+                  <span className="logo-wave"></span>
+                </span>
+              </span>
+
+              <span className="brand-text">
+                Gear<span>Beat</span>
+              </span>
             </Link>
 
             <nav className="nav-links">
@@ -56,6 +61,8 @@ export default async function RootLayout({
                   </Link>
                 </>
               )}
+
+              <LanguageSwitcher />
             </nav>
           </div>
         </header>
