@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "../../../lib/admin";
+import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
@@ -24,7 +24,8 @@ function formatRating(value: number) {
 }
 
 export default async function AdminReviewsPage() {
-  await requireAdmin();
+  await requireAdminRole(["support", "content"]);
+
   const supabaseAdmin = createAdminClient();
 
   const { data: reviews, error } = await supabaseAdmin
@@ -286,6 +287,4 @@ export default async function AdminReviewsPage() {
           </table>
         </div>
       </div>
-    </section>
-  );
-}
+    </section
