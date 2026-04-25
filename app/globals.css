@@ -1731,3 +1731,37 @@ html[dir="rtl"] .filter-action-row {
     flex-direction: column;
   }
 }
+.review-layout {
+  display: grid;
+  grid-template-columns: 0.75fr 1.25fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.rating-row {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rating-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.rating-select {
+  min-width: 160px;
+}
+
+@media (max-width: 960px) {
+  .review-layout,
+  .rating-row {
+    grid-template-columns: 1fr;
+  }
+}
