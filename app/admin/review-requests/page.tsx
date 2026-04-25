@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "../../../lib/admin";
+import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
@@ -46,7 +46,8 @@ function requestStatusStyle(status: string) {
 }
 
 export default async function AdminReviewRequestsPage() {
-  await requireAdmin();
+  await requireAdminRole(["operations", "support"]);
+
   const supabaseAdmin = createAdminClient();
 
   const { data: requests, error } = await supabaseAdmin
