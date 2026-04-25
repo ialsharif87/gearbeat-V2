@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
@@ -36,9 +37,97 @@ function badgeStyle(type: "booking" | "payment", status: string) {
 }
 
 export default async function AdminBookingsPage() {
-  await requireAdminRole(["operations", "support", "finance"]);
+  const { admin } = await requireAdminRole(["operations", "support", "finance"]);
 
   const supabaseAdmin = createAdminClient();
+
+  const canManageBookingStatus =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "support";
+
+  const canManagePaymentStatus =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "finance";
+
+  async function updateBookingStatus(formData: FormData) {
+    "use server";
+
+    await requireAdminRole(["operations", "support"]);
+
+    const supabaseAdmin = createAdminClient();
+
+    const bookingId = String(formData.get("booking_id") || "");
+    const status = String(formData.get("status") || "");
+    const studioSlug = String(formData.get("studio_slug") || "");
+
+    const allowedStatuses = ["pending", "confirmed", "completed", "cancelled"];
+
+    if (!bookingId) {
+      throw new Error("Missing booking ID.");
+    }
+
+    if (!allowedStatuses.includes(status)) {
+      throw new Error("Invalid booking status.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("bookings")
+      .update({ status })
+      .eq("id", bookingId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin");
+    revalidatePath("/customer/bookings");
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+    }
+  }
+
+  async function updatePaymentStatus(formData: FormData) {
+    "use server";
+
+    await requireAdminRole(["operations", "finance"]);
+
+    const supabaseAdmin = createAdminClient();
+
+    const bookingId = String(formData.get("booking_id") || "");
+    const paymentStatus = String(formData.get("payment_status") || "");
+    const studioSlug = String(formData.get("studio_slug") || "");
+
+    const allowedPaymentStatuses = ["unpaid", "paid", "failed", "refunded"];
+
+    if (!bookingId) {
+      throw new Error("Missing booking ID.");
+    }
+
+    if (!allowedPaymentStatuses.includes(paymentStatus)) {
+      throw new Error("Invalid payment status.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("bookings")
+      .update({ payment_status: paymentStatus })
+      .eq("id", bookingId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin");
+    revalidatePath("/customer/bookings");
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+    }
+  }
 
   const { data: bookings, error } = await supabaseAdmin
     .from("bookings")
@@ -78,6 +167,10 @@ export default async function AdminBookingsPage() {
     0;
   const pendingBookings =
     bookings?.filter((booking) => booking.status === "pending").length || 0;
+  const confirmedBookings =
+    bookings?.filter((booking) => booking.status === "confirmed").length || 0;
+  const completedBookings =
+    bookings?.filter((booking) => booking.status === "completed").length || 0;
   const cancelledBookings =
     bookings?.filter((booking) => booking.status === "cancelled").length || 0;
 
@@ -94,8 +187,8 @@ export default async function AdminBookingsPage() {
 
         <p>
           <T
-            en="Track all bookings, booking status, payment status, review requests, and customer feedback activity."
-            ar="تابع كل الحجوزات، حالة الحجز، حالة الدفع، طلبات التقييم، ونشاط آراء العملاء."
+            en="Track and manage booking status, payment status, review requests, and customer feedback activity."
+            ar="تابع وأدر حالة الحجز، حالة الدفع، طلبات التقييم، ونشاط آراء العملاء."
           />
         </p>
       </div>
@@ -131,14 +224,28 @@ export default async function AdminBookingsPage() {
 
         <div className="card admin-kpi-card">
           <span>
-            <T en="Pending Bookings" ar="الحجوزات المعلقة" />
+            <T en="Pending" ar="معلقة" />
           </span>
           <strong>{pendingBookings}</strong>
         </div>
 
         <div className="card admin-kpi-card">
           <span>
-            <T en="Cancelled Bookings" ar="الحجوزات الملغية" />
+            <T en="Confirmed" ar="مؤكدة" />
+          </span>
+          <strong>{confirmedBookings}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Completed" ar="مكتملة" />
+          </span>
+          <strong>{completedBookings}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Cancelled" ar="ملغية" />
           </span>
           <strong>{cancelledBookings}</strong>
         </div>
@@ -163,6 +270,13 @@ export default async function AdminBookingsPage() {
         <h2>
           <T en="Booking list" ar="قائمة الحجوزات" />
         </h2>
+
+        <p>
+          <T
+            en="Operations and Support can manage booking status. Operations and Finance can manage payment status."
+            ar="فريق العمليات والدعم يمكنهم إدارة حالة الحجز. فريق العمليات والمالية يمكنهم إدارة حالة الدفع."
+          />
+        </p>
 
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -206,6 +320,8 @@ export default async function AdminBookingsPage() {
                   const reviewRequests = Array.isArray(booking.review_requests)
                     ? booking.review_requests
                     : [];
+
+                  const studioSlug = studio?.slug || "";
 
                   return (
                     <tr key={booking.id}>
@@ -279,24 +395,242 @@ export default async function AdminBookingsPage() {
                       </td>
 
                       <td>
-                        <div className="actions">
-                          {studio?.slug ? (
-                            <Link
-                              href={`/studios/${studio.slug}`}
-                              className="btn btn-small"
-                            >
-                              <T en="Studio" ar="الاستوديو" />
-                            </Link>
+                        <div className="admin-studio-actions">
+                          <div className="actions">
+                            {studioSlug ? (
+                              <Link
+                                href={`/studios/${studioSlug}`}
+                                className="btn btn-small"
+                              >
+                                <T en="Studio" ar="الاستوديو" />
+                              </Link>
+                            ) : null}
+
+                            {booking.payment_status === "paid" &&
+                            !reviews.length ? (
+                              <Link
+                                href={`/customer/bookings/${booking.id}/review`}
+                                className="btn btn-secondary btn-small"
+                              >
+                                <T en="Review Link" ar="رابط التقييم" />
+                              </Link>
+                            ) : null}
+                          </div>
+
+                          {canManageBookingStatus ? (
+                            <div className="admin-inline-action-grid">
+                              {booking.status !== "confirmed" ? (
+                                <form action={updateBookingStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="confirmed"
+                                  />
+                                  <button
+                                    className="btn btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Confirm" ar="تأكيد" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {booking.status !== "completed" ? (
+                                <form action={updateBookingStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="completed"
+                                  />
+                                  <button
+                                    className="btn btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Complete" ar="إكمال" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {booking.status !== "pending" ? (
+                                <form action={updateBookingStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="pending"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Pending" ar="تعليق" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {booking.status !== "cancelled" ? (
+                                <form action={updateBookingStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="cancelled"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Cancel" ar="إلغاء" />
+                                  </button>
+                                </form>
+                              ) : null}
+                            </div>
                           ) : null}
 
-                          {booking.payment_status === "paid" &&
-                          !reviews.length ? (
-                            <Link
-                              href={`/customer/bookings/${booking.id}/review`}
-                              className="btn btn-secondary btn-small"
-                            >
-                              <T en="Review Link" ar="رابط التقييم" />
-                            </Link>
+                          {canManagePaymentStatus ? (
+                            <div className="admin-inline-action-grid">
+                              {booking.payment_status !== "paid" ? (
+                                <form action={updatePaymentStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="payment_status"
+                                    value="paid"
+                                  />
+                                  <button
+                                    className="btn btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Mark Paid" ar="تحديد مدفوع" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {booking.payment_status !== "unpaid" ? (
+                                <form action={updatePaymentStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="payment_status"
+                                    value="unpaid"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Unpaid" ar="غير مدفوع" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {booking.payment_status !== "refunded" ? (
+                                <form action={updatePaymentStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="payment_status"
+                                    value="refunded"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Refunded" ar="مسترد" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {booking.payment_status !== "failed" ? (
+                                <form action={updatePaymentStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="booking_id"
+                                    value={booking.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studioSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="payment_status"
+                                    value="failed"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Failed" ar="فشل الدفع" />
+                                  </button>
+                                </form>
+                              ) : null}
+                            </div>
                           ) : null}
                         </div>
                       </td>
