@@ -2,19 +2,20 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
 import { requireRole } from "../../../lib/auth";
+import T from "../../../components/t";
 
 function statusLabel(status: string) {
-  if (status === "confirmed") return "Confirmed";
-  if (status === "cancelled") return "Cancelled";
-  if (status === "completed") return "Completed";
-  return "Pending";
+  if (status === "confirmed") return <T en="Confirmed" ar="مؤكد" />;
+  if (status === "cancelled") return <T en="Cancelled" ar="ملغي" />;
+  if (status === "completed") return <T en="Completed" ar="مكتمل" />;
+  return <T en="Pending" ar="قيد الانتظار" />;
 }
 
 function paymentLabel(status: string) {
-  if (status === "paid") return "Paid";
-  if (status === "failed") return "Failed";
-  if (status === "refunded") return "Refunded";
-  return "Unpaid";
+  if (status === "paid") return <T en="Paid" ar="مدفوع" />;
+  if (status === "failed") return <T en="Failed" ar="فشل الدفع" />;
+  if (status === "refunded") return <T en="Refunded" ar="مسترد" />;
+  return <T en="Unpaid" ar="غير مدفوع" />;
 }
 
 function badgeStyle(type: "booking" | "payment", status: string) {
@@ -112,8 +113,12 @@ export default async function OwnerBookingsPage() {
   if (error) {
     return (
       <div className="card">
-        <span className="badge">Error</span>
-        <h1>Owner Bookings</h1>
+        <span className="badge">
+          <T en="Error" ar="خطأ" />
+        </span>
+        <h1>
+          <T en="Owner Bookings" ar="حجوزات الاستوديو" />
+        </h1>
         <p>{error.message}</p>
       </div>
     );
@@ -131,18 +136,29 @@ export default async function OwnerBookingsPage() {
   return (
     <section>
       <div className="section-head">
-        <span className="badge">Studio Owner</span>
-        <h1>Bookings</h1>
-        <p>Review, confirm, or cancel booking requests for your studios.</p>
+        <span className="badge">
+          <T en="Studio Owner" ar="صاحب الاستوديو" />
+        </span>
+
+        <h1>
+          <T en="Bookings" ar="الحجوزات" />
+        </h1>
+
+        <p>
+          <T
+            en="Review, confirm, or cancel booking requests for your studios."
+            ar="راجع طلبات الحجز الخاصة باستوديوهاتك وقم بتأكيدها أو إلغائها."
+          />
+        </p>
       </div>
 
       <div className="actions" style={{ marginBottom: 24 }}>
         <Link href="/owner" className="btn btn-secondary">
-          Back to Dashboard
+          <T en="Back to Dashboard" ar="العودة إلى لوحة التحكم" />
         </Link>
 
         <Link href="/owner/studios" className="btn">
-          My Studios
+          <T en="My Studios" ar="استوديوهاتي" />
         </Link>
       </div>
 
@@ -160,14 +176,15 @@ export default async function OwnerBookingsPage() {
                     className="badge"
                     style={badgeStyle("booking", booking.status)}
                   >
-                    Booking: {statusLabel(booking.status)}
+                    <T en="Booking:" ar="الحجز:" /> {statusLabel(booking.status)}
                   </span>
 
                   <span
                     className="badge"
                     style={badgeStyle("payment", booking.payment_status)}
                   >
-                    Payment: {paymentLabel(booking.payment_status)}
+                    <T en="Payment:" ar="الدفع:" />{" "}
+                    {paymentLabel(booking.payment_status)}
                   </span>
                 </div>
 
@@ -179,19 +196,26 @@ export default async function OwnerBookingsPage() {
                 </p>
 
                 <p>
-                  Date: <strong>{booking.booking_date}</strong>
+                  <T en="Date:" ar="التاريخ:" />{" "}
+                  <strong>{booking.booking_date}</strong>
                 </p>
 
                 <p>
-                  Time: <strong>{booking.start_time}</strong> to{" "}
-                  <strong>{booking.end_time}</strong>
+                  <T en="Time:" ar="الوقت:" />{" "}
+                  <strong>{booking.start_time}</strong>{" "}
+                  <T en="to" ar="إلى" /> <strong>{booking.end_time}</strong>
                 </p>
 
                 <p>
-                  Amount: <strong>{booking.total_amount} SAR</strong>
+                  <T en="Amount:" ar="المبلغ:" />{" "}
+                  <strong>{booking.total_amount} SAR</strong>
                 </p>
 
-                {booking.notes ? <p>Notes: {booking.notes}</p> : null}
+                {booking.notes ? (
+                  <p>
+                    <T en="Notes:" ar="ملاحظات:" /> {booking.notes}
+                  </p>
+                ) : null}
 
                 <div className="actions">
                   {booking.status === "pending" ? (
@@ -204,7 +228,7 @@ export default async function OwnerBookingsPage() {
                         />
                         <input type="hidden" name="status" value="confirmed" />
                         <button className="btn" type="submit">
-                          Confirm
+                          <T en="Confirm" ar="تأكيد" />
                         </button>
                       </form>
 
@@ -216,13 +240,13 @@ export default async function OwnerBookingsPage() {
                         />
                         <input type="hidden" name="status" value="cancelled" />
                         <button className="btn btn-secondary" type="submit">
-                          Cancel
+                          <T en="Cancel" ar="إلغاء" />
                         </button>
                       </form>
                     </>
                   ) : (
                     <p>
-                      Current status:{" "}
+                      <T en="Current status:" ar="الحالة الحالية:" />{" "}
                       <strong>{statusLabel(booking.status)}</strong>
                     </p>
                   )}
@@ -232,7 +256,7 @@ export default async function OwnerBookingsPage() {
                       href={`/studios/${studio.slug}`}
                       className="btn btn-small"
                     >
-                      View Studio
+                      <T en="View Studio" ar="عرض الاستوديو" />
                     </Link>
                   ) : null}
                 </div>
@@ -241,11 +265,19 @@ export default async function OwnerBookingsPage() {
           })
         ) : (
           <div className="card">
-            <h2>No bookings yet</h2>
-            <p>No customer bookings have been made for your studios yet.</p>
+            <h2>
+              <T en="No bookings yet" ar="لا توجد حجوزات بعد" />
+            </h2>
+
+            <p>
+              <T
+                en="No customer bookings have been made for your studios yet."
+                ar="لا توجد حجوزات من العملاء على استوديوهاتك حتى الآن."
+              />
+            </p>
 
             <Link href="/owner/studios" className="btn">
-              My Studios
+              <T en="My Studios" ar="استوديوهاتي" />
             </Link>
           </div>
         )}
