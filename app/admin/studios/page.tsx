@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { requireAdmin } from "../../../lib/admin";
+import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
 export default async function AdminStudiosPage() {
-  const { admin } = await requireAdmin();
+  const { admin } = await requireAdminRole(["operations", "content", "sales"]);
   const supabaseAdmin = createAdminClient();
 
   const { data: studios, error } = await supabaseAdmin
@@ -60,9 +60,7 @@ export default async function AdminStudiosPage() {
           <T en="Back to Admin Dashboard" ar="العودة إلى لوحة الإدارة" />
         </Link>
 
-        {admin.admin_role === "super_admin" ||
-        admin.admin_role === "operations" ||
-        admin.admin_role === "content" ? (
+        {admin.admin_role === "super_admin" ? (
           <Link href="/admin/team" className="btn btn-secondary">
             <T en="Admin Team" ar="فريق الإدارة" />
           </Link>
