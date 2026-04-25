@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "./t";
+import SocialLinks from "./social-links";
 
 export default function Footer() {
   return (
@@ -55,23 +56,7 @@ export default function Footer() {
             />
           </p>
 
-          <div className="footer-socials">
-            <a href="#" aria-label="Instagram">
-              IG
-            </a>
-            <a href="#" aria-label="TikTok">
-              TT
-            </a>
-            <a href="#" aria-label="X">
-              X
-            </a>
-            <a href="#" aria-label="YouTube">
-              YT
-            </a>
-            <a href="#" aria-label="LinkedIn">
-              IN
-            </a>
-          </div>
+          <SocialLinks />
         </div>
 
         <div className="footer-column">
@@ -82,12 +67,15 @@ export default function Footer() {
           <Link href="/studios">
             <T en="Browse Studios" ar="تصفح الاستوديوهات" />
           </Link>
+
           <Link href="/customer/bookings">
             <T en="My Bookings" ar="حجوزاتي" />
           </Link>
+
           <Link href="/profile">
             <T en="My Profile" ar="ملفي الشخصي" />
           </Link>
+
           <Link href="/signup">
             <T en="Create Account" ar="إنشاء حساب" />
           </Link>
@@ -101,12 +89,15 @@ export default function Footer() {
           <Link href="/owner">
             <T en="List Your Studio" ar="أضف استوديوك" />
           </Link>
+
           <Link href="/owner">
             <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
           </Link>
+
           <Link href="/owner/bookings">
             <T en="Manage Bookings" ar="إدارة الحجوزات" />
           </Link>
+
           <Link href="/about">
             <T en="Verified Reviews" ar="التقييمات الموثقة" />
           </Link>
@@ -120,12 +111,15 @@ export default function Footer() {
           <Link href="/support">
             <T en="Contact Support" ar="تواصل مع الدعم" />
           </Link>
+
           <Link href="/support">
             <T en="Booking Help" ar="مساعدة الحجوزات" />
           </Link>
+
           <Link href="/support">
             <T en="Account Help" ar="مساعدة الحساب" />
           </Link>
+
           <Link href="/support">
             <T en="Report a Problem" ar="بلّغ عن مشكلة" />
           </Link>
@@ -139,15 +133,19 @@ export default function Footer() {
           <Link href="/about">
             <T en="About Us" ar="من نحن" />
           </Link>
+
           <Link href="/contact">
             <T en="Contact" ar="تواصل معنا" />
           </Link>
+
           <Link href="/terms">
             <T en="Terms & Conditions" ar="الشروط والأحكام" />
           </Link>
+
           <Link href="/privacy">
             <T en="Privacy Policy" ar="سياسة الخصوصية" />
           </Link>
+
           <Link href="/staff-access" className="team-access-link">
             <T en="Team Access" ar="دخول الفريق" />
           </Link>
