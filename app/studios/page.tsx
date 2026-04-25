@@ -5,14 +5,45 @@ import T from "../../components/t";
 type SearchParams = {
   q?: string;
   city?: string;
+  district?: string;
+  min_price?: string;
   max_price?: string;
   verified?: string;
+  min_google_rating?: string;
+  min_tripadvisor_rating?: string;
   features?: string | string[];
+  equipment_categories?: string | string[];
+  equipment_brand?: string;
+  equipment_q?: string;
+  sort?: string;
 };
 
 function toArray(value: string | string[] | undefined) {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
+}
+
+function uniqueClean(values: Array<string | null | undefined>) {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => String(value || "").trim())
+        .filter((value) => value.length > 0)
+    )
+  );
+}
+
+function intersectMany(arrays: string[][]) {
+  if (!arrays.length) return null;
+
+  let result = new Set(arrays[0]);
+
+  for (const array of arrays.slice(1)) {
+    const nextSet = new Set(array);
+    result = new Set(Array.from(result).filter((id) => nextSet.has(id)));
+  }
+
+  return Array.from(result);
 }
 
 export default async function StudiosPage({
@@ -22,11 +53,25 @@ export default async function StudiosPage({
 }) {
   const params = searchParams ? await searchParams : {};
 
-  const queryText = String(params.q || "").trim();
+  const queryText = String(params.q || "").trim().replaceAll(",", " ");
   const selectedCity = String(params.city || "").trim();
+  const selectedDistrict = String(params.district || "").trim();
+
+  const minPrice = Number(params.min_price || 0);
   const maxPrice = Number(params.max_price || 0);
+
   const verifiedOnly = params.verified === "true";
+
+  const minGoogleRating = Number(params.min_google_rating || 0);
+  const minTripAdvisorRating = Number(params.min_tripadvisor_rating || 0);
+
   const selectedFeatureIds = toArray(params.features);
+  const selectedEquipmentCategories = toArray(params.equipment_categories);
+
+  const selectedEquipmentBrand = String(params.equipment_brand || "").trim();
+  const equipmentKeyword = String(params.equipment_q || "").trim().replaceAll(",", " ");
+
+  const sort = String(params.sort || "newest");
 
   const supabase = await createClient();
 
@@ -37,8 +82,17 @@ export default async function StudiosPage({
     .not("city", "is", null)
     .order("city", { ascending: true });
 
-  const cities = Array.from(
-    new Set((cityRows || []).map((item) => item.city).filter(Boolean))
+  const cities = uniqueClean((cityRows || []).map((item) => item.city));
+
+  const { data: districtRows } = await supabase
+    .from("studios")
+    .select("district")
+    .eq("status", "approved")
+    .not("district", "is", null)
+    .order("district", { ascending: true });
+
+  const districts = uniqueClean(
+    (districtRows || []).map((item) => item.district)
   );
 
   const { data: features } = await supabase
@@ -47,7 +101,20 @@ export default async function StudiosPage({
     .eq("status", "active")
     .order("sort_order", { ascending: true });
 
-  let matchingStudioIds: string[] | null = null;
+  const { data: equipmentFilterRows } = await supabase
+    .from("studio_equipment")
+    .select("category,brand")
+    .order("category", { ascending: true });
+
+  const equipmentCategories = uniqueClean(
+    (equipmentFilterRows || []).map((item) => item.category)
+  );
+
+  const equipmentBrands = uniqueClean(
+    (equipmentFilterRows || []).map((item) => item.brand)
+  );
+
+  const studioIdFilters: string[][] = [];
 
   if (selectedFeatureIds.length > 0) {
     const { data: linkedStudios } = await supabase
@@ -65,29 +132,73 @@ export default async function StudiosPage({
       counts.get(item.studio_id)?.add(item.feature_id);
     }
 
-    matchingStudioIds = Array.from(counts.entries())
+    const matchingFeatureStudioIds = Array.from(counts.entries())
       .filter(([, featureSet]) =>
         selectedFeatureIds.every((featureId) => featureSet.has(featureId))
       )
       .map(([studioId]) => studioId);
+
+    studioIdFilters.push(matchingFeatureStudioIds);
   }
+
+  const hasEquipmentFilters =
+    selectedEquipmentCategories.length > 0 ||
+    selectedEquipmentBrand ||
+    equipmentKeyword;
+
+  if (hasEquipmentFilters) {
+    let equipmentQuery = supabase
+      .from("studio_equipment")
+      .select("studio_id,name,brand,model,category");
+
+    if (selectedEquipmentCategories.length > 0) {
+      equipmentQuery = equipmentQuery.in("category", selectedEquipmentCategories);
+    }
+
+    if (selectedEquipmentBrand) {
+      equipmentQuery = equipmentQuery.ilike("brand", `%${selectedEquipmentBrand}%`);
+    }
+
+    if (equipmentKeyword) {
+      equipmentQuery = equipmentQuery.or(
+        `name.ilike.%${equipmentKeyword}%,brand.ilike.%${equipmentKeyword}%,model.ilike.%${equipmentKeyword}%,category.ilike.%${equipmentKeyword}%`
+      );
+    }
+
+    const { data: matchingEquipmentRows } = await equipmentQuery;
+
+    const matchingEquipmentStudioIds = uniqueClean(
+      (matchingEquipmentRows || []).map((item) => item.studio_id)
+    );
+
+    studioIdFilters.push(matchingEquipmentStudioIds);
+  }
+
+  const finalMatchingStudioIds = intersectMany(studioIdFilters);
 
   let studiosQuery = supabase
     .from("studios")
     .select(
-      "id,name,slug,city,district,price_from,status,cover_image_url,verified,google_rating,google_user_ratings_total,tripadvisor_rating"
+      "id,name,slug,city,district,price_from,status,cover_image_url,verified,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at"
     )
-    .eq("status", "approved")
-    .order("created_at", { ascending: false });
+    .eq("status", "approved");
 
   if (queryText) {
     studiosQuery = studiosQuery.or(
-      `name.ilike.%${queryText}%,city.ilike.%${queryText}%,district.ilike.%${queryText}%`
+      `name.ilike.%${queryText}%,city.ilike.%${queryText}%,district.ilike.%${queryText}%,description.ilike.%${queryText}%`
     );
   }
 
   if (selectedCity) {
     studiosQuery = studiosQuery.eq("city", selectedCity);
+  }
+
+  if (selectedDistrict) {
+    studiosQuery = studiosQuery.eq("district", selectedDistrict);
+  }
+
+  if (minPrice > 0) {
+    studiosQuery = studiosQuery.gte("price_from", minPrice);
   }
 
   if (maxPrice > 0) {
@@ -98,12 +209,40 @@ export default async function StudiosPage({
     studiosQuery = studiosQuery.eq("verified", true);
   }
 
-  if (matchingStudioIds) {
-    if (matchingStudioIds.length > 0) {
-      studiosQuery = studiosQuery.in("id", matchingStudioIds);
+  if (minGoogleRating > 0) {
+    studiosQuery = studiosQuery.gte("google_rating", minGoogleRating);
+  }
+
+  if (minTripAdvisorRating > 0) {
+    studiosQuery = studiosQuery.gte("tripadvisor_rating", minTripAdvisorRating);
+  }
+
+  if (finalMatchingStudioIds) {
+    if (finalMatchingStudioIds.length > 0) {
+      studiosQuery = studiosQuery.in("id", finalMatchingStudioIds);
     } else {
-      studiosQuery = studiosQuery.in("id", ["00000000-0000-0000-0000-000000000000"]);
+      studiosQuery = studiosQuery.in("id", [
+        "00000000-0000-0000-0000-000000000000"
+      ]);
     }
+  }
+
+  if (sort === "price_low") {
+    studiosQuery = studiosQuery.order("price_from", { ascending: true });
+  } else if (sort === "price_high") {
+    studiosQuery = studiosQuery.order("price_from", { ascending: false });
+  } else if (sort === "google_rating") {
+    studiosQuery = studiosQuery.order("google_rating", {
+      ascending: false,
+      nullsFirst: false
+    });
+  } else if (sort === "tripadvisor_rating") {
+    studiosQuery = studiosQuery.order("tripadvisor_rating", {
+      ascending: false,
+      nullsFirst: false
+    });
+  } else {
+    studiosQuery = studiosQuery.order("created_at", { ascending: false });
   }
 
   const { data: studios, error } = await studiosQuery;
@@ -123,15 +262,24 @@ export default async function StudiosPage({
   }
 
   const resultCount = studios?.length || 0;
+
   const hasFilters =
     queryText ||
     selectedCity ||
+    selectedDistrict ||
+    minPrice ||
     maxPrice ||
     verifiedOnly ||
-    selectedFeatureIds.length > 0;
+    minGoogleRating ||
+    minTripAdvisorRating ||
+    selectedFeatureIds.length > 0 ||
+    selectedEquipmentCategories.length > 0 ||
+    selectedEquipmentBrand ||
+    equipmentKeyword ||
+    sort !== "newest";
 
   const groupedFeatures =
-    features?.reduce<Record<string, typeof features>>((groups, feature) => {
+    features?.reduce<Record<string, any[]>>((groups, feature) => {
       const key = feature.category || "general";
 
       if (!groups[key]) {
@@ -143,7 +291,10 @@ export default async function StudiosPage({
       return groups;
     }, {}) || {};
 
-  const featureGroupLabels: Record<string, { en: string; ar: string; icon: string }> = {
+  const featureGroupLabels: Record<
+    string,
+    { en: string; ar: string; icon: string }
+  > = {
     space: {
       en: "Space type",
       ar: "نوع المساحة",
@@ -198,7 +349,7 @@ export default async function StudiosPage({
         </p>
       </div>
 
-      <form className="card studio-filter-panel">
+      <form className="card studio-filter-panel advanced-studio-filter-panel">
         <div className="filter-main-search">
           <label>
             <T en="Search" ar="بحث" />
@@ -208,7 +359,7 @@ export default async function StudiosPage({
             className="input"
             name="q"
             defaultValue={queryText}
-            placeholder="Studio name, city, district..."
+            placeholder="Studio name, city, district, description..."
           />
         </div>
 
@@ -229,6 +380,36 @@ export default async function StudiosPage({
 
         <div>
           <label>
+            <T en="District" ar="الحي" />
+          </label>
+
+          <select className="input" name="district" defaultValue={selectedDistrict}>
+            <option value="">All districts</option>
+            {districts.map((district) => (
+              <option value={district} key={district}>
+                {district}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label>
+            <T en="Min price" ar="أقل سعر" />
+          </label>
+
+          <input
+            className="input"
+            name="min_price"
+            type="number"
+            min="0"
+            defaultValue={minPrice || ""}
+            placeholder="100"
+          />
+        </div>
+
+        <div>
+          <label>
             <T en="Max price" ar="أعلى سعر" />
           </label>
 
@@ -242,6 +423,56 @@ export default async function StudiosPage({
           />
         </div>
 
+        <div>
+          <label>
+            <T en="Min Google rating" ar="أقل تقييم Google" />
+          </label>
+
+          <select
+            className="input"
+            name="min_google_rating"
+            defaultValue={minGoogleRating || ""}
+          >
+            <option value="">Any</option>
+            <option value="3">3.0+</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+          </select>
+        </div>
+
+        <div>
+          <label>
+            <T en="Min TripAdvisor rating" ar="أقل تقييم TripAdvisor" />
+          </label>
+
+          <select
+            className="input"
+            name="min_tripadvisor_rating"
+            defaultValue={minTripAdvisorRating || ""}
+          >
+            <option value="">Any</option>
+            <option value="3">3.0+</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+          </select>
+        </div>
+
+        <div>
+          <label>
+            <T en="Sort by" ar="ترتيب حسب" />
+          </label>
+
+          <select className="input" name="sort" defaultValue={sort}>
+            <option value="newest">Newest</option>
+            <option value="price_low">Price: low to high</option>
+            <option value="price_high">Price: high to low</option>
+            <option value="google_rating">Google rating</option>
+            <option value="tripadvisor_rating">TripAdvisor rating</option>
+          </select>
+        </div>
+
         <label className="filter-check-card">
           <input
             type="checkbox"
@@ -253,14 +484,6 @@ export default async function StudiosPage({
             <T en="Verified only" ar="الموثق فقط" />
           </span>
         </label>
-
-        <button className="btn" type="submit">
-          <T en="Apply Filters" ar="تطبيق الفلاتر" />
-        </button>
-
-        <Link href="/studios" className="btn btn-secondary">
-          <T en="Reset" ar="إعادة ضبط" />
-        </Link>
 
         <div className="feature-filter-area">
           <div className="feature-filter-head">
@@ -278,7 +501,8 @@ export default async function StudiosPage({
 
           <div className="feature-filter-groups">
             {Object.entries(groupedFeatures).map(([category, groupItems]) => {
-              const label = featureGroupLabels[category] || featureGroupLabels.general;
+              const label =
+                featureGroupLabels[category] || featureGroupLabels.general;
 
               return (
                 <details className="filter-accordion" key={category}>
@@ -314,6 +538,84 @@ export default async function StudiosPage({
               );
             })}
           </div>
+        </div>
+
+        <div className="equipment-filter-area">
+          <div className="feature-filter-head">
+            <span className="badge">
+              <T en="Equipment Filters" ar="فلاتر المعدات" />
+            </span>
+
+            <p>
+              <T
+                en="Search by detailed equipment category, brand, model, or name."
+                ar="ابحث حسب تصنيف المعدة، العلامة التجارية، الموديل، أو الاسم."
+              />
+            </p>
+          </div>
+
+          <div className="equipment-filter-grid">
+            <div>
+              <label>
+                <T en="Equipment keyword" ar="كلمة بحث للمعدات" />
+              </label>
+
+              <input
+                className="input"
+                name="equipment_q"
+                defaultValue={equipmentKeyword}
+                placeholder="Neumann, U87, Piano, Camera..."
+              />
+            </div>
+
+            <div>
+              <label>
+                <T en="Equipment brand" ar="علامة المعدة" />
+              </label>
+
+              <select
+                className="input"
+                name="equipment_brand"
+                defaultValue={selectedEquipmentBrand}
+              >
+                <option value="">Any brand</option>
+                {equipmentBrands.map((brand) => (
+                  <option value={brand} key={brand}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="equipment-category-chips">
+            {equipmentCategories.map((category) => {
+              const checked = selectedEquipmentCategories.includes(category);
+
+              return (
+                <label className="feature-filter-chip" key={category}>
+                  <input
+                    type="checkbox"
+                    name="equipment_categories"
+                    value={category}
+                    defaultChecked={checked}
+                  />
+
+                  <span>{category}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="filter-action-row">
+          <button className="btn" type="submit">
+            <T en="Apply All Filters" ar="تطبيق كل الفلاتر" />
+          </button>
+
+          <Link href="/studios" className="btn btn-secondary">
+            <T en="Reset" ar="إعادة ضبط" />
+          </Link>
         </div>
       </form>
 
@@ -366,6 +668,12 @@ export default async function StudiosPage({
                       {studio.google_rating} ★ Google
                     </span>
                   ) : null}
+
+                  {studio.tripadvisor_rating ? (
+                    <span className="badge">
+                      {studio.tripadvisor_rating} ★ TripAdvisor
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
@@ -390,8 +698,11 @@ export default async function StudiosPage({
                       </span>
                     ) : null}
 
-                    {studio.tripadvisor_rating ? (
-                      <span>TripAdvisor: {studio.tripadvisor_rating} ★</span>
+                    {studio.tripadvisor_reviews_total ? (
+                      <span>
+                        TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
+                        <T en="reviews" ar="تقييم" />
+                      </span>
                     ) : null}
                   </div>
                 </div>
