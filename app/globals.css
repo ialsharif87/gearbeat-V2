@@ -1986,3 +1986,52 @@ html[dir="rtl"] .filter-action-row {
     flex-direction: column;
   }
 }
+.admin-role-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.admin-role-list div {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-role-list p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  margin-top: 18px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html[dir="rtl"] .admin-table th,
+html[dir="rtl"] .admin-table td {
+  text-align: right;
+}
+
+.admin-table th {
+  color: var(--soft);
+  font-weight: 900;
+}
+
+.admin-table td {
+  color: white;
+}
