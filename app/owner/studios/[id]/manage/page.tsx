@@ -79,6 +79,16 @@ function groupFeaturesByCategory(features: any[] | null | undefined) {
   return grouped;
 }
 
+function formatSyncDate(value: string | null | undefined) {
+  if (!value) return null;
+
+  try {
+    return new Date(value).toLocaleDateString();
+  } catch {
+    return null;
+  }
+}
+
 export default async function ManageStudioPage({
   params
 }: {
@@ -91,7 +101,7 @@ export default async function ManageStudioPage({
   const { data: studio, error: studioError } = await supabase
     .from("studios")
     .select(
-      "id,name,slug,city,district,address,price_from,status,cover_image_url,google_maps_url,google_reviews_url,google_place_id,google_rating"
+      "id,name,slug,city,district,address,price_from,status,cover_image_url,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
     )
     .eq("id", id)
     .eq("owner_auth_user_id", user.id)
@@ -152,21 +162,22 @@ export default async function ManageStudioPage({
     });
   }
 
-  async function updateGoogleInfo(formData: FormData) {
+  async function updateExternalReviewLinks(formData: FormData) {
     "use server";
 
     const supabase = await createClient();
 
     const studioId = String(formData.get("studio_id") || "");
     const studioSlug = String(formData.get("studio_slug") || "");
+
     const googleMapsUrl = String(formData.get("google_maps_url") || "").trim();
     const googleReviewsUrl = String(
       formData.get("google_reviews_url") || ""
     ).trim();
     const googlePlaceId = String(formData.get("google_place_id") || "").trim();
-    const googleRatingRaw = String(formData.get("google_rating") || "").trim();
-
-    const googleRating = googleRatingRaw ? Number(googleRatingRaw) : null;
+    const tripadvisorUrl = String(
+      formData.get("tripadvisor_url") || ""
+    ).trim();
 
     if (!studioId) {
       throw new Error("Missing studio ID.");
@@ -178,7 +189,7 @@ export default async function ManageStudioPage({
         google_maps_url: googleMapsUrl || null,
         google_reviews_url: googleReviewsUrl || null,
         google_place_id: googlePlaceId || null,
-        google_rating: googleRating
+        tripadvisor_url: tripadvisorUrl || null
       })
       .eq("id", studioId)
       .eq("owner_auth_user_id", user.id);
@@ -364,8 +375,8 @@ export default async function ManageStudioPage({
 
           <p>
             <T
-              en="Group your studio details into space type, amenities, equipment, services, media capabilities, Google location, and reviews."
-              ar="قسّم تفاصيل الاستوديو إلى نوع المساحة، المميزات، المعدات، الخدمات، إمكانيات الإنتاج، موقع Google، والتقييمات."
+              en="Group your studio details into space type, amenities, equipment, services, media capabilities, Google location, and trusted review sources."
+              ar="قسّم تفاصيل الاستوديو إلى نوع المساحة، المميزات، المعدات، الخدمات، إمكانيات الإنتاج، موقع Google، ومصادر التقييمات الموثوقة."
             />
           </p>
         </div>
@@ -388,7 +399,7 @@ export default async function ManageStudioPage({
           <div>
             <b>3</b>
             <span>
-              <T en="Add Google location" ar="أضف موقع Google" />
+              <T en="Add review sources" ar="أضف مصادر التقييم" />
             </span>
           </div>
         </div>
@@ -398,21 +409,21 @@ export default async function ManageStudioPage({
 
       <div className="card google-review-card">
         <span className="badge">
-          <T en="Google Location" ar="موقع Google" />
+          <T en="Trust & External Reviews" ar="الثقة والتقييمات الخارجية" />
         </span>
 
         <h2>
-          <T en="Maps and reviews" ar="الخرائط والتقييمات" />
+          <T en="Google, TripAdvisor, and trusted sources" ar="Google وTripAdvisor ومصادر موثوقة" />
         </h2>
 
         <p>
           <T
-            en="Add your Google Maps link and Google Reviews link to build trust and help customers find your studio."
-            ar="أضف رابط Google Maps ورابط تقييمات Google لبناء الثقة ومساعدة العملاء على الوصول إلى الاستوديو."
+            en="Owners can add source links only. Ratings are read-only and should be synced automatically or verified later by the platform."
+            ar="صاحب الاستوديو يضيف روابط المصادر فقط. التقييمات للعرض فقط ويتم جلبها تلقائيًا أو التحقق منها لاحقًا من المنصة."
           />
         </p>
 
-        <form className="google-location-form" action={updateGoogleInfo}>
+        <form className="google-location-form" action={updateExternalReviewLinks}>
           <input type="hidden" name="studio_id" value={studio.id} />
           <input type="hidden" name="studio_slug" value={studio.slug} />
 
@@ -449,21 +460,80 @@ export default async function ManageStudioPage({
           />
 
           <label>
-            <T en="Google Rating" ar="تقييم Google" />
+            <T en="TripAdvisor URL" ar="رابط TripAdvisor" />
           </label>
           <input
             className="input"
-            name="google_rating"
-            type="number"
-            min="0"
-            max="5"
-            step="0.1"
-            defaultValue={studio.google_rating || ""}
-            placeholder="4.8"
+            name="tripadvisor_url"
+            type="url"
+            defaultValue={studio.tripadvisor_url || ""}
+            placeholder="https://www.tripadvisor.com/..."
           />
 
+          <div className="external-rating-grid">
+            <div className="external-rating-card">
+              <span className="badge">Google</span>
+
+              <h3>
+                {studio.google_rating ? `${studio.google_rating} ★` : "Not synced"}
+              </h3>
+
+              <p>
+                {studio.google_user_ratings_total ? (
+                  <>
+                    {studio.google_user_ratings_total}{" "}
+                    <T en="reviews" ar="تقييم" />
+                  </>
+                ) : (
+                  <T
+                    en="Google rating will be synced automatically later."
+                    ar="سيتم جلب تقييم Google تلقائيًا لاحقًا."
+                  />
+                )}
+              </p>
+
+              {studio.google_rating_last_synced_at ? (
+                <p>
+                  <T en="Last sync:" ar="آخر تحديث:" />{" "}
+                  {formatSyncDate(studio.google_rating_last_synced_at)}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="external-rating-card">
+              <span className="badge">TripAdvisor</span>
+
+              <h3>
+                {studio.tripadvisor_rating
+                  ? `${studio.tripadvisor_rating} ★`
+                  : "Not verified"}
+              </h3>
+
+              <p>
+                {studio.tripadvisor_reviews_total ? (
+                  <>
+                    {studio.tripadvisor_reviews_total}{" "}
+                    <T en="reviews" ar="تقييم" />
+                  </>
+                ) : (
+                  <T
+                    en="TripAdvisor rating will be verified later."
+                    ar="سيتم التحقق من تقييم TripAdvisor لاحقًا."
+                  />
+                )}
+              </p>
+
+              {studio.tripadvisor_rating_last_synced_at ? (
+                <p>
+                  <T en="Last sync:" ar="آخر تحديث:" />{" "}
+                  {formatSyncDate(studio.tripadvisor_rating_last_synced_at)}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
           <button className="btn" type="submit">
-            <T en="Save Google Info" ar="حفظ بيانات Google" />
+            <T en="Save Review Sources" ar="حفظ مصادر التقييم" />
           </button>
         </form>
 
@@ -487,6 +557,17 @@ export default async function ManageStudioPage({
               className="btn btn-secondary"
             >
               <T en="Open Google Reviews" ar="فتح تقييمات Google" />
+            </a>
+          ) : null}
+
+          {studio.tripadvisor_url ? (
+            <a
+              href={studio.tripadvisor_url}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-secondary"
+            >
+              <T en="Open TripAdvisor" ar="فتح TripAdvisor" />
             </a>
           ) : null}
         </div>
