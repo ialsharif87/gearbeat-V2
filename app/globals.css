@@ -2050,3 +2050,13 @@ html[dir="rtl"] .admin-table td {
 .admin-badge-stack small {
   color: var(--muted);
 }
+.admin-studio-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-inline-action-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
