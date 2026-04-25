@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "../../lib/supabase/client";
+import T from "../../components/t";
 
 export default function ForgotPasswordPage() {
   const supabase = createClient();
@@ -40,17 +41,26 @@ export default function ForgotPasswordPage() {
   return (
     <section>
       <div className="card form">
-        <span className="badge">Account Recovery</span>
+        <span className="badge">
+          <T en="Account Recovery" ar="استعادة الحساب" />
+        </span>
 
-        <h1>Forgot Password</h1>
+        <h1>
+          <T en="Forgot Password" ar="نسيت كلمة المرور" />
+        </h1>
 
         <p>
-          Enter your email address and we will send you a link to reset your
-          password.
+          <T
+            en="Enter your email address and we will send you a link to reset your password."
+            ar="أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور."
+          />
         </p>
 
         <form onSubmit={handleResetPassword}>
-          <label>Email</label>
+          <label>
+            <T en="Email" ar="البريد الإلكتروني" />
+          </label>
+
           <input
             className="input"
             type="email"
@@ -61,16 +71,28 @@ export default function ForgotPasswordPage() {
           />
 
           {errorMessage ? <p className="error">{errorMessage}</p> : null}
-          {message ? <p className="success">{message}</p> : null}
+
+          {message ? (
+            <p className="success">
+              <T
+                en="Password reset link sent. Please check your email and open the reset link."
+                ar="تم إرسال رابط إعادة تعيين كلمة المرور. يرجى مراجعة بريدك الإلكتروني وفتح الرابط."
+              />
+            </p>
+          ) : null}
 
           <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading ? (
+              <T en="Sending..." ar="جاري الإرسال..." />
+            ) : (
+              <T en="Send Reset Link" ar="إرسال رابط إعادة التعيين" />
+            )}
           </button>
         </form>
 
         <div className="actions">
           <Link href="/login" className="btn btn-secondary">
-            Back to Login
+            <T en="Back to Login" ar="العودة إلى تسجيل الدخول" />
           </Link>
         </div>
       </div>
