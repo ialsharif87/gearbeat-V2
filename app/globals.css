@@ -2227,3 +2227,15 @@ html[dir="rtl"] .admin-table td {
     height: 40px;
   }
 }
+.brand-logo {
+  width: 160px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+@media (max-width: 900px) {
+  .brand-logo {
+    width: 130px;
+  }
+}
