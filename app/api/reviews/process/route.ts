@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "../../../../lib/supabase/admin";
 
+export const dynamic = "force-dynamic";
+
 function createReviewToken() {
   const randomPart = crypto.randomUUID().replaceAll("-", "");
   const timePart = Date.now().toString(36);
@@ -36,20 +38,26 @@ function buildReviewEmail({
     <div style="font-family: Arial, sans-serif; background:#070b18; color:#ffffff; padding:32px;">
       <div style="max-width:620px; margin:0 auto; background:#10172a; border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:28px;">
         <h1 style="margin:0 0 12px; font-size:28px;">How was your studio experience?</h1>
+
         <p style="font-size:16px; line-height:1.6; color:#cbd5e1;">
           Thank you for booking <strong>${studioName}</strong> through GearBeat.
         </p>
+
         <p style="font-size:16px; line-height:1.6; color:#cbd5e1;">
           Your review helps other creators choose trusted studios. This review is linked to a verified paid booking.
         </p>
+
         <a href="${reviewUrl}" style="display:inline-block; margin-top:18px; background:#1ed760; color:#06130c; text-decoration:none; font-weight:bold; padding:14px 22px; border-radius:999px;">
           Write your review
         </a>
+
         <p style="font-size:13px; line-height:1.6; color:#94a3b8; margin-top:24px;">
           If the button does not work, copy and paste this link into your browser:<br />
           <span style="word-break:break-all;">${reviewUrl}</span>
         </p>
+
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.12); margin:24px 0;" />
+
         <p style="font-size:13px; color:#94a3b8; margin:0;">
           Sent to ${customerEmail} by GearBeat.
         </p>
@@ -73,7 +81,9 @@ Sent to ${customerEmail} by GearBeat.
   return { subject, html, text };
 }
 
-async function createReviewRequests(supabase: ReturnType<typeof createAdminClient>) {
+async function createReviewRequests(
+  supabase: ReturnType<typeof createAdminClient>
+) {
   const now = new Date();
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
@@ -153,7 +163,9 @@ async function createReviewRequests(supabase: ReturnType<typeof createAdminClien
   return rows.length;
 }
 
-async function sendReviewEmails(supabase: ReturnType<typeof createAdminClient>) {
+async function sendReviewEmails(
+  supabase: ReturnType<typeof createAdminClient>
+) {
   const resendApiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.REVIEW_FROM_EMAIL;
 
@@ -269,8 +281,14 @@ async function sendReviewEmails(supabase: ReturnType<typeof createAdminClient>) 
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const providedSecret = request.headers.get("x-cron-secret");
+  const authHeader = request.headers.get("authorization");
 
-  if (cronSecret && providedSecret !== cronSecret) {
+  const isValidCronSecret =
+    !cronSecret ||
+    providedSecret === cronSecret ||
+    authHeader === `Bearer ${cronSecret}`;
+
+  if (!isValidCronSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
