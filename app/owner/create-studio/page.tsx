@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { requireRole } from "../../../lib/auth";
+import T from "../../../components/t";
 
 function slugify(value: string) {
   return value
@@ -11,7 +12,7 @@ function slugify(value: string) {
 }
 
 export default async function CreateStudioPage() {
-  const { user } = await requireRole("owner");
+  await requireRole("owner");
 
   async function createStudio(formData: FormData) {
     "use server";
@@ -59,19 +60,32 @@ export default async function CreateStudioPage() {
       throw new Error(error.message);
     }
 
-    redirect("/owner");
+    redirect("/owner/studios");
   }
 
   return (
     <section>
       <div className="section-head">
-        <span className="badge">Studio Owner</span>
-        <h1>Create Studio</h1>
-        <p>Add your studio details and publish it to the marketplace.</p>
+        <span className="badge">
+          <T en="Studio Owner" ar="صاحب الاستوديو" />
+        </span>
+
+        <h1>
+          <T en="Create Studio" ar="إنشاء استوديو" />
+        </h1>
+
+        <p>
+          <T
+            en="Add your studio details and publish it to the marketplace."
+            ar="أضف تفاصيل الاستوديو وانشره في المنصة."
+          />
+        </p>
       </div>
 
       <form className="card form" action={createStudio}>
-        <label>Studio name *</label>
+        <label>
+          <T en="Studio name" ar="اسم الاستوديو" /> *
+        </label>
         <input
           className="input"
           name="name"
@@ -79,20 +93,28 @@ export default async function CreateStudioPage() {
           required
         />
 
-        <label>City *</label>
+        <label>
+          <T en="City" ar="المدينة" /> *
+        </label>
         <input className="input" name="city" placeholder="Riyadh" required />
 
-        <label>District</label>
+        <label>
+          <T en="District" ar="الحي" />
+        </label>
         <input className="input" name="district" placeholder="Al Olaya" />
 
-        <label>Address</label>
+        <label>
+          <T en="Address" ar="العنوان" />
+        </label>
         <input
           className="input"
           name="address"
           placeholder="Full address or location description"
         />
 
-        <label>Description *</label>
+        <label>
+          <T en="Description" ar="الوصف" /> *
+        </label>
         <textarea
           className="input"
           name="description"
@@ -101,7 +123,9 @@ export default async function CreateStudioPage() {
           required
         />
 
-        <label>Starting price / hour *</label>
+        <label>
+          <T en="Starting price / hour" ar="السعر الابتدائي / الساعة" /> *
+        </label>
         <input
           className="input"
           name="price_from"
@@ -111,7 +135,9 @@ export default async function CreateStudioPage() {
           required
         />
 
-        <label>Cover image URL</label>
+        <label>
+          <T en="Cover image URL" ar="رابط صورة الغلاف" />
+        </label>
         <input
           className="input"
           name="cover_image_url"
@@ -119,7 +145,7 @@ export default async function CreateStudioPage() {
         />
 
         <button className="btn" type="submit">
-          Create Studio
+          <T en="Create Studio" ar="إنشاء الاستوديو" />
         </button>
       </form>
     </section>
