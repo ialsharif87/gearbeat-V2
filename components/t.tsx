@@ -7,19 +7,37 @@ type TProps = {
   ar: string;
 };
 
+function getSavedLanguage(): "en" | "ar" {
+  if (typeof window === "undefined") return "en";
+
+  const savedLanguage = window.localStorage.getItem("gearbeat_language");
+
+  if (savedLanguage === "ar" || savedLanguage === "en") {
+    return savedLanguage;
+  }
+
+  return "en";
+}
+
 export default function T({ en, ar }: TProps) {
-  const [language, setLanguage] = useState<"en" | "ar">("en");
+  const [language, setLanguage] = useState<"en" | "ar">(getSavedLanguage);
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("gearbeat_language");
+    const savedLanguage = getSavedLanguage();
 
-    if (savedLanguage === "ar" || savedLanguage === "en") {
-      setLanguage(savedLanguage);
-    }
+    setLanguage(savedLanguage);
+    document.documentElement.lang = savedLanguage;
+    document.documentElement.dir = savedLanguage === "ar" ? "rtl" : "ltr";
 
     function handleLanguageChange(event: Event) {
       const customEvent = event as CustomEvent<{ language: "en" | "ar" }>;
-      setLanguage(customEvent.detail.language);
+
+      if (
+        customEvent.detail.language === "ar" ||
+        customEvent.detail.language === "en"
+      ) {
+        setLanguage(customEvent.detail.language);
+      }
     }
 
     window.addEventListener("gearbeat-language-change", handleLanguageChange);
