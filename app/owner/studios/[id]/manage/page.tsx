@@ -52,7 +52,7 @@ const featureGroups = [
     titleEn: "Custom Features",
     titleAr: "مميزات مخصصة",
     descEn: "Add anything special that does not exist in the list.",
-    descAr: "أضف أي ميزة خاصة غير موجودة في القائمة."
+    descAr: "أضف ميزة خاصة غير موجودة في القائمة."
   }
 ];
 
@@ -68,7 +68,11 @@ function groupFeaturesByCategory(features: any[] | null | undefined) {
 
   for (const item of features || []) {
     const category = item.category || "custom";
-    if (!grouped[category]) grouped[category] = [];
+
+    if (!grouped[category]) {
+      grouped[category] = [];
+    }
+
     grouped[category].push(item);
   }
 
@@ -105,7 +109,9 @@ export default async function ManageStudioPage({
 
   const { data: selectedFeatures } = await supabase
     .from("studio_feature_links")
-    .select("id,feature_id,custom_name,studio_features(id,name_en,name_ar,category)")
+    .select(
+      "id,feature_id,custom_name,studio_features(id,name_en,name_ar,category)"
+    )
     .eq("studio_id", studio.id);
 
   const { data: equipment } = await supabase
@@ -152,8 +158,11 @@ export default async function ManageStudioPage({
     const supabase = await createClient();
 
     const studioId = String(formData.get("studio_id") || "");
+    const studioSlug = String(formData.get("studio_slug") || "");
     const googleMapsUrl = String(formData.get("google_maps_url") || "").trim();
-    const googleReviewsUrl = String(formData.get("google_reviews_url") || "").trim();
+    const googleReviewsUrl = String(
+      formData.get("google_reviews_url") || ""
+    ).trim();
     const googlePlaceId = String(formData.get("google_place_id") || "").trim();
     const googleRatingRaw = String(formData.get("google_rating") || "").trim();
 
@@ -179,7 +188,10 @@ export default async function ManageStudioPage({
     }
 
     revalidatePath(`/owner/studios/${studioId}/manage`);
-    revalidatePath(`/studios/${studio.slug}`);
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+    }
   }
 
   async function addFeature(formData: FormData) {
@@ -402,6 +414,7 @@ export default async function ManageStudioPage({
 
         <form className="google-location-form" action={updateGoogleInfo}>
           <input type="hidden" name="studio_id" value={studio.id} />
+          <input type="hidden" name="studio_slug" value={studio.slug} />
 
           <label>
             <T en="Google Maps URL" ar="رابط Google Maps" />
