@@ -33,6 +33,12 @@ function getRole(user: any, profile: any) {
   return profile?.role || user?.user_metadata?.role || "customer";
 }
 
+function getRoleLabel(role: string) {
+  if (role === "owner") return "Studio Owner / صاحب استوديو";
+  if (role === "customer") return "Customer / عميل";
+  return role;
+}
+
 export default async function ProfilePage() {
   const supabase = await createClient();
 
@@ -68,9 +74,17 @@ export default async function ProfilePage() {
       redirect("/login");
     }
 
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    const existingRole =
+      existingProfile?.role || user.user_metadata?.role || "customer";
+
     const fullName = String(formData.get("full_name") || "").trim();
     const phone = cleanPhone(String(formData.get("phone") || ""));
-    const role = String(formData.get("role") || "customer");
 
     if (!fullName) {
       throw new Error("Full name is required.");
@@ -86,7 +100,7 @@ export default async function ProfilePage() {
 
     const allowedRoles = ["customer", "owner"];
 
-    if (!allowedRoles.includes(role)) {
+    if (!allowedRoles.includes(existingRole)) {
       throw new Error("Invalid account type.");
     }
 
@@ -97,7 +111,7 @@ export default async function ProfilePage() {
         phone,
         phone_number: phone,
         mobile: phone,
-        role
+        role: existingRole
       }
     });
 
@@ -111,7 +125,7 @@ export default async function ProfilePage() {
         email: user.email,
         full_name: fullName,
         phone,
-        role,
+        role: existingRole,
         updated_at: new Date().toISOString()
       },
       {
@@ -127,11 +141,7 @@ export default async function ProfilePage() {
     revalidatePath("/admin/bookings");
     revalidatePath("/admin");
 
-    if (role === "owner") {
-      redirect("/owner");
-    }
-
-    redirect("/customer");
+    redirect("/profile");
   }
 
   return (
@@ -148,8 +158,8 @@ export default async function ProfilePage() {
 
           <p>
             <T
-              en="Keep your name, email, and phone number updated so bookings are clear for studios and admins."
-              ar="حدّث اسمك، بريدك الإلكتروني، ورقم جوالك حتى تكون الحجوزات واضحة للاستوديوهات والإدارة."
+              en="Keep your name and phone number updated so bookings are clear for studios and admins."
+              ar="حدّث اسمك ورقم جوالك حتى تكون الحجوزات واضحة للاستوديوهات والإدارة."
             />
           </p>
 
@@ -201,10 +211,20 @@ export default async function ProfilePage() {
             <label>
               <T en="Account type" ar="نوع الحساب" />
             </label>
-            <select className="input" name="role" defaultValue={currentRole} required>
-              <option value="customer">Customer / عميل</option>
-              <option value="owner">Studio Owner / صاحب استوديو</option>
-            </select>
+            <input
+              className="input"
+              name="role_display"
+              type="text"
+              value={getRoleLabel(currentRole)}
+              readOnly
+            />
+
+            <p className="admin-muted-line">
+              <T
+                en="Account type cannot be changed from this page. It is selected during signup."
+                ar="لا يمكن تغيير نوع الحساب من هذه الصفحة. يتم اختياره عند إنشاء الحساب."
+              />
+            </p>
 
             <button className="btn" type="submit">
               <T en="Save Profile" ar="حفظ البيانات" />
@@ -216,9 +236,11 @@ export default async function ProfilePage() {
               <T en="Customer Dashboard" ar="لوحة العميل" />
             </Link>
 
-            <Link href="/owner" className="btn btn-secondary">
-              <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
-            </Link>
+            {currentRole === "owner" ? (
+              <Link href="/owner" className="btn btn-secondary">
+                <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>
