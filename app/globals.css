@@ -2209,3 +2209,21 @@ html[dir="rtl"] .admin-table td {
   font-size: 0.82rem;
   max-width: 420px;
 }
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-image {
+  display: block;
+  width: auto;
+  height: 46px;
+  object-fit: contain;
+}
+
+@media (max-width: 900px) {
+  .logo-image {
+    height: 40px;
+  }
+}
