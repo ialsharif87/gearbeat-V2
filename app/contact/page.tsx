@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "../../components/t";
+import SocialLinks from "../../components/social-links";
 
 export default function ContactPage() {
   return (
@@ -112,10 +113,7 @@ export default function ContactPage() {
           </span>
 
           <h2>
-            <T
-              en="What should you include?"
-              ar="ماذا يجب أن ترسل؟"
-            />
+            <T en="What should you include?" ar="ماذا يجب أن ترسل؟" />
           </h2>
 
           <div className="contact-check-list">
@@ -129,7 +127,10 @@ export default function ContactPage() {
               <T en="Booking reference if available" ar="رقم الحجز إن وجد" />
             </span>
             <span>
-              <T en="Studio name if related" ar="اسم الاستوديو إذا كان الموضوع متعلقًا به" />
+              <T
+                en="Studio name if related"
+                ar="اسم الاستوديو إذا كان الموضوع متعلقًا به"
+              />
             </span>
             <span>
               <T en="Clear explanation of the request" ar="شرح واضح للطلب" />
@@ -153,32 +154,7 @@ export default function ContactPage() {
             />
           </p>
 
-          <div className="contact-socials">
-            <a href="#" aria-label="Instagram">
-              <strong>IG</strong>
-              <span>Instagram</span>
-            </a>
-
-            <a href="#" aria-label="TikTok">
-              <strong>TT</strong>
-              <span>TikTok</span>
-            </a>
-
-            <a href="#" aria-label="X">
-              <strong>X</strong>
-              <span>X</span>
-            </a>
-
-            <a href="#" aria-label="YouTube">
-              <strong>YT</strong>
-              <span>YouTube</span>
-            </a>
-
-            <a href="#" aria-label="LinkedIn">
-              <strong>IN</strong>
-              <span>LinkedIn</span>
-            </a>
-          </div>
+          <SocialLinks variant="large" />
         </div>
       </div>
 
@@ -191,10 +167,7 @@ export default function ContactPage() {
           </span>
 
           <h2>
-            <T
-              en="Need something specific?"
-              ar="تحتاج شيء محدد؟"
-            />
+            <T en="Need something specific?" ar="تحتاج شيء محدد؟" />
           </h2>
 
           <p>
@@ -211,7 +184,10 @@ export default function ContactPage() {
               <T en="Support Center" ar="مركز الدعم" />
             </strong>
             <span>
-              <T en="Bookings, accounts, reports" ar="الحجوزات، الحسابات، البلاغات" />
+              <T
+                en="Bookings, accounts, reports"
+                ar="الحجوزات، الحسابات، البلاغات"
+              />
             </span>
           </Link>
 
