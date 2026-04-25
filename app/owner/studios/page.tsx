@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
 import { requireRole } from "../../../lib/auth";
+import T from "../../../components/t";
 
 export default async function OwnerStudiosPage() {
   const { user } = await requireRole("owner");
@@ -8,15 +9,21 @@ export default async function OwnerStudiosPage() {
 
   const { data: studios, error } = await supabase
     .from("studios")
-    .select("id,name,slug,city,district,price_from,status,verified,cover_image_url,created_at")
+    .select(
+      "id,name,slug,city,district,price_from,status,verified,cover_image_url,created_at"
+    )
     .eq("owner_auth_user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
     return (
       <div className="card">
-        <span className="badge">Error</span>
-        <h1>My Studios</h1>
+        <span className="badge">
+          <T en="Error" ar="خطأ" />
+        </span>
+        <h1>
+          <T en="My Studios" ar="استوديوهاتي" />
+        </h1>
         <p>{error.message}</p>
       </div>
     );
@@ -25,58 +32,99 @@ export default async function OwnerStudiosPage() {
   return (
     <section>
       <div className="section-head">
-        <span className="badge">Studio Owner</span>
-        <h1>My Studios</h1>
-        <p>Manage the studios you created on GearBeat.</p>
+        <span className="badge">
+          <T en="Studio Owner" ar="صاحب الاستوديو" />
+        </span>
+
+        <h1>
+          <T en="My Studios" ar="استوديوهاتي" />
+        </h1>
+
+        <p>
+          <T
+            en="Manage the studios you created on GearBeat."
+            ar="أدر الاستوديوهات التي أنشأتها على GearBeat."
+          />
+        </p>
       </div>
 
       <div className="actions" style={{ marginBottom: 24 }}>
         <Link href="/owner/create-studio" className="btn">
-          Create New Studio
+          <T en="Create New Studio" ar="إنشاء استوديو جديد" />
         </Link>
 
         <Link href="/owner" className="btn btn-secondary">
-          Back to Dashboard
+          <T en="Back to Dashboard" ar="العودة إلى لوحة التحكم" />
         </Link>
       </div>
 
       <div className="grid">
         {studios?.length ? (
           studios.map((studio) => (
-            <article className="card" key={studio.id}>
+            <article className="card studio-card" key={studio.id}>
               <div className="studio-cover">
                 {studio.cover_image_url ? (
                   <img src={studio.cover_image_url} alt={studio.name} />
                 ) : (
-                  <div className="placeholder">No Image</div>
+                  <div className="placeholder">
+                    <T en="No Image" ar="لا توجد صورة" />
+                  </div>
                 )}
               </div>
 
-              <span className="badge">{studio.status}</span>
+              <div className="studio-card-body">
+                <div className="actions" style={{ marginTop: 0 }}>
+                  <span className="badge">{studio.status}</span>
 
-              <h2>{studio.name}</h2>
+                  {studio.verified ? (
+                    <span className="badge">
+                      <T en="Verified" ar="موثق" />
+                    </span>
+                  ) : (
+                    <span className="badge">
+                      <T en="Not verified" ar="غير موثق" />
+                    </span>
+                  )}
+                </div>
 
-              <p>
-                {studio.city}
-                {studio.district ? ` · ${studio.district}` : ""}
-              </p>
+                <h2>{studio.name}</h2>
 
-              <p>From {studio.price_from ?? 0} SAR</p>
+                <p>
+                  {studio.city}
+                  {studio.district ? ` · ${studio.district}` : ""}
+                </p>
 
-              <div className="actions">
-                <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                  View Public Page
-                </Link>
+                <p>
+                  <T en="From" ar="من" />{" "}
+                  <strong>{studio.price_from ?? 0} SAR</strong>
+                </p>
+
+                <div className="actions">
+                  <Link
+                    href={`/studios/${studio.slug}`}
+                    className="btn btn-small"
+                  >
+                    <T en="View Public Page" ar="عرض الصفحة العامة" />
+                  </Link>
+                </div>
               </div>
             </article>
           ))
         ) : (
           <div className="card">
-            <h2>No studios yet</h2>
-            <p>You have not created any studios yet.</p>
+            <h2>
+              <T en="No studios yet" ar="لا توجد استوديوهات بعد" />
+            </h2>
+
+            <p>
+              <T
+                en="You have not created any studios yet."
+                ar="لم تقم بإنشاء أي استوديو حتى الآن."
+              />
+            </p>
 
             <Link href="/owner/create-studio" className="btn">
-              Create Studio
+              <T en="Create Studio" ar="إنشاء استوديو" />
             </Link>
           </div>
         )}
