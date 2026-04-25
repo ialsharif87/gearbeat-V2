@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentProfile, getDashboardPath } from "../lib/auth";
 import LogoutButton from "../components/logout-button";
 import LanguageSwitcher from "../components/language-switcher";
+import T from "../components/t";
 
 export const metadata = {
   title: "GearBeat",
@@ -34,20 +35,47 @@ export default async function RootLayout({
             </Link>
 
             <nav className="nav-links">
-              <Link href="/studios">Browse Studios</Link>
+              <Link href="/studios">
+                <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+              </Link>
 
               {profile ? (
                 <>
-                  <Link href={getDashboardPath(profile.role)}>Dashboard</Link>
+                  <Link href={getDashboardPath(profile.role)}>
+                    <T en="Dashboard" ar="لوحة التحكم" />
+                  </Link>
 
                   {profile.role === "customer" ? (
-                    <Link href="/customer/bookings">My Bookings</Link>
+                    <Link href="/customer/bookings">
+                      <T en="My Bookings" ar="حجوزاتي" />
+                    </Link>
                   ) : null}
 
                   {profile.role === "owner" ? (
                     <>
-                      <Link href="/owner/studios">My Studios</Link>
-                      <Link href="/owner/bookings">Bookings</Link>
+                      <Link href="/owner/studios">
+                        <T en="My Studios" ar="استوديوهاتي" />
+                      </Link>
+
+                      <Link href="/owner/bookings">
+                        <T en="Bookings" ar="الحجوزات" />
+                      </Link>
+                    </>
+                  ) : null}
+
+                  {profile.role === "vendor" ? (
+                    <>
+                      <Link href="/vendor">
+                        <T en="Vendor Dashboard" ar="لوحة المتجر" />
+                      </Link>
+
+                      <Link href="/vendor/products">
+                        <T en="Products" ar="المنتجات" />
+                      </Link>
+
+                      <Link href="/vendor/orders">
+                        <T en="Orders" ar="الطلبات" />
+                      </Link>
                     </>
                   ) : null}
 
@@ -55,9 +83,12 @@ export default async function RootLayout({
                 </>
               ) : (
                 <>
-                  <Link href="/login">Login</Link>
+                  <Link href="/login">
+                    <T en="Login" ar="تسجيل الدخول" />
+                  </Link>
+
                   <Link href="/signup" className="btn btn-small">
-                    Sign up
+                    <T en="Sign up" ar="إنشاء حساب" />
                   </Link>
                 </>
               )}
