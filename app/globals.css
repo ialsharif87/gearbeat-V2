@@ -2239,3 +2239,41 @@ html[dir="rtl"] .admin-table td {
     width: 130px;
   }
 }
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  height: 58px;
+}
+
+.brand-logo {
+  height: 46px;
+  width: auto;
+  max-width: 180px;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.site-header {
+  min-height: 76px;
+}
+
+.nav {
+  min-height: 58px;
+}
+
+@media (max-width: 900px) {
+  .brand {
+    height: 48px;
+  }
+
+  .brand-logo {
+    height: 38px;
+    max-width: 145px;
+  }
+}
