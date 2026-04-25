@@ -1417,3 +1417,46 @@ html[dir="rtl"] .gb-accordion summary::after {
     grid-template-columns: 1fr;
   }
 }
+.public-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.public-feature-card {
+  display: grid;
+  gap: 16px;
+}
+
+.public-feature-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.public-feature-head h2 {
+  margin: 0;
+}
+
+.public-feature-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.equipment-public-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.equipment-public-card {
+  display: grid;
+  gap: 14px;
+}
+
+@media (max-width: 960px) {
+  .public-feature-grid,
+  .equipment-public-grid {
+    grid-template-columns: 1fr;
+  }
+}
