@@ -2277,3 +2277,121 @@ html[dir="rtl"] .admin-table td {
     max-width: 145px;
   }
 }
+/* FINAL LOGO FIX - DO NOT DELETE OLD CSS */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: 96px;
+  padding: 14px 5vw;
+  backdrop-filter: blur(18px);
+  background: rgba(7, 11, 24, 0.78);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nav {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 280px 1fr auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  height: 72px !important;
+  width: auto !important;
+  text-decoration: none !important;
+  line-height: 0 !important;
+  gap: 0 !important;
+}
+
+.brand-logo {
+  display: block !important;
+  height: 68px !important;
+  width: auto !important;
+  max-width: 260px !important;
+  min-width: 190px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter:
+    drop-shadow(0 0 10px rgba(53, 216, 255, 0.35))
+    drop-shadow(0 0 16px rgba(30, 215, 96, 0.18)) !important;
+}
+
+.brand-logo::before,
+.brand-logo::after,
+.brand::before,
+.brand::after {
+  display: none !important;
+  content: none !important;
+}
+
+.logo-gear,
+.logo-wave,
+.brand-text {
+  display: none !important;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.language-switch,
+.language-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    min-height: auto;
+    padding: 12px 5vw;
+  }
+
+  .nav {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .brand {
+    height: 58px !important;
+  }
+
+  .brand-logo {
+    height: 54px !important;
+    min-width: 150px !important;
+    max-width: 210px !important;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .language-switch,
+  .language-switcher {
+    justify-content: flex-start;
+  }
+}
