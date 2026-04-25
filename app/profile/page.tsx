@@ -8,6 +8,10 @@ function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").trim();
 }
 
+function cleanIdentityNumber(value: string) {
+  return value.replace(/\s+/g, "").trim();
+}
+
 function getFullName(user: any, profile: any) {
   return (
     profile?.full_name ||
@@ -39,6 +43,30 @@ function getRoleLabel(role: string) {
   return role;
 }
 
+function getIdentityType(user: any, profile: any) {
+  return (
+    profile?.identity_type ||
+    user?.user_metadata?.identity_type ||
+    ""
+  );
+}
+
+function getIdentityNumber(user: any, profile: any) {
+  return (
+    profile?.identity_number ||
+    user?.user_metadata?.identity_number ||
+    ""
+  );
+}
+
+function getIdentityLabel(identityType: string) {
+  if (identityType === "national_id") return "National ID / هوية وطنية";
+  if (identityType === "iqama") return "Iqama / إقامة";
+  if (identityType === "passport") return "Passport / جواز سفر";
+  if (identityType === "gcc_id") return "GCC ID / هوية خليجية";
+  return "—";
+}
+
 export default async function ProfilePage() {
   const supabase = await createClient();
 
@@ -52,7 +80,9 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id,auth_user_id,email,full_name,phone,role,updated_at")
+    .select(
+      "id,auth_user_id,email,full_name,phone,role,identity_type,identity_number,identity_locked,identity_created_at,updated_at"
+    )
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -60,6 +90,13 @@ export default async function ProfilePage() {
   const currentPhone = getPhone(user, profile);
   const currentRole = getRole(user, profile);
   const currentEmail = profile?.email || user.email || "";
+  const currentIdentityType = getIdentityType(user, profile);
+  const currentIdentityNumber = getIdentityNumber(user, profile);
+
+  const identityIsLocked =
+    Boolean(profile?.identity_locked) &&
+    Boolean(currentIdentityType) &&
+    Boolean(currentIdentityNumber);
 
   async function updateProfile(formData: FormData) {
     "use server";
@@ -76,7 +113,7 @@ export default async function ProfilePage() {
 
     const { data: existingProfile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role,identity_type,identity_number,identity_locked")
       .eq("auth_user_id", user.id)
       .maybeSingle();
 
@@ -85,6 +122,25 @@ export default async function ProfilePage() {
 
     const fullName = String(formData.get("full_name") || "").trim();
     const phone = cleanPhone(String(formData.get("phone") || ""));
+
+    const existingIdentityType =
+      existingProfile?.identity_type ||
+      user.user_metadata?.identity_type ||
+      "";
+
+    const existingIdentityNumber =
+      existingProfile?.identity_number ||
+      user.user_metadata?.identity_number ||
+      "";
+
+    const existingIdentityLocked =
+      Boolean(existingProfile?.identity_locked) &&
+      Boolean(existingIdentityType) &&
+      Boolean(existingIdentityNumber);
+
+    let finalIdentityType = existingIdentityType;
+    let finalIdentityNumber = existingIdentityNumber;
+    let finalIdentityLocked = existingIdentityLocked;
 
     if (!fullName) {
       throw new Error("Full name is required.");
@@ -104,6 +160,32 @@ export default async function ProfilePage() {
       throw new Error("Invalid account type.");
     }
 
+    if (!existingIdentityLocked) {
+      const identityType = String(formData.get("identity_type") || "").trim();
+      const identityNumber = cleanIdentityNumber(
+        String(formData.get("identity_number") || "")
+      );
+
+      const allowedIdentityTypes = [
+        "national_id",
+        "iqama",
+        "passport",
+        "gcc_id"
+      ];
+
+      if (!allowedIdentityTypes.includes(identityType)) {
+        throw new Error("Identity type is required.");
+      }
+
+      if (!identityNumber || identityNumber.length < 5) {
+        throw new Error("Please enter a valid identity number.");
+      }
+
+      finalIdentityType = identityType;
+      finalIdentityNumber = identityNumber;
+      finalIdentityLocked = true;
+    }
+
     const { error: authUpdateError } = await supabase.auth.updateUser({
       data: {
         full_name: fullName,
@@ -111,7 +193,10 @@ export default async function ProfilePage() {
         phone,
         phone_number: phone,
         mobile: phone,
-        role: existingRole
+        role: existingRole,
+        identity_type: finalIdentityType,
+        identity_number: finalIdentityNumber,
+        identity_locked: finalIdentityLocked
       }
     });
 
@@ -126,6 +211,12 @@ export default async function ProfilePage() {
         full_name: fullName,
         phone,
         role: existingRole,
+        identity_type: finalIdentityType,
+        identity_number: finalIdentityNumber,
+        identity_locked: finalIdentityLocked,
+        identity_created_at: finalIdentityLocked
+          ? new Date().toISOString()
+          : null,
         updated_at: new Date().toISOString()
       },
       {
@@ -158,8 +249,8 @@ export default async function ProfilePage() {
 
           <p>
             <T
-              en="Keep your name and phone number updated so bookings are clear for studios and admins."
-              ar="حدّث اسمك ورقم جوالك حتى تكون الحجوزات واضحة للاستوديوهات والإدارة."
+              en="Keep your name and phone number updated. Identity details are locked after they are saved."
+              ar="حدّث اسمك ورقم جوالك. بيانات الهوية يتم قفلها بعد حفظها."
             />
           </p>
 
@@ -225,6 +316,81 @@ export default async function ProfilePage() {
                 ar="لا يمكن تغيير نوع الحساب من هذه الصفحة. يتم اختياره عند إنشاء الحساب."
               />
             </p>
+
+            <div className="profile-identity-box">
+              <span className="badge">
+                <T en="Identity Details" ar="بيانات الهوية" />
+              </span>
+
+              {identityIsLocked ? (
+                <>
+                  <label>
+                    <T en="Identity type" ar="نوع الهوية" />
+                  </label>
+                  <input
+                    className="input"
+                    name="identity_type_display"
+                    type="text"
+                    value={getIdentityLabel(currentIdentityType)}
+                    readOnly
+                  />
+
+                  <label>
+                    <T en="Identity number" ar="رقم الهوية" />
+                  </label>
+                  <input
+                    className="input"
+                    name="identity_number_display"
+                    type="text"
+                    value={currentIdentityNumber}
+                    readOnly
+                  />
+
+                  <p className="admin-muted-line">
+                    <T
+                      en="Identity details are locked and cannot be changed from this page."
+                      ar="بيانات الهوية مقفلة ولا يمكن تغييرها من هذه الصفحة."
+                    />
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="admin-muted-line">
+                    <T
+                      en="Your account is missing identity details. Please add them once. They cannot be changed later."
+                      ar="حسابك لا يحتوي على بيانات الهوية. الرجاء إضافتها مرة واحدة فقط. لا يمكن تغييرها لاحقًا."
+                    />
+                  </p>
+
+                  <label>
+                    <T en="Identity type" ar="نوع الهوية" />
+                  </label>
+                  <select className="input" name="identity_type" required>
+                    <option value="">
+                      Select identity type / اختر نوع الهوية
+                    </option>
+                    <option value="national_id">
+                      National ID / هوية وطنية
+                    </option>
+                    <option value="iqama">Iqama / إقامة</option>
+                    <option value="passport">Passport / جواز سفر</option>
+                    <option value="gcc_id">GCC ID / هوية خليجية</option>
+                  </select>
+
+                  <label>
+                    <T en="Identity number" ar="رقم الهوية" />
+                  </label>
+                  <input
+                    className="input"
+                    name="identity_number"
+                    type="text"
+                    placeholder="Identity / Iqama / Passport number"
+                    required
+                    minLength={5}
+                  />
+                </>
+              )}
+            </div>
 
             <button className="btn" type="submit">
               <T en="Save Profile" ar="حفظ البيانات" />
