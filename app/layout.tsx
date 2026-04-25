@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import "./globals.css";
 import { createClient } from "../lib/supabase/server";
@@ -47,10 +48,15 @@ export default async function RootLayout({
         <header className="site-header">
           <nav className="nav">
             <div className="nav-left">
-              <Link href="/" className="brand">
-                <span className="brand-text">
-                  Gear<span>Beat</span>
-                </span>
+              <Link href="/" className="brand brand-logo">
+                <Image
+                  src="/logo.png"
+                  alt="GearBeat"
+                  width={150}
+                  height={46}
+                  priority
+                  className="logo-image"
+                />
               </Link>
             </div>
 
