@@ -1085,3 +1085,66 @@ html[dir="rtl"] .login-help-row {
     top: auto;
   }
 }
+.manage-studio-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.feature-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.feature-row,
+.feature-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-row p,
+.feature-pill p {
+  margin: 4px 0 0;
+}
+
+.feature-pill {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.mini-danger {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  color: white;
+  background: rgba(255, 75, 75, 0.22);
+  border: 1px solid rgba(255, 75, 75, 0.45);
+  font-weight: 900;
+}
+
+.mini-danger:hover {
+  background: rgba(255, 75, 75, 0.4);
+}
+
+@media (max-width: 960px) {
+  .manage-studio-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-row,
+  .feature-pill {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
