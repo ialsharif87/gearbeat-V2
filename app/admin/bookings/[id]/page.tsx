@@ -100,7 +100,11 @@ export default async function AdminBookingDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { admin } = await requireAdminRole(["operations", "support", "finance"]);
+  const { admin, user } = await requireAdminRole([
+    "operations",
+    "support",
+    "finance"
+  ]);
 
   const supabaseAdmin = createAdminClient();
 
@@ -112,6 +116,12 @@ export default async function AdminBookingDetailsPage({
   const canManagePaymentStatus =
     admin.admin_role === "super_admin" ||
     admin.admin_role === "operations" ||
+    admin.admin_role === "finance";
+
+  const canManageAdminNotes =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "support" ||
     admin.admin_role === "finance";
 
   async function updateBookingStatus(formData: FormData) {
@@ -194,6 +204,38 @@ export default async function AdminBookingDetailsPage({
     }
   }
 
+  async function updateAdminNotes(formData: FormData) {
+    "use server";
+
+    const { user } = await requireAdminRole(["operations", "support", "finance"]);
+
+    const supabaseAdmin = createAdminClient();
+
+    const bookingId = String(formData.get("booking_id") || "");
+    const adminNotes = String(formData.get("admin_notes") || "").trim();
+
+    if (!bookingId) {
+      throw new Error("Missing booking ID.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("bookings")
+      .update({
+        admin_notes: adminNotes || null,
+        admin_notes_updated_at: new Date().toISOString(),
+        admin_notes_updated_by: user.id
+      })
+      .eq("id", bookingId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath(`/admin/bookings/${bookingId}`);
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin");
+  }
+
   const { data: booking, error } = await supabaseAdmin
     .from("bookings")
     .select(`
@@ -206,6 +248,9 @@ export default async function AdminBookingDetailsPage({
       status,
       payment_status,
       notes,
+      admin_notes,
+      admin_notes_updated_at,
+      admin_notes_updated_by,
       created_at,
       studios (
         id,
@@ -274,6 +319,16 @@ export default async function AdminBookingDetailsPage({
   const identityNumber = getCustomerIdentityNumber(customer, profile);
   const studioSlug = studio?.slug || "";
 
+  let adminNotesUpdatedByEmail = "—";
+
+  if (booking.admin_notes_updated_by) {
+    const { data: adminNoteUser } = await supabaseAdmin.auth.admin.getUserById(
+      booking.admin_notes_updated_by
+    );
+
+    adminNotesUpdatedByEmail = adminNoteUser?.user?.email || "—";
+  }
+
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
@@ -297,8 +352,8 @@ export default async function AdminBookingDetailsPage({
 
         <p>
           <T
-            en="Full booking view with customer, identity, studio, payment, and review information."
-            ar="عرض كامل للحجز مع بيانات العميل، الهوية، الاستوديو، الدفع، والتقييم."
+            en="Full booking view with customer, identity, studio, payment, review, and internal admin notes."
+            ar="عرض كامل للحجز مع بيانات العميل، الهوية، الاستوديو، الدفع، التقييم، وملاحظات الإدارة الداخلية."
           />
         </p>
       </div>
@@ -364,7 +419,8 @@ export default async function AdminBookingDetailsPage({
           </p>
 
           <p>
-            <T en="Notes:" ar="ملاحظات:" /> {booking.notes || "—"}
+            <T en="Customer notes:" ar="ملاحظات العميل:" />{" "}
+            {booking.notes || "—"}
           </p>
         </div>
 
@@ -433,6 +489,59 @@ export default async function AdminBookingDetailsPage({
           </p>
 
           <p>{studio?.address || "—"}</p>
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="card admin-notes-card">
+        <span className="badge">
+          <T en="Internal Admin Notes" ar="ملاحظات الإدارة الداخلية" />
+        </span>
+
+        <h2>
+          <T en="Private notes" ar="ملاحظات خاصة" />
+        </h2>
+
+        <p>
+          <T
+            en="These notes are visible only to admin users. Customers and studio owners cannot see them."
+            ar="هذه الملاحظات تظهر فقط لمستخدمي الإدارة. العميل وصاحب الاستوديو لا يستطيعان رؤيتها."
+          />
+        </p>
+
+        {canManageAdminNotes ? (
+          <form className="form" action={updateAdminNotes}>
+            <input type="hidden" name="booking_id" value={booking.id} />
+
+            <label>
+              <T en="Admin notes" ar="ملاحظات الإدارة" />
+            </label>
+
+            <textarea
+              className="input"
+              name="admin_notes"
+              rows={6}
+              defaultValue={booking.admin_notes || ""}
+              placeholder="Write internal notes about this booking..."
+            />
+
+            <button className="btn" type="submit">
+              <T en="Save Admin Notes" ar="حفظ ملاحظات الإدارة" />
+            </button>
+          </form>
+        ) : null}
+
+        <div className="admin-notes-meta">
+          <p>
+            <T en="Last updated:" ar="آخر تحديث:" />{" "}
+            {formatDate(booking.admin_notes_updated_at)}
+          </p>
+
+          <p>
+            <T en="Updated by:" ar="تم التحديث بواسطة:" />{" "}
+            {adminNotesUpdatedByEmail}
+          </p>
         </div>
       </div>
 
