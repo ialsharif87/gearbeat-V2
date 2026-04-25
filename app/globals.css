@@ -2198,3 +2198,14 @@ html[dir="rtl"] .admin-table td {
   margin: 0;
   color: var(--muted);
 }
+.audit-json {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--soft);
+  font-size: 0.82rem;
+  max-width: 420px;
+}
