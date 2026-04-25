@@ -2395,3 +2395,72 @@ html[dir="rtl"] .admin-table td {
     justify-content: flex-start;
   }
 }
+/* FINAL LANGUAGE SWITCH FIX */
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(5, 8, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 0 16px rgba(255, 255, 255, 0.04),
+    0 0 18px rgba(53, 216, 255, 0.12);
+}
+
+.language-switcher a {
+  min-width: 42px;
+  height: 36px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--muted);
+  font-weight: 900;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.language-switcher a.active {
+  color: #04110a;
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+  box-shadow:
+    0 0 18px rgba(30, 215, 96, 0.36),
+    0 0 18px rgba(53, 216, 255, 0.22);
+}
+
+.language-switcher a:hover {
+  color: white;
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="ltr"] body {
+  direction: ltr;
+  text-align: left;
+}
+
+html[dir="rtl"] .nav,
+html[dir="rtl"] .nav-links,
+html[dir="rtl"] .actions,
+html[dir="rtl"] .visual-search,
+html[dir="rtl"] .studio-card-footer {
+  direction: rtl;
+}
+
+html[dir="ltr"] .nav,
+html[dir="ltr"] .nav-links,
+html[dir="ltr"] .actions,
+html[dir="ltr"] .visual-search,
+html[dir="ltr"] .studio-card-footer {
+  direction: ltr;
+}
