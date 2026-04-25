@@ -1,85 +1,83 @@
-import "./globals.css";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { getCurrentProfile, getDashboardPath } from "../lib/auth";
-import LogoutButton from "../components/logout-button";
-import LanguageSwitcher from "../components/language-switcher";
+import { redirect } from "next/navigation";
+import "./globals.css";
+import { createClient } from "../lib/supabase/server";
 import T from "../components/t";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "GearBeat",
-  description: "Premium music studio booking marketplace"
+  description: "Book music studios and creative spaces."
 };
+
+function getDashboardPath(user: any) {
+  const role = user?.user_metadata?.role;
+
+  if (role === "owner") return "/owner";
+  if (role === "admin") return "/admin";
+
+  return "/customer";
+}
 
 export default async function RootLayout({
   children
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  const { profile } = await getCurrentProfile();
+}) {
+  const supabase = await createClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  async function logout() {
+    "use server";
+
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+
+    redirect("/login");
+  }
+
+  const dashboardPath = user ? getDashboardPath(user) : "/login";
 
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en">
       <body>
         <header className="site-header">
-          <div className="container nav">
-            <Link href="/" className="brand">
-              <span className="brand-logo" aria-hidden="true">
-                <span className="logo-gear">
-                  <span className="logo-wave"></span>
+          <nav className="nav">
+            <div className="nav-left">
+              <Link href="/" className="brand">
+                <span className="brand-text">
+                  Gear<span>Beat</span>
                 </span>
-              </span>
+              </Link>
+            </div>
 
-              <span className="brand-text">
-                Gear<span>Beat</span>
-              </span>
-            </Link>
-
-            <nav className="nav-links">
+            <div className="nav-links">
               <Link href="/studios">
                 <T en="Browse Studios" ar="تصفح الاستوديوهات" />
               </Link>
 
-              {profile ? (
+              {user ? (
                 <>
-                  <Link href={getDashboardPath(profile.role)}>
+                  <Link href={dashboardPath}>
                     <T en="Dashboard" ar="لوحة التحكم" />
                   </Link>
 
-                  {profile.role === "customer" ? (
-                    <Link href="/customer/bookings">
-                      <T en="My Bookings" ar="حجوزاتي" />
-                    </Link>
-                  ) : null}
+                  <Link href="/customer/bookings">
+                    <T en="My Bookings" ar="حجوزاتي" />
+                  </Link>
 
-                  {profile.role === "owner" ? (
-                    <>
-                      <Link href="/owner/studios">
-                        <T en="My Studios" ar="استوديوهاتي" />
-                      </Link>
+                  <Link href="/profile">
+                    <T en="My Profile" ar="ملفي الشخصي" />
+                  </Link>
 
-                      <Link href="/owner/bookings">
-                        <T en="Bookings" ar="الحجوزات" />
-                      </Link>
-                    </>
-                  ) : null}
-
-                  {profile.role === "vendor" ? (
-                    <>
-                      <Link href="/vendor">
-                        <T en="Vendor Dashboard" ar="لوحة المتجر" />
-                      </Link>
-
-                      <Link href="/vendor/products">
-                        <T en="Products" ar="المنتجات" />
-                      </Link>
-
-                      <Link href="/vendor/orders">
-                        <T en="Orders" ar="الطلبات" />
-                      </Link>
-                    </>
-                  ) : null}
-
-                  <LogoutButton />
+                  <form action={logout}>
+                    <button className="nav-button" type="submit">
+                      <T en="Logout" ar="تسجيل الخروج" />
+                    </button>
+                  </form>
                 </>
               ) : (
                 <>
@@ -87,18 +85,25 @@ export default async function RootLayout({
                     <T en="Login" ar="تسجيل الدخول" />
                   </Link>
 
-                  <Link href="/signup" className="btn btn-small">
-                    <T en="Sign up" ar="إنشاء حساب" />
+                  <Link href="/signup" className="nav-button-link">
+                    <T en="Sign Up" ar="إنشاء حساب" />
                   </Link>
                 </>
               )}
+            </div>
 
-              <LanguageSwitcher />
-            </nav>
-          </div>
+            <div className="language-switch">
+              <Link href="?lang=ar" className="lang-pill">
+                AR
+              </Link>
+              <Link href="?lang=en" className="lang-link">
+                EN
+              </Link>
+            </div>
+          </nav>
         </header>
 
-        <main className="container page">{children}</main>
+        <main className="main">{children}</main>
       </body>
     </html>
   );
