@@ -3183,337 +3183,248 @@ html[dir="rtl"] .footer-column a:hover {
     transform: scale(1.08) !important;
   }
 }
-import Link from "next/link";
-import T from "../../components/t";
+/* FINAL ABOUT PAGE DESIGN */
 
-export default function AboutPage() {
-  return (
-    <section className="about-page">
-      <div className="about-hero card">
-        <div className="about-hero-content">
-          <span className="badge">
-            <T en="About GearBeat" ar="من نحن" />
-          </span>
+.about-page {
+  display: grid;
+  gap: 0;
+}
 
-          <h1>
-            <T
-              en="Built for creators. Designed for studios."
-              ar="منصة صُممت للمبدعين وأصحاب الاستوديوهات."
-            />
-          </h1>
+.about-hero {
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 28px;
+  align-items: center;
+  padding: 44px;
+}
 
-          <p>
-            <T
-              en="GearBeat connects musicians, podcasters, producers, and creators with trusted studios and creative spaces through a simple, transparent, and secure booking experience."
-              ar="GearBeat تربط الموسيقيين، صناع البودكاست، المنتجين، والمبدعين باستوديوهات ومساحات إبداعية موثوقة من خلال تجربة حجز سهلة، واضحة، وآمنة."
-            />
-          </p>
+.about-hero h1 {
+  margin: 14px 0 18px;
+  font-size: clamp(2.7rem, 6vw, 5.2rem);
+  line-height: 0.96;
+  letter-spacing: -0.08em;
+  background: linear-gradient(90deg, white, var(--cyan), var(--green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
-          <div className="actions">
-            <Link href="/studios" className="btn">
-              <T en="Browse Studios" ar="تصفح الاستوديوهات" />
-            </Link>
+.about-hero p {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 1.12rem;
+  line-height: 1.8;
+}
 
-            <Link href="/support" className="btn btn-secondary">
-              <T en="Contact Support" ar="تواصل مع الدعم" />
-            </Link>
-          </div>
-        </div>
+.about-hero-visual {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+}
 
-        <div className="about-hero-visual">
-          <div className="about-sound-card">
-            <div className="about-wave">
-              {Array.from({ length: 28 }).map((_, index) => (
-                <i key={index} />
-              ))}
-            </div>
+.about-sound-card {
+  width: min(420px, 100%);
+  min-height: 360px;
+  display: grid;
+  align-content: center;
+  gap: 26px;
+  padding: 28px;
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(53, 216, 255, 0.18), transparent 38%),
+    radial-gradient(circle at 80% 70%, rgba(30, 215, 96, 0.16), transparent 36%),
+    rgba(5, 8, 20, 0.78);
+  border: 1px solid rgba(53, 216, 255, 0.18);
+  box-shadow:
+    0 0 34px rgba(53, 216, 255, 0.16),
+    0 24px 80px rgba(0, 0, 0, 0.42);
+}
 
-            <div className="about-sound-stats">
-              <div>
-                <strong>01</strong>
-                <span>
-                  <T en="Creators" ar="مبدعون" />
-                </span>
-              </div>
+.about-wave {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
 
-              <div>
-                <strong>02</strong>
-                <span>
-                  <T en="Studios" ar="استوديوهات" />
-                </span>
-              </div>
+.about-wave i {
+  width: 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--cyan), var(--purple), var(--green));
+  box-shadow: 0 0 16px rgba(53, 216, 255, 0.28);
+  animation: aboutWave 1.8s ease-in-out infinite;
+}
 
-              <div>
-                <strong>03</strong>
-                <span>
-                  <T en="Trust" ar="ثقة" />
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+.about-wave i:nth-child(2n) {
+  animation-delay: 0.12s;
+}
 
-      <div style={{ height: 30 }} />
+.about-wave i:nth-child(3n) {
+  animation-delay: 0.24s;
+}
 
-      <div className="about-mission-grid">
-        <div className="card">
-          <span className="badge">
-            <T en="Our Mission" ar="مهمتنا" />
-          </span>
+.about-wave i:nth-child(4n) {
+  animation-delay: 0.36s;
+}
 
-          <h2>
-            <T
-              en="Make studio booking simple, trusted, and organized."
-              ar="نجعل حجز الاستوديوهات أسهل، أوثق، وأكثر تنظيمًا."
-            />
-          </h2>
+@keyframes aboutWave {
+  0%,
+  100% {
+    height: 28px;
+  }
 
-          <p>
-            <T
-              en="We help creators find the right space faster, and help studio owners manage visibility, bookings, reviews, and operations from one place."
-              ar="نساعد المبدعين في العثور على المساحة المناسبة بسرعة، ونساعد أصحاب الاستوديوهات في إدارة الظهور، الحجوزات، التقييمات، والعمليات من مكان واحد."
-            />
-          </p>
-        </div>
+  50% {
+    height: 120px;
+  }
+}
 
-        <div className="card">
-          <span className="badge">
-            <T en="Our Vision" ar="رؤيتنا" />
-          </span>
+.about-sound-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
 
-          <h2>
-            <T
-              en="A stronger sound community."
-              ar="مجتمع صوتي أقوى."
-            />
-          </h2>
+.about-sound-stats div {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-          <p>
-            <T
-              en="GearBeat is designed to support artists, studios, producers, podcasters, and the wider creative economy."
-              ar="GearBeat صُممت لدعم الفنانين، الاستوديوهات، المنتجين، صناع البودكاست، والاقتصاد الإبداعي بشكل أوسع."
-            />
-          </p>
-        </div>
-      </div>
+.about-sound-stats strong {
+  display: block;
+  color: var(--green);
+  font-size: 1.5rem;
+}
 
-      <div style={{ height: 30 }} />
+.about-sound-stats span {
+  color: var(--soft);
+  font-weight: 800;
+}
 
-      <div className="section-head">
-        <span className="badge">
-          <T en="What We Do" ar="ماذا نقدم" />
-        </span>
+.about-mission-grid,
+.about-split,
+.about-trust-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
 
-        <h1>
-          <T
-            en="One platform for discovery, booking, trust, and operations."
-            ar="منصة واحدة للاكتشاف، الحجز، الثقة، والتشغيل."
-          />
-        </h1>
+.about-feature-card {
+  min-height: 260px;
+}
 
-        <p>
-          <T
-            en="GearBeat gives creators a better booking journey and gives studio owners tools to manage their business."
-            ar="GearBeat تمنح المبدعين تجربة حجز أفضل، وتمنح أصحاب الاستوديوهات أدوات لإدارة أعمالهم."
-          />
-        </p>
-      </div>
+.about-feature-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  border-radius: 20px;
+  background: rgba(53, 216, 255, 0.1);
+  border: 1px solid rgba(53, 216, 255, 0.18);
+  box-shadow: 0 0 22px rgba(53, 216, 255, 0.12);
+  font-size: 1.6rem;
+}
 
-      <div className="grid">
-        <div className="card about-feature-card">
-          <div className="about-feature-icon">🎧</div>
-          <h2>
-            <T en="Studio Discovery" ar="اكتشاف الاستوديوهات" />
-          </h2>
-          <p>
-            <T
-              en="Find spaces based on city, vibe, pricing, equipment, and creative needs."
-              ar="اعثر على المساحات حسب المدينة، الأجواء، السعر، المعدات، واحتياجاتك الإبداعية."
-            />
-          </p>
-        </div>
+.about-check-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
 
-        <div className="card about-feature-card">
-          <div className="about-feature-icon">📅</div>
-          <h2>
-            <T en="Clear Booking Flow" ar="تجربة حجز واضحة" />
-          </h2>
-          <p>
-            <T
-              en="A direct flow for bookings, payment status, customer details, and review requests."
-              ar="مسار واضح للحجوزات، حالة الدفع، بيانات العميل، وطلبات التقييم."
-            />
-          </p>
-        </div>
+.about-check-list span {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(30, 215, 96, 0.08);
+  border: 1px solid rgba(30, 215, 96, 0.16);
+  color: var(--soft);
+  font-weight: 800;
+}
 
-        <div className="card about-feature-card">
-          <div className="about-feature-icon">⭐</div>
-          <h2>
-            <T en="Verified Reviews" ar="تقييمات موثقة" />
-          </h2>
-          <p>
-            <T
-              en="Reviews are connected to booking activity to improve transparency."
-              ar="التقييمات مرتبطة بنشاط الحجز لتحسين الشفافية."
-            />
-          </p>
-        </div>
-      </div>
+.about-trust-card {
+  align-items: center;
+}
 
-      <div style={{ height: 30 }} />
+.about-trust-card h2,
+.about-final-cta h2 {
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  line-height: 1.05;
+}
 
-      <div className="about-split">
-        <div className="card">
-          <span className="badge">
-            <T en="For Creators" ar="للمبدعين" />
-          </span>
+.about-trust-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
 
-          <h2>
-            <T
-              en="Book with confidence."
-              ar="احجز بثقة."
-            />
-          </h2>
+.about-trust-grid div {
+  min-height: 130px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-          <p>
-            <T
-              en="Creators can browse spaces, compare what each studio offers, book sessions, and share feedback after real visits."
-              ar="يستطيع المبدعون تصفح المساحات، مقارنة ما يقدمه كل استوديو، حجز الجلسات، ومشاركة تجربتهم بعد زيارات حقيقية."
-            />
-          </p>
+.about-trust-grid strong {
+  display: block;
+  color: var(--cyan);
+  font-size: 1.7rem;
+  margin-bottom: 12px;
+}
 
-          <div className="about-check-list">
-            <span>
-              <T en="Trusted studio details" ar="تفاصيل استوديو موثوقة" />
-            </span>
-            <span>
-              <T en="Simple booking journey" ar="رحلة حجز سهلة" />
-            </span>
-            <span>
-              <T en="Post-booking review flow" ar="تقييم بعد انتهاء الحجز" />
-            </span>
-          </div>
-        </div>
+.about-trust-grid span {
+  color: var(--soft);
+  font-weight: 800;
+}
 
-        <div className="card">
-          <span className="badge">
-            <T en="For Studio Owners" ar="لأصحاب الاستوديوهات" />
-          </span>
+.about-final-cta {
+  text-align: center;
+}
 
-          <h2>
-            <T
-              en="Manage your studio digitally."
-              ar="أدر استوديوك رقميًا."
-            />
-          </h2>
+.about-final-cta p {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-          <p>
-            <T
-              en="Studio owners can manage listings, monitor bookings, build trust with reviews, and improve visibility."
-              ar="أصحاب الاستوديوهات يستطيعون إدارة القوائم، متابعة الحجوزات، بناء الثقة بالتقييمات، وتحسين الظهور."
-            />
-          </p>
+.about-final-cta .actions {
+  justify-content: center;
+}
 
-          <div className="about-check-list">
-            <span>
-              <T en="Listing management" ar="إدارة القوائم" />
-            </span>
-            <span>
-              <T en="Booking visibility" ar="وضوح الحجوزات" />
-            </span>
-            <span>
-              <T en="Review monitoring" ar="متابعة التقييمات" />
-            </span>
-          </div>
-        </div>
-      </div>
+@media (max-width: 960px) {
+  .about-hero,
+  .about-mission-grid,
+  .about-split,
+  .about-trust-card {
+    grid-template-columns: 1fr;
+  }
 
-      <div style={{ height: 30 }} />
+  .about-hero {
+    padding: 28px;
+  }
 
-      <div className="card about-trust-card">
-        <div>
-          <span className="badge">
-            <T en="Trust & Safety" ar="الثقة والأمان" />
-          </span>
+  .about-hero-visual {
+    min-height: 330px;
+  }
 
-          <h2>
-            <T
-              en="Built with accountability from day one."
-              ar="مبنية على الوضوح والمسؤولية من البداية."
-            />
-          </h2>
+  .about-trust-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
-          <p>
-            <T
-              en="GearBeat uses required customer profiles, locked identity details, booking-linked reviews, internal admin monitoring, and audit logs to protect the booking experience."
-              ar="GearBeat تستخدم ملفات عملاء إلزامية، بيانات هوية مقفلة، تقييمات مرتبطة بالحجز، مراقبة إدارية داخلية، وسجلات تغيير لحماية تجربة الحجز."
-            />
-          </p>
-        </div>
+@media (max-width: 640px) {
+  .about-hero {
+    padding: 22px;
+  }
 
-        <div className="about-trust-grid">
-          <div>
-            <strong>01</strong>
-            <span>
-              <T en="Profile completion" ar="إكمال الملف" />
-            </span>
-          </div>
+  .about-hero h1 {
+    font-size: 2.45rem;
+  }
 
-          <div>
-            <strong>02</strong>
-            <span>
-              <T en="Locked identity" ar="هوية مقفلة" />
-            </span>
-          </div>
-
-          <div>
-            <strong>03</strong>
-            <span>
-              <T en="Verified reviews" ar="تقييمات موثقة" />
-            </span>
-          </div>
-
-          <div>
-            <strong>04</strong>
-            <span>
-              <T en="Admin audit logs" ar="سجل تغييرات" />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ height: 30 }} />
-
-      <div className="card about-final-cta">
-        <span className="badge">
-          <T en="Join GearBeat" ar="انضم إلى GearBeat" />
-        </span>
-
-        <h2>
-          <T
-            en="Ready to discover your next studio?"
-            ar="جاهز تكتشف استوديوك القادم؟"
-          />
-        </h2>
-
-        <p>
-          <T
-            en="Start browsing trusted creative spaces or list your studio today."
-            ar="ابدأ بتصفح المساحات الإبداعية الموثوقة أو أضف استوديوك اليوم."
-          />
-        </p>
-
-        <div className="actions">
-          <Link href="/studios" className="btn">
-            <T en="Browse Studios" ar="تصفح الاستوديوهات" />
-          </Link>
-
-          <Link href="/owner" className="btn btn-secondary">
-            <T en="List Your Studio" ar="أضف استوديوك" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
+  .about-sound-stats {
+    grid-template-columns: 1fr;
+  }
 }
