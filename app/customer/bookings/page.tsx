@@ -111,6 +111,9 @@ export default async function CustomerBookingsPage() {
         city,
         district,
         slug
+      ),
+      reviews (
+        id
       )
     `)
     .eq("customer_auth_user_id", user.id)
@@ -145,8 +148,8 @@ export default async function CustomerBookingsPage() {
 
         <p>
           <T
-            en="Track your studio booking requests and payment status."
-            ar="تابع طلبات حجز الاستوديو وحالة الدفع."
+            en="Track your studio booking requests, payment status, and verified reviews."
+            ar="تابع طلبات حجز الاستوديو، حالة الدفع، والتقييمات الموثقة."
           />
         </p>
       </div>
@@ -168,9 +171,21 @@ export default async function CustomerBookingsPage() {
               ? booking.studios[0]
               : booking.studios;
 
+            const reviews = Array.isArray(booking.reviews)
+              ? booking.reviews
+              : [];
+
+            const hasReview = reviews.length > 0;
+
             const canPay =
               booking.status === "confirmed" &&
               booking.payment_status === "unpaid";
+
+            const canReview =
+              (booking.status === "confirmed" ||
+                booking.status === "completed") &&
+              booking.payment_status === "paid" &&
+              !hasReview;
 
             return (
               <article className="card" key={booking.id}>
@@ -190,6 +205,12 @@ export default async function CustomerBookingsPage() {
                     <T en="Payment:" ar="الدفع:" />{" "}
                     {paymentLabel(booking.payment_status)}
                   </span>
+
+                  {hasReview ? (
+                    <span className="badge">
+                      <T en="Reviewed" ar="تم التقييم" />
+                    </span>
+                  ) : null}
                 </div>
 
                 <h2>{studio?.name || "Studio"}</h2>
@@ -238,8 +259,8 @@ export default async function CustomerBookingsPage() {
                 booking.payment_status === "paid" ? (
                   <p>
                     <T
-                      en="Your booking is confirmed and paid."
-                      ar="تم تأكيد الحجز والدفع."
+                      en="Your booking is confirmed and paid. You can write a verified review after your experience."
+                      ar="تم تأكيد الحجز والدفع. يمكنك كتابة تقييم موثق بعد تجربتك."
                     />
                   </p>
                 ) : null}
@@ -271,6 +292,21 @@ export default async function CustomerBookingsPage() {
                         <T en="Pay Now" ar="ادفع الآن" />
                       </button>
                     </form>
+                  ) : null}
+
+                  {canReview ? (
+                    <Link
+                      href={`/customer/bookings/${booking.id}/review`}
+                      className="btn"
+                    >
+                      <T en="Write Review" ar="اكتب تقييم" />
+                    </Link>
+                  ) : null}
+
+                  {hasReview ? (
+                    <span className="btn btn-secondary btn-small">
+                      <T en="Review submitted" ar="تم إرسال التقييم" />
+                    </span>
                   ) : null}
 
                   {studio?.slug ? (
