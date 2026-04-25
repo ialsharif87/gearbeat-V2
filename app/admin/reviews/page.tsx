@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
@@ -23,10 +24,82 @@ function formatRating(value: number) {
   return value.toFixed(1);
 }
 
+function reviewStatusStyle(status: string) {
+  if (status === "published") {
+    return {
+      background: "rgba(30, 215, 96, 0.18)",
+      color: "#1ed760",
+      border: "1px solid rgba(30, 215, 96, 0.45)"
+    };
+  }
+
+  if (status === "hidden") {
+    return {
+      background: "rgba(255, 75, 75, 0.18)",
+      color: "#ff4b4b",
+      border: "1px solid rgba(255, 75, 75, 0.45)"
+    };
+  }
+
+  if (status === "flagged") {
+    return {
+      background: "rgba(255, 193, 7, 0.18)",
+      color: "#ffc107",
+      border: "1px solid rgba(255, 193, 7, 0.45)"
+    };
+  }
+
+  return {
+    background: "rgba(255, 255, 255, 0.12)",
+    color: "#ffffff",
+    border: "1px solid rgba(255, 255, 255, 0.22)"
+  };
+}
+
 export default async function AdminReviewsPage() {
   await requireAdminRole(["support", "content"]);
 
   const supabaseAdmin = createAdminClient();
+
+  async function updateReviewStatus(formData: FormData) {
+    "use server";
+
+    await requireAdminRole(["support", "content"]);
+
+    const supabaseAdmin = createAdminClient();
+
+    const reviewId = String(formData.get("review_id") || "");
+    const studioSlug = String(formData.get("studio_slug") || "");
+    const status = String(formData.get("status") || "");
+
+    if (!reviewId) {
+      throw new Error("Missing review ID.");
+    }
+
+    const allowedStatuses = ["published", "hidden", "flagged"];
+
+    if (!allowedStatuses.includes(status)) {
+      throw new Error("Invalid review status.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("reviews")
+      .update({
+        status
+      })
+      .eq("id", reviewId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/reviews");
+    revalidatePath("/admin");
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+    }
+  }
 
   const { data: reviews, error } = await supabaseAdmin
     .from("reviews")
@@ -60,8 +133,15 @@ export default async function AdminReviewsPage() {
     .order("created_at", { ascending: false });
 
   const totalReviews = reviews?.length || 0;
+
   const publishedReviews =
     reviews?.filter((review) => review.status === "published").length || 0;
+
+  const hiddenReviews =
+    reviews?.filter((review) => review.status === "hidden").length || 0;
+
+  const flaggedReviews =
+    reviews?.filter((review) => review.status === "flagged").length || 0;
 
   const averageScore = reviews?.length
     ? reviews.reduce((sum, review) => sum + averageReviewScore(review), 0) /
@@ -81,8 +161,8 @@ export default async function AdminReviewsPage() {
 
         <p>
           <T
-            en="Monitor verified GearBeat reviews, review quality, comments, and booking links."
-            ar="راقب تقييمات GearBeat الموثقة، جودة التقييمات، التعليقات، وربطها بالحجوزات."
+            en="Monitor, publish, hide, or flag verified GearBeat reviews."
+            ar="راقب، انشر، أخفِ، أو علّم تقييمات GearBeat الموثقة."
           />
         </p>
       </div>
@@ -115,9 +195,23 @@ export default async function AdminReviewsPage() {
 
         <div className="card admin-kpi-card">
           <span>
-            <T en="Published Reviews" ar="التقييمات المنشورة" />
+            <T en="Published" ar="منشورة" />
           </span>
           <strong>{publishedReviews}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Hidden" ar="مخفية" />
+          </span>
+          <strong>{hiddenReviews}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Flagged" ar="معلّمة" />
+          </span>
+          <strong>{flaggedReviews}</strong>
         </div>
 
         <div className="card admin-kpi-card">
@@ -147,6 +241,13 @@ export default async function AdminReviewsPage() {
         <h2>
           <T en="Review list" ar="قائمة التقييمات" />
         </h2>
+
+        <p>
+          <T
+            en="Published reviews appear on public studio pages. Hidden and flagged reviews are kept internally."
+            ar="التقييمات المنشورة تظهر في صفحات الاستوديو العامة. التقييمات المخفية أو المعلّمة تبقى داخليًا."
+          />
+        </p>
 
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -188,6 +289,7 @@ export default async function AdminReviewsPage() {
                     : review.bookings;
 
                   const avg = averageReviewScore(review);
+                  const studioSlug = studio?.slug || "";
 
                   return (
                     <tr key={review.id}>
@@ -256,21 +358,108 @@ export default async function AdminReviewsPage() {
                       </td>
 
                       <td>
-                        <span className="badge">{review.status}</span>
+                        <span
+                          className="badge"
+                          style={reviewStatusStyle(review.status)}
+                        >
+                          {review.status}
+                        </span>
+
                         <p className="admin-muted-line">
                           {new Date(review.created_at).toLocaleDateString()}
                         </p>
                       </td>
 
                       <td>
-                        {studio?.slug ? (
-                          <Link
-                            href={`/studios/${studio.slug}`}
-                            className="btn btn-small"
-                          >
-                            <T en="View Studio" ar="عرض الاستوديو" />
-                          </Link>
-                        ) : null}
+                        <div className="admin-studio-actions">
+                          <div className="actions">
+                            {studioSlug ? (
+                              <Link
+                                href={`/studios/${studioSlug}`}
+                                className="btn btn-small"
+                              >
+                                <T en="View Studio" ar="عرض الاستوديو" />
+                              </Link>
+                            ) : null}
+                          </div>
+
+                          <div className="admin-inline-action-grid">
+                            {review.status !== "published" ? (
+                              <form action={updateReviewStatus}>
+                                <input
+                                  type="hidden"
+                                  name="review_id"
+                                  value={review.id}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="studio_slug"
+                                  value={studioSlug}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="status"
+                                  value="published"
+                                />
+                                <button className="btn btn-small" type="submit">
+                                  <T en="Publish" ar="نشر" />
+                                </button>
+                              </form>
+                            ) : null}
+
+                            {review.status !== "hidden" ? (
+                              <form action={updateReviewStatus}>
+                                <input
+                                  type="hidden"
+                                  name="review_id"
+                                  value={review.id}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="studio_slug"
+                                  value={studioSlug}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="status"
+                                  value="hidden"
+                                />
+                                <button
+                                  className="btn btn-secondary btn-small"
+                                  type="submit"
+                                >
+                                  <T en="Hide" ar="إخفاء" />
+                                </button>
+                              </form>
+                            ) : null}
+
+                            {review.status !== "flagged" ? (
+                              <form action={updateReviewStatus}>
+                                <input
+                                  type="hidden"
+                                  name="review_id"
+                                  value={review.id}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="studio_slug"
+                                  value={studioSlug}
+                                />
+                                <input
+                                  type="hidden"
+                                  name="status"
+                                  value="flagged"
+                                />
+                                <button
+                                  className="btn btn-secondary btn-small"
+                                  type="submit"
+                                >
+                                  <T en="Flag" ar="تعليم" />
+                                </button>
+                              </form>
+                            ) : null}
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   );
