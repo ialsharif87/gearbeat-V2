@@ -1,54 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type TProps = {
   en: string;
   ar: string;
 };
 
-function getSavedLanguage(): "en" | "ar" {
-  if (typeof window === "undefined") return "en";
+function getCookie(name: string) {
+  if (typeof document === "undefined") return "";
 
-  const savedLanguage = window.localStorage.getItem("gearbeat_language");
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
 
-  if (savedLanguage === "ar" || savedLanguage === "en") {
-    return savedLanguage;
+  if (parts.length === 2) {
+    return parts.pop()?.split(";").shift() || "";
   }
 
-  return "en";
+  return "";
+}
+
+function setCookie(name: string, value: string) {
+  if (typeof document === "undefined") return;
+
+  document.cookie = `${name}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
+function normalizeLang(value: string | null | undefined) {
+  return value === "en" ? "en" : "ar";
 }
 
 export default function T({ en, ar }: TProps) {
-  const [language, setLanguage] = useState<"en" | "ar">(getSavedLanguage);
+  const searchParams = useSearchParams();
+  const queryLang = searchParams.get("lang");
+
+  const initialLang = useMemo(() => {
+    return normalizeLang(queryLang || getCookie("gb_lang") || "ar");
+  }, [queryLang]);
+
+  const [lang, setLang] = useState(initialLang);
 
   useEffect(() => {
-    const savedLanguage = getSavedLanguage();
+    const nextLang = normalizeLang(queryLang || getCookie("gb_lang") || "ar");
 
-    setLanguage(savedLanguage);
-    document.documentElement.lang = savedLanguage;
-    document.documentElement.dir = savedLanguage === "ar" ? "rtl" : "ltr";
+    setLang(nextLang);
+    setCookie("gb_lang", nextLang);
 
-    function handleLanguageChange(event: Event) {
-      const customEvent = event as CustomEvent<{ language: "en" | "ar" }>;
+    document.documentElement.lang = nextLang;
+    document.documentElement.dir = nextLang === "ar" ? "rtl" : "ltr";
+  }, [queryLang]);
 
-      if (
-        customEvent.detail.language === "ar" ||
-        customEvent.detail.language === "en"
-      ) {
-        setLanguage(customEvent.detail.language);
-      }
-    }
-
-    window.addEventListener("gearbeat-language-change", handleLanguageChange);
-
-    return () => {
-      window.removeEventListener(
-        "gearbeat-language-change",
-        handleLanguageChange
-      );
-    };
-  }, []);
-
-  return <>{language === "ar" ? ar : en}</>;
+  return <>{lang === "en" ? en : ar}</>;
 }
