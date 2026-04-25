@@ -2035,3 +2035,18 @@ html[dir="rtl"] .admin-table td {
 .admin-table td {
   color: white;
 }
+.admin-muted-line {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.admin-badge-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-badge-stack small {
+  color: var(--muted);
+}
