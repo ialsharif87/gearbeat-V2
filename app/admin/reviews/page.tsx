@@ -63,11 +63,10 @@ export default async function AdminReviewsPage() {
   const publishedReviews =
     reviews?.filter((review) => review.status === "published").length || 0;
 
-  const averageScore =
-    reviews?.length
-      ? reviews.reduce((sum, review) => sum + averageReviewScore(review), 0) /
-        reviews.length
-      : 0;
+  const averageScore = reviews?.length
+    ? reviews.reduce((sum, review) => sum + averageReviewScore(review), 0) /
+      reviews.length
+    : 0;
 
   return (
     <section>
@@ -287,4 +286,6 @@ export default async function AdminReviewsPage() {
           </table>
         </div>
       </div>
-    </section
+    </section>
+  );
+}
