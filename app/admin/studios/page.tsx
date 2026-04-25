@@ -1,11 +1,133 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
+function studioStatusStyle(status: string) {
+  if (status === "approved") {
+    return {
+      background: "rgba(30, 215, 96, 0.18)",
+      color: "#1ed760",
+      border: "1px solid rgba(30, 215, 96, 0.45)"
+    };
+  }
+
+  if (status === "suspended" || status === "rejected") {
+    return {
+      background: "rgba(255, 75, 75, 0.18)",
+      color: "#ff4b4b",
+      border: "1px solid rgba(255, 75, 75, 0.45)"
+    };
+  }
+
+  return {
+    background: "rgba(255, 193, 7, 0.18)",
+    color: "#ffc107",
+    border: "1px solid rgba(255, 193, 7, 0.45)"
+  };
+}
+
 export default async function AdminStudiosPage() {
   const { admin } = await requireAdminRole(["operations", "content", "sales"]);
   const supabaseAdmin = createAdminClient();
+
+  const canManageStudios =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "content";
+
+  async function updateStudioStatus(formData: FormData) {
+    "use server";
+
+    const { admin } = await requireAdminRole(["operations", "content"]);
+
+    const canUpdate =
+      admin.admin_role === "super_admin" ||
+      admin.admin_role === "operations" ||
+      admin.admin_role === "content";
+
+    if (!canUpdate) {
+      throw new Error("You do not have permission to update studio status.");
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    const studioId = String(formData.get("studio_id") || "");
+    const studioSlug = String(formData.get("studio_slug") || "");
+    const status = String(formData.get("status") || "");
+
+    if (!studioId) {
+      throw new Error("Missing studio ID.");
+    }
+
+    const allowedStatuses = ["pending", "approved", "suspended", "rejected"];
+
+    if (!allowedStatuses.includes(status)) {
+      throw new Error("Invalid studio status.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("studios")
+      .update({
+        status
+      })
+      .eq("id", studioId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/studios");
+    revalidatePath("/admin");
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+    }
+  }
+
+  async function updateStudioVerified(formData: FormData) {
+    "use server";
+
+    const { admin } = await requireAdminRole(["operations", "content"]);
+
+    const canUpdate =
+      admin.admin_role === "super_admin" ||
+      admin.admin_role === "operations" ||
+      admin.admin_role === "content";
+
+    if (!canUpdate) {
+      throw new Error("You do not have permission to verify studios.");
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    const studioId = String(formData.get("studio_id") || "");
+    const studioSlug = String(formData.get("studio_slug") || "");
+    const verified = String(formData.get("verified") || "") === "true";
+
+    if (!studioId) {
+      throw new Error("Missing studio ID.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("studios")
+      .update({
+        verified
+      })
+      .eq("id", studioId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/studios");
+    revalidatePath("/admin");
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+    }
+  }
 
   const { data: studios, error } = await supabaseAdmin
     .from("studios")
@@ -36,6 +158,16 @@ export default async function AdminStudiosPage() {
     `)
     .order("created_at", { ascending: false });
 
+  const totalStudios = studios?.length || 0;
+  const approvedStudios =
+    studios?.filter((studio) => studio.status === "approved").length || 0;
+  const pendingStudios =
+    studios?.filter((studio) => studio.status === "pending").length || 0;
+  const suspendedStudios =
+    studios?.filter((studio) => studio.status === "suspended").length || 0;
+  const verifiedStudios =
+    studios?.filter((studio) => studio.verified).length || 0;
+
   return (
     <section>
       <div className="section-head">
@@ -49,8 +181,8 @@ export default async function AdminStudiosPage() {
 
         <p>
           <T
-            en="Review all studios, their status, verification, bookings, reviews, and external trust sources."
-            ar="راجع كل الاستوديوهات، حالتها، التوثيق، الحجوزات، التقييمات، ومصادر الثقة الخارجية."
+            en="Review all studios, approve or suspend listings, manage verification, and monitor trust sources."
+            ar="راجع كل الاستوديوهات، اعتمد أو أوقف القوائم، أدر التوثيق، وراقب مصادر الثقة."
           />
         </p>
       </div>
@@ -67,12 +199,66 @@ export default async function AdminStudiosPage() {
         ) : null}
       </div>
 
+      <div className="admin-kpi-grid">
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Total Studios" ar="إجمالي الاستوديوهات" />
+          </span>
+          <strong>{totalStudios}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Approved" ar="معتمدة" />
+          </span>
+          <strong>{approvedStudios}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Pending" ar="معلقة" />
+          </span>
+          <strong>{pendingStudios}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Suspended" ar="موقوفة" />
+          </span>
+          <strong>{suspendedStudios}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Verified" ar="موثقة" />
+          </span>
+          <strong>{verifiedStudios}</strong>
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
       {error ? (
         <div className="card">
           <span className="badge">
             <T en="Error" ar="خطأ" />
           </span>
           <p>{error.message}</p>
+        </div>
+      ) : null}
+
+      {!canManageStudios ? (
+        <div className="card">
+          <span className="badge">
+            <T en="View Only" ar="عرض فقط" />
+          </span>
+
+          <p>
+            <T
+              en="Your role can view studios, but cannot approve, suspend, or verify them."
+              ar="صلاحيتك تسمح بعرض الاستوديوهات فقط، ولا تسمح بالاعتماد أو الإيقاف أو التوثيق."
+            />
+          </p>
         </div>
       ) : null}
 
@@ -140,7 +326,13 @@ export default async function AdminStudiosPage() {
 
                       <td>
                         <div className="admin-badge-stack">
-                          <span className="badge">{studio.status}</span>
+                          <span
+                            className="badge"
+                            style={studioStatusStyle(studio.status)}
+                          >
+                            {studio.status}
+                          </span>
+
                           {studio.verified ? (
                             <span className="badge">
                               <T en="Verified" ar="موثق" />
@@ -192,6 +384,7 @@ export default async function AdminStudiosPage() {
                             <T en="Bookings:" ar="الحجوزات:" />{" "}
                             <strong>{bookingsCount}</strong>
                           </span>
+
                           <span>
                             <T en="Reviews:" ar="التقييمات:" />{" "}
                             <strong>{reviewsCount}</strong>
@@ -200,34 +393,168 @@ export default async function AdminStudiosPage() {
                       </td>
 
                       <td>
-                        <div className="actions">
-                          <Link
-                            href={`/studios/${studio.slug}`}
-                            className="btn btn-small"
-                          >
-                            <T en="View" ar="عرض" />
-                          </Link>
-
-                          {studio.google_maps_url ? (
-                            <a
-                              href={studio.google_maps_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-secondary btn-small"
+                        <div className="admin-studio-actions">
+                          <div className="actions">
+                            <Link
+                              href={`/studios/${studio.slug}`}
+                              className="btn btn-small"
                             >
-                              Google
-                            </a>
-                          ) : null}
+                              <T en="View" ar="عرض" />
+                            </Link>
 
-                          {studio.tripadvisor_url ? (
-                            <a
-                              href={studio.tripadvisor_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-secondary btn-small"
-                            >
-                              TripAdvisor
-                            </a>
+                            {studio.google_maps_url ? (
+                              <a
+                                href={studio.google_maps_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-secondary btn-small"
+                              >
+                                Google
+                              </a>
+                            ) : null}
+
+                            {studio.tripadvisor_url ? (
+                              <a
+                                href={studio.tripadvisor_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-secondary btn-small"
+                              >
+                                TripAdvisor
+                              </a>
+                            ) : null}
+                          </div>
+
+                          {canManageStudios ? (
+                            <div className="admin-inline-action-grid">
+                              {studio.status !== "approved" ? (
+                                <form action={updateStudioStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="studio_id"
+                                    value={studio.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studio.slug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="approved"
+                                  />
+                                  <button
+                                    className="btn btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Approve" ar="اعتماد" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {studio.status !== "pending" ? (
+                                <form action={updateStudioStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="studio_id"
+                                    value={studio.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studio.slug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="pending"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Set Pending" ar="تعليق" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {studio.status !== "suspended" ? (
+                                <form action={updateStudioStatus}>
+                                  <input
+                                    type="hidden"
+                                    name="studio_id"
+                                    value={studio.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studio.slug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="status"
+                                    value="suspended"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Suspend" ar="إيقاف" />
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {!studio.verified ? (
+                                <form action={updateStudioVerified}>
+                                  <input
+                                    type="hidden"
+                                    name="studio_id"
+                                    value={studio.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studio.slug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="verified"
+                                    value="true"
+                                  />
+                                  <button
+                                    className="btn btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Verify" ar="توثيق" />
+                                  </button>
+                                </form>
+                              ) : (
+                                <form action={updateStudioVerified}>
+                                  <input
+                                    type="hidden"
+                                    name="studio_id"
+                                    value={studio.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="studio_slug"
+                                    value={studio.slug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="verified"
+                                    value="false"
+                                  />
+                                  <button
+                                    className="btn btn-secondary btn-small"
+                                    type="submit"
+                                  >
+                                    <T en="Unverify" ar="إلغاء التوثيق" />
+                                  </button>
+                                </form>
+                              )}
+                            </div>
                           ) : null}
                         </div>
                       </td>
