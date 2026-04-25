@@ -3124,3 +3124,62 @@ html[dir="rtl"] .footer-column a:hover {
     justify-content: flex-start !important;
   }
 }
+/* FINAL BIGGER HEADER LOGO OVERRIDE */
+
+.enhanced-nav {
+  grid-template-columns: 360px 1fr auto !important;
+  min-height: 92px !important;
+}
+
+.site-header {
+  min-height: 112px !important;
+  padding: 10px 5vw !important;
+}
+
+.brand {
+  height: 92px !important;
+  min-width: 340px !important;
+}
+
+.brand-logo {
+  height: 94px !important;
+  width: auto !important;
+  min-width: 300px !important;
+  max-width: 390px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  transform: scale(1.18) !important;
+  transform-origin: left center !important;
+}
+
+@media (max-width: 1050px) {
+  .enhanced-nav {
+    grid-template-columns: 300px 1fr auto !important;
+  }
+
+  .brand {
+    height: 82px !important;
+    min-width: 280px !important;
+  }
+
+  .brand-logo {
+    height: 82px !important;
+    min-width: 250px !important;
+    max-width: 330px !important;
+    transform: scale(1.12) !important;
+  }
+}
+
+@media (max-width: 820px) {
+  .brand {
+    height: 70px !important;
+    min-width: 230px !important;
+  }
+
+  .brand-logo {
+    height: 70px !important;
+    min-width: 210px !important;
+    max-width: 280px !important;
+    transform: scale(1.08) !important;
+  }
+}
