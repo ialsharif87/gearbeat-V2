@@ -100,12 +100,19 @@ export default async function OwnerStudiosPage() {
                 </p>
 
                 <div className="actions">
-                  <Link
-                    href={`/studios/${studio.slug}`}
-                    className="btn btn-small"
-                  >
-                    <T en="View Public Page" ar="عرض الصفحة العامة" />
-                  </Link>
+                <Link
+  href={`/studios/${studio.slug}`}
+  className="btn btn-small"
+>
+  <T en="View Public Page" ar="عرض الصفحة العامة" />
+</Link>
+
+<Link
+  href={`/owner/studios/${studio.id}/manage`}
+  className="btn btn-secondary btn-small"
+>
+  <T en="Manage" ar="إدارة" />
+</Link>
                 </div>
               </div>
             </article>
