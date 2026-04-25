@@ -47,7 +47,7 @@ export default async function RootLayout({
     <html lang="ar" dir="rtl">
       <body>
         <header className="site-header">
-          <nav className="nav">
+          <nav className="nav enhanced-nav">
             <div className="nav-left">
               <Link href="/" className="brand" aria-label="GearBeat Home">
                 <img
@@ -58,9 +58,17 @@ export default async function RootLayout({
               </Link>
             </div>
 
-            <div className="nav-links">
+            <div className="nav-links enhanced-nav-links">
               <Link href="/studios">
                 <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+              </Link>
+
+              <Link href="/about">
+                <T en="About" ar="من نحن" />
+              </Link>
+
+              <Link href="/support">
+                <T en="Support" ar="الدعم" />
               </Link>
 
               {user ? (
@@ -89,14 +97,16 @@ export default async function RootLayout({
                     <T en="Login" ar="تسجيل الدخول" />
                   </Link>
 
-                  <Link href="/signup" className="nav-button-link">
+                  <Link href="/signup" className="nav-button-link nav-cta">
                     <T en="Sign Up" ar="إنشاء حساب" />
                   </Link>
                 </>
               )}
             </div>
 
-            <LanguageSwitcher />
+            <div className="nav-right">
+              <LanguageSwitcher />
+            </div>
           </nav>
         </header>
 
