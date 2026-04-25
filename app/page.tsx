@@ -1,268 +1,287 @@
 import Link from "next/link";
 import T from "../components/t";
 
-function Waveform() {
-  return (
-    <div className="waveform" aria-hidden="true">
-      {Array.from({ length: 36 }).map((_, index) => (
-        <i key={index} />
-      ))}
-    </div>
-  );
-}
-
 export default function HomePage() {
   return (
-    <>
-      <section className="hero">
-        <div className="hero-grid">
-          <div className="hero-content">
-            <span className="badge">
-              <T
-                en="Premium Music Studio Marketplace"
-                ar="منصة فاخرة لحجز الاستوديوهات الموسيقية"
-              />
-            </span>
-
-            <h1 className="glow-title">
-              <T en="Find Your Perfect" ar="اعثر على" />{" "}
-              <span className="neon-text">
-                <T en="Sound Space" ar="مساحتك الصوتية المثالية" />
-              </span>
-            </h1>
-
-            <p>
-              <T
-                en="Book recording studios, podcast rooms, rehearsal spaces, and production rooms with a premium music-tech experience built for creators, artists, and studio owners."
-                ar="احجز استوديوهات التسجيل، غرف البودكاست، مساحات التدريب، وغرف الإنتاج من خلال تجربة فاخرة مخصصة للمبدعين والفنانين وأصحاب الاستوديوهات."
-              />
-            </p>
-
-            <div className="visual-search">
-              <span>
-                <T
-                  en="Advanced search for studios, city, vibe, or price..."
-                  ar="ابحث عن الاستوديو، المدينة، الأجواء، أو السعر..."
-                />
-              </span>
-              <span className="search-icon">⌕</span>
-            </div>
-
-            <div className="actions">
-              <Link href="/studios" className="btn">
-                <T en="Book Your Next Studio" ar="احجز استوديوك القادم" />
-              </Link>
-
-              <Link href="/signup" className="btn btn-secondary">
-                <T en="Join GearBeat" ar="انضم إلى GearBeat" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="card wave-card">
-            <span className="badge">
-              <T en="Live Studio Pulse" ar="نبض الاستوديو المباشر" />
-            </span>
-
-            <h2>
-              <T
-                en="Creator demand is moving fast."
-                ar="طلب المبدعين يتحرك بسرعة."
-              />
-            </h2>
-
-            <p>
-              <T
-                en="Track bookings, studio activity, payment status, and owner confirmations from one clean marketplace flow."
-                ar="تابع الحجوزات، نشاط الاستوديو، حالة الدفع، وموافقات المالك من خلال مسار واضح واحد."
-              />
-            </p>
-
-            <Waveform />
-
-            <div className="stats-row">
-              <div className="stat">
-                <b>24/7</b>
-                <span>
-                  <T en="Booking access" ar="إتاحة الحجز" />
-                </span>
-              </div>
-
-              <div className="stat">
-                <b>3</b>
-                <span>
-                  <T en="User roles" ar="أنواع مستخدمين" />
-                </span>
-              </div>
-
-              <div className="stat">
-                <b>Live</b>
-                <span>
-                  <T en="Supabase data" ar="بيانات مباشرة" />
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="featured-grid">
-        <div className="section-head">
+    <section className="home-page">
+      <div className="home-hero card">
+        <div className="home-hero-content">
           <span className="badge">
-            <T en="Featured Experience" ar="تجربة مميزة" />
+            <T en="Studio Booking Platform" ar="منصة حجز الاستوديوهات" />
           </span>
 
           <h1>
-            <T en="Built for music spaces." ar="مصمم للمساحات الموسيقية." />
+            <T
+              en="Find the right studio for your next sound."
+              ar="اعثر على الاستوديو المناسب لصوتك القادم."
+            />
           </h1>
 
           <p>
             <T
-              en="GearBeat connects customers and studio owners in one booking flow: discover, request, confirm, and pay."
-              ar="GearBeat يربط العملاء وأصحاب الاستوديوهات في مسار حجز واحد: استكشاف، طلب، تأكيد، ودفع."
+              en="GearBeat connects creators with trusted music studios, podcast rooms, rehearsal spaces, and production rooms through a simple and transparent booking experience."
+              ar="GearBeat تربط المبدعين باستوديوهات موسيقية موثوقة، غرف بودكاست، مساحات تدريب، وغرف إنتاج من خلال تجربة حجز سهلة وواضحة."
+            />
+          </p>
+
+          <div className="actions">
+            <Link href="/studios" className="btn">
+              <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+            </Link>
+
+            <Link href="/owner" className="btn btn-secondary">
+              <T en="List Your Studio" ar="أضف استوديوك" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="home-hero-visual">
+          <div className="sound-orb">
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <div className="hero-mini-card hero-mini-card-one">
+            <strong>4.8 ★</strong>
+            <p>
+              <T en="Verified reviews" ar="تقييمات موثقة" />
+            </p>
+          </div>
+
+          <div className="hero-mini-card hero-mini-card-two">
+            <strong>24/7</strong>
+            <p>
+              <T en="Booking visibility" ar="وضوح الحجوزات" />
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: 28 }} />
+
+      <div className="section-head">
+        <span className="badge">
+          <T en="Why GearBeat" ar="لماذا GearBeat" />
+        </span>
+
+        <h1>
+          <T
+            en="A smoother way to book creative spaces."
+            ar="طريقة أسهل لحجز المساحات الإبداعية."
+          />
+        </h1>
+
+        <p>
+          <T
+            en="We focus on trust, clarity, and a better booking flow for creators and studio owners."
+            ar="نركز على الثقة، الوضوح، وتجربة حجز أفضل للمبدعين وأصحاب الاستوديوهات."
+          />
+        </p>
+      </div>
+
+      <div className="grid">
+        <div className="card home-feature-card">
+          <div className="home-feature-icon">🎙️</div>
+          <h2>
+            <T en="Find the right space" ar="اعثر على المساحة المناسبة" />
+          </h2>
+          <p>
+            <T
+              en="Search for music studios, podcast rooms, rehearsal spaces, and production rooms."
+              ar="ابحث عن استوديوهات موسيقية، غرف بودكاست، مساحات تدريب، وغرف إنتاج."
             />
           </p>
         </div>
 
-        <div className="grid">
-          <article className="card">
-            <div className="studio-cover">
-              <img
-                src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04"
-                alt="Recording studio"
-              />
-            </div>
-
-            <h2>
-              <T en="The Echo Chamber" ar="غرفة الصدى" />
-            </h2>
-
-            <p>
-              <T
-                en="Premium recording room with neon ambience and studio-grade gear."
-                ar="غرفة تسجيل فاخرة بأجواء نيون ومعدات احترافية."
-              />
-            </p>
-
-            <p>
-              <T en="Price:" ar="السعر:" />{" "}
-              <strong>
-                <T en="From 250 SAR" ar="من 250 ريال" />
-              </strong>
-            </p>
-
-            <Link href="/studios" className="btn btn-small">
-              <T en="View Details" ar="عرض التفاصيل" />
-            </Link>
-          </article>
-
-          <article className="card">
-            <div className="studio-cover">
-              <img
-                src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0"
-                alt="Music production room"
-              />
-            </div>
-
-            <h2>
-              <T en="Producer Suite" ar="جناح المنتج" />
-            </h2>
-
-            <p>
-              <T
-                en="Creative production space for artists, producers, and writers."
-                ar="مساحة إنتاج إبداعية للفنانين والمنتجين والكتّاب."
-              />
-            </p>
-
-            <p>
-              <T en="Price:" ar="السعر:" />{" "}
-              <strong>
-                <T en="From 300 SAR" ar="من 300 ريال" />
-              </strong>
-            </p>
-
-            <Link href="/studios" className="btn btn-small">
-              <T en="View Details" ar="عرض التفاصيل" />
-            </Link>
-          </article>
-
-          <article className="card">
-            <div className="studio-cover">
-              <img
-                src="https://images.unsplash.com/photo-1516280440614-37939bbacd81"
-                alt="Podcast studio"
-              />
-            </div>
-
-            <h2>
-              <T en="Podcast Lab" ar="مختبر البودكاست" />
-            </h2>
-
-            <p>
-              <T
-                en="Clean spoken-word studio for podcasts, interviews, and content."
-                ar="استوديو واضح ومجهز للبودكاست والمقابلات وصناعة المحتوى."
-              />
-            </p>
-
-            <p>
-              <T en="Price:" ar="السعر:" />{" "}
-              <strong>
-                <T en="From 180 SAR" ar="من 180 ريال" />
-              </strong>
-            </p>
-
-            <Link href="/studios" className="btn btn-small">
-              <T en="View Details" ar="عرض التفاصيل" />
-            </Link>
-          </article>
+        <div className="card home-feature-card">
+          <div className="home-feature-icon">✅</div>
+          <h2>
+            <T en="Book with confidence" ar="احجز بثقة" />
+          </h2>
+          <p>
+            <T
+              en="Clear booking details, customer profiles, verified flows, and transparent reviews."
+              ar="تفاصيل حجز واضحة، ملفات عملاء، خطوات موثقة، وتقييمات شفافة."
+            />
+          </p>
         </div>
-      </section>
 
-      <section className="pulse-panel">
+        <div className="card home-feature-card">
+          <div className="home-feature-icon">⚡</div>
+          <h2>
+            <T en="Manage from one place" ar="إدارة من مكان واحد" />
+          </h2>
+          <p>
+            <T
+              en="Studio owners can manage listings, bookings, reviews, and visibility."
+              ar="أصحاب الاستوديوهات يقدرون يديرون القوائم، الحجوزات، التقييمات، والظهور."
+            />
+          </p>
+        </div>
+      </div>
+
+      <div style={{ height: 34 }} />
+
+      <div className="home-split">
         <div className="card">
           <span className="badge">
-            <T en="For Customers" ar="للعملاء" />
+            <T en="For Creators" ar="للمبدعين" />
           </span>
 
           <h2>
-            <T en="Book with confidence." ar="احجز بثقة." />
+            <T
+              en="Create more. Search less."
+              ar="اصنع أكثر. وابحث أقل."
+            />
           </h2>
 
           <p>
             <T
-              en="Browse studios, create booking requests, track confirmation status, and simulate payment after owner approval."
-              ar="تصفح الاستوديوهات، أنشئ طلبات الحجز، تابع حالة التأكيد، وادفع بعد موافقة صاحب الاستوديو."
+              en="Compare studios, understand what each space offers, book your session, and leave a verified review after your visit."
+              ar="قارن الاستوديوهات، افهم ما تقدمه كل مساحة، احجز جلستك، واترك تقييمًا موثقًا بعد زيارتك."
             />
           </p>
+
+          <div className="home-check-list">
+            <span>
+              <T en="Easy studio discovery" ar="اكتشاف الاستوديوهات بسهولة" />
+            </span>
+            <span>
+              <T en="Clear booking details" ar="تفاصيل حجز واضحة" />
+            </span>
+            <span>
+              <T en="Verified review flow" ar="تقييمات مرتبطة بالحجز" />
+            </span>
+          </div>
 
           <Link href="/studios" className="btn">
-            <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+            <T en="Start Browsing" ar="ابدأ التصفح" />
           </Link>
         </div>
 
         <div className="card">
           <span className="badge">
-            <T en="For Studio Owners" ar="لأصحاب الاستوديوهات" />
+            <T en="For Studios" ar="للاستوديوهات" />
           </span>
 
           <h2>
-            <T en="Manage your studio flow." ar="أدر مسار استوديوك." />
+            <T
+              en="Turn your space into a bookable business."
+              ar="حوّل مساحتك إلى نشاط قابل للحجز."
+            />
           </h2>
 
           <p>
             <T
-              en="Create studios, review booking requests, confirm or cancel bookings, and track customer payment status."
-              ar="أنشئ الاستوديوهات، راجع طلبات الحجز، أكد أو ألغِ الحجوزات، وتابع حالة دفع العميل."
+              en="List your studio, manage bookings, build trust with reviews, and improve your visibility with a stronger digital presence."
+              ar="أضف استوديوك، أدر الحجوزات، ابنِ الثقة بالتقييمات، وحسّن ظهورك الرقمي."
             />
           </p>
 
-          <Link href="/signup" className="btn btn-secondary">
-            <T en="Create Owner Account" ar="إنشاء حساب مالك استوديو" />
+          <div className="home-check-list">
+            <span>
+              <T en="Studio profile management" ar="إدارة ملف الاستوديو" />
+            </span>
+            <span>
+              <T en="Booking monitoring" ar="متابعة الحجوزات" />
+            </span>
+            <span>
+              <T en="Review visibility" ar="إظهار التقييمات" />
+            </span>
+          </div>
+
+          <Link href="/owner" className="btn btn-secondary">
+            <T en="List Your Studio" ar="أضف استوديوك" />
           </Link>
         </div>
-      </section>
-    </>
+      </div>
+
+      <div style={{ height: 34 }} />
+
+      <div className="card home-trust-card">
+        <div>
+          <span className="badge">
+            <T en="Trust & Safety" ar="الثقة والأمان" />
+          </span>
+
+          <h2>
+            <T
+              en="Built around real bookings and clear accountability."
+              ar="مبنية حول حجوزات حقيقية ووضوح في المسؤولية."
+            />
+          </h2>
+
+          <p>
+            <T
+              en="GearBeat uses required customer profile details, locked identity information, booking-linked reviews, admin monitoring, and internal audit logs to improve trust across the platform."
+              ar="GearBeat تستخدم بيانات العميل الإلزامية، الهوية المقفلة، التقييمات المرتبطة بالحجز، مراقبة الإدارة، وسجل التغييرات الداخلي لرفع مستوى الثقة داخل المنصة."
+            />
+          </p>
+        </div>
+
+        <div className="trust-points">
+          <div>
+            <strong>01</strong>
+            <span>
+              <T en="Profile completion required" ar="إكمال الملف إلزامي" />
+            </span>
+          </div>
+
+          <div>
+            <strong>02</strong>
+            <span>
+              <T en="Identity details locked" ar="بيانات الهوية مقفلة" />
+            </span>
+          </div>
+
+          <div>
+            <strong>03</strong>
+            <span>
+              <T en="Reviews linked to bookings" ar="التقييمات مرتبطة بالحجوزات" />
+            </span>
+          </div>
+
+          <div>
+            <strong>04</strong>
+            <span>
+              <T en="Admin audit log" ar="سجل تغييرات إداري" />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: 34 }} />
+
+      <div className="card home-about-preview">
+        <span className="badge">
+          <T en="About GearBeat" ar="عن GearBeat" />
+        </span>
+
+        <h2>
+          <T
+            en="A platform for creators, studios, and the sound community."
+            ar="منصة للمبدعين، الاستوديوهات، ومجتمع الصوت."
+          />
+        </h2>
+
+        <p>
+          <T
+            en="GearBeat is designed to make studio booking simpler, more trusted, and more organized for everyone involved."
+            ar="GearBeat صُممت لجعل حجز الاستوديوهات أسهل، أكثر ثقة، وأكثر تنظيمًا لكل الأطراف."
+          />
+        </p>
+
+        <div className="actions">
+          <Link href="/about" className="btn">
+            <T en="Learn About GearBeat" ar="اعرف أكثر عن GearBeat" />
+          </Link>
+
+          <Link href="/support" className="btn btn-secondary">
+            <T en="Contact Support" ar="تواصل مع الدعم" />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
