@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdminRole } from "../../../../lib/admin";
 import { createAdminClient } from "../../../../lib/supabase/admin";
+import { createAuditLog } from "../../../../lib/audit";
 import T from "../../../../components/t";
 
 function badgeStyle(type: "booking" | "payment", status: string) {
@@ -100,11 +101,7 @@ export default async function AdminBookingDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { admin, user } = await requireAdminRole([
-    "operations",
-    "support",
-    "finance"
-  ]);
+  const { admin } = await requireAdminRole(["operations", "support", "finance"]);
 
   const supabaseAdmin = createAdminClient();
 
@@ -127,8 +124,7 @@ export default async function AdminBookingDetailsPage({
   async function updateBookingStatus(formData: FormData) {
     "use server";
 
-    await requireAdminRole(["operations", "support"]);
-
+    const { user, admin } = await requireAdminRole(["operations", "support"]);
     const supabaseAdmin = createAdminClient();
 
     const bookingId = String(formData.get("booking_id") || "");
@@ -145,6 +141,16 @@ export default async function AdminBookingDetailsPage({
       throw new Error("Invalid booking status.");
     }
 
+    const { data: oldBooking, error: readError } = await supabaseAdmin
+      .from("bookings")
+      .select("id,status,payment_status,studio_id,customer_auth_user_id")
+      .eq("id", bookingId)
+      .single();
+
+    if (readError || !oldBooking) {
+      throw new Error(readError?.message || "Booking not found.");
+    }
+
     const { error } = await supabaseAdmin
       .from("bookings")
       .update({ status })
@@ -153,6 +159,26 @@ export default async function AdminBookingDetailsPage({
     if (error) {
       throw new Error(error.message);
     }
+
+    await createAuditLog({
+      actorAuthUserId: user.id,
+      actorEmail: user.email,
+      action: "booking_status_updated",
+      entityType: "booking",
+      entityId: bookingId,
+      oldValues: {
+        status: oldBooking.status
+      },
+      newValues: {
+        status
+      },
+      metadata: {
+        admin_role: admin.admin_role,
+        studio_slug: studioSlug,
+        studio_id: oldBooking.studio_id,
+        customer_auth_user_id: oldBooking.customer_auth_user_id
+      }
+    });
 
     revalidatePath(`/admin/bookings/${bookingId}`);
     revalidatePath("/admin/bookings");
@@ -167,8 +193,7 @@ export default async function AdminBookingDetailsPage({
   async function updatePaymentStatus(formData: FormData) {
     "use server";
 
-    await requireAdminRole(["operations", "finance"]);
-
+    const { user, admin } = await requireAdminRole(["operations", "finance"]);
     const supabaseAdmin = createAdminClient();
 
     const bookingId = String(formData.get("booking_id") || "");
@@ -185,6 +210,16 @@ export default async function AdminBookingDetailsPage({
       throw new Error("Invalid payment status.");
     }
 
+    const { data: oldBooking, error: readError } = await supabaseAdmin
+      .from("bookings")
+      .select("id,status,payment_status,studio_id,customer_auth_user_id")
+      .eq("id", bookingId)
+      .single();
+
+    if (readError || !oldBooking) {
+      throw new Error(readError?.message || "Booking not found.");
+    }
+
     const { error } = await supabaseAdmin
       .from("bookings")
       .update({ payment_status: paymentStatus })
@@ -193,6 +228,26 @@ export default async function AdminBookingDetailsPage({
     if (error) {
       throw new Error(error.message);
     }
+
+    await createAuditLog({
+      actorAuthUserId: user.id,
+      actorEmail: user.email,
+      action: "booking_payment_status_updated",
+      entityType: "booking",
+      entityId: bookingId,
+      oldValues: {
+        payment_status: oldBooking.payment_status
+      },
+      newValues: {
+        payment_status: paymentStatus
+      },
+      metadata: {
+        admin_role: admin.admin_role,
+        studio_slug: studioSlug,
+        studio_id: oldBooking.studio_id,
+        customer_auth_user_id: oldBooking.customer_auth_user_id
+      }
+    });
 
     revalidatePath(`/admin/bookings/${bookingId}`);
     revalidatePath("/admin/bookings");
@@ -207,7 +262,11 @@ export default async function AdminBookingDetailsPage({
   async function updateAdminNotes(formData: FormData) {
     "use server";
 
-    const { user } = await requireAdminRole(["operations", "support", "finance"]);
+    const { user, admin } = await requireAdminRole([
+      "operations",
+      "support",
+      "finance"
+    ]);
 
     const supabaseAdmin = createAdminClient();
 
@@ -216,6 +275,16 @@ export default async function AdminBookingDetailsPage({
 
     if (!bookingId) {
       throw new Error("Missing booking ID.");
+    }
+
+    const { data: oldBooking, error: readError } = await supabaseAdmin
+      .from("bookings")
+      .select("id,admin_notes,studio_id,customer_auth_user_id")
+      .eq("id", bookingId)
+      .single();
+
+    if (readError || !oldBooking) {
+      throw new Error(readError?.message || "Booking not found.");
     }
 
     const { error } = await supabaseAdmin
@@ -230,6 +299,25 @@ export default async function AdminBookingDetailsPage({
     if (error) {
       throw new Error(error.message);
     }
+
+    await createAuditLog({
+      actorAuthUserId: user.id,
+      actorEmail: user.email,
+      action: "booking_admin_notes_updated",
+      entityType: "booking",
+      entityId: bookingId,
+      oldValues: {
+        admin_notes: oldBooking.admin_notes
+      },
+      newValues: {
+        admin_notes: adminNotes || null
+      },
+      metadata: {
+        admin_role: admin.admin_role,
+        studio_id: oldBooking.studio_id,
+        customer_auth_user_id: oldBooking.customer_auth_user_id
+      }
+    });
 
     revalidatePath(`/admin/bookings/${bookingId}`);
     revalidatePath("/admin/bookings");
@@ -329,6 +417,16 @@ export default async function AdminBookingDetailsPage({
     adminNotesUpdatedByEmail = adminNoteUser?.user?.email || "—";
   }
 
+  const { data: auditLogs } = await supabaseAdmin
+    .from("audit_logs")
+    .select(
+      "id,actor_email,action,old_values,new_values,metadata,created_at"
+    )
+    .eq("entity_type", "booking")
+    .eq("entity_id", booking.id)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
@@ -352,8 +450,8 @@ export default async function AdminBookingDetailsPage({
 
         <p>
           <T
-            en="Full booking view with customer, identity, studio, payment, review, and internal admin notes."
-            ar="عرض كامل للحجز مع بيانات العميل، الهوية، الاستوديو، الدفع، التقييم، وملاحظات الإدارة الداخلية."
+            en="Full booking view with customer, identity, studio, payment, review, internal notes, and audit history."
+            ar="عرض كامل للحجز مع بيانات العميل، الهوية، الاستوديو، الدفع، التقييم، الملاحظات الداخلية، وسجل التغييرات."
           />
         </p>
       </div>
@@ -687,6 +785,49 @@ export default async function AdminBookingDetailsPage({
           ) : (
             <p>
               <T en="No review submitted yet." ar="لم يتم إرسال تقييم بعد." />
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="card">
+        <span className="badge">
+          <T en="Audit Log" ar="سجل التغييرات" />
+        </span>
+
+        <h2>
+          <T en="Recent changes" ar="آخر التغييرات" />
+        </h2>
+
+        <div className="admin-list">
+          {auditLogs?.length ? (
+            auditLogs.map((log) => (
+              <div className="admin-list-row" key={log.id}>
+                <div>
+                  <strong>{log.action}</strong>
+                  <p>{log.actor_email || "Unknown user"}</p>
+                  <p className="admin-muted-line">{formatDate(log.created_at)}</p>
+                </div>
+
+                <div>
+                  <pre className="audit-json">
+                    {JSON.stringify(
+                      {
+                        old: log.old_values,
+                        new: log.new_values
+                      },
+                      null,
+                      2
+                    )}
+                  </pre>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>
+              <T en="No audit activity yet." ar="لا يوجد سجل تغييرات حتى الآن." />
             </p>
           )}
         </div>
