@@ -36,10 +36,19 @@ function badgeStyle(type: "booking" | "payment", status: string) {
   return yellow;
 }
 
-function getCustomerName(user: any) {
+function getIdentityLabel(identityType: string | null | undefined) {
+  if (identityType === "national_id") return "National ID / هوية وطنية";
+  if (identityType === "iqama") return "Iqama / إقامة";
+  if (identityType === "passport") return "Passport / جواز سفر";
+  if (identityType === "gcc_id") return "GCC ID / هوية خليجية";
+  return "—";
+}
+
+function getCustomerName(user: any, profile: any) {
   const metadata = user?.user_metadata || {};
 
   return (
+    profile?.full_name ||
     metadata.full_name ||
     metadata.name ||
     metadata.display_name ||
@@ -49,10 +58,11 @@ function getCustomerName(user: any) {
   );
 }
 
-function getCustomerPhone(user: any) {
+function getCustomerPhone(user: any, profile: any) {
   const metadata = user?.user_metadata || {};
 
   return (
+    profile?.phone ||
     user?.phone ||
     metadata.phone ||
     metadata.phone_number ||
@@ -61,6 +71,18 @@ function getCustomerPhone(user: any) {
     metadata.whatsapp ||
     "—"
   );
+}
+
+function getCustomerIdentityType(user: any, profile: any) {
+  const metadata = user?.user_metadata || {};
+
+  return profile?.identity_type || metadata.identity_type || "";
+}
+
+function getCustomerIdentityNumber(user: any, profile: any) {
+  const metadata = user?.user_metadata || {};
+
+  return profile?.identity_number || metadata.identity_number || "—";
 }
 
 export default async function AdminBookingsPage() {
@@ -198,19 +220,33 @@ export default async function AdminBookingsPage() {
 
   const customerResults = await Promise.all(
     customerIds.map(async (customerId) => {
-      const { data, error } = await supabaseAdmin.auth.admin.getUserById(
-        customerId
-      );
+      const [{ data: userData }, { data: profileData }] = await Promise.all([
+        supabaseAdmin.auth.admin.getUserById(customerId),
+        supabaseAdmin
+          .from("profiles")
+          .select(
+            "auth_user_id,email,full_name,phone,role,identity_type,identity_number,identity_locked"
+          )
+          .eq("auth_user_id", customerId)
+          .maybeSingle()
+      ]);
 
       return {
         id: customerId,
-        user: error ? null : data?.user || null
+        user: userData?.user || null,
+        profile: profileData || null
       };
     })
   );
 
   const customerMap = new Map(
-    customerResults.map((item) => [item.id, item.user])
+    customerResults.map((item) => [
+      item.id,
+      {
+        user: item.user,
+        profile: item.profile
+      }
+    ])
   );
 
   const totalBookings = bookings?.length || 0;
@@ -239,8 +275,8 @@ export default async function AdminBookingsPage() {
 
         <p>
           <T
-            en="Track and manage booking status, payment status, customer details, review requests, and customer feedback activity."
-            ar="تابع وأدر حالة الحجز، حالة الدفع، بيانات العميل، طلبات التقييم، ونشاط آراء العملاء."
+            en="Track and manage booking status, payment status, customer details, identity details, review requests, and feedback activity."
+            ar="تابع وأدر حالة الحجز، حالة الدفع، بيانات العميل، بيانات الهوية، طلبات التقييم، ونشاط الآراء."
           />
         </p>
       </div>
@@ -325,8 +361,8 @@ export default async function AdminBookingsPage() {
 
         <p>
           <T
-            en="Customer name, email, and phone are shown to make each studio booking clear."
-            ar="يظهر اسم العميل، الإيميل، ورقم الجوال حتى يكون واضحًا من صاحب الحجز لكل استوديو."
+            en="Customer name, email, phone, and identity details are shown to make each booking clear for operations."
+            ar="يظهر اسم العميل، الإيميل، الجوال، وبيانات الهوية حتى يكون كل حجز واضحًا للعمليات."
           />
         </p>
 
@@ -339,6 +375,9 @@ export default async function AdminBookingsPage() {
                 </th>
                 <th>
                   <T en="Customer" ar="العميل" />
+                </th>
+                <th>
+                  <T en="Identity" ar="الهوية" />
                 </th>
                 <th>
                   <T en="Date / Time" ar="التاريخ / الوقت" />
@@ -377,13 +416,24 @@ export default async function AdminBookingsPage() {
                     : [];
 
                   const studioSlug = studio?.slug || "";
-                  const customer = customerMap.get(
+                  const customerRecord = customerMap.get(
                     booking.customer_auth_user_id
                   );
 
-                  const customerName = getCustomerName(customer);
-                  const customerPhone = getCustomerPhone(customer);
-                  const customerEmail = customer?.email || "—";
+                  const customer = customerRecord?.user;
+                  const profile = customerRecord?.profile;
+
+                  const customerName = getCustomerName(customer, profile);
+                  const customerPhone = getCustomerPhone(customer, profile);
+                  const customerEmail = profile?.email || customer?.email || "—";
+                  const identityType = getCustomerIdentityType(
+                    customer,
+                    profile
+                  );
+                  const identityNumber = getCustomerIdentityNumber(
+                    customer,
+                    profile
+                  );
 
                   return (
                     <tr key={booking.id}>
@@ -401,6 +451,22 @@ export default async function AdminBookingsPage() {
                         <p className="admin-muted-line">
                           <T en="Phone:" ar="الجوال:" /> {customerPhone}
                         </p>
+                      </td>
+
+                      <td>
+                        <strong>{getIdentityLabel(identityType)}</strong>
+                        <p className="admin-muted-line">
+                          <T en="No:" ar="رقم:" /> {identityNumber}
+                        </p>
+                        {profile?.identity_locked ? (
+                          <span className="badge">
+                            <T en="Locked" ar="مقفلة" />
+                          </span>
+                        ) : (
+                          <span className="badge">
+                            <T en="Not locked" ar="غير مقفلة" />
+                          </span>
+                        )}
                       </td>
 
                       <td>
@@ -709,7 +775,7 @@ export default async function AdminBookingsPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <T en="No bookings found." ar="لا توجد حجوزات." />
                   </td>
                 </tr>
