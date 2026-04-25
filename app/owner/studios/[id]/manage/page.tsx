@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireRole } from "../../../../../lib/auth";
@@ -86,7 +86,9 @@ export default async function ManageStudioPage({
 
   const { data: studio, error: studioError } = await supabase
     .from("studios")
-    .select("id,name,slug,city,district,address,price_from,status,cover_image_url")
+    .select(
+      "id,name,slug,city,district,address,price_from,status,cover_image_url,google_maps_url,google_reviews_url,google_place_id,google_rating"
+    )
     .eq("id", id)
     .eq("owner_auth_user_id", user.id)
     .single();
@@ -142,6 +144,42 @@ export default async function ManageStudioPage({
       ...item,
       feature
     });
+  }
+
+  async function updateGoogleInfo(formData: FormData) {
+    "use server";
+
+    const supabase = await createClient();
+
+    const studioId = String(formData.get("studio_id") || "");
+    const googleMapsUrl = String(formData.get("google_maps_url") || "").trim();
+    const googleReviewsUrl = String(formData.get("google_reviews_url") || "").trim();
+    const googlePlaceId = String(formData.get("google_place_id") || "").trim();
+    const googleRatingRaw = String(formData.get("google_rating") || "").trim();
+
+    const googleRating = googleRatingRaw ? Number(googleRatingRaw) : null;
+
+    if (!studioId) {
+      throw new Error("Missing studio ID.");
+    }
+
+    const { error } = await supabase
+      .from("studios")
+      .update({
+        google_maps_url: googleMapsUrl || null,
+        google_reviews_url: googleReviewsUrl || null,
+        google_place_id: googlePlaceId || null,
+        google_rating: googleRating
+      })
+      .eq("id", studioId)
+      .eq("owner_auth_user_id", user.id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath(`/owner/studios/${studioId}/manage`);
+    revalidatePath(`/studios/${studio.slug}`);
   }
 
   async function addFeature(formData: FormData) {
@@ -314,8 +352,8 @@ export default async function ManageStudioPage({
 
           <p>
             <T
-              en="Group your studio details into space type, amenities, equipment, services, and media capabilities. This will later help search filters, ranking, and customer trust."
-              ar="قسّم تفاصيل الاستوديو إلى نوع المساحة، المميزات، المعدات، الخدمات، وإمكانيات الإنتاج. هذا سيساعد لاحقًا في الفلاتر، ترتيب البحث، وثقة العملاء."
+              en="Group your studio details into space type, amenities, equipment, services, media capabilities, Google location, and reviews."
+              ar="قسّم تفاصيل الاستوديو إلى نوع المساحة، المميزات، المعدات، الخدمات، إمكانيات الإنتاج، موقع Google، والتقييمات."
             />
           </p>
         </div>
@@ -338,9 +376,106 @@ export default async function ManageStudioPage({
           <div>
             <b>3</b>
             <span>
-              <T en="Improve visibility" ar="حسّن الظهور" />
+              <T en="Add Google location" ar="أضف موقع Google" />
             </span>
           </div>
+        </div>
+      </div>
+
+      <div style={{ height: 28 }} />
+
+      <div className="card google-review-card">
+        <span className="badge">
+          <T en="Google Location" ar="موقع Google" />
+        </span>
+
+        <h2>
+          <T en="Maps and reviews" ar="الخرائط والتقييمات" />
+        </h2>
+
+        <p>
+          <T
+            en="Add your Google Maps link and Google Reviews link to build trust and help customers find your studio."
+            ar="أضف رابط Google Maps ورابط تقييمات Google لبناء الثقة ومساعدة العملاء على الوصول إلى الاستوديو."
+          />
+        </p>
+
+        <form className="google-location-form" action={updateGoogleInfo}>
+          <input type="hidden" name="studio_id" value={studio.id} />
+
+          <label>
+            <T en="Google Maps URL" ar="رابط Google Maps" />
+          </label>
+          <input
+            className="input"
+            name="google_maps_url"
+            type="url"
+            defaultValue={studio.google_maps_url || ""}
+            placeholder="https://maps.google.com/..."
+          />
+
+          <label>
+            <T en="Google Reviews URL" ar="رابط تقييمات Google" />
+          </label>
+          <input
+            className="input"
+            name="google_reviews_url"
+            type="url"
+            defaultValue={studio.google_reviews_url || ""}
+            placeholder="https://search.google.com/local/writereview?placeid=..."
+          />
+
+          <label>
+            <T en="Google Place ID" ar="معرّف Google Place ID" />
+          </label>
+          <input
+            className="input"
+            name="google_place_id"
+            defaultValue={studio.google_place_id || ""}
+            placeholder="Optional"
+          />
+
+          <label>
+            <T en="Google Rating" ar="تقييم Google" />
+          </label>
+          <input
+            className="input"
+            name="google_rating"
+            type="number"
+            min="0"
+            max="5"
+            step="0.1"
+            defaultValue={studio.google_rating || ""}
+            placeholder="4.8"
+          />
+
+          <button className="btn" type="submit">
+            <T en="Save Google Info" ar="حفظ بيانات Google" />
+          </button>
+        </form>
+
+        <div className="actions">
+          {studio.google_maps_url ? (
+            <a
+              href={studio.google_maps_url}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-secondary"
+            >
+              <T en="Open in Google Maps" ar="فتح في Google Maps" />
+            </a>
+          ) : null}
+
+          {studio.google_reviews_url ? (
+            <a
+              href={studio.google_reviews_url}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-secondary"
+            >
+              <T en="Open Google Reviews" ar="فتح تقييمات Google" />
+            </a>
+          ) : null}
         </div>
       </div>
 
@@ -376,8 +511,7 @@ export default async function ManageStudioPage({
                         <T en={group.titleEn} ar={group.titleAr} />
                       </strong>
                       <small>
-                        {selectedGroup.length}{" "}
-                        <T en="selected" ar="محدد" />
+                        {selectedGroup.length} <T en="selected" ar="محدد" />
                       </small>
                     </span>
                   </summary>
@@ -686,28 +820,6 @@ export default async function ManageStudioPage({
             )}
           </div>
         </div>
-      </div>
-
-      <div style={{ height: 28 }} />
-
-      <div className="card google-review-card">
-        <span className="badge">
-          <T en="Coming Next" ar="الخطوة القادمة" />
-        </span>
-
-        <h2>
-          <T
-            en="Google location and reviews"
-            ar="موقع Google والتقييمات"
-          />
-        </h2>
-
-        <p>
-          <T
-            en="Next we will add Google Maps link, Google location button, and GearBeat reviews after completed bookings."
-            ar="بعد ذلك سنضيف رابط Google Maps، زر فتح الموقع على Google، وتقييمات GearBeat بعد إكمال الحجوزات."
-          />
-        </p>
       </div>
     </section>
   );
