@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import "./globals.css";
 import { createClient } from "../lib/supabase/server";
 import T from "../components/t";
+import LanguageSwitcher from "../components/language-switcher";
 
 export const metadata: Metadata = {
   title: "GearBeat",
@@ -42,7 +43,7 @@ export default async function RootLayout({
   const dashboardPath = user ? getDashboardPath(user) : "/login";
 
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <body>
         <header className="site-header">
           <nav className="nav">
@@ -94,15 +95,7 @@ export default async function RootLayout({
               )}
             </div>
 
-            <div className="language-switch">
-              <Link href="?lang=ar" className="lang-pill">
-                AR
-              </Link>
-
-              <Link href="?lang=en" className="lang-link">
-                EN
-              </Link>
-            </div>
+            <LanguageSwitcher />
           </nav>
         </header>
 
