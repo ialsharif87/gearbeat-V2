@@ -5,6 +5,7 @@ import "./globals.css";
 import { createClient } from "../lib/supabase/server";
 import T from "../components/t";
 import LanguageSwitcher from "../components/language-switcher";
+import Footer from "../components/footer";
 
 export const metadata: Metadata = {
   title: "GearBeat",
@@ -100,6 +101,8 @@ export default async function RootLayout({
         </header>
 
         <main className="main">{children}</main>
+
+        <Footer />
       </body>
     </html>
   );
