@@ -1765,3 +1765,142 @@ html[dir="rtl"] .filter-action-row {
     grid-template-columns: 1fr;
   }
 }
+.gearbeat-rating-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(30, 215, 96, 0.11);
+  border: 1px solid rgba(30, 215, 96, 0.28);
+}
+
+.gearbeat-rating-mini strong {
+  color: var(--green);
+}
+
+.gearbeat-rating-mini span {
+  color: var(--soft);
+}
+
+.verified-reviews-card {
+  border-color: rgba(30, 215, 96, 0.18);
+}
+
+.compact-section-head {
+  margin-bottom: 24px;
+}
+
+.review-summary-grid {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 22px;
+}
+
+.review-score-hero {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(30, 215, 96, 0.1);
+  border: 1px solid rgba(30, 215, 96, 0.24);
+}
+
+.review-score-hero strong {
+  font-size: 3rem;
+  color: var(--green);
+}
+
+.review-score-hero span {
+  font-size: 1.2rem;
+  color: #ffd166;
+  letter-spacing: 2px;
+}
+
+.review-score-hero p {
+  margin: 8px 0 0;
+  color: var(--soft);
+}
+
+.review-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.review-breakdown-grid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.review-breakdown-grid span {
+  color: var(--soft);
+}
+
+.review-breakdown-grid strong {
+  color: var(--cyan);
+}
+
+.review-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.review-card {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.review-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.review-stars {
+  color: #ffd166;
+  letter-spacing: 2px;
+}
+
+.review-card small {
+  color: var(--muted);
+}
+
+.empty-review-box {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 960px) {
+  .review-summary-grid,
+  .review-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .review-breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gearbeat-rating-mini {
+    align-items: flex-start;
+    flex-direction: column;
+    border-radius: 20px;
+  }
+}
