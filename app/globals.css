@@ -1904,3 +1904,28 @@ html[dir="rtl"] .filter-action-row {
     border-radius: 20px;
   }
 }
+.review-transparency-box {
+  margin: 20px 0;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(53, 216, 255, 0.075);
+  border: 1px solid rgba(53, 216, 255, 0.18);
+}
+
+.review-transparency-box h3 {
+  margin: 0 0 10px;
+}
+
+.review-transparency-box p {
+  margin: 8px 0 0;
+  color: var(--soft);
+}
+
+.review-category-grid {
+  margin-bottom: 22px;
+}
+
+.review-meta-line {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
