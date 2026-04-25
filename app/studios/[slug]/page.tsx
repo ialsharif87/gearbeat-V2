@@ -13,6 +13,21 @@ function formatSyncDate(value: string | null | undefined) {
   }
 }
 
+function average(numbers: number[]) {
+  if (!numbers.length) return 0;
+  return numbers.reduce((sum, number) => sum + number, 0) / numbers.length;
+}
+
+function formatRating(value: number) {
+  if (!value) return "—";
+  return value.toFixed(1);
+}
+
+function stars(value: number) {
+  const rounded = Math.round(value);
+  return "★★★★★".slice(0, rounded) + "☆☆☆☆☆".slice(0, 5 - rounded);
+}
+
 export default async function StudioDetailsPage({
   params
 }: {
@@ -51,6 +66,15 @@ export default async function StudioDetailsPage({
     .eq("studio_id", studio.id)
     .order("created_at", { ascending: false });
 
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select(
+      "id,rating,cleanliness_rating,equipment_rating,sound_quality_rating,communication_rating,value_rating,comment,created_at"
+    )
+    .eq("studio_id", studio.id)
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
   const featureGroups: Record<string, any[]> = {
     space: [],
     amenity: [],
@@ -87,6 +111,43 @@ export default async function StudioDetailsPage({
     studio.tripadvisor_url ||
     studio.google_rating ||
     studio.tripadvisor_rating;
+
+  const reviewList = reviews || [];
+  const reviewCount = reviewList.length;
+
+  const overallAverage = average(
+    reviewList.map((review) => Number(review.rating || 0)).filter(Boolean)
+  );
+
+  const cleanlinessAverage = average(
+    reviewList
+      .map((review) => Number(review.cleanliness_rating || 0))
+      .filter(Boolean)
+  );
+
+  const equipmentAverage = average(
+    reviewList
+      .map((review) => Number(review.equipment_rating || 0))
+      .filter(Boolean)
+  );
+
+  const soundAverage = average(
+    reviewList
+      .map((review) => Number(review.sound_quality_rating || 0))
+      .filter(Boolean)
+  );
+
+  const communicationAverage = average(
+    reviewList
+      .map((review) => Number(review.communication_rating || 0))
+      .filter(Boolean)
+  );
+
+  const valueAverage = average(
+    reviewList
+      .map((review) => Number(review.value_rating || 0))
+      .filter(Boolean)
+  );
 
   return (
     <section>
@@ -134,6 +195,16 @@ export default async function StudioDetailsPage({
             </span>
             <strong>{studio.price_from ?? 0} SAR / hour</strong>
           </div>
+
+          {reviewCount > 0 ? (
+            <div className="gearbeat-rating-mini">
+              <strong>{formatRating(overallAverage)} ★</strong>
+              <span>
+                <T en="Verified GearBeat rating" ar="تقييم GearBeat موثق" /> ·{" "}
+                {reviewCount} <T en="reviews" ar="تقييم" />
+              </span>
+            </div>
+          ) : null}
 
           <div className="actions">
             <Link href={`/studios/${studio.slug}/book`} className="btn">
@@ -295,6 +366,119 @@ export default async function StudioDetailsPage({
             ))}
           </div>
         </div>
+      </div>
+
+      <div style={{ height: 28 }} />
+
+      <div className="card verified-reviews-card">
+        <div className="section-head compact-section-head">
+          <span className="badge">
+            <T en="Verified GearBeat Reviews" ar="تقييمات GearBeat الموثقة" />
+          </span>
+
+          <h1>
+            <T en="Real reviews from paid bookings" ar="تقييمات حقيقية من حجوزات مدفوعة" />
+          </h1>
+
+          <p>
+            <T
+              en="Only customers with confirmed and paid bookings can submit these reviews."
+              ar="فقط العملاء الذين لديهم حجوزات مؤكدة ومدفوعة يمكنهم إرسال هذه التقييمات."
+            />
+          </p>
+        </div>
+
+        {reviewCount > 0 ? (
+          <>
+            <div className="review-summary-grid">
+              <div className="review-score-hero">
+                <strong>{formatRating(overallAverage)}</strong>
+                <span>{stars(overallAverage)}</span>
+                <p>
+                  {reviewCount} <T en="verified reviews" ar="تقييم موثق" />
+                </p>
+              </div>
+
+              <div className="review-breakdown-grid">
+                <div>
+                  <span>
+                    <T en="Cleanliness" ar="النظافة" />
+                  </span>
+                  <strong>{formatRating(cleanlinessAverage)}</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <T en="Equipment" ar="المعدات" />
+                  </span>
+                  <strong>{formatRating(equipmentAverage)}</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <T en="Sound quality" ar="جودة الصوت" />
+                  </span>
+                  <strong>{formatRating(soundAverage)}</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <T en="Communication" ar="التواصل" />
+                  </span>
+                  <strong>{formatRating(communicationAverage)}</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <T en="Value" ar="القيمة" />
+                  </span>
+                  <strong>{formatRating(valueAverage)}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="review-card-grid">
+              {reviewList.slice(0, 6).map((review) => (
+                <article className="review-card" key={review.id}>
+                  <div className="review-card-head">
+                    <span className="badge">
+                      <T en="Verified booking" ar="حجز موثق" />
+                    </span>
+                    <strong>{review.rating} ★</strong>
+                  </div>
+
+                  <p className="review-stars">{stars(Number(review.rating || 0))}</p>
+
+                  {review.comment ? (
+                    <p>{review.comment}</p>
+                  ) : (
+                    <p>
+                      <T
+                        en="The customer did not leave a written comment."
+                        ar="لم يترك العميل تعليقًا مكتوبًا."
+                      />
+                    </p>
+                  )}
+
+                  <small>{formatSyncDate(review.created_at)}</small>
+                </article>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="empty-review-box">
+            <h2>
+              <T en="No GearBeat reviews yet" ar="لا توجد تقييمات GearBeat بعد" />
+            </h2>
+
+            <p>
+              <T
+                en="Verified reviews will appear here after customers complete paid bookings and share their feedback."
+                ar="ستظهر التقييمات الموثقة هنا بعد أن يكمل العملاء حجوزات مدفوعة ويشاركون آراءهم."
+              />
+            </p>
+          </div>
+        )}
       </div>
 
       <div style={{ height: 28 }} />
