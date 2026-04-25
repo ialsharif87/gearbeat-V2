@@ -7,7 +7,13 @@ type SearchParams = {
   city?: string;
   max_price?: string;
   verified?: string;
+  features?: string | string[];
 };
+
+function toArray(value: string | string[] | undefined) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
 
 export default async function StudiosPage({
   searchParams
@@ -20,6 +26,7 @@ export default async function StudiosPage({
   const selectedCity = String(params.city || "").trim();
   const maxPrice = Number(params.max_price || 0);
   const verifiedOnly = params.verified === "true";
+  const selectedFeatureIds = toArray(params.features);
 
   const supabase = await createClient();
 
@@ -33,6 +40,37 @@ export default async function StudiosPage({
   const cities = Array.from(
     new Set((cityRows || []).map((item) => item.city).filter(Boolean))
   );
+
+  const { data: features } = await supabase
+    .from("studio_features")
+    .select("id,name_en,name_ar,category,sort_order")
+    .eq("status", "active")
+    .order("sort_order", { ascending: true });
+
+  let matchingStudioIds: string[] | null = null;
+
+  if (selectedFeatureIds.length > 0) {
+    const { data: linkedStudios } = await supabase
+      .from("studio_feature_links")
+      .select("studio_id,feature_id")
+      .in("feature_id", selectedFeatureIds);
+
+    const counts = new Map<string, Set<string>>();
+
+    for (const item of linkedStudios || []) {
+      if (!counts.has(item.studio_id)) {
+        counts.set(item.studio_id, new Set());
+      }
+
+      counts.get(item.studio_id)?.add(item.feature_id);
+    }
+
+    matchingStudioIds = Array.from(counts.entries())
+      .filter(([, featureSet]) =>
+        selectedFeatureIds.every((featureId) => featureSet.has(featureId))
+      )
+      .map(([studioId]) => studioId);
+  }
 
   let studiosQuery = supabase
     .from("studios")
@@ -60,6 +98,14 @@ export default async function StudiosPage({
     studiosQuery = studiosQuery.eq("verified", true);
   }
 
+  if (matchingStudioIds) {
+    if (matchingStudioIds.length > 0) {
+      studiosQuery = studiosQuery.in("id", matchingStudioIds);
+    } else {
+      studiosQuery = studiosQuery.in("id", ["00000000-0000-0000-0000-000000000000"]);
+    }
+  }
+
   const { data: studios, error } = await studiosQuery;
 
   if (error) {
@@ -77,6 +123,58 @@ export default async function StudiosPage({
   }
 
   const resultCount = studios?.length || 0;
+  const hasFilters =
+    queryText ||
+    selectedCity ||
+    maxPrice ||
+    verifiedOnly ||
+    selectedFeatureIds.length > 0;
+
+  const groupedFeatures =
+    features?.reduce<Record<string, typeof features>>((groups, feature) => {
+      const key = feature.category || "general";
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+
+      groups[key].push(feature);
+
+      return groups;
+    }, {}) || {};
+
+  const featureGroupLabels: Record<string, { en: string; ar: string; icon: string }> = {
+    space: {
+      en: "Space type",
+      ar: "نوع المساحة",
+      icon: "🎙️"
+    },
+    amenity: {
+      en: "Amenities",
+      ar: "المميزات",
+      icon: "✨"
+    },
+    equipment: {
+      en: "Equipment",
+      ar: "المعدات",
+      icon: "🎛️"
+    },
+    service: {
+      en: "Services",
+      ar: "الخدمات",
+      icon: "🧑‍💻"
+    },
+    media: {
+      en: "Media",
+      ar: "الإنتاج",
+      icon: "🎥"
+    },
+    general: {
+      en: "Other",
+      ar: "أخرى",
+      icon: "➕"
+    }
+  };
 
   return (
     <section>
@@ -163,6 +261,60 @@ export default async function StudiosPage({
         <Link href="/studios" className="btn btn-secondary">
           <T en="Reset" ar="إعادة ضبط" />
         </Link>
+
+        <div className="feature-filter-area">
+          <div className="feature-filter-head">
+            <span className="badge">
+              <T en="Feature Filters" ar="فلاتر المميزات" />
+            </span>
+
+            <p>
+              <T
+                en="Filter by space type, amenities, equipment, services, and media capabilities."
+                ar="فلتر حسب نوع المساحة، المميزات، المعدات، الخدمات، وإمكانيات الإنتاج."
+              />
+            </p>
+          </div>
+
+          <div className="feature-filter-groups">
+            {Object.entries(groupedFeatures).map(([category, groupItems]) => {
+              const label = featureGroupLabels[category] || featureGroupLabels.general;
+
+              return (
+                <details className="filter-accordion" key={category}>
+                  <summary>
+                    <span>{label.icon}</span>
+                    <strong>
+                      <T en={label.en} ar={label.ar} />
+                    </strong>
+                    <small>{groupItems.length}</small>
+                  </summary>
+
+                  <div className="feature-filter-options">
+                    {groupItems.map((feature) => {
+                      const checked = selectedFeatureIds.includes(feature.id);
+
+                      return (
+                        <label className="feature-filter-chip" key={feature.id}>
+                          <input
+                            type="checkbox"
+                            name="features"
+                            value={feature.id}
+                            defaultChecked={checked}
+                          />
+
+                          <span>
+                            <T en={feature.name_en} ar={feature.name_ar} />
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </div>
       </form>
 
       <div className="studio-results-bar">
@@ -171,7 +323,7 @@ export default async function StudiosPage({
             {resultCount} <T en="results" ar="نتيجة" />
           </span>
 
-          {queryText || selectedCity || maxPrice || verifiedOnly ? (
+          {hasFilters ? (
             <p>
               <T
                 en="Showing filtered studio results."
