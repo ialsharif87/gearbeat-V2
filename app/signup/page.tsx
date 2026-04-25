@@ -7,6 +7,10 @@ function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").trim();
 }
 
+function cleanIdentityNumber(value: string) {
+  return value.replace(/\s+/g, "").trim();
+}
+
 export default function SignupPage() {
   async function signUp(formData: FormData) {
     "use server";
@@ -18,6 +22,10 @@ export default function SignupPage() {
     const phone = cleanPhone(String(formData.get("phone") || ""));
     const password = String(formData.get("password") || "");
     const role = String(formData.get("role") || "customer");
+    const identityType = String(formData.get("identity_type") || "").trim();
+    const identityNumber = cleanIdentityNumber(
+      String(formData.get("identity_number") || "")
+    );
 
     if (!fullName) {
       throw new Error("Full name is required.");
@@ -27,11 +35,7 @@ export default function SignupPage() {
       throw new Error("Email is required.");
     }
 
-    if (!phone) {
-      throw new Error("Phone number is required.");
-    }
-
-    if (phone.length < 8) {
+    if (!phone || phone.length < 8) {
       throw new Error("Please enter a valid phone number.");
     }
 
@@ -45,6 +49,21 @@ export default function SignupPage() {
       throw new Error("Invalid account type.");
     }
 
+    const allowedIdentityTypes = [
+      "national_id",
+      "iqama",
+      "passport",
+      "gcc_id"
+    ];
+
+    if (!allowedIdentityTypes.includes(identityType)) {
+      throw new Error("Identity type is required.");
+    }
+
+    if (!identityNumber || identityNumber.length < 5) {
+      throw new Error("Please enter a valid identity number.");
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -55,7 +74,10 @@ export default function SignupPage() {
           phone,
           phone_number: phone,
           mobile: phone,
-          role
+          role,
+          identity_type: identityType,
+          identity_number: identityNumber,
+          identity_locked: true
         }
       }
     });
@@ -74,6 +96,10 @@ export default function SignupPage() {
           full_name: fullName,
           phone,
           role,
+          identity_type: identityType,
+          identity_number: identityNumber,
+          identity_locked: true,
+          identity_created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         },
         {
@@ -143,6 +169,36 @@ export default function SignupPage() {
               required
               minLength={8}
             />
+
+            <label>
+              <T en="Identity type" ar="نوع الهوية" />
+            </label>
+            <select className="input" name="identity_type" required>
+              <option value="">Select identity type / اختر نوع الهوية</option>
+              <option value="national_id">National ID / هوية وطنية</option>
+              <option value="iqama">Iqama / إقامة</option>
+              <option value="passport">Passport / جواز سفر</option>
+              <option value="gcc_id">GCC ID / هوية خليجية</option>
+            </select>
+
+            <label>
+              <T en="Identity number" ar="رقم الهوية" />
+            </label>
+            <input
+              className="input"
+              name="identity_number"
+              type="text"
+              placeholder="Identity / Iqama / Passport number"
+              required
+              minLength={5}
+            />
+
+            <p className="admin-muted-line">
+              <T
+                en="Identity details cannot be changed after signup."
+                ar="لا يمكن تغيير بيانات الهوية بعد إنشاء الحساب."
+              />
+            </p>
 
             <label>
               <T en="Password" ar="كلمة المرور" />
