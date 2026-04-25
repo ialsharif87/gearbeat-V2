@@ -36,6 +36,33 @@ function badgeStyle(type: "booking" | "payment", status: string) {
   return yellow;
 }
 
+function getCustomerName(user: any) {
+  const metadata = user?.user_metadata || {};
+
+  return (
+    metadata.full_name ||
+    metadata.name ||
+    metadata.display_name ||
+    metadata.first_name ||
+    user?.email ||
+    "Customer"
+  );
+}
+
+function getCustomerPhone(user: any) {
+  const metadata = user?.user_metadata || {};
+
+  return (
+    user?.phone ||
+    metadata.phone ||
+    metadata.phone_number ||
+    metadata.mobile ||
+    metadata.mobile_number ||
+    metadata.whatsapp ||
+    "—"
+  );
+}
+
 export default async function AdminBookingsPage() {
   const { admin } = await requireAdminRole(["operations", "support", "finance"]);
 
@@ -161,6 +188,31 @@ export default async function AdminBookingsPage() {
     `)
     .order("created_at", { ascending: false });
 
+  const customerIds = Array.from(
+    new Set(
+      (bookings || [])
+        .map((booking) => booking.customer_auth_user_id)
+        .filter(Boolean)
+    )
+  );
+
+  const customerResults = await Promise.all(
+    customerIds.map(async (customerId) => {
+      const { data, error } = await supabaseAdmin.auth.admin.getUserById(
+        customerId
+      );
+
+      return {
+        id: customerId,
+        user: error ? null : data?.user || null
+      };
+    })
+  );
+
+  const customerMap = new Map(
+    customerResults.map((item) => [item.id, item.user])
+  );
+
   const totalBookings = bookings?.length || 0;
   const paidBookings =
     bookings?.filter((booking) => booking.payment_status === "paid").length ||
@@ -187,8 +239,8 @@ export default async function AdminBookingsPage() {
 
         <p>
           <T
-            en="Track and manage booking status, payment status, review requests, and customer feedback activity."
-            ar="تابع وأدر حالة الحجز، حالة الدفع، طلبات التقييم، ونشاط آراء العملاء."
+            en="Track and manage booking status, payment status, customer details, review requests, and customer feedback activity."
+            ar="تابع وأدر حالة الحجز، حالة الدفع، بيانات العميل، طلبات التقييم، ونشاط آراء العملاء."
           />
         </p>
       </div>
@@ -273,8 +325,8 @@ export default async function AdminBookingsPage() {
 
         <p>
           <T
-            en="Operations and Support can manage booking status. Operations and Finance can manage payment status."
-            ar="فريق العمليات والدعم يمكنهم إدارة حالة الحجز. فريق العمليات والمالية يمكنهم إدارة حالة الدفع."
+            en="Customer name, email, and phone are shown to make each studio booking clear."
+            ar="يظهر اسم العميل، الإيميل، ورقم الجوال حتى يكون واضحًا من صاحب الحجز لكل استوديو."
           />
         </p>
 
@@ -284,6 +336,9 @@ export default async function AdminBookingsPage() {
               <tr>
                 <th>
                   <T en="Studio" ar="الاستوديو" />
+                </th>
+                <th>
+                  <T en="Customer" ar="العميل" />
                 </th>
                 <th>
                   <T en="Date / Time" ar="التاريخ / الوقت" />
@@ -322,6 +377,13 @@ export default async function AdminBookingsPage() {
                     : [];
 
                   const studioSlug = studio?.slug || "";
+                  const customer = customerMap.get(
+                    booking.customer_auth_user_id
+                  );
+
+                  const customerName = getCustomerName(customer);
+                  const customerPhone = getCustomerPhone(customer);
+                  const customerEmail = customer?.email || "—";
 
                   return (
                     <tr key={booking.id}>
@@ -330,6 +392,14 @@ export default async function AdminBookingsPage() {
                         <p className="admin-muted-line">
                           {studio?.city || ""}
                           {studio?.district ? ` · ${studio.district}` : ""}
+                        </p>
+                      </td>
+
+                      <td>
+                        <strong>{customerName}</strong>
+                        <p className="admin-muted-line">{customerEmail}</p>
+                        <p className="admin-muted-line">
+                          <T en="Phone:" ar="الجوال:" /> {customerPhone}
                         </p>
                       </td>
 
@@ -639,7 +709,7 @@ export default async function AdminBookingsPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <T en="No bookings found." ar="لا توجد حجوزات." />
                   </td>
                 </tr>
