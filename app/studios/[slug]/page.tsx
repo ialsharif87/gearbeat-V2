@@ -14,8 +14,13 @@ function formatSyncDate(value: string | null | undefined) {
 }
 
 function average(numbers: number[]) {
-  if (!numbers.length) return 0;
-  return numbers.reduce((sum, number) => sum + number, 0) / numbers.length;
+  const validNumbers = numbers.filter((number) => Number.isFinite(number));
+
+  if (!validNumbers.length) return 0;
+
+  return (
+    validNumbers.reduce((sum, number) => sum + number, 0) / validNumbers.length
+  );
 }
 
 function formatRating(value: number) {
@@ -26,6 +31,70 @@ function formatRating(value: number) {
 function stars(value: number) {
   const rounded = Math.round(value);
   return "★★★★★".slice(0, rounded) + "☆☆☆☆☆".slice(0, 5 - rounded);
+}
+
+function getReviewScore(review: any) {
+  const scores = [
+    Number(review.rating || 0),
+    Number(review.cleanliness_rating || 0),
+    Number(review.equipment_rating || 0),
+    Number(review.sound_quality_rating || 0),
+    Number(review.communication_rating || 0),
+    Number(review.value_rating || 0)
+  ].filter((score) => score >= 1 && score <= 5);
+
+  return average(scores);
+}
+
+function getReviewAgeDays(createdAt: string) {
+  const reviewDate = new Date(createdAt);
+  const now = new Date();
+  const diffMs = now.getTime() - reviewDate.getTime();
+
+  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+}
+
+function getTimeWeight(createdAt: string) {
+  const ageDays = getReviewAgeDays(createdAt);
+
+  if (ageDays <= 90) return 1;
+  if (ageDays <= 180) return 0.7;
+  if (ageDays <= 365) return 0.4;
+
+  return 0.2;
+}
+
+function weightedAverageByTime(reviews: any[]) {
+  if (!reviews.length) return 0;
+
+  const weightedRows = reviews
+    .map((review) => {
+      const score = getReviewScore(review);
+      const weight = getTimeWeight(review.created_at);
+
+      return {
+        score,
+        weight
+      };
+    })
+    .filter((item) => item.score > 0 && item.weight > 0);
+
+  if (!weightedRows.length) return 0;
+
+  const totalWeightedScore = weightedRows.reduce(
+    (sum, item) => sum + item.score * item.weight,
+    0
+  );
+
+  const totalWeight = weightedRows.reduce((sum, item) => sum + item.weight, 0);
+
+  if (!totalWeight) return 0;
+
+  return totalWeightedScore / totalWeight;
+}
+
+function reviewsInLastDays(reviews: any[], days: number) {
+  return reviews.filter((review) => getReviewAgeDays(review.created_at) <= days);
 }
 
 export default async function StudioDetailsPage({
@@ -115,8 +184,22 @@ export default async function StudioDetailsPage({
   const reviewList = reviews || [];
   const reviewCount = reviewList.length;
 
-  const overallAverage = average(
-    reviewList.map((review) => Number(review.rating || 0)).filter(Boolean)
+  const reviewScores = reviewList
+    .map((review) => getReviewScore(review))
+    .filter((score) => score > 0);
+
+  const allTimeAverage = average(reviewScores);
+  const timeWeightedAverage = weightedAverageByTime(reviewList);
+
+  const recent90Reviews = reviewsInLastDays(reviewList, 90);
+  const recent180Reviews = reviewsInLastDays(reviewList, 180);
+
+  const recent90Average = average(
+    recent90Reviews.map((review) => getReviewScore(review)).filter(Boolean)
+  );
+
+  const recent180Average = average(
+    recent180Reviews.map((review) => getReviewScore(review)).filter(Boolean)
   );
 
   const cleanlinessAverage = average(
@@ -148,6 +231,10 @@ export default async function StudioDetailsPage({
       .map((review) => Number(review.value_rating || 0))
       .filter(Boolean)
   );
+
+  const lastReviewDate = reviewList[0]?.created_at
+    ? formatSyncDate(reviewList[0].created_at)
+    : null;
 
   return (
     <section>
@@ -198,10 +285,13 @@ export default async function StudioDetailsPage({
 
           {reviewCount > 0 ? (
             <div className="gearbeat-rating-mini">
-              <strong>{formatRating(overallAverage)} ★</strong>
+              <strong>{formatRating(timeWeightedAverage)} ★</strong>
               <span>
-                <T en="Verified GearBeat rating" ar="تقييم GearBeat موثق" /> ·{" "}
-                {reviewCount} <T en="reviews" ar="تقييم" />
+                <T
+                  en="GearBeat weighted rating"
+                  ar="تقييم GearBeat المرجّح"
+                />{" "}
+                · {reviewCount} <T en="verified reviews" ar="تقييم موثق" />
               </span>
             </div>
           ) : null}
@@ -377,13 +467,16 @@ export default async function StudioDetailsPage({
           </span>
 
           <h1>
-            <T en="Real reviews from paid bookings" ar="تقييمات حقيقية من حجوزات مدفوعة" />
+            <T
+              en="Transparent rating from paid bookings"
+              ar="تقييم شفاف من حجوزات مدفوعة"
+            />
           </h1>
 
           <p>
             <T
-              en="Only customers with confirmed and paid bookings can submit these reviews."
-              ar="فقط العملاء الذين لديهم حجوزات مؤكدة ومدفوعة يمكنهم إرسال هذه التقييمات."
+              en="GearBeat rating is calculated from verified paid bookings only, using 6 review categories. Recent reviews carry more weight."
+              ar="يتم احتساب تقييم GearBeat من حجوزات مدفوعة وموثقة فقط، بناءً على 6 نقاط تقييم. التقييمات الحديثة لها وزن أعلى."
             />
           </p>
         </div>
@@ -392,77 +485,168 @@ export default async function StudioDetailsPage({
           <>
             <div className="review-summary-grid">
               <div className="review-score-hero">
-                <strong>{formatRating(overallAverage)}</strong>
-                <span>{stars(overallAverage)}</span>
+                <strong>{formatRating(timeWeightedAverage)}</strong>
+                <span>{stars(timeWeightedAverage)}</span>
                 <p>
-                  {reviewCount} <T en="verified reviews" ar="تقييم موثق" />
+                  <T en="Weighted GearBeat rating" ar="تقييم GearBeat المرجّح" />
                 </p>
               </div>
 
               <div className="review-breakdown-grid">
                 <div>
                   <span>
-                    <T en="Cleanliness" ar="النظافة" />
+                    <T en="All-time average" ar="المتوسط العام" />
                   </span>
-                  <strong>{formatRating(cleanlinessAverage)}</strong>
+                  <strong>{formatRating(allTimeAverage)}</strong>
                 </div>
 
                 <div>
                   <span>
-                    <T en="Equipment" ar="المعدات" />
+                    <T en="Verified reviews" ar="التقييمات الموثقة" />
                   </span>
-                  <strong>{formatRating(equipmentAverage)}</strong>
+                  <strong>{reviewCount}</strong>
                 </div>
 
                 <div>
                   <span>
-                    <T en="Sound quality" ar="جودة الصوت" />
+                    <T en="Last 90 days" ar="آخر 90 يوم" />
                   </span>
-                  <strong>{formatRating(soundAverage)}</strong>
+                  <strong>
+                    {recent90Reviews.length
+                      ? `${formatRating(recent90Average)} · ${
+                          recent90Reviews.length
+                        }`
+                      : "—"}
+                  </strong>
                 </div>
 
                 <div>
                   <span>
-                    <T en="Communication" ar="التواصل" />
+                    <T en="Last 180 days" ar="آخر 180 يوم" />
                   </span>
-                  <strong>{formatRating(communicationAverage)}</strong>
+                  <strong>
+                    {recent180Reviews.length
+                      ? `${formatRating(recent180Average)} · ${
+                          recent180Reviews.length
+                        }`
+                      : "—"}
+                  </strong>
                 </div>
 
                 <div>
                   <span>
-                    <T en="Value" ar="القيمة" />
+                    <T en="Last review" ar="آخر تقييم" />
                   </span>
-                  <strong>{formatRating(valueAverage)}</strong>
+                  <strong>{lastReviewDate || "—"}</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <T en="Calculation" ar="طريقة الحساب" />
+                  </span>
+                  <strong>
+                    <T en="6 categories" ar="6 نقاط" />
+                  </strong>
                 </div>
               </div>
             </div>
 
+            <div className="review-transparency-box">
+              <h3>
+                <T en="How this rating is calculated" ar="كيف يتم احتساب التقييم" />
+              </h3>
+
+              <p>
+                <T
+                  en="Each customer review is calculated as the average of 6 categories: overall experience, cleanliness, equipment quality, sound quality, communication, and value for money."
+                  ar="يتم احتساب كل تقييم عميل كمتوسط 6 نقاط: التجربة العامة، النظافة، جودة المعدات، جودة الصوت، التواصل، والقيمة مقابل السعر."
+                />
+              </p>
+
+              <p>
+                <T
+                  en="Time weighting: reviews from the last 90 days count 100%, 91–180 days count 70%, 181–365 days count 40%, and older reviews count 20%."
+                  ar="الوزن الزمني: تقييمات آخر 90 يوم تُحتسب 100%، من 91 إلى 180 يوم تُحتسب 70%، من 181 إلى 365 يوم تُحتسب 40%، والتقييمات الأقدم تُحتسب 20%."
+                />
+              </p>
+            </div>
+
+            <div className="review-breakdown-grid review-category-grid">
+              <div>
+                <span>
+                  <T en="Cleanliness" ar="النظافة" />
+                </span>
+                <strong>{formatRating(cleanlinessAverage)}</strong>
+              </div>
+
+              <div>
+                <span>
+                  <T en="Equipment" ar="المعدات" />
+                </span>
+                <strong>{formatRating(equipmentAverage)}</strong>
+              </div>
+
+              <div>
+                <span>
+                  <T en="Sound quality" ar="جودة الصوت" />
+                </span>
+                <strong>{formatRating(soundAverage)}</strong>
+              </div>
+
+              <div>
+                <span>
+                  <T en="Communication" ar="التواصل" />
+                </span>
+                <strong>{formatRating(communicationAverage)}</strong>
+              </div>
+
+              <div>
+                <span>
+                  <T en="Value" ar="القيمة" />
+                </span>
+                <strong>{formatRating(valueAverage)}</strong>
+              </div>
+            </div>
+
             <div className="review-card-grid">
-              {reviewList.slice(0, 6).map((review) => (
-                <article className="review-card" key={review.id}>
-                  <div className="review-card-head">
-                    <span className="badge">
-                      <T en="Verified booking" ar="حجز موثق" />
-                    </span>
-                    <strong>{review.rating} ★</strong>
-                  </div>
+              {reviewList.slice(0, 6).map((review) => {
+                const reviewScore = getReviewScore(review);
+                const reviewAge = getReviewAgeDays(review.created_at);
+                const reviewWeight = getTimeWeight(review.created_at);
 
-                  <p className="review-stars">{stars(Number(review.rating || 0))}</p>
+                return (
+                  <article className="review-card" key={review.id}>
+                    <div className="review-card-head">
+                      <span className="badge">
+                        <T en="Verified booking" ar="حجز موثق" />
+                      </span>
+                      <strong>{formatRating(reviewScore)} ★</strong>
+                    </div>
 
-                  {review.comment ? (
-                    <p>{review.comment}</p>
-                  ) : (
-                    <p>
-                      <T
-                        en="The customer did not leave a written comment."
-                        ar="لم يترك العميل تعليقًا مكتوبًا."
-                      />
+                    <p className="review-stars">{stars(reviewScore)}</p>
+
+                    <p className="review-meta-line">
+                      <T en="Age:" ar="العمر:" /> {reviewAge}{" "}
+                      <T en="days" ar="يوم" /> ·{" "}
+                      <T en="Weight:" ar="الوزن:" />{" "}
+                      {Math.round(reviewWeight * 100)}%
                     </p>
-                  )}
 
-                  <small>{formatSyncDate(review.created_at)}</small>
-                </article>
-              ))}
+                    {review.comment ? (
+                      <p>{review.comment}</p>
+                    ) : (
+                      <p>
+                        <T
+                          en="The customer did not leave a written comment."
+                          ar="لم يترك العميل تعليقًا مكتوبًا."
+                        />
+                      </p>
+                    )}
+
+                    <small>{formatSyncDate(review.created_at)}</small>
+                  </article>
+                );
+              })}
             </div>
           </>
         ) : (
