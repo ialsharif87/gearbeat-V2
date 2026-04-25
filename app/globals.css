@@ -2060,3 +2060,114 @@ html[dir="rtl"] .admin-table td {
   flex-wrap: wrap;
   gap: 8px;
 }
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 18px 5vw;
+  backdrop-filter: blur(18px);
+  background: rgba(7, 11, 24, 0.72);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  text-decoration: none;
+}
+
+.brand-text {
+  font-size: 2rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -1px;
+}
+
+.brand-text span {
+  color: var(--green);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: var(--soft);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.nav-links a:hover {
+  color: white;
+}
+
+.nav-button,
+.nav-button-link {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-button:hover,
+.nav-button-link:hover {
+  background: rgba(30, 215, 96, 0.18);
+  color: var(--green);
+}
+
+.language-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-pill,
+.lang-link {
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 0.9rem;
+}
+
+.lang-pill {
+  background: var(--green);
+  color: #06130c;
+  padding: 9px 11px;
+  border-radius: 999px;
+}
+
+.lang-link {
+  color: var(--soft);
+}
+
+.main {
+  width: min(1180px, 90vw);
+  margin: 0 auto;
+  padding: 36px 0 70px;
+}
+
+@media (max-width: 900px) {
+  .nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav-links {
+    gap: 12px;
+  }
+
+  .brand-text {
+    font-size: 1.6rem;
+  }
+}
