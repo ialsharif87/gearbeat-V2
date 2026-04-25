@@ -1570,3 +1570,106 @@ html[dir="rtl"] .studio-card-floating-badges {
     width: fit-content;
   }
 }
+.feature-filter-area {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.feature-filter-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.feature-filter-groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.filter-accordion {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  overflow: hidden;
+}
+
+.filter-accordion summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.filter-accordion summary small {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+html[dir="rtl"] .filter-accordion summary small {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.feature-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+
+.feature-filter-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 !important;
+  padding: 9px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--soft);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition:
+    border 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.feature-filter-chip input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--green);
+}
+
+.feature-filter-chip:has(input:checked) {
+  color: white;
+  background: rgba(30, 215, 96, 0.13);
+  border-color: rgba(30, 215, 96, 0.42);
+  box-shadow: 0 0 18px rgba(30, 215, 96, 0.12);
+}
+
+@media (max-width: 960px) {
+  .feature-filter-groups {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-filter-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
