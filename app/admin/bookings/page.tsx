@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "../../../lib/admin";
+import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
@@ -36,7 +36,8 @@ function badgeStyle(type: "booking" | "payment", status: string) {
 }
 
 export default async function AdminBookingsPage() {
-  await requireAdmin();
+  await requireAdminRole(["operations", "support", "finance"]);
+
   const supabaseAdmin = createAdminClient();
 
   const { data: bookings, error } = await supabaseAdmin
@@ -73,7 +74,8 @@ export default async function AdminBookingsPage() {
 
   const totalBookings = bookings?.length || 0;
   const paidBookings =
-    bookings?.filter((booking) => booking.payment_status === "paid").length || 0;
+    bookings?.filter((booking) => booking.payment_status === "paid").length ||
+    0;
   const pendingBookings =
     bookings?.filter((booking) => booking.status === "pending").length || 0;
   const cancelledBookings =
