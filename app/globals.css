@@ -1148,3 +1148,243 @@ html[dir="rtl"] .login-help-row {
     flex-direction: column;
   }
 }
+.onboarding-intro-card {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.onboarding-steps {
+  display: grid;
+  gap: 12px;
+}
+
+.onboarding-steps div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.onboarding-steps b {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #06130c;
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+  box-shadow: 0 0 18px rgba(30, 215, 96, 0.3);
+}
+
+.manage-split {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.gb-accordion {
+  margin-top: 12px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  overflow: hidden;
+}
+
+.gb-accordion summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+}
+
+.gb-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.gb-accordion summary::after {
+  content: "⌄";
+  margin-left: auto;
+  font-size: 1.4rem;
+  color: var(--cyan);
+  transition: transform 0.2s ease;
+}
+
+html[dir="rtl"] .gb-accordion summary::after {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.gb-accordion[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.accordion-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(53, 216, 255, 0.12);
+  border: 1px solid rgba(53, 216, 255, 0.2);
+  box-shadow: 0 0 18px rgba(53, 216, 255, 0.16);
+  font-size: 1.3rem;
+}
+
+.gb-accordion summary span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.gb-accordion summary small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.feature-pill-wrap {
+  padding: 0 18px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.feature-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(30, 215, 96, 0.11);
+  border: 1px solid rgba(30, 215, 96, 0.25);
+  color: white;
+}
+
+.mini-danger {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  color: white;
+  background: rgba(255, 75, 75, 0.22);
+  border: 1px solid rgba(255, 75, 75, 0.45);
+  font-weight: 900;
+}
+
+.mini-danger:hover {
+  background: rgba(255, 75, 75, 0.4);
+}
+
+.feature-card-grid {
+  padding: 0 18px 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.select-card {
+  min-height: 150px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  transition:
+    transform 0.2s ease,
+    border 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.select-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(53, 216, 255, 0.35);
+  box-shadow: 0 0 24px rgba(53, 216, 255, 0.14);
+}
+
+.select-card.selected {
+  border-color: rgba(30, 215, 96, 0.45);
+  background: rgba(30, 215, 96, 0.09);
+}
+
+.select-card-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(184, 50, 255, 0.14);
+  border: 1px solid rgba(184, 50, 255, 0.26);
+  font-size: 1.25rem;
+}
+
+.select-card small {
+  color: var(--muted);
+}
+
+.custom-feature-form {
+  padding: 0 18px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.muted-line {
+  color: var(--muted);
+  padding: 0 18px 18px;
+}
+
+.equipment-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.equipment-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.equipment-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(255, 63, 212, 0.13);
+  border: 1px solid rgba(255, 63, 212, 0.24);
+  font-size: 1.3rem;
+}
+
+.google-review-card {
+  border-color: rgba(53, 216, 255, 0.22);
+}
+
+@media (max-width: 960px) {
+  .onboarding-intro-card,
+  .manage-split {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .equipment-card {
+    grid-template-columns: 1fr;
+  }
+}
