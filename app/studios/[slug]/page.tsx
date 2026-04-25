@@ -3,6 +3,16 @@ import { notFound } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import T from "../../../components/t";
 
+function formatSyncDate(value: string | null | undefined) {
+  if (!value) return null;
+
+  try {
+    return new Date(value).toLocaleDateString();
+  } catch {
+    return null;
+  }
+}
+
 export default async function StudioDetailsPage({
   params
 }: {
@@ -14,7 +24,7 @@ export default async function StudioDetailsPage({
   const { data: studio, error } = await supabase
     .from("studios")
     .select(
-      "id,name,slug,city,district,address,description,price_from,status,cover_image_url,verified"
+      "id,name,slug,city,district,address,description,price_from,status,cover_image_url,verified,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
     )
     .eq("slug", slug)
     .eq("status", "approved")
@@ -29,6 +39,54 @@ export default async function StudioDetailsPage({
     .select("id,image_url,is_cover,sort_order")
     .eq("studio_id", studio.id)
     .order("sort_order", { ascending: true });
+
+  const { data: selectedFeatures } = await supabase
+    .from("studio_feature_links")
+    .select("id,custom_name,studio_features(name_en,name_ar,category)")
+    .eq("studio_id", studio.id);
+
+  const { data: equipment } = await supabase
+    .from("studio_equipment")
+    .select("id,name,brand,model,category,quantity,notes")
+    .eq("studio_id", studio.id)
+    .order("created_at", { ascending: false });
+
+  const featureGroups: Record<string, any[]> = {
+    space: [],
+    amenity: [],
+    equipment: [],
+    service: [],
+    media: [],
+    custom: []
+  };
+
+  for (const item of selectedFeatures || []) {
+    const feature = Array.isArray(item.studio_features)
+      ? item.studio_features[0]
+      : item.studio_features;
+
+    const category = feature?.category || "custom";
+
+    if (!featureGroups[category]) {
+      featureGroups[category] = [];
+    }
+
+    featureGroups[category].push({
+      ...item,
+      feature
+    });
+  }
+
+  const hasFeatures = Object.values(featureGroups).some(
+    (items) => items.length > 0
+  );
+
+  const hasExternalTrust =
+    studio.google_maps_url ||
+    studio.google_reviews_url ||
+    studio.tripadvisor_url ||
+    studio.google_rating ||
+    studio.tripadvisor_rating;
 
   return (
     <section>
@@ -86,54 +144,133 @@ export default async function StudioDetailsPage({
               <T en="Back to Studios" ar="العودة إلى الاستوديوهات" />
             </Link>
           </div>
+
+          <div className="actions">
+            {studio.google_maps_url ? (
+              <a
+                href={studio.google_maps_url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary btn-small"
+              >
+                <T en="Open in Google Maps" ar="فتح في Google Maps" />
+              </a>
+            ) : null}
+
+            {studio.google_reviews_url ? (
+              <a
+                href={studio.google_reviews_url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary btn-small"
+              >
+                <T en="Google Reviews" ar="تقييمات Google" />
+              </a>
+            ) : null}
+
+            {studio.tripadvisor_url ? (
+              <a
+                href={studio.tripadvisor_url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary btn-small"
+              >
+                TripAdvisor
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
+
+      <div style={{ height: 28 }} />
 
       <div className="pulse-panel">
         <div className="card">
           <span className="badge">
-            <T en="Studio Highlights" ar="مميزات الاستوديو" />
+            <T en="Studio Trust" ar="ثقة الاستوديو" />
           </span>
 
           <h2>
-            <T en="Designed for creators" ar="مصمم للمبدعين" />
+            <T en="Review sources" ar="مصادر التقييم" />
           </h2>
 
           <p>
             <T
-              en="Use this space for recording, production, podcasts, rehearsals, or content creation. More detailed amenities will be added later."
-              ar="استخدم هذه المساحة للتسجيل، الإنتاج، البودكاست، التدريب، أو صناعة المحتوى. سيتم إضافة مميزات أكثر لاحقًا."
+              en="External review links help customers validate the studio quality. Ratings are not entered manually by the owner."
+              ar="روابط التقييمات الخارجية تساعد العملاء على التأكد من جودة الاستوديو. التقييمات لا يتم إدخالها يدويًا من صاحب الاستوديو."
             />
           </p>
 
-          <div className="stats-row">
-            <div className="stat">
-              <b>
-                <T en="Live" ar="مباشر" />
-              </b>
-              <span>
-                <T en="Booking request" ar="طلب الحجز" />
-              </span>
+          <div className="external-rating-grid">
+            <div className="external-rating-card">
+              <span className="badge">Google</span>
+
+              <h3>
+                {studio.google_rating ? `${studio.google_rating} ★` : "—"}
+              </h3>
+
+              <p>
+                {studio.google_user_ratings_total ? (
+                  <>
+                    {studio.google_user_ratings_total}{" "}
+                    <T en="reviews" ar="تقييم" />
+                  </>
+                ) : (
+                  <T
+                    en="Rating not synced yet."
+                    ar="لم يتم جلب التقييم بعد."
+                  />
+                )}
+              </p>
+
+              {studio.google_rating_last_synced_at ? (
+                <p>
+                  <T en="Last sync:" ar="آخر تحديث:" />{" "}
+                  {formatSyncDate(studio.google_rating_last_synced_at)}
+                </p>
+              ) : null}
             </div>
 
-            <div className="stat">
-              <b>
-                <T en="Fast" ar="سريع" />
-              </b>
-              <span>
-                <T en="Owner approval" ar="موافقة المالك" />
-              </span>
-            </div>
+            <div className="external-rating-card">
+              <span className="badge">TripAdvisor</span>
 
-            <div className="stat">
-              <b>
-                <T en="Secure" ar="آمن" />
-              </b>
-              <span>
-                <T en="Account based flow" ar="مسار مرتبط بالحساب" />
-              </span>
+              <h3>
+                {studio.tripadvisor_rating
+                  ? `${studio.tripadvisor_rating} ★`
+                  : "—"}
+              </h3>
+
+              <p>
+                {studio.tripadvisor_reviews_total ? (
+                  <>
+                    {studio.tripadvisor_reviews_total}{" "}
+                    <T en="reviews" ar="تقييم" />
+                  </>
+                ) : (
+                  <T
+                    en="Rating not verified yet."
+                    ar="لم يتم التحقق من التقييم بعد."
+                  />
+                )}
+              </p>
+
+              {studio.tripadvisor_rating_last_synced_at ? (
+                <p>
+                  <T en="Last sync:" ar="آخر تحديث:" />{" "}
+                  {formatSyncDate(studio.tripadvisor_rating_last_synced_at)}
+                </p>
+              ) : null}
             </div>
           </div>
+
+          {!hasExternalTrust ? (
+            <p>
+              <T
+                en="No external review sources have been added yet."
+                ar="لم تتم إضافة مصادر تقييم خارجية حتى الآن."
+              />
+            </p>
+          ) : null}
         </div>
 
         <div className="card wave-card">
@@ -147,8 +284,8 @@ export default async function StudioDetailsPage({
 
           <p>
             <T
-              en="Visual sound energy for this studio experience."
-              ar="طاقة صوتية بصرية تعكس تجربة هذا الاستوديو."
+              en="A quick visual signal for the studio experience."
+              ar="إشارة بصرية سريعة لتجربة هذا الاستوديو."
             />
           </p>
 
@@ -159,6 +296,170 @@ export default async function StudioDetailsPage({
           </div>
         </div>
       </div>
+
+      <div style={{ height: 28 }} />
+
+      <div className="section-head">
+        <span className="badge">
+          <T en="Studio Setup" ar="إعدادات الاستوديو" />
+        </span>
+
+        <h1>
+          <T en="Features and amenities" ar="المميزات والخدمات" />
+        </h1>
+
+        <p>
+          <T
+            en="Explore the space type, amenities, equipment features, services, and media capabilities selected by the studio owner."
+            ar="استعرض نوع المساحة، المميزات، المعدات، الخدمات، وإمكانيات الإنتاج التي أضافها صاحب الاستوديو."
+          />
+        </p>
+      </div>
+
+      {hasFeatures ? (
+        <div className="public-feature-grid">
+          {[
+            {
+              key: "space",
+              icon: "🎙️",
+              en: "Studio Space Type",
+              ar: "نوع مساحة الاستوديو"
+            },
+            {
+              key: "amenity",
+              icon: "✨",
+              en: "Amenities",
+              ar: "المميزات"
+            },
+            {
+              key: "equipment",
+              icon: "🎛️",
+              en: "Equipment Features",
+              ar: "مميزات المعدات"
+            },
+            {
+              key: "service",
+              icon: "🧑‍💻",
+              en: "Services Available",
+              ar: "الخدمات المتاحة"
+            },
+            {
+              key: "media",
+              icon: "🎥",
+              en: "Media & Production",
+              ar: "الإنتاج والتصوير"
+            },
+            {
+              key: "custom",
+              icon: "➕",
+              en: "Custom Features",
+              ar: "مميزات مخصصة"
+            }
+          ].map((group) => {
+            const items = featureGroups[group.key] || [];
+
+            if (!items.length) return null;
+
+            return (
+              <div className="card public-feature-card" key={group.key}>
+                <div className="public-feature-head">
+                  <span className="accordion-icon">{group.icon}</span>
+
+                  <div>
+                    <h2>
+                      <T en={group.en} ar={group.ar} />
+                    </h2>
+                    <p>
+                      {items.length} <T en="items" ar="عنصر" />
+                    </p>
+                  </div>
+                </div>
+
+                <div className="feature-pill-wrap">
+                  {items.map((item) => (
+                    <span className="feature-pill" key={item.id}>
+                      <T
+                        en={
+                          item.feature?.name_en ||
+                          item.custom_name ||
+                          "Feature"
+                        }
+                        ar={
+                          item.feature?.name_ar ||
+                          item.custom_name ||
+                          "ميزة"
+                        }
+                      />
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="card">
+          <h2>
+            <T en="No features added yet" ar="لم تتم إضافة مميزات بعد" />
+          </h2>
+          <p>
+            <T
+              en="The studio owner has not added detailed features yet."
+              ar="لم يقم صاحب الاستوديو بإضافة تفاصيل المميزات حتى الآن."
+            />
+          </p>
+        </div>
+      )}
+
+      <div style={{ height: 28 }} />
+
+      <div className="section-head">
+        <span className="badge">
+          <T en="Equipment" ar="المعدات" />
+        </span>
+
+        <h1>
+          <T en="Studio equipment" ar="معدات الاستوديو" />
+        </h1>
+      </div>
+
+      {equipment?.length ? (
+        <div className="equipment-public-grid">
+          {equipment.map((item) => (
+            <div className="card equipment-public-card" key={item.id}>
+              <div className="equipment-icon">🎚️</div>
+
+              <div>
+                <h2>{item.name}</h2>
+
+                <p>
+                  {[item.brand, item.model, item.category]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+
+                <p>
+                  <T en="Quantity:" ar="الكمية:" /> {item.quantity}
+                </p>
+
+                {item.notes ? <p>{item.notes}</p> : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card">
+          <h2>
+            <T en="No equipment listed yet" ar="لا توجد معدات مدرجة بعد" />
+          </h2>
+          <p>
+            <T
+              en="Detailed equipment will appear here once the studio owner adds it."
+              ar="ستظهر المعدات التفصيلية هنا بعد أن يضيفها صاحب الاستوديو."
+            />
+          </p>
+        </div>
+      )}
 
       <div style={{ height: 34 }} />
 
