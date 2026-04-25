@@ -131,6 +131,7 @@ export default async function AdminBookingsPage() {
     }
 
     revalidatePath("/admin/bookings");
+    revalidatePath(`/admin/bookings/${bookingId}`);
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
 
@@ -170,6 +171,7 @@ export default async function AdminBookingsPage() {
     }
 
     revalidatePath("/admin/bookings");
+    revalidatePath(`/admin/bookings/${bookingId}`);
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
 
@@ -533,10 +535,17 @@ export default async function AdminBookingsPage() {
                       <td>
                         <div className="admin-studio-actions">
                           <div className="actions">
+                            <Link
+                              href={`/admin/bookings/${booking.id}`}
+                              className="btn btn-small"
+                            >
+                              <T en="Details" ar="التفاصيل" />
+                            </Link>
+
                             {studioSlug ? (
                               <Link
                                 href={`/studios/${studioSlug}`}
-                                className="btn btn-small"
+                                className="btn btn-secondary btn-small"
                               >
                                 <T en="Studio" ar="الاستوديو" />
                               </Link>
