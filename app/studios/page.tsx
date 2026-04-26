@@ -46,6 +46,43 @@ function intersectMany(arrays: string[][]) {
   return Array.from(result);
 }
 
+function isStudioBookable(studio: any) {
+  return (
+    studio.status === "approved" &&
+    studio.verified === true &&
+    studio.booking_enabled === true &&
+    studio.owner_compliance_status === "approved"
+  );
+}
+
+function getStudioAvailabilityReason(studio: any) {
+  if (!studio.verified) {
+    return {
+      en: "Waiting for studio verification",
+      ar: "بانتظار توثيق الاستوديو"
+    };
+  }
+
+  if (studio.owner_compliance_status !== "approved") {
+    return {
+      en: "Owner business verification pending",
+      ar: "بانتظار اعتماد بيانات المالك التجارية"
+    };
+  }
+
+  if (!studio.booking_enabled) {
+    return {
+      en: "Booking is not active yet",
+      ar: "الحجز غير مفعل بعد"
+    };
+  }
+
+  return {
+    en: "Coming soon",
+    ar: "قريبًا"
+  };
+}
+
 export default async function StudiosPage({
   searchParams
 }: {
@@ -69,7 +106,9 @@ export default async function StudiosPage({
   const selectedEquipmentCategories = toArray(params.equipment_categories);
 
   const selectedEquipmentBrand = String(params.equipment_brand || "").trim();
-  const equipmentKeyword = String(params.equipment_q || "").trim().replaceAll(",", " ");
+  const equipmentKeyword = String(params.equipment_q || "")
+    .trim()
+    .replaceAll(",", " ");
 
   const sort = String(params.sort || "newest");
 
@@ -152,11 +191,17 @@ export default async function StudiosPage({
       .select("studio_id,name,brand,model,category");
 
     if (selectedEquipmentCategories.length > 0) {
-      equipmentQuery = equipmentQuery.in("category", selectedEquipmentCategories);
+      equipmentQuery = equipmentQuery.in(
+        "category",
+        selectedEquipmentCategories
+      );
     }
 
     if (selectedEquipmentBrand) {
-      equipmentQuery = equipmentQuery.ilike("brand", `%${selectedEquipmentBrand}%`);
+      equipmentQuery = equipmentQuery.ilike(
+        "brand",
+        `%${selectedEquipmentBrand}%`
+      );
     }
 
     if (equipmentKeyword) {
@@ -179,7 +224,7 @@ export default async function StudiosPage({
   let studiosQuery = supabase
     .from("studios")
     .select(
-      "id,name,slug,city,district,price_from,status,cover_image_url,verified,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at"
+      "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at"
     )
     .eq("status", "approved");
 
@@ -214,7 +259,10 @@ export default async function StudiosPage({
   }
 
   if (minTripAdvisorRating > 0) {
-    studiosQuery = studiosQuery.gte("tripadvisor_rating", minTripAdvisorRating);
+    studiosQuery = studiosQuery.gte(
+      "tripadvisor_rating",
+      minTripAdvisorRating
+    );
   }
 
   if (finalMatchingStudioIds) {
@@ -383,7 +431,11 @@ export default async function StudiosPage({
             <T en="District" ar="الحي" />
           </label>
 
-          <select className="input" name="district" defaultValue={selectedDistrict}>
+          <select
+            className="input"
+            name="district"
+            defaultValue={selectedDistrict}
+          >
             <option value="">All districts</option>
             {districts.map((district) => (
               <option value={district} key={district}>
@@ -645,84 +697,118 @@ export default async function StudiosPage({
 
       <div className="grid">
         {studios?.length ? (
-          studios.map((studio) => (
-            <article className="card studio-card" key={studio.id}>
-              <div className="studio-cover">
-                {studio.cover_image_url ? (
-                  <img src={studio.cover_image_url} alt={studio.name} />
-                ) : (
-                  <div className="placeholder">
-                    <T en="No Image" ar="لا توجد صورة" />
-                  </div>
-                )}
+          studios.map((studio) => {
+            const bookable = isStudioBookable(studio);
+            const availabilityReason = getStudioAvailabilityReason(studio);
 
-                <div className="studio-card-floating-badges">
-                  {studio.verified ? (
-                    <span className="badge">
-                      <T en="Verified" ar="موثق" />
-                    </span>
-                  ) : null}
+            return (
+              <article className="card studio-card" key={studio.id}>
+                <div className="studio-cover">
+                  {studio.cover_image_url ? (
+                    <img src={studio.cover_image_url} alt={studio.name} />
+                  ) : (
+                    <div className="placeholder">
+                      <T en="No Image" ar="لا توجد صورة" />
+                    </div>
+                  )}
 
-                  {studio.google_rating ? (
-                    <span className="badge">
-                      {studio.google_rating} ★ Google
-                    </span>
-                  ) : null}
+                  <div className="studio-card-floating-badges">
+                    {bookable ? (
+                      <span className="badge studio-bookable-badge">
+                        <T en="Bookable" ar="قابل للحجز" />
+                      </span>
+                    ) : (
+                      <span className="badge studio-coming-soon-badge">
+                        <T en="Coming Soon" ar="قريبًا" />
+                      </span>
+                    )}
 
-                  {studio.tripadvisor_rating ? (
-                    <span className="badge">
-                      {studio.tripadvisor_rating} ★ TripAdvisor
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="studio-card-body">
-                <div>
-                  <span className="badge">
-                    <T en="Available" ar="متاح" />
-                  </span>
-
-                  <h2>{studio.name}</h2>
-
-                  <p>
-                    {studio.city}
-                    {studio.district ? ` · ${studio.district}` : ""}
-                  </p>
-
-                  <div className="studio-trust-mini">
-                    {studio.google_user_ratings_total ? (
-                      <span>
-                        Google: {studio.google_user_ratings_total}{" "}
-                        <T en="reviews" ar="تقييم" />
+                    {studio.verified ? (
+                      <span className="badge">
+                        <T en="Verified" ar="موثق" />
                       </span>
                     ) : null}
 
-                    {studio.tripadvisor_reviews_total ? (
-                      <span>
-                        TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
-                        <T en="reviews" ar="تقييم" />
+                    {studio.google_rating ? (
+                      <span className="badge">
+                        {studio.google_rating} ★ Google
+                      </span>
+                    ) : null}
+
+                    {studio.tripadvisor_rating ? (
+                      <span className="badge">
+                        {studio.tripadvisor_rating} ★ TripAdvisor
                       </span>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="studio-card-footer">
-                  <p>
-                    <T en="From" ar="من" />{" "}
-                    <strong>{studio.price_from ?? 0} SAR</strong>
-                  </p>
+                <div className="studio-card-body">
+                  <div>
+                    <span className="badge">
+                      {bookable ? (
+                        <T en="Available for booking" ar="متاح للحجز" />
+                      ) : (
+                        <T en="Not bookable yet" ar="غير قابل للحجز بعد" />
+                      )}
+                    </span>
 
-                  <Link
-                    href={`/studios/${studio.slug}`}
-                    className="btn btn-small"
-                  >
-                    <T en="View Details" ar="عرض التفاصيل" />
-                  </Link>
+                    <h2>{studio.name}</h2>
+
+                    <p>
+                      {studio.city}
+                      {studio.district ? ` · ${studio.district}` : ""}
+                    </p>
+
+                    {!bookable ? (
+                      <p className="studio-card-availability-note">
+                        <T
+                          en={availabilityReason.en}
+                          ar={availabilityReason.ar}
+                        />
+                      </p>
+                    ) : null}
+
+                    <div className="studio-trust-mini">
+                      {studio.google_user_ratings_total ? (
+                        <span>
+                          Google: {studio.google_user_ratings_total}{" "}
+                          <T en="reviews" ar="تقييم" />
+                        </span>
+                      ) : null}
+
+                      {studio.tripadvisor_reviews_total ? (
+                        <span>
+                          TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
+                          <T en="reviews" ar="تقييم" />
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="studio-card-footer">
+                    <p>
+                      <T en="From" ar="من" />{" "}
+                      <strong>{studio.price_from ?? 0} SAR</strong>
+                    </p>
+
+                    <Link
+                      href={`/studios/${studio.slug}`}
+                      className={
+                        bookable ? "btn btn-small" : "btn btn-secondary btn-small"
+                      }
+                    >
+                      {bookable ? (
+                        <T en="View & Book" ar="عرض وحجز" />
+                      ) : (
+                        <T en="View Details" ar="عرض التفاصيل" />
+                      )}
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            );
+          })
         ) : (
           <div className="card">
             <h2>
