@@ -1,67 +1,60 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
+import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 
-function cleanPhone(phone: string) {
-  return phone.replace(/\s+/g, "").trim();
+function cleanText(value: FormDataEntryValue | null) {
+  return String(value || "").trim();
 }
 
-function cleanIdentityNumber(value: string) {
+function cleanPhone(value: string) {
   return value.replace(/\s+/g, "").trim();
 }
 
-export default function SignupPage() {
-  async function signUp(formData: FormData) {
+function normalizeRole(value: string) {
+  if (value === "owner") return "owner";
+  return "customer";
+}
+
+export default async function SignupPage({
+  searchParams
+}: {
+  searchParams?: Promise<{ error?: string; success?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+
+  async function signup(formData: FormData) {
     "use server";
 
     const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
 
-    const fullName = String(formData.get("full_name") || "").trim();
-    const email = String(formData.get("email") || "").trim().toLowerCase();
-    const phone = cleanPhone(String(formData.get("phone") || ""));
+    const fullName = cleanText(formData.get("full_name"));
+    const email = cleanText(formData.get("email")).toLowerCase();
+    const phone = cleanPhone(cleanText(formData.get("phone")));
     const password = String(formData.get("password") || "");
-    const role = String(formData.get("role") || "customer");
-    const identityType = String(formData.get("identity_type") || "").trim();
-    const identityNumber = cleanIdentityNumber(
-      String(formData.get("identity_number") || "")
-    );
+    const confirmPassword = String(formData.get("confirm_password") || "");
+    const role = normalizeRole(cleanText(formData.get("role")));
 
-    if (!fullName) {
+    if (!fullName || fullName.length < 2) {
       throw new Error("Full name is required.");
     }
 
-    if (!email) {
-      throw new Error("Email is required.");
+    if (!email || !email.includes("@")) {
+      throw new Error("Valid email is required.");
     }
 
     if (!phone || phone.length < 8) {
-      throw new Error("Please enter a valid phone number.");
+      throw new Error("Valid phone number is required.");
     }
 
-    if (!password || password.length < 8) {
-      throw new Error("Password must be at least 8 characters.");
+    if (!password || password.length < 6) {
+      throw new Error("Password must be at least 6 characters.");
     }
 
-    const allowedRoles = ["customer", "owner"];
-
-    if (!allowedRoles.includes(role)) {
-      throw new Error("Invalid account type.");
-    }
-
-    const allowedIdentityTypes = [
-      "national_id",
-      "iqama",
-      "passport",
-      "gcc_id"
-    ];
-
-    if (!allowedIdentityTypes.includes(identityType)) {
-      throw new Error("Identity type is required.");
-    }
-
-    if (!identityNumber || identityNumber.length < 5) {
-      throw new Error("Please enter a valid identity number.");
+    if (password !== confirmPassword) {
+      throw new Error("Passwords do not match.");
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -75,9 +68,7 @@ export default function SignupPage() {
           phone_number: phone,
           mobile: phone,
           role,
-          identity_type: identityType,
-          identity_number: identityNumber,
-          identity_locked: true
+          account_type: role
         }
       }
     });
@@ -88,28 +79,43 @@ export default function SignupPage() {
 
     const userId = data.user?.id;
 
-    if (userId) {
-      await supabase.from("profiles").upsert(
-        {
-          auth_user_id: userId,
-          email,
-          full_name: fullName,
-          phone,
-          role,
-          identity_type: identityType,
-          identity_number: identityNumber,
-          identity_locked: true,
-          identity_created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          onConflict: "auth_user_id"
-        }
-      );
+    if (!userId) {
+      redirect("/login?signedup=1");
     }
 
+    const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
+      {
+        auth_user_id: userId,
+        email,
+        full_name: fullName,
+        phone,
+        role,
+        account_status: "active",
+        updated_at: new Date().toISOString()
+      },
+      {
+        onConflict: "auth_user_id"
+      }
+    );
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        full_name: fullName,
+        name: fullName,
+        phone,
+        phone_number: phone,
+        mobile: phone,
+        role,
+        account_type: role
+      }
+    });
+
     if (role === "owner") {
-      redirect("/owner");
+      redirect("/owner/onboarding");
     }
 
     redirect("/customer");
@@ -129,12 +135,24 @@ export default function SignupPage() {
 
           <p>
             <T
-              en="Create your account to book studios or list your own studio."
-              ar="أنشئ حسابك لحجز الاستوديوهات أو إضافة استوديو خاص بك."
+              en="Create your account as a customer or studio owner."
+              ar="أنشئ حسابك كعميل أو صاحب استوديو."
             />
           </p>
 
-          <form className="form" action={signUp}>
+          {params?.error ? (
+            <div className="error">
+              <T en="Signup failed. Please try again." ar="فشل التسجيل. حاول مرة أخرى." />
+            </div>
+          ) : null}
+
+          {params?.success ? (
+            <div className="success">
+              <T en="Account created successfully." ar="تم إنشاء الحساب بنجاح." />
+            </div>
+          ) : null}
+
+          <form className="form" action={signup}>
             <label>
               <T en="Full name" ar="الاسم الكامل" />
             </label>
@@ -171,32 +189,21 @@ export default function SignupPage() {
             />
 
             <label>
-              <T en="Identity type" ar="نوع الهوية" />
+              <T en="Account type" ar="نوع الحساب" />
             </label>
-            <select className="input" name="identity_type" required>
-              <option value="">Select identity type / اختر نوع الهوية</option>
-              <option value="national_id">National ID / هوية وطنية</option>
-              <option value="iqama">Iqama / إقامة</option>
-              <option value="passport">Passport / جواز سفر</option>
-              <option value="gcc_id">GCC ID / هوية خليجية</option>
+            <select className="input" name="role" required defaultValue="customer">
+              <option value="customer">
+                Customer / عميل
+              </option>
+              <option value="owner">
+                Studio Owner / صاحب استوديو
+              </option>
             </select>
-
-            <label>
-              <T en="Identity number" ar="رقم الهوية" />
-            </label>
-            <input
-              className="input"
-              name="identity_number"
-              type="text"
-              placeholder="Identity / Iqama / Passport number"
-              required
-              minLength={5}
-            />
 
             <p className="admin-muted-line">
               <T
-                en="Identity details cannot be changed after signup."
-                ar="لا يمكن تغيير بيانات الهوية بعد إنشاء الحساب."
+                en="Studio owners must complete business onboarding before bookings can be activated."
+                ar="أصحاب الاستوديوهات يجب أن يكملوا بيانات الشركة والوثائق قبل تفعيل الحجوزات."
               />
             </p>
 
@@ -207,30 +214,37 @@ export default function SignupPage() {
               className="input"
               name="password"
               type="password"
-              placeholder="Minimum 8 characters"
+              placeholder="Minimum 6 characters"
               required
-              minLength={8}
+              minLength={6}
             />
 
             <label>
-              <T en="Account type" ar="نوع الحساب" />
+              <T en="Confirm password" ar="تأكيد كلمة المرور" />
             </label>
-            <select className="input" name="role" defaultValue="customer" required>
-              <option value="customer">Customer / عميل</option>
-              <option value="owner">Studio Owner / صاحب استوديو</option>
-            </select>
+            <input
+              className="input"
+              name="confirm_password"
+              type="password"
+              placeholder="Confirm password"
+              required
+              minLength={6}
+            />
 
             <button className="btn" type="submit">
               <T en="Create Account" ar="إنشاء الحساب" />
             </button>
           </form>
 
-          <p style={{ marginTop: 18 }}>
-            <T en="Already have an account?" ar="لديك حساب بالفعل؟" />{" "}
-            <Link href="/login">
-              <T en="Login" ar="تسجيل الدخول" />
+          <div className="actions" style={{ marginTop: 18 }}>
+            <Link href="/login" className="btn btn-secondary">
+              <T en="Already have an account?" ar="لديك حساب بالفعل؟" />
             </Link>
-          </p>
+
+            <Link href="/" className="btn btn-secondary">
+              <T en="Back to Home" ar="العودة للرئيسية" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
