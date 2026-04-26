@@ -4616,3 +4616,89 @@ body:has(.staff-login-clean-page) .main {
     padding: 24px;
   }
 }
+/* ADMIN OWNER COMPLIANCE */
+
+.owner-compliance-list {
+  display: grid;
+  gap: 24px;
+}
+
+.owner-compliance-admin-card {
+  display: grid;
+  gap: 22px;
+}
+
+.owner-compliance-admin-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.owner-compliance-admin-head h2 {
+  margin: 12px 0 8px;
+}
+
+.owner-compliance-admin-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.owner-compliance-admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.owner-compliance-admin-grid h3 {
+  margin: 0 0 12px;
+  color: white;
+}
+
+.owner-compliance-admin-grid p {
+  color: var(--soft);
+  line-height: 1.7;
+}
+
+.owner-admin-document-list,
+.owner-admin-studio-list {
+  display: grid;
+  gap: 12px;
+}
+
+.owner-admin-document-list div,
+.owner-admin-studio-list div,
+.owner-admin-agreement-box {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.owner-admin-studio-list div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.owner-compliance-admin-review {
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.owner-compliance-admin-review h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 960px) {
+  .owner-compliance-admin-head {
+    flex-direction: column;
+  }
+
+  .owner-compliance-admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
