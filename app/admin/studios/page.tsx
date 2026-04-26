@@ -28,6 +28,38 @@ function studioStatusStyle(status: string) {
   };
 }
 
+function ownerStatusStyle(status: string) {
+  if (status === "active") {
+    return {
+      background: "rgba(30, 215, 96, 0.18)",
+      color: "#1ed760",
+      border: "1px solid rgba(30, 215, 96, 0.45)"
+    };
+  }
+
+  if (status === "pending_deletion" || status === "suspended") {
+    return {
+      background: "rgba(255, 193, 7, 0.18)",
+      color: "#ffc107",
+      border: "1px solid rgba(255, 193, 7, 0.45)"
+    };
+  }
+
+  if (status === "deleted") {
+    return {
+      background: "rgba(255, 75, 75, 0.18)",
+      color: "#ff4b4b",
+      border: "1px solid rgba(255, 75, 75, 0.45)"
+    };
+  }
+
+  return {
+    background: "rgba(255, 255, 255, 0.08)",
+    color: "#dbe7ff",
+    border: "1px solid rgba(255, 255, 255, 0.14)"
+  };
+}
+
 export default async function AdminStudiosPage() {
   const { admin } = await requireAdminRole(["operations", "content", "sales"]);
   const supabaseAdmin = createAdminClient();
@@ -70,7 +102,8 @@ export default async function AdminStudiosPage() {
     const { error } = await supabaseAdmin
       .from("studios")
       .update({
-        status
+        status,
+        updated_at: new Date().toISOString()
       })
       .eq("id", studioId);
 
@@ -113,7 +146,8 @@ export default async function AdminStudiosPage() {
     const { error } = await supabaseAdmin
       .from("studios")
       .update({
-        verified
+        verified,
+        updated_at: new Date().toISOString()
       })
       .eq("id", studioId);
 
@@ -158,6 +192,25 @@ export default async function AdminStudiosPage() {
     `)
     .order("created_at", { ascending: false });
 
+  const ownerIds = Array.from(
+    new Set(
+      (studios || [])
+        .map((studio) => studio.owner_auth_user_id)
+        .filter(Boolean)
+    )
+  );
+
+  const { data: ownerProfiles } = ownerIds.length
+    ? await supabaseAdmin
+        .from("profiles")
+        .select("auth_user_id, full_name, email, phone, role, account_status")
+        .in("auth_user_id", ownerIds)
+    : { data: [] };
+
+  const ownerProfileMap = new Map(
+    (ownerProfiles || []).map((profile) => [profile.auth_user_id, profile])
+  );
+
   const totalStudios = studios?.length || 0;
   const approvedStudios =
     studios?.filter((studio) => studio.status === "approved").length || 0;
@@ -181,8 +234,8 @@ export default async function AdminStudiosPage() {
 
         <p>
           <T
-            en="Review all studios, approve or suspend listings, manage verification, and monitor trust sources."
-            ar="راجع كل الاستوديوهات، اعتمد أو أوقف القوائم، أدر التوثيق، وراقب مصادر الثقة."
+            en="Review all studios, approve or suspend listings, manage verification, monitor trust sources, and identify each studio owner."
+            ar="راجع كل الاستوديوهات، اعتمد أو أوقف القوائم، أدر التوثيق، راقب مصادر الثقة، وتعرّف على صاحب كل استوديو."
           />
         </p>
       </div>
@@ -279,6 +332,9 @@ export default async function AdminStudiosPage() {
                   <T en="Studio" ar="الاستوديو" />
                 </th>
                 <th>
+                  <T en="Studio Owner" ar="صاحب الاستوديو" />
+                </th>
+                <th>
                   <T en="Location" ar="الموقع" />
                 </th>
                 <th>
@@ -310,11 +366,83 @@ export default async function AdminStudiosPage() {
                     ? studio.reviews.length
                     : 0;
 
+                  const ownerProfile = studio.owner_auth_user_id
+                    ? ownerProfileMap.get(studio.owner_auth_user_id)
+                    : null;
+
                   return (
                     <tr key={studio.id}>
                       <td>
                         <strong>{studio.name}</strong>
                         <p className="admin-muted-line">{studio.slug}</p>
+                      </td>
+
+                      <td>
+                        {studio.owner_auth_user_id ? (
+                          ownerProfile ? (
+                            <div className="admin-owner-cell">
+                              <strong>
+                                {ownerProfile.full_name || "Studio Owner"}
+                              </strong>
+
+                              <p className="admin-muted-line">
+                                {ownerProfile.email || "No email"}
+                              </p>
+
+                              <p className="admin-muted-line">
+                                {ownerProfile.phone || "No phone"}
+                              </p>
+
+                              <div className="admin-badge-stack">
+                                <span
+                                  className="badge"
+                                  style={ownerStatusStyle(
+                                    ownerProfile.account_status || "active"
+                                  )}
+                                >
+                                  {ownerProfile.account_status || "active"}
+                                </span>
+
+                                <span className="badge">
+                                  {ownerProfile.role || "owner"}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="admin-owner-cell">
+                              <strong>
+                                <T
+                                  en="Linked without profile"
+                                  ar="مربوط بدون ملف شخصي"
+                                />
+                              </strong>
+
+                              <p className="admin-muted-line">
+                                <T
+                                  en="Owner ID exists, but no profile was found."
+                                  ar="يوجد رقم مالك، لكن لا يوجد ملف شخصي."
+                                />
+                              </p>
+
+                              <p className="admin-muted-line">
+                                {studio.owner_auth_user_id}
+                              </p>
+                            </div>
+                          )
+                        ) : (
+                          <div className="admin-owner-cell">
+                            <strong>
+                              <T en="Not linked" ar="غير مربوط" />
+                            </strong>
+
+                            <p className="admin-muted-line">
+                              <T
+                                en="No owner assigned to this studio."
+                                ar="لا يوجد صاحب استوديو مربوط بهذا الاستوديو."
+                              />
+                            </p>
+                          </div>
+                        )}
                       </td>
 
                       <td>
@@ -563,7 +691,7 @@ export default async function AdminStudiosPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <T en="No studios found." ar="لا توجد استوديوهات." />
                   </td>
                 </tr>
