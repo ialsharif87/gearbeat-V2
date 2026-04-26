@@ -4361,3 +4361,8 @@ html[dir="rtl"] .contact-floating-card {
     font-size: 2.45rem;
   }
 }
+.admin-review-form {
+  display: grid;
+  gap: 10px;
+  min-width: 260px;
+}
