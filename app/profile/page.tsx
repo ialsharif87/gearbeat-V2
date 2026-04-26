@@ -44,19 +44,11 @@ function getRoleLabel(role: string) {
 }
 
 function getIdentityType(user: any, profile: any) {
-  return (
-    profile?.identity_type ||
-    user?.user_metadata?.identity_type ||
-    ""
-  );
+  return profile?.identity_type || user?.user_metadata?.identity_type || "";
 }
 
 function getIdentityNumber(user: any, profile: any) {
-  return (
-    profile?.identity_number ||
-    user?.user_metadata?.identity_number ||
-    ""
-  );
+  return profile?.identity_number || user?.user_metadata?.identity_number || "";
 }
 
 function getIdentityLabel(identityType: string) {
@@ -81,7 +73,7 @@ export default async function ProfilePage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id,auth_user_id,email,full_name,phone,role,identity_type,identity_number,identity_locked,identity_created_at,updated_at"
+      "id,auth_user_id,email,full_name,phone,role,identity_type,identity_number,identity_locked,identity_created_at,account_status,deletion_requested_at,updated_at"
     )
     .eq("auth_user_id", user.id)
     .maybeSingle();
@@ -98,6 +90,8 @@ export default async function ProfilePage() {
     Boolean(currentIdentityType) &&
     Boolean(currentIdentityNumber);
 
+  const accountStatus = profile?.account_status || "active";
+
   async function updateProfile(formData: FormData) {
     "use server";
 
@@ -113,9 +107,17 @@ export default async function ProfilePage() {
 
     const { data: existingProfile } = await supabase
       .from("profiles")
-      .select("role,identity_type,identity_number,identity_locked")
+      .select("role,identity_type,identity_number,identity_locked,account_status")
       .eq("auth_user_id", user.id)
       .maybeSingle();
+
+    if (existingProfile?.account_status === "pending_deletion") {
+      throw new Error("This account is pending deletion and cannot be updated.");
+    }
+
+    if (existingProfile?.account_status === "deleted") {
+      throw new Error("This account has been deleted.");
+    }
 
     const existingRole =
       existingProfile?.role || user.user_metadata?.role || "customer";
@@ -217,6 +219,7 @@ export default async function ProfilePage() {
         identity_created_at: finalIdentityLocked
           ? new Date().toISOString()
           : null,
+        account_status: existingProfile?.account_status || "active",
         updated_at: new Date().toISOString()
       },
       {
@@ -254,6 +257,23 @@ export default async function ProfilePage() {
             />
           </p>
 
+          {accountStatus === "pending_deletion" ? (
+            <div className="profile-warning-box">
+              <strong>
+                <T
+                  en="Account deletion requested"
+                  ar="تم طلب حذف الحساب"
+                />
+              </strong>
+              <p>
+                <T
+                  en="Your account is pending deletion review. Profile updates are disabled until the request is reviewed."
+                  ar="حسابك قيد مراجعة طلب الحذف. تم إيقاف تعديل الملف الشخصي حتى تتم مراجعة الطلب."
+                />
+              </p>
+            </div>
+          ) : null}
+
           <form className="form" action={updateProfile}>
             <label>
               <T en="Full name" ar="الاسم الكامل" />
@@ -266,6 +286,7 @@ export default async function ProfilePage() {
               placeholder="Your full name"
               required
               minLength={2}
+              disabled={accountStatus === "pending_deletion"}
             />
 
             <label>
@@ -297,6 +318,7 @@ export default async function ProfilePage() {
               placeholder="+9665XXXXXXXX"
               required
               minLength={8}
+              disabled={accountStatus === "pending_deletion"}
             />
 
             <label>
@@ -316,6 +338,17 @@ export default async function ProfilePage() {
                 ar="لا يمكن تغيير نوع الحساب من هذه الصفحة. يتم اختياره عند إنشاء الحساب."
               />
             </p>
+
+            <label>
+              <T en="Account status" ar="حالة الحساب" />
+            </label>
+            <input
+              className="input"
+              name="account_status_display"
+              type="text"
+              value={accountStatus}
+              readOnly
+            />
 
             <div className="profile-identity-box">
               <span className="badge">
@@ -365,7 +398,12 @@ export default async function ProfilePage() {
                   <label>
                     <T en="Identity type" ar="نوع الهوية" />
                   </label>
-                  <select className="input" name="identity_type" required>
+                  <select
+                    className="input"
+                    name="identity_type"
+                    required
+                    disabled={accountStatus === "pending_deletion"}
+                  >
                     <option value="">
                       Select identity type / اختر نوع الهوية
                     </option>
@@ -387,14 +425,17 @@ export default async function ProfilePage() {
                     placeholder="Identity / Iqama / Passport number"
                     required
                     minLength={5}
+                    disabled={accountStatus === "pending_deletion"}
                   />
                 </>
               )}
             </div>
 
-            <button className="btn" type="submit">
-              <T en="Save Profile" ar="حفظ البيانات" />
-            </button>
+            {accountStatus !== "pending_deletion" ? (
+              <button className="btn" type="submit">
+                <T en="Save Profile" ar="حفظ البيانات" />
+              </button>
+            ) : null}
           </form>
 
           <div className="actions" style={{ marginTop: 18 }}>
@@ -407,6 +448,27 @@ export default async function ProfilePage() {
                 <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
               </Link>
             ) : null}
+          </div>
+
+          <div className="profile-danger-zone">
+            <span className="badge">
+              <T en="Danger Zone" ar="منطقة حساسة" />
+            </span>
+
+            <h2>
+              <T en="Delete account" ar="حذف الحساب" />
+            </h2>
+
+            <p>
+              <T
+                en="You can request to delete your account. Some booking records may remain for legal, operational, reporting, or safety purposes."
+                ar="يمكنك طلب حذف حسابك. قد تبقى بعض سجلات الحجوزات لأغراض قانونية أو تشغيلية أو تقارير أو أمان."
+              />
+            </p>
+
+            <Link href="/account/delete" className="btn btn-secondary">
+              <T en="Request Account Deletion" ar="طلب حذف الحساب" />
+            </Link>
           </div>
         </div>
       </div>
