@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import "./globals.css";
 import { createClient } from "../lib/supabase/server";
+import { createAdminClient } from "../lib/supabase/admin";
 import T from "../components/t";
 import LanguageSwitcher from "../components/language-switcher";
 import Footer from "../components/footer";
@@ -12,11 +13,12 @@ export const metadata: Metadata = {
   description: "Book music studios and creative spaces."
 };
 
-function getDashboardPath(user: any) {
+function getDashboardPath(user: any, adminUser: any) {
+  if (adminUser) return "/admin";
+
   const role = user?.user_metadata?.role;
 
   if (role === "owner") return "/owner";
-  if (role === "admin") return "/admin";
 
   return "/customer";
 }
@@ -27,10 +29,24 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
+
+  let adminUser = null;
+
+  if (user) {
+    const { data } = await supabaseAdmin
+      .from("admin_users")
+      .select("id, email, admin_role, status")
+      .eq("auth_user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    adminUser = data;
+  }
 
   async function logout() {
     "use server";
@@ -41,7 +57,9 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const dashboardPath = user ? getDashboardPath(user) : "/login";
+  const dashboardPath = user ? getDashboardPath(user, adminUser) : "/login";
+  const isAdmin = Boolean(adminUser);
+  const userRole = user?.user_metadata?.role || "customer";
 
   return (
     <html lang="ar" dir="rtl">
@@ -74,16 +92,30 @@ export default async function RootLayout({
               {user ? (
                 <>
                   <Link href={dashboardPath}>
-                    <T en="Dashboard" ar="لوحة التحكم" />
+                    {isAdmin ? (
+                      <T en="Admin Dashboard" ar="لوحة الإدارة" />
+                    ) : (
+                      <T en="Dashboard" ar="لوحة التحكم" />
+                    )}
                   </Link>
 
-                  <Link href="/customer/bookings">
-                    <T en="My Bookings" ar="حجوزاتي" />
-                  </Link>
+                  {!isAdmin ? (
+                    <>
+                      <Link href="/customer/bookings">
+                        <T en="My Bookings" ar="حجوزاتي" />
+                      </Link>
 
-                  <Link href="/profile">
-                    <T en="My Profile" ar="ملفي الشخصي" />
-                  </Link>
+                      <Link href="/profile">
+                        <T en="My Profile" ar="ملفي الشخصي" />
+                      </Link>
+                    </>
+                  ) : null}
+
+                  {!isAdmin && userRole === "owner" ? (
+                    <Link href="/owner">
+                      <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
+                    </Link>
+                  ) : null}
 
                   <form action={logout}>
                     <button className="nav-button" type="submit">
