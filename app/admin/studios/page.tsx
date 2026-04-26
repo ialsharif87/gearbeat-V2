@@ -60,6 +60,73 @@ function ownerStatusStyle(status: string) {
   };
 }
 
+function bookingReadinessStyle(isReady: boolean) {
+  if (isReady) {
+    return {
+      background: "rgba(30, 215, 96, 0.18)",
+      color: "#1ed760",
+      border: "1px solid rgba(30, 215, 96, 0.45)"
+    };
+  }
+
+  return {
+    background: "rgba(255, 193, 7, 0.18)",
+    color: "#ffc107",
+    border: "1px solid rgba(255, 193, 7, 0.45)"
+  };
+}
+
+function isStudioBookable(studio: any) {
+  return (
+    studio.status === "approved" &&
+    studio.verified === true &&
+    studio.booking_enabled === true &&
+    studio.owner_compliance_status === "approved"
+  );
+}
+
+function getBookingReadinessReason(studio: any) {
+  if (!studio.owner_auth_user_id) {
+    return {
+      en: "Missing owner",
+      ar: "لا يوجد مالك مربوط"
+    };
+  }
+
+  if (studio.status !== "approved") {
+    return {
+      en: "Studio not approved",
+      ar: "الاستوديو غير معتمد"
+    };
+  }
+
+  if (!studio.verified) {
+    return {
+      en: "Studio not verified",
+      ar: "الاستوديو غير موثق"
+    };
+  }
+
+  if (studio.owner_compliance_status !== "approved") {
+    return {
+      en: "Owner compliance pending",
+      ar: "امتثال المالك غير مكتمل"
+    };
+  }
+
+  if (!studio.booking_enabled) {
+    return {
+      en: "Booking disabled",
+      ar: "الحجز غير مفعل"
+    };
+  }
+
+  return {
+    en: "Ready for booking",
+    ar: "جاهز للحجز"
+  };
+}
+
 export default async function AdminStudiosPage() {
   const { admin } = await requireAdminRole(["operations", "content", "sales"]);
   const supabaseAdmin = createAdminClient();
@@ -174,6 +241,8 @@ export default async function AdminStudiosPage() {
       price_from,
       status,
       verified,
+      booking_enabled,
+      owner_compliance_status,
       google_maps_url,
       google_reviews_url,
       google_rating,
@@ -220,6 +289,8 @@ export default async function AdminStudiosPage() {
     studios?.filter((studio) => studio.status === "suspended").length || 0;
   const verifiedStudios =
     studios?.filter((studio) => studio.verified).length || 0;
+  const bookableStudios =
+    studios?.filter((studio) => isStudioBookable(studio)).length || 0;
 
   return (
     <section>
@@ -234,8 +305,8 @@ export default async function AdminStudiosPage() {
 
         <p>
           <T
-            en="Review all studios, approve or suspend listings, manage verification, monitor trust sources, and identify each studio owner."
-            ar="راجع كل الاستوديوهات، اعتمد أو أوقف القوائم، أدر التوثيق، راقب مصادر الثقة، وتعرّف على صاحب كل استوديو."
+            en="Review all studios, approve or suspend listings, manage verification, monitor trust sources, identify owners, and check booking readiness."
+            ar="راجع كل الاستوديوهات، اعتمد أو أوقف القوائم، أدر التوثيق، راقب مصادر الثقة، وتأكد من جاهزية الحجز."
           />
         </p>
       </div>
@@ -286,6 +357,13 @@ export default async function AdminStudiosPage() {
             <T en="Verified" ar="موثقة" />
           </span>
           <strong>{verifiedStudios}</strong>
+        </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Bookable" ar="قابلة للحجز" />
+          </span>
+          <strong>{bookableStudios}</strong>
         </div>
       </div>
 
@@ -344,6 +422,9 @@ export default async function AdminStudiosPage() {
                   <T en="Status" ar="الحالة" />
                 </th>
                 <th>
+                  <T en="Booking Readiness" ar="جاهزية الحجز" />
+                </th>
+                <th>
                   <T en="Trust" ar="الثقة" />
                 </th>
                 <th>
@@ -369,6 +450,9 @@ export default async function AdminStudiosPage() {
                   const ownerProfile = studio.owner_auth_user_id
                     ? ownerProfileMap.get(studio.owner_auth_user_id)
                     : null;
+
+                  const bookable = isStudioBookable(studio);
+                  const readinessReason = getBookingReadinessReason(studio);
 
                   return (
                     <tr key={studio.id}>
@@ -470,6 +554,40 @@ export default async function AdminStudiosPage() {
                               <T en="Not verified" ar="غير موثق" />
                             </span>
                           )}
+                        </div>
+                      </td>
+
+                      <td>
+                        <div className="admin-booking-readiness-cell">
+                          <span
+                            className="badge"
+                            style={bookingReadinessStyle(bookable)}
+                          >
+                            {bookable ? (
+                              <T en="Ready" ar="جاهز" />
+                            ) : (
+                              <T en="Not Ready" ar="غير جاهز" />
+                            )}
+                          </span>
+
+                          <p className="admin-muted-line">
+                            <T
+                              en={readinessReason.en}
+                              ar={readinessReason.ar}
+                            />
+                          </p>
+
+                          <div className="admin-badge-stack">
+                            <span className="badge">
+                              <T en="Booking:" ar="الحجز:" />{" "}
+                              {studio.booking_enabled ? "On" : "Off"}
+                            </span>
+
+                            <span className="badge">
+                              <T en="Owner compliance:" ar="امتثال المالك:" />{" "}
+                              {studio.owner_compliance_status || "incomplete"}
+                            </span>
+                          </div>
                         </div>
                       </td>
 
@@ -691,7 +809,7 @@ export default async function AdminStudiosPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <T en="No studios found." ar="لا توجد استوديوهات." />
                   </td>
                 </tr>
