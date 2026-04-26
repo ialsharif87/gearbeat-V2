@@ -821,3 +821,16 @@ export default async function AdminStudiosPage() {
     </section>
   );
 }
+.admin-booking-readiness-cell {
+  display: grid;
+  gap: 8px;
+  min-width: 230px;
+}
+
+.admin-booking-readiness-cell p {
+  margin: 0;
+}
+
+.admin-booking-readiness-cell .badge {
+  width: fit-content;
+}
