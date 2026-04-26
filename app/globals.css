@@ -4740,3 +4740,21 @@ body:has(.staff-login-clean-page) .main {
   margin: 0 0 12px;
   color: #dbe7ff;
 }
+.studio-bookable-badge {
+  background: rgba(30, 215, 96, 0.18) !important;
+  color: #1ed760 !important;
+  border: 1px solid rgba(30, 215, 96, 0.45) !important;
+}
+
+.studio-coming-soon-badge {
+  background: rgba(255, 193, 7, 0.18) !important;
+  color: #ffc107 !important;
+  border: 1px solid rgba(255, 193, 7, 0.45) !important;
+}
+
+.studio-card-availability-note {
+  margin: 8px 0 0;
+  color: #ffc107 !important;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
