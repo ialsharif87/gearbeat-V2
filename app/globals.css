@@ -4389,3 +4389,22 @@ html[dir="rtl"] .contact-floating-card {
 .profile-warning-box p {
   margin: 8px 0 0;
 }
+/* ADMIN STUDIO OWNER CELL */
+
+.admin-owner-cell {
+  display: grid;
+  gap: 6px;
+  min-width: 240px;
+}
+
+.admin-owner-cell strong {
+  color: white;
+}
+
+.admin-owner-cell .badge {
+  width: fit-content;
+}
+
+.admin-owner-cell p {
+  margin: 0;
+}
