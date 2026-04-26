@@ -1,305 +1,424 @@
 import Link from "next/link";
-import { requireAdmin, canAccessAdminArea } from "../../lib/admin";
-import { createClient } from "../../lib/supabase/server";
+import { requireAdminRole } from "../../lib/admin";
 import T from "../../components/t";
 
+function roleLabel(role: string) {
+  if (role === "super_admin") return "Super Admin";
+  if (role === "operations") return "Operations";
+  if (role === "support") return "Support";
+  if (role === "content") return "Content";
+  if (role === "sales") return "Sales";
+  return role || "Admin";
+}
+
 export default async function AdminDashboardPage() {
-  const { admin } = await requireAdmin();
-  const supabase = await createClient();
+  const { admin, user } = await requireAdminRole([
+    "operations",
+    "support",
+    "content",
+    "sales"
+  ]);
 
-  const canTeam = canAccessAdminArea(admin.admin_role, "team");
-  const canStudios = canAccessAdminArea(admin.admin_role, "studios");
-  const canBookings = canAccessAdminArea(admin.admin_role, "bookings");
-  const canReviews = canAccessAdminArea(admin.admin_role, "reviews");
-  const canReviewRequests = canAccessAdminArea(
-    admin.admin_role,
-    "review_requests"
-  );
+  const isSuperAdmin = admin.admin_role === "super_admin";
 
-  const { count: studiosCount } = await supabase
-    .from("studios")
-    .select("*", { count: "exact", head: true });
+  const canManageStudios =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "content";
 
-  const { count: bookingsCount } = await supabase
-    .from("bookings")
-    .select("*", { count: "exact", head: true });
+  const canManageOwnerCompliance =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "support";
 
-  const { count: paidBookingsCount } = await supabase
-    .from("bookings")
-    .select("*", { count: "exact", head: true })
-    .eq("payment_status", "paid");
+  const canManageBookings =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "support" ||
+    admin.admin_role === "sales";
 
-  const { count: reviewsCount } = await supabase
-    .from("reviews")
-    .select("*", { count: "exact", head: true });
+  const canManageReviews =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "support" ||
+    admin.admin_role === "content";
 
-  const { count: pendingReviewRequestsCount } = await supabase
-    .from("review_requests")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "pending");
-
-  const { count: sentReviewRequestsCount } = await supabase
-    .from("review_requests")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "sent");
-
-  const { data: recentBookings } = await supabase
-    .from("bookings")
-    .select(`
-      id,
-      booking_date,
-      start_time,
-      end_time,
-      status,
-      payment_status,
-      total_amount,
-      created_at,
-      studios (
-        name,
-        city
-      )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  const { data: recentReviews } = await supabase
-    .from("reviews")
-    .select(`
-      id,
-      rating,
-      comment,
-      created_at,
-      studios (
-        name
-      )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const canViewAudit =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations";
 
   return (
     <section>
       <div className="section-head">
         <span className="badge">
-          <T en="Admin" ar="الإدارة" />
+          <T en="Admin Dashboard" ar="لوحة الإدارة" />
         </span>
 
         <h1>
-          <T en="Admin Dashboard" ar="لوحة تحكم الإدارة" />
+          <T en="GearBeat Control Center" ar="مركز تحكم GearBeat" />
         </h1>
 
         <p>
           <T
-            en="Monitor studios, bookings, payments, reviews, and review request emails based on your admin role."
-            ar="راقب الاستوديوهات، الحجوزات، المدفوعات، التقييمات، وإيميلات طلب التقييم حسب صلاحيتك."
+            en="Manage studios, bookings, reviews, owner onboarding, account deletion requests, and internal platform operations."
+            ar="إدارة الاستوديوهات، الحجوزات، التقييمات، إعداد ملاك الاستوديوهات، طلبات حذف الحسابات، وعمليات المنصة الداخلية."
           />
         </p>
       </div>
 
-      <div className="card">
+      <div className="card admin-notes-card">
         <span className="badge">
-          <T en="Logged in as" ar="تم تسجيل الدخول كـ" />
+          <T en="Current Access" ar="صلاحية الدخول الحالية" />
         </span>
 
-        <h2>{admin.full_name || admin.email}</h2>
+        <h2>{roleLabel(admin.admin_role)}</h2>
 
-        <p>
-          <T en="Role:" ar="الصلاحية:" /> <strong>{admin.admin_role}</strong>
-        </p>
+        <div className="admin-notes-meta">
+          <p>
+            <strong>
+              <T en="Email:" ar="البريد الإلكتروني:" />
+            </strong>{" "}
+            {user?.email || admin.email || "—"}
+          </p>
 
-        <div className="actions">
-          {canTeam ? (
-            <Link href="/admin/team" className="btn">
-              <T en="Manage Team" ar="إدارة الفريق" />
-            </Link>
-          ) : null}
+          <p>
+            <strong>
+              <T en="Role:" ar="الدور:" />
+            </strong>{" "}
+            {roleLabel(admin.admin_role)}
+          </p>
 
-          {canStudios ? (
-            <Link href="/admin/studios" className="btn btn-secondary">
-              <T en="Studios" ar="الاستوديوهات" />
-            </Link>
-          ) : null}
-
-          {canBookings ? (
-            <Link href="/admin/bookings" className="btn btn-secondary">
-              <T en="Bookings" ar="الحجوزات" />
-            </Link>
-          ) : null}
-
-          {canReviews ? (
-            <Link href="/admin/reviews" className="btn btn-secondary">
-              <T en="Reviews" ar="التقييمات" />
-            </Link>
-          ) : null}
-
-          {canReviewRequests ? (
-            <Link href="/admin/review-requests" className="btn btn-secondary">
-              <T en="Review Requests" ar="طلبات التقييم" />
-            </Link>
-          ) : null}
+          <p>
+            <strong>
+              <T en="Status:" ar="الحالة:" />
+            </strong>{" "}
+            {admin.status || "active"}
+          </p>
         </div>
       </div>
 
       <div style={{ height: 24 }} />
 
       <div className="admin-kpi-grid">
-        {canStudios ? (
-          <div className="card admin-kpi-card">
-            <span>
-              <T en="Studios" ar="الاستوديوهات" />
-            </span>
-            <strong>{studiosCount || 0}</strong>
-          </div>
-        ) : null}
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Studios" ar="الاستوديوهات" />
+          </span>
+          <strong>OPS</strong>
+          <p className="admin-muted-line">
+            <T
+              en="Monitor listings, approval, verification, and ownership."
+              ar="مراقبة القوائم، الاعتماد، التوثيق، والملكية."
+            />
+          </p>
+        </div>
 
-        {canBookings ? (
-          <>
-            <div className="card admin-kpi-card">
-              <span>
-                <T en="Bookings" ar="الحجوزات" />
-              </span>
-              <strong>{bookingsCount || 0}</strong>
-            </div>
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Bookings" ar="الحجوزات" />
+          </span>
+          <strong>LIVE</strong>
+          <p className="admin-muted-line">
+            <T
+              en="Review booking status, customers, studios, and operations."
+              ar="مراجعة حالة الحجوزات، العملاء، الاستوديوهات، والعمليات."
+            />
+          </p>
+        </div>
 
-            <div className="card admin-kpi-card">
-              <span>
-                <T en="Paid Bookings" ar="الحجوزات المدفوعة" />
-              </span>
-              <strong>{paidBookingsCount || 0}</strong>
-            </div>
-          </>
-        ) : null}
-
-        {canReviews ? (
-          <div className="card admin-kpi-card">
-            <span>
-              <T en="Reviews" ar="التقييمات" />
-            </span>
-            <strong>{reviewsCount || 0}</strong>
-          </div>
-        ) : null}
-
-        {canReviewRequests ? (
-          <>
-            <div className="card admin-kpi-card">
-              <span>
-                <T en="Pending Review Requests" ar="طلبات تقييم معلقة" />
-              </span>
-              <strong>{pendingReviewRequestsCount || 0}</strong>
-            </div>
-
-            <div className="card admin-kpi-card">
-              <span>
-                <T en="Sent Review Requests" ar="طلبات تقييم مرسلة" />
-              </span>
-              <strong>{sentReviewRequestsCount || 0}</strong>
-            </div>
-          </>
-        ) : null}
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Compliance" ar="الامتثال" />
+          </span>
+          <strong>NEW</strong>
+          <p className="admin-muted-line">
+            <T
+              en="Approve owners after business documents and agreements."
+              ar="اعتماد الملاك بعد بيانات الشركة والوثائق والعقود."
+            />
+          </p>
+        </div>
       </div>
 
       <div style={{ height: 24 }} />
 
       <div className="admin-two-column">
-        {canBookings ? (
-          <div className="card">
-            <span className="badge">
-              <T en="Recent Bookings" ar="آخر الحجوزات" />
-            </span>
+        <div className="card">
+          <span className="badge">
+            <T en="Core Operations" ar="العمليات الأساسية" />
+          </span>
 
-            <h2>
-              <T en="Latest activity" ar="آخر النشاطات" />
-            </h2>
+          <h2>
+            <T en="Platform management" ar="إدارة المنصة" />
+          </h2>
 
-            <div className="admin-list">
-              {recentBookings?.length ? (
-                recentBookings.map((booking) => {
-                  const studio = Array.isArray(booking.studios)
-                    ? booking.studios[0]
-                    : booking.studios;
+          <div className="admin-role-list">
+            {canManageStudios ? (
+              <div>
+                <strong>
+                  <T en="Studios Monitoring" ar="مراقبة الاستوديوهات" />
+                </strong>
 
-                  return (
-                    <div className="admin-list-row" key={booking.id}>
-                      <div>
-                        <strong>{studio?.name || "Studio"}</strong>
-                        <p>
-                          {booking.booking_date} · {booking.start_time} -{" "}
-                          {booking.end_time}
-                        </p>
-                        <p>
-                          {studio?.city || ""} · {booking.total_amount} SAR
-                        </p>
-                      </div>
-
-                      <div>
-                        <span className="badge">{booking.status}</span>
-                        <span className="badge">{booking.payment_status}</span>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
                 <p>
-                  <T en="No bookings yet." ar="لا توجد حجوزات حتى الآن." />
+                  <T
+                    en="Approve, suspend, verify, and review studio ownership."
+                    ar="اعتماد، إيقاف، توثيق، ومراجعة ملكية الاستوديوهات."
+                  />
                 </p>
-              )}
+
+                <div className="actions">
+                  <Link href="/admin/studios" className="btn btn-secondary">
+                    <T en="Open Studios" ar="فتح الاستوديوهات" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {canManageOwnerCompliance ? (
+              <div>
+                <strong>
+                  <T en="Owner Compliance" ar="امتثال ملاك الاستوديوهات" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Review commercial registration, national address, zakat certificate, finance details, and electronic agreement."
+                    ar="مراجعة السجل التجاري، العنوان الوطني، شهادة الزكاة، البيانات المالية، والعقد الإلكتروني."
+                  />
+                </p>
+
+                <div className="actions">
+                  <Link
+                    href="/admin/owner-compliance"
+                    className="btn btn-secondary"
+                  >
+                    <T en="Open Owner Compliance" ar="فتح امتثال الملاك" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {canManageBookings ? (
+              <div>
+                <strong>
+                  <T en="Bookings" ar="الحجوزات" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Monitor booking activity, booking status, customer records, and studio reservations."
+                    ar="مراقبة نشاط الحجوزات، حالة الحجز، سجلات العملاء، وحجوزات الاستوديوهات."
+                  />
+                </p>
+
+                <div className="actions">
+                  <Link href="/admin/bookings" className="btn btn-secondary">
+                    <T en="Open Bookings" ar="فتح الحجوزات" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {canManageReviews ? (
+              <div>
+                <strong>
+                  <T en="Reviews" ar="التقييمات" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Review, publish, hide, and monitor verified booking reviews."
+                    ar="مراجعة، نشر، إخفاء، ومراقبة تقييمات الحجوزات الموثقة."
+                  />
+                </p>
+
+                <div className="actions">
+                  <Link href="/admin/reviews" className="btn btn-secondary">
+                    <T en="Open Reviews" ar="فتح التقييمات" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="card">
+          <span className="badge">
+            <T en="Admin Tools" ar="أدوات الإدارة" />
+          </span>
+
+          <h2>
+            <T en="Controls and governance" ar="التحكم والحوكمة" />
+          </h2>
+
+          <div className="admin-role-list">
+            {isSuperAdmin ? (
+              <div>
+                <strong>
+                  <T en="Admin Team" ar="فريق الإدارة" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Manage internal team access, roles, and admin permissions."
+                    ar="إدارة دخول الفريق الداخلي، الأدوار، وصلاحيات الإدارة."
+                  />
+                </p>
+
+                <div className="actions">
+                  <Link href="/admin/team" className="btn btn-secondary">
+                    <T en="Open Admin Team" ar="فتح فريق الإدارة" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {canManageOwnerCompliance ? (
+              <div>
+                <strong>
+                  <T en="Account Deletion Requests" ar="طلبات حذف الحسابات" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Review and execute account deletion or anonymization requests."
+                    ar="مراجعة وتنفيذ طلبات حذف الحساب أو إخفاء البيانات."
+                  />
+                </p>
+
+                <div className="actions">
+                  <Link
+                    href="/admin/account-deletion-requests"
+                    className="btn btn-secondary"
+                  >
+                    <T en="Open Deletion Requests" ar="فتح طلبات الحذف" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {canViewAudit ? (
+              <div>
+                <strong>
+                  <T en="Audit Log" ar="سجل التدقيق" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Track important admin actions and sensitive account changes."
+                    ar="تتبع إجراءات الإدارة المهمة وتغييرات الحسابات الحساسة."
+                  />
+                </p>
+
+                <div className="actions">
+                  <Link href="/admin/audit-log" className="btn btn-secondary">
+                    <T en="Open Audit Log" ar="فتح سجل التدقيق" />
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            <div>
+              <strong>
+                <T en="Public Site" ar="الموقع العام" />
+              </strong>
+
+              <p>
+                <T
+                  en="Return to the public GearBeat website."
+                  ar="العودة إلى موقع GearBeat العام."
+                />
+              </p>
+
+              <div className="actions">
+                <Link href="/" className="btn btn-secondary">
+                  <T en="Back to Home" ar="العودة للرئيسية" />
+                </Link>
+
+                <Link href="/studios" className="btn btn-secondary">
+                  <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+                </Link>
+              </div>
             </div>
           </div>
-        ) : null}
-
-        {canReviews ? (
-          <div className="card">
-            <span className="badge">
-              <T en="Recent Reviews" ar="آخر التقييمات" />
-            </span>
-
-            <h2>
-              <T en="Latest feedback" ar="آخر الآراء" />
-            </h2>
-
-            <div className="admin-list">
-              {recentReviews?.length ? (
-                recentReviews.map((review) => {
-                  const studio = Array.isArray(review.studios)
-                    ? review.studios[0]
-                    : review.studios;
-
-                  return (
-                    <div className="admin-list-row" key={review.id}>
-                      <div>
-                        <strong>{studio?.name || "Studio"}</strong>
-                        <p>{review.rating} ★</p>
-                        <p>{review.comment || "No written comment"}</p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <p>
-                  <T en="No reviews yet." ar="لا توجد تقييمات حتى الآن." />
-                </p>
-              )}
-            </div>
-          </div>
-        ) : null}
+        </div>
       </div>
 
-      {!canStudios &&
-      !canBookings &&
-      !canReviews &&
-      !canReviewRequests &&
-      !canTeam ? (
-        <div className="card">
-          <h2>
-            <T en="No admin areas available" ar="لا توجد مناطق إدارة متاحة" />
-          </h2>
-          <p>
-            <T
-              en="Your account is active, but it has no assigned permissions yet."
-              ar="حسابك مفعل، لكن لا توجد صلاحيات مخصصة له حاليًا."
-            />
-          </p>
+      <div style={{ height: 24 }} />
+
+      <div className="card">
+        <span className="badge">
+          <T en="Recommended Workflow" ar="مسار العمل المقترح" />
+        </span>
+
+        <h2>
+          <T
+            en="How studio activation should work"
+            ar="كيف يجب أن يتم تفعيل الاستوديو"
+          />
+        </h2>
+
+        <div className="feature-list">
+          <div className="feature-row">
+            <div>
+              <strong>
+                <T en="1. Owner signs up" ar="١. المالك ينشئ حساب" />
+              </strong>
+              <p>
+                <T
+                  en="Studio owner creates an owner account from the normal signup page."
+                  ar="مالك الاستوديو ينشئ حساب مالك من صفحة التسجيل العادية."
+                />
+              </p>
+            </div>
+          </div>
+
+          <div className="feature-row">
+            <div>
+              <strong>
+                <T
+                  en="2. Owner completes onboarding"
+                  ar="٢. المالك يكمل بياناته"
+                />
+              </strong>
+              <p>
+                <T
+                  en="Company details, commercial registration, national address, zakat certificate, invoice information, and agreement are completed."
+                  ar="يتم إكمال بيانات الشركة، السجل التجاري، العنوان الوطني، شهادة الزكاة، بيانات الفوترة، والعقد."
+                />
+              </p>
+            </div>
+          </div>
+
+          <div className="feature-row">
+            <div>
+              <strong>
+                <T en="3. Admin approves compliance" ar="٣. الإدارة تعتمد الامتثال" />
+              </strong>
+              <p>
+                <T
+                  en="Admin reviews the owner compliance profile and approves or rejects it."
+                  ar="الإدارة تراجع ملف امتثال المالك وتقوم بالاعتماد أو الرفض."
+                />
+              </p>
+            </div>
+          </div>
+
+          <div className="feature-row">
+            <div>
+              <strong>
+                <T en="4. Bookings become active" ar="٤. يتم تفعيل الحجوزات" />
+              </strong>
+              <p>
+                <T
+                  en="Only approved studios with approved owner compliance become bookable."
+                  ar="فقط الاستوديوهات المعتمدة والمرتبطة بمالك معتمد تصبح قابلة للحجز."
+                />
+              </p>
+            </div>
+          </div>
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }
