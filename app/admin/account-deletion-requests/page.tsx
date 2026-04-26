@@ -46,6 +46,10 @@ function formatDate(value: string | null | undefined) {
   }
 }
 
+function deletedEmailForUser(userId: string) {
+  return `deleted-user-${userId.slice(0, 8)}@gearbeat.local`;
+}
+
 export default async function AdminAccountDeletionRequestsPage() {
   const { admin } = await requireAdminRole(["operations", "support"]);
 
@@ -55,6 +59,9 @@ export default async function AdminAccountDeletionRequestsPage() {
     admin.admin_role === "super_admin" ||
     admin.admin_role === "operations" ||
     admin.admin_role === "support";
+
+  const canExecuteDeletion =
+    admin.admin_role === "super_admin" || admin.admin_role === "operations";
 
   async function updateDeletionRequest(formData: FormData) {
     "use server";
@@ -118,6 +125,174 @@ export default async function AdminAccountDeletionRequestsPage() {
 
     revalidatePath("/admin/account-deletion-requests");
     revalidatePath("/admin");
+  }
+
+  async function executeDeletion(formData: FormData) {
+    "use server";
+
+    const { user, admin } = await requireAdminRole(["operations"]);
+    const supabaseAdmin = createAdminClient();
+
+    const requestId = String(formData.get("request_id") || "");
+
+    if (!requestId) {
+      throw new Error("Missing request ID.");
+    }
+
+    const { data: request, error: requestError } = await supabaseAdmin
+      .from("account_deletion_requests")
+      .select(
+        "id,auth_user_id,email,role,reason,status,has_active_bookings,has_active_studios"
+      )
+      .eq("id", requestId)
+      .single();
+
+    if (requestError || !request) {
+      throw new Error(requestError?.message || "Deletion request not found.");
+    }
+
+    if (request.status !== "approved") {
+      throw new Error("Only approved requests can be executed.");
+    }
+
+    if (!request.auth_user_id) {
+      throw new Error("Missing auth user ID.");
+    }
+
+    if (request.role === "admin" || request.role === "super_admin") {
+      throw new Error("Admin accounts cannot be deleted from this page.");
+    }
+
+    const targetUserId = request.auth_user_id;
+    const targetEmail = request.email || deletedEmailForUser(targetUserId);
+    const replacementEmail = deletedEmailForUser(targetUserId);
+
+    const activeBookingStatuses = ["pending", "confirmed"];
+
+    const { count: customerActiveBookingsCount } = await supabaseAdmin
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_auth_user_id", targetUserId)
+      .in("status", activeBookingStatuses);
+
+    let ownerActiveBookingsCount = 0;
+    let ownerStudioIds: string[] = [];
+
+    if (request.role === "owner") {
+      const { data: studios } = await supabaseAdmin
+        .from("studios")
+        .select("id")
+        .eq("owner_auth_user_id", targetUserId);
+
+      ownerStudioIds = (studios || []).map((studio) => studio.id);
+
+      if (ownerStudioIds.length) {
+        const { count } = await supabaseAdmin
+          .from("bookings")
+          .select("id", { count: "exact", head: true })
+          .in("studio_id", ownerStudioIds)
+          .in("status", activeBookingStatuses);
+
+        ownerActiveBookingsCount = count || 0;
+      }
+    }
+
+    const totalActiveBookings =
+      (customerActiveBookingsCount || 0) + ownerActiveBookingsCount;
+
+    if (totalActiveBookings > 0) {
+      throw new Error(
+        "Cannot execute deletion while the account has active bookings."
+      );
+    }
+
+    if (request.role === "owner" && ownerStudioIds.length) {
+      await supabaseAdmin
+        .from("studios")
+        .update({
+          status: "inactive",
+          updated_at: new Date().toISOString()
+        })
+        .eq("owner_auth_user_id", targetUserId);
+    }
+
+    await supabaseAdmin
+      .from("admin_users")
+      .delete()
+      .eq("auth_user_id", targetUserId);
+
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        email: replacementEmail,
+        full_name: "Deleted User",
+        phone: null,
+        identity_type: null,
+        identity_number: null,
+        identity_locked: false,
+        account_status: "deleted",
+        deleted_at: new Date().toISOString(),
+        deleted_reason: request.reason || "Account deletion request executed.",
+        updated_at: new Date().toISOString()
+      })
+      .eq("auth_user_id", targetUserId);
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_auth_user_id: user.id,
+      actor_email: user.email,
+      action: "account_deletion_executed",
+      entity_type: "account_deletion_request",
+      entity_id: request.id,
+      old_values: {
+        status: request.status,
+        email: targetEmail,
+        role: request.role
+      },
+      new_values: {
+        status: "completed",
+        email: replacementEmail,
+        account_status: "deleted"
+      },
+      metadata: {
+        admin_role: admin.admin_role,
+        target_auth_user_id: targetUserId,
+        owner_studio_count: ownerStudioIds.length,
+        customer_active_bookings_count: customerActiveBookingsCount || 0,
+        owner_active_bookings_count: ownerActiveBookingsCount
+      }
+    });
+
+    const { error: authDeleteError } =
+      await supabaseAdmin.auth.admin.deleteUser(targetUserId);
+
+    if (authDeleteError) {
+      throw new Error(authDeleteError.message);
+    }
+
+    const { error: completeError } = await supabaseAdmin
+      .from("account_deletion_requests")
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: user.id,
+        admin_notes: "Account deletion/anonymization executed.",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", requestId);
+
+    if (completeError) {
+      throw new Error(completeError.message);
+    }
+
+    revalidatePath("/admin/account-deletion-requests");
+    revalidatePath("/admin");
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/reviews");
   }
 
   const { data: requests, error } = await supabaseAdmin
@@ -242,8 +417,8 @@ export default async function AdminAccountDeletionRequestsPage() {
 
         <p>
           <T
-            en="Approved requests are not deleted automatically yet. The final delete/anonymize step will be added next."
-            ar="الطلبات الموافق عليها لا يتم حذفها تلقائيًا الآن. خطوة الحذف أو إخفاء البيانات النهائي سنضيفها بعدها."
+            en="Approved requests can be executed by operations or super admin. Execution removes login access and anonymizes personal profile data."
+            ar="يمكن تنفيذ الطلبات الموافق عليها من العمليات أو السوبر أدمن. التنفيذ يزيل إمكانية تسجيل الدخول ويخفي بيانات الملف الشخصية."
           />
         </p>
 
@@ -348,9 +523,12 @@ export default async function AdminAccountDeletionRequestsPage() {
                     </td>
 
                     <td>
-                      {canReview && request.status !== "completed" ? (
-                        <div className="admin-studio-actions">
-                          <form className="admin-review-form" action={updateDeletionRequest}>
+                      <div className="admin-studio-actions">
+                        {canReview && request.status !== "completed" ? (
+                          <form
+                            className="admin-review-form"
+                            action={updateDeletionRequest}
+                          >
                             <input
                               type="hidden"
                               name="request_id"
@@ -400,12 +578,34 @@ export default async function AdminAccountDeletionRequestsPage() {
                               ) : null}
                             </div>
                           </form>
-                        </div>
-                      ) : (
-                        <span className="badge">
-                          <T en="No action" ar="لا يوجد إجراء" />
-                        </span>
-                      )}
+                        ) : null}
+
+                        {canExecuteDeletion &&
+                        request.status === "approved" &&
+                        request.role !== "admin" &&
+                        request.role !== "super_admin" ? (
+                          <form action={executeDeletion}>
+                            <input
+                              type="hidden"
+                              name="request_id"
+                              value={request.id}
+                            />
+
+                            <button
+                              className="btn btn-secondary btn-small"
+                              type="submit"
+                            >
+                              <T en="Execute Deletion" ar="تنفيذ الحذف" />
+                            </button>
+                          </form>
+                        ) : null}
+
+                        {request.status === "completed" ? (
+                          <span className="badge">
+                            <T en="Completed" ar="مكتمل" />
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))
