@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../lib/supabase/server";
+import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 
 function cleanPhone(phone: string) {
@@ -61,6 +62,7 @@ function getIdentityLabel(identityType: string) {
 
 export default async function ProfilePage() {
   const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
 
   const {
     data: { user }
@@ -68,6 +70,17 @@ export default async function ProfilePage() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id, email, admin_role, status")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
   }
 
   const { data: profile } = await supabase
@@ -96,6 +109,7 @@ export default async function ProfilePage() {
     "use server";
 
     const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
 
     const {
       data: { user }
@@ -103,6 +117,17 @@ export default async function ProfilePage() {
 
     if (!user) {
       redirect("/login");
+    }
+
+    const { data: adminUser } = await supabaseAdmin
+      .from("admin_users")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (adminUser) {
+      redirect("/admin");
     }
 
     const { data: existingProfile } = await supabase
@@ -260,10 +285,7 @@ export default async function ProfilePage() {
           {accountStatus === "pending_deletion" ? (
             <div className="profile-warning-box">
               <strong>
-                <T
-                  en="Account deletion requested"
-                  ar="تم طلب حذف الحساب"
-                />
+                <T en="Account deletion requested" ar="تم طلب حذف الحساب" />
               </strong>
               <p>
                 <T
@@ -331,13 +353,6 @@ export default async function ProfilePage() {
               value={getRoleLabel(currentRole)}
               readOnly
             />
-
-            <p className="admin-muted-line">
-              <T
-                en="Account type cannot be changed from this page. It is selected during signup."
-                ar="لا يمكن تغيير نوع الحساب من هذه الصفحة. يتم اختياره عند إنشاء الحساب."
-              />
-            </p>
 
             <label>
               <T en="Account status" ar="حالة الحساب" />
