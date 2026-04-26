@@ -3,6 +3,41 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
 import T from "../../../../components/t";
 
+function getBookingBlockReason(studio: any) {
+  if (studio.status !== "approved") {
+    return {
+      en: "This studio is still pending approval.",
+      ar: "هذا الاستوديو لا يزال بانتظار الاعتماد."
+    };
+  }
+
+  if (!studio.verified) {
+    return {
+      en: "This studio is not verified yet.",
+      ar: "هذا الاستوديو غير موثق حتى الآن."
+    };
+  }
+
+  if (studio.owner_compliance_status !== "approved") {
+    return {
+      en: "The studio owner has not completed business verification yet.",
+      ar: "مالك الاستوديو لم يكمل التحقق التجاري حتى الآن."
+    };
+  }
+
+  if (!studio.booking_enabled) {
+    return {
+      en: "Booking is currently disabled for this studio.",
+      ar: "الحجز غير مفعل حاليًا لهذا الاستوديو."
+    };
+  }
+
+  return {
+    en: "This studio is not available for booking yet.",
+    ar: "هذا الاستوديو غير متاح للحجز حاليًا."
+  };
+}
+
 export default async function BookStudioPage({
   params
 }: {
@@ -16,19 +51,28 @@ export default async function BookStudioPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect(`/login?next=/studios/${slug}/book`);
   }
 
   const { data: studio, error } = await supabase
     .from("studios")
-    .select("id,name,slug,city,district,price_from,status")
+    .select(
+      "id,name,slug,city,district,price_from,status,verified,booking_enabled,owner_compliance_status"
+    )
     .eq("slug", slug)
-    .eq("status", "approved")
     .single();
 
   if (error || !studio) {
     notFound();
   }
+
+  const isBookable =
+    studio.status === "approved" &&
+    studio.verified === true &&
+    studio.booking_enabled === true &&
+    studio.owner_compliance_status === "approved";
+
+  const blockReason = getBookingBlockReason(studio);
 
   const studioId = studio.id;
   const studioSlug = studio.slug;
@@ -47,15 +91,53 @@ export default async function BookStudioPage({
     } = await supabase.auth.getUser();
 
     if (!user) {
-      redirect("/login");
+      redirect(`/login?next=/studios/${studioSlug}/book`);
     }
 
-    const bookingDate = String(formData.get("booking_date"));
-    const startTime = String(formData.get("start_time"));
-    const endTime = String(formData.get("end_time"));
-    const notes = String(formData.get("notes") || "");
+    const { data: latestStudio, error: latestStudioError } = await supabase
+      .from("studios")
+      .select(
+        "id,slug,status,verified,booking_enabled,owner_compliance_status,price_from"
+      )
+      .eq("id", studioId)
+      .single();
 
-    const totalAmount = studioPriceFrom;
+    if (latestStudioError || !latestStudio) {
+      throw new Error("Studio not found.");
+    }
+
+    const latestIsBookable =
+      latestStudio.status === "approved" &&
+      latestStudio.verified === true &&
+      latestStudio.booking_enabled === true &&
+      latestStudio.owner_compliance_status === "approved";
+
+    if (!latestIsBookable) {
+      redirect(`/studios/${studioSlug}`);
+    }
+
+    const bookingDate = String(formData.get("booking_date") || "");
+    const startTime = String(formData.get("start_time") || "");
+    const endTime = String(formData.get("end_time") || "");
+    const notes = String(formData.get("notes") || "").trim();
+
+    if (!bookingDate) {
+      throw new Error("Booking date is required.");
+    }
+
+    if (!startTime) {
+      throw new Error("Start time is required.");
+    }
+
+    if (!endTime) {
+      throw new Error("End time is required.");
+    }
+
+    if (startTime >= endTime) {
+      throw new Error("End time must be after start time.");
+    }
+
+    const totalAmount = Number(latestStudio.price_from || studioPriceFrom || 0);
 
     const { error: bookingError } = await supabase.from("bookings").insert({
       studio_id: studioId,
@@ -75,6 +157,69 @@ export default async function BookStudioPage({
     }
 
     redirect("/customer/bookings");
+  }
+
+  if (!isBookable) {
+    return (
+      <section>
+        <div className="section-head">
+          <span className="badge">
+            <T en="Booking unavailable" ar="الحجز غير متاح" />
+          </span>
+
+          <h1>
+            <T en="This studio is not ready for bookings yet." ar="هذا الاستوديو غير جاهز للحجز بعد." />
+          </h1>
+
+          <p>
+            <T en={blockReason.en} ar={blockReason.ar} />
+          </p>
+        </div>
+
+        <div className="card studio-booking-blocked-box">
+          <strong>
+            <T en="Booking is blocked" ar="تم إيقاف الحجز" />
+          </strong>
+
+          <p>
+            <T
+              en="For customer safety and platform compliance, bookings are only available after studio approval, verification, owner business approval, and booking activation."
+              ar="لحماية العميل وضمان امتثال المنصة، لا يتم تفعيل الحجز إلا بعد اعتماد الاستوديو، توثيقه، اعتماد بيانات المالك التجارية، وتفعيل الحجز."
+            />
+          </p>
+
+          <div className="admin-badge-stack">
+            <span className="badge">
+              <T en="Studio status:" ar="حالة الاستوديو:" /> {studio.status}
+            </span>
+
+            <span className="badge">
+              <T en="Verified:" ar="التوثيق:" /> {studio.verified ? "Yes" : "No"}
+            </span>
+
+            <span className="badge">
+              <T en="Owner compliance:" ar="امتثال المالك:" />{" "}
+              {studio.owner_compliance_status || "incomplete"}
+            </span>
+
+            <span className="badge">
+              <T en="Booking enabled:" ar="تفعيل الحجز:" />{" "}
+              {studio.booking_enabled ? "Yes" : "No"}
+            </span>
+          </div>
+
+          <div className="actions">
+            <Link href={`/studios/${studioSlug}`} className="btn btn-secondary">
+              <T en="Back to Studio" ar="العودة إلى الاستوديو" />
+            </Link>
+
+            <Link href="/studios" className="btn btn-secondary">
+              <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
