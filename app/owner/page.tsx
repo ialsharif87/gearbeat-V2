@@ -1,9 +1,61 @@
 import Link from "next/link";
-import { requireRole } from "../../lib/auth";
+import { redirect } from "next/navigation";
+import { createClient } from "../../lib/supabase/server";
+import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 
 export default async function OwnerPage() {
-  const { profile } = await requireRole("owner");
+  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?account=owner");
+  }
+
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id, auth_user_id, email, admin_role, status")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
+  }
+
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .select("id, auth_user_id, email, full_name, phone, role, account_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  if (!profile) {
+    redirect("/login?account=owner");
+  }
+
+  if (profile.account_status === "deleted") {
+    redirect("/forbidden");
+  }
+
+  if (profile.account_status === "pending_deletion") {
+    redirect("/account/delete");
+  }
+
+  if (profile.role === "customer") {
+    redirect("/customer");
+  }
+
+  if (profile.role !== "owner") {
+    redirect("/forbidden");
+  }
 
   return (
     <section>
@@ -68,7 +120,11 @@ export default async function OwnerPage() {
         </div>
 
         <div className="actions">
-          <Link href="/owner/create-studio" className="btn">
+          <Link href="/owner/onboarding" className="btn">
+            <T en="Complete Business Onboarding" ar="إكمال بيانات النشاط" />
+          </Link>
+
+          <Link href="/owner/create-studio" className="btn btn-secondary">
             <T en="Create Studio" ar="إنشاء استوديو" />
           </Link>
 
