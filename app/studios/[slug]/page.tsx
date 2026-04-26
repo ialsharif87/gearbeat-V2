@@ -97,6 +97,41 @@ function reviewsInLastDays(reviews: any[], days: number) {
   return reviews.filter((review) => getReviewAgeDays(review.created_at) <= days);
 }
 
+function getBookingBlockReason(studio: any) {
+  if (studio.status !== "approved") {
+    return {
+      en: "This studio is still pending approval.",
+      ar: "هذا الاستوديو لا يزال بانتظار الاعتماد."
+    };
+  }
+
+  if (!studio.verified) {
+    return {
+      en: "This studio is not verified yet.",
+      ar: "هذا الاستوديو غير موثق حتى الآن."
+    };
+  }
+
+  if (studio.owner_compliance_status !== "approved") {
+    return {
+      en: "The studio owner has not completed business verification yet.",
+      ar: "مالك الاستوديو لم يكمل التحقق التجاري حتى الآن."
+    };
+  }
+
+  if (!studio.booking_enabled) {
+    return {
+      en: "Booking is currently disabled for this studio.",
+      ar: "الحجز غير مفعل حاليًا لهذا الاستوديو."
+    };
+  }
+
+  return {
+    en: "This studio is not available for booking yet.",
+    ar: "هذا الاستوديو غير متاح للحجز حاليًا."
+  };
+}
+
 export default async function StudioDetailsPage({
   params
 }: {
@@ -108,7 +143,7 @@ export default async function StudioDetailsPage({
   const { data: studio, error } = await supabase
     .from("studios")
     .select(
-      "id,name,slug,city,district,address,description,price_from,status,cover_image_url,verified,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
+      "id,name,slug,city,district,address,description,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
     )
     .eq("slug", slug)
     .eq("status", "approved")
@@ -117,6 +152,14 @@ export default async function StudioDetailsPage({
   if (error || !studio) {
     notFound();
   }
+
+  const isBookable =
+    studio.status === "approved" &&
+    studio.verified === true &&
+    studio.booking_enabled === true &&
+    studio.owner_compliance_status === "approved";
+
+  const bookingBlockReason = getBookingBlockReason(studio);
 
   const { data: images } = await supabase
     .from("studio_images")
@@ -296,10 +339,43 @@ export default async function StudioDetailsPage({
             </div>
           ) : null}
 
+          {!isBookable ? (
+            <div className="studio-booking-blocked-box">
+              <strong>
+                <T en="Booking not available yet" ar="الحجز غير متاح حاليًا" />
+              </strong>
+
+              <p>
+                <T
+                  en={bookingBlockReason.en}
+                  ar={bookingBlockReason.ar}
+                />
+              </p>
+
+              <div className="admin-badge-stack">
+                <span className="badge">
+                  <T en="Studio:" ar="الاستوديو:" /> {studio.status}
+                </span>
+
+                <span className="badge">
+                  <T en="Verified:" ar="التوثيق:" />{" "}
+                  {studio.verified ? "Yes" : "No"}
+                </span>
+
+                <span className="badge">
+                  <T en="Owner compliance:" ar="امتثال المالك:" />{" "}
+                  {studio.owner_compliance_status || "incomplete"}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
           <div className="actions">
-            <Link href={`/studios/${studio.slug}/book`} className="btn">
-              <T en="Book Now" ar="احجز الآن" />
-            </Link>
+            {isBookable ? (
+              <Link href={`/studios/${studio.slug}/book`} className="btn">
+                <T en="Book Now" ar="احجز الآن" />
+              </Link>
+            ) : null}
 
             <Link href="/studios" className="btn btn-secondary">
               <T en="Back to Studios" ar="العودة إلى الاستوديوهات" />
