@@ -333,12 +333,20 @@ export default async function LoginPage({
               </Link>
             </div>
           ) : (
-            <p className="staff-login-note">
-              <T
-                en="If you are not part of the GearBeat team, please use the public login page."
-                ar="إذا لم تكن من فريق GearBeat، الرجاء استخدام صفحة الدخول العامة."
-              />
-            </p>
+            <>
+              <div className="actions" style={{ marginTop: 18, justifyContent: "center" }}>
+                <Link href="/" className="btn btn-secondary">
+                  <T en="Back to Home" ar="العودة للصفحة الرئيسية" />
+                </Link>
+              </div>
+
+              <p className="staff-login-note">
+                <T
+                  en="If you are not part of the GearBeat team, please use the public login page."
+                  ar="إذا لم تكن من فريق GearBeat، الرجاء استخدام صفحة الدخول العامة."
+                />
+              </p>
+            </>
           )}
         </div>
       </div>
