@@ -4279,3 +4279,85 @@ html[dir="rtl"] .contact-floating-card {
     grid-template-columns: 1fr;
   }
 }
+/* FINAL ACCOUNT DELETION PAGE */
+
+.delete-account-page {
+  display: grid;
+  gap: 0;
+}
+
+.delete-account-hero {
+  padding: 44px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 75, 75, 0.13), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgba(255, 193, 7, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(12, 18, 38, 0.72);
+}
+
+.delete-account-hero h1 {
+  margin: 14px 0 18px;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 0.96;
+  letter-spacing: -0.08em;
+  background: linear-gradient(90deg, white, var(--yellow), var(--red));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.delete-account-hero p {
+  max-width: 860px;
+  color: var(--muted);
+  font-size: 1.12rem;
+  line-height: 1.8;
+}
+
+.delete-account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.delete-check-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.delete-check-list span {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--soft);
+  font-weight: 800;
+}
+
+.delete-warning-card {
+  border-color: rgba(255, 193, 7, 0.28);
+}
+
+.delete-danger-card {
+  border-color: rgba(255, 75, 75, 0.28);
+}
+
+@media (max-width: 960px) {
+  .delete-account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .delete-account-hero {
+    padding: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .delete-account-hero {
+    padding: 22px;
+  }
+
+  .delete-account-hero h1 {
+    font-size: 2.45rem;
+  }
+}
