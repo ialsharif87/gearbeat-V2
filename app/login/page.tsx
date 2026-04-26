@@ -125,8 +125,7 @@ export default async function LoginPage({
   const nextPath = safeNextPath(params?.next);
 
   const isStaffAccess = nextPath === "/admin";
-  const defaultAccount =
-    params?.account === "owner" ? "owner" : "customer";
+  const defaultAccount = params?.account === "owner" ? "owner" : "customer";
 
   async function login(formData: FormData) {
     "use server";
@@ -217,12 +216,12 @@ export default async function LoginPage({
   }
 
   return (
-    <section>
-      <div className="auth-shell">
-        <div className="card auth-card">
+    <section className={isStaffAccess ? "staff-login-clean-page" : ""}>
+      <div className={isStaffAccess ? "staff-login-shell" : "auth-shell"}>
+        <div className={isStaffAccess ? "card staff-login-card" : "card auth-card"}>
           <span className="badge">
             {isStaffAccess ? (
-              <T en="Team Access" ar="دخول الفريق" />
+              <T en="Secure Team Access" ar="دخول الفريق الآمن" />
             ) : (
               <T en="Login" ar="تسجيل الدخول" />
             )}
@@ -239,8 +238,8 @@ export default async function LoginPage({
           <p>
             {isStaffAccess ? (
               <T
-                en="Use your approved admin or staff account to access the GearBeat dashboard."
-                ar="استخدم حساب الأدمن أو الموظف المعتمد لدخول لوحة تحكم GearBeat."
+                en="This page is restricted to approved GearBeat team members only."
+                ar="هذه الصفحة مخصصة فقط لأعضاء فريق GearBeat المعتمدين."
               />
             ) : (
               <T
@@ -250,7 +249,7 @@ export default async function LoginPage({
             )}
           </p>
 
-          {params?.created ? (
+          {params?.created && !isStaffAccess ? (
             <div className="success" style={{ marginBottom: 18 }}>
               <T
                 en="Account created. Please login to continue."
@@ -306,48 +305,41 @@ export default async function LoginPage({
 
             <button className="btn" type="submit">
               {isStaffAccess ? (
-                <T en="Enter Admin Dashboard" ar="دخول لوحة الإدارة" />
+                <T en="Enter Dashboard" ar="دخول لوحة الإدارة" />
               ) : (
                 <T en="Login" ar="تسجيل الدخول" />
               )}
             </button>
           </form>
 
-          <div className="actions" style={{ marginTop: 18 }}>
-            {!isStaffAccess ? (
-              <>
-                <Link
-                  href="/signup?account=customer"
-                  className="btn btn-secondary"
-                >
-                  <T en="Create Customer Account" ar="إنشاء حساب مستخدم" />
-                </Link>
+          {!isStaffAccess ? (
+            <div className="actions" style={{ marginTop: 18 }}>
+              <Link
+                href="/signup?account=customer"
+                className="btn btn-secondary"
+              >
+                <T en="Create Customer Account" ar="إنشاء حساب مستخدم" />
+              </Link>
 
-                <Link
-                  href="/signup?account=owner"
-                  className="btn btn-secondary"
-                >
-                  <T
-                    en="Create Studio Owner Account"
-                    ar="إنشاء حساب مالك استوديو"
-                  />
-                </Link>
-              </>
-            ) : null}
+              <Link href="/signup?account=owner" className="btn btn-secondary">
+                <T
+                  en="Create Studio Owner Account"
+                  ar="إنشاء حساب مالك استوديو"
+                />
+              </Link>
 
-            <Link href="/" className="btn btn-secondary">
-              <T en="Back to Home" ar="العودة للرئيسية" />
-            </Link>
-          </div>
-
-          {isStaffAccess ? (
-            <p className="admin-muted-line" style={{ marginTop: 18 }}>
+              <Link href="/" className="btn btn-secondary">
+                <T en="Back to Home" ar="العودة للرئيسية" />
+              </Link>
+            </div>
+          ) : (
+            <p className="staff-login-note">
               <T
-                en="Public users and studio owners cannot access the admin dashboard."
-                ar="المستخدمون وملاك الاستوديوهات لا يمكنهم دخول لوحة الإدارة."
+                en="If you are not part of the GearBeat team, please use the public login page."
+                ar="إذا لم تكن من فريق GearBeat، الرجاء استخدام صفحة الدخول العامة."
               />
             </p>
-          ) : null}
+          )}
         </div>
       </div>
     </section>
