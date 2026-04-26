@@ -159,11 +159,24 @@ export default async function AdminAccountDeletionRequestsPage() {
       throw new Error("Missing auth user ID.");
     }
 
+    const targetUserId = request.auth_user_id;
+
+    const { data: linkedAdminUser } = await supabaseAdmin
+      .from("admin_users")
+      .select("id, admin_role, status")
+      .eq("auth_user_id", targetUserId)
+      .maybeSingle();
+
+    if (linkedAdminUser) {
+      throw new Error(
+        "This account is linked to an admin user and cannot be deleted from account deletion requests."
+      );
+    }
+
     if (request.role === "admin" || request.role === "super_admin") {
       throw new Error("Admin accounts cannot be deleted from this page.");
     }
 
-    const targetUserId = request.auth_user_id;
     const targetEmail = request.email || deletedEmailForUser(targetUserId);
     const replacementEmail = deletedEmailForUser(targetUserId);
 
@@ -215,11 +228,6 @@ export default async function AdminAccountDeletionRequestsPage() {
         })
         .eq("owner_auth_user_id", targetUserId);
     }
-
-    await supabaseAdmin
-      .from("admin_users")
-      .delete()
-      .eq("auth_user_id", targetUserId);
 
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
