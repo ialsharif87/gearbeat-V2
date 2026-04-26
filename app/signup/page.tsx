@@ -20,9 +20,10 @@ function normalizeRole(value: string) {
 export default async function SignupPage({
   searchParams
 }: {
-  searchParams?: Promise<{ error?: string; success?: string }>;
+  searchParams?: Promise<{ account?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
+  const defaultAccount = params?.account === "owner" ? "owner" : "customer";
 
   async function signup(formData: FormData) {
     "use server";
@@ -79,46 +80,46 @@ export default async function SignupPage({
 
     const userId = data.user?.id;
 
-    if (!userId) {
-      redirect("/login?signedup=1");
-    }
+    if (userId) {
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .upsert(
+          {
+            auth_user_id: userId,
+            email,
+            full_name: fullName,
+            phone,
+            role,
+            account_status: "active",
+            updated_at: new Date().toISOString()
+          },
+          {
+            onConflict: "auth_user_id"
+          }
+        );
 
-    const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
-      {
-        auth_user_id: userId,
-        email,
-        full_name: fullName,
-        phone,
-        role,
-        account_status: "active",
-        updated_at: new Date().toISOString()
-      },
-      {
-        onConflict: "auth_user_id"
+      if (profileError) {
+        throw new Error(profileError.message);
       }
-    );
 
-    if (profileError) {
-      throw new Error(profileError.message);
+      await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          full_name: fullName,
+          name: fullName,
+          phone,
+          phone_number: phone,
+          mobile: phone,
+          role,
+          account_type: role
+        }
+      });
     }
-
-    await supabaseAdmin.auth.admin.updateUserById(userId, {
-      user_metadata: {
-        full_name: fullName,
-        name: fullName,
-        phone,
-        phone_number: phone,
-        mobile: phone,
-        role,
-        account_type: role
-      }
-    });
 
     if (role === "owner") {
-      redirect("/owner/onboarding");
+      redirect("/login?account=owner&created=1");
     }
 
-    redirect("/customer");
+    redirect("/login?account=customer&created=1");
   }
 
   return (
@@ -136,21 +137,9 @@ export default async function SignupPage({
           <p>
             <T
               en="Create your account as a customer or studio owner."
-              ar="أنشئ حسابك كعميل أو صاحب استوديو."
+              ar="أنشئ حسابك كمستخدم أو مالك استوديو."
             />
           </p>
-
-          {params?.error ? (
-            <div className="error">
-              <T en="Signup failed. Please try again." ar="فشل التسجيل. حاول مرة أخرى." />
-            </div>
-          ) : null}
-
-          {params?.success ? (
-            <div className="success">
-              <T en="Account created successfully." ar="تم إنشاء الحساب بنجاح." />
-            </div>
-          ) : null}
 
           <form className="form" action={signup}>
             <label>
@@ -191,19 +180,20 @@ export default async function SignupPage({
             <label>
               <T en="Account type" ar="نوع الحساب" />
             </label>
-            <select className="input" name="role" required defaultValue="customer">
-              <option value="customer">
-                Customer / عميل
-              </option>
-              <option value="owner">
-                Studio Owner / صاحب استوديو
-              </option>
+            <select
+              className="input"
+              name="role"
+              required
+              defaultValue={defaultAccount}
+            >
+              <option value="customer">Customer / مستخدم</option>
+              <option value="owner">Studio Owner / مالك استوديو</option>
             </select>
 
             <p className="admin-muted-line">
               <T
-                en="Studio owners must complete business onboarding before bookings can be activated."
-                ar="أصحاب الاستوديوهات يجب أن يكملوا بيانات الشركة والوثائق قبل تفعيل الحجوزات."
+                en="Studio owners must complete business onboarding before their studios can accept bookings."
+                ar="ملاك الاستوديوهات يجب أن يكملوا بيانات الشركة والوثائق قبل تفعيل الحجوزات."
               />
             </p>
 
@@ -237,8 +227,12 @@ export default async function SignupPage({
           </form>
 
           <div className="actions" style={{ marginTop: 18 }}>
-            <Link href="/login" className="btn btn-secondary">
-              <T en="Already have an account?" ar="لديك حساب بالفعل؟" />
+            <Link href="/login?account=customer" className="btn btn-secondary">
+              <T en="Login as Customer" ar="دخول كمستخدم" />
+            </Link>
+
+            <Link href="/login?account=owner" className="btn btn-secondary">
+              <T en="Login as Studio Owner" ar="دخول كمالك استوديو" />
             </Link>
 
             <Link href="/" className="btn btn-secondary">
