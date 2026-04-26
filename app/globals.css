@@ -4722,3 +4722,21 @@ body:has(.staff-login-clean-page) .main {
   margin: 0 0 12px;
   color: var(--soft);
 }
+.studio-booking-blocked-box {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.24);
+}
+
+.studio-booking-blocked-box strong {
+  display: block;
+  color: #ffc107;
+  margin-bottom: 8px;
+}
+
+.studio-booking-blocked-box p {
+  margin: 0 0 12px;
+  color: #dbe7ff;
+}
