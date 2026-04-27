@@ -6,6 +6,83 @@ import { createAdminClient } from "../../../../lib/supabase/admin";
 import { createAuditLog } from "../../../../lib/audit";
 import T from "../../../../components/t";
 
+type AdminRole = "super_admin" | "operations" | "support" | "finance";
+
+type StudioRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  city: string | null;
+  district: string | null;
+  address: string | null;
+  owner_auth_user_id: string | null;
+};
+
+type ReviewRow = {
+  id: string;
+  rating: number | null;
+  cleanliness_rating: number | null;
+  equipment_rating: number | null;
+  sound_quality_rating: number | null;
+  communication_rating: number | null;
+  value_rating: number | null;
+  comment: string | null;
+  status: string | null;
+  created_at: string | null;
+};
+
+type ReviewRequestRow = {
+  id: string;
+  status: string | null;
+  email_sent_at: string | null;
+  expires_at: string | null;
+  review_submitted_at: string | null;
+  review_token: string | null;
+  created_at: string | null;
+};
+
+type BookingDetailsRow = {
+  id: string;
+  customer_auth_user_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  total_amount: number | null;
+  status: string;
+  payment_status: string;
+  notes: string | null;
+  admin_notes: string | null;
+  admin_notes_updated_at: string | null;
+  admin_notes_updated_by: string | null;
+  created_at: string | null;
+  studios: StudioRow | StudioRow[] | null;
+  reviews: ReviewRow[] | null;
+  review_requests: ReviewRequestRow[] | null;
+};
+
+type CustomerProfileRow = {
+  auth_user_id: string;
+  email: string | null;
+  full_name: string | null;
+  phone: string | null;
+  role: string | null;
+  identity_type: string | null;
+  identity_number: string | null;
+  identity_locked: boolean | null;
+  identity_created_at: string | null;
+  updated_at: string | null;
+};
+
+type AuditLogRow = {
+  id: string;
+  actor_email: string | null;
+  action: string;
+  old_values: unknown;
+  new_values: unknown;
+  metadata: unknown;
+  created_at: string | null;
+};
+
 function badgeStyle(type: "booking" | "payment", status: string) {
   const green = {
     background: "rgba(30, 215, 96, 0.18)",
@@ -46,7 +123,7 @@ function getIdentityLabel(identityType: string | null | undefined) {
   return "—";
 }
 
-function getCustomerName(user: any, profile: any) {
+function getCustomerName(user: any, profile: CustomerProfileRow | null) {
   const metadata = user?.user_metadata || {};
 
   return (
@@ -60,7 +137,7 @@ function getCustomerName(user: any, profile: any) {
   );
 }
 
-function getCustomerPhone(user: any, profile: any) {
+function getCustomerPhone(user: any, profile: CustomerProfileRow | null) {
   const metadata = user?.user_metadata || {};
 
   return (
@@ -75,12 +152,12 @@ function getCustomerPhone(user: any, profile: any) {
   );
 }
 
-function getCustomerIdentityType(user: any, profile: any) {
+function getCustomerIdentityType(user: any, profile: CustomerProfileRow | null) {
   const metadata = user?.user_metadata || {};
   return profile?.identity_type || metadata.identity_type || "";
 }
 
-function getCustomerIdentityNumber(user: any, profile: any) {
+function getCustomerIdentityNumber(user: any, profile: CustomerProfileRow | null) {
   const metadata = user?.user_metadata || {};
   return profile?.identity_number || metadata.identity_number || "—";
 }
@@ -95,41 +172,65 @@ function formatDate(value: string | null | undefined) {
   }
 }
 
+function normalizeStudio(studios: StudioRow | StudioRow[] | null) {
+  return Array.isArray(studios) ? studios[0] : studios;
+}
+
+function normalizeReviews(reviews: ReviewRow[] | null) {
+  return Array.isArray(reviews) ? reviews : [];
+}
+
+function normalizeReviewRequests(reviewRequests: ReviewRequestRow[] | null) {
+  return Array.isArray(reviewRequests) ? reviewRequests : [];
+}
+
 export default async function AdminBookingDetailsPage({
   params
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { admin } = await requireAdminRole(["operations", "support", "finance"]);
+
+  const { admin } = await requireAdminRole([
+    "super_admin",
+    "operations",
+    "support",
+    "finance"
+  ]);
 
   const supabaseAdmin = createAdminClient();
+  const adminRole = admin.admin_role as AdminRole;
 
   const canManageBookingStatus =
-    admin.admin_role === "super_admin" ||
-    admin.admin_role === "operations" ||
-    admin.admin_role === "support";
+    adminRole === "super_admin" ||
+    adminRole === "operations" ||
+    adminRole === "support";
 
   const canManagePaymentStatus =
-    admin.admin_role === "super_admin" ||
-    admin.admin_role === "operations" ||
-    admin.admin_role === "finance";
+    adminRole === "super_admin" ||
+    adminRole === "operations" ||
+    adminRole === "finance";
 
   const canManageAdminNotes =
-    admin.admin_role === "super_admin" ||
-    admin.admin_role === "operations" ||
-    admin.admin_role === "support" ||
-    admin.admin_role === "finance";
+    adminRole === "super_admin" ||
+    adminRole === "operations" ||
+    adminRole === "support" ||
+    adminRole === "finance";
 
   async function updateBookingStatus(formData: FormData) {
     "use server";
 
-    const { user, admin } = await requireAdminRole(["operations", "support"]);
+    const { user, admin } = await requireAdminRole([
+      "super_admin",
+      "operations",
+      "support"
+    ]);
+
     const supabaseAdmin = createAdminClient();
 
-    const bookingId = String(formData.get("booking_id") || "");
-    const status = String(formData.get("status") || "");
-    const studioSlug = String(formData.get("studio_slug") || "");
+    const bookingId = String(formData.get("booking_id") || "").trim();
+    const status = String(formData.get("status") || "").trim();
+    const studioSlug = String(formData.get("studio_slug") || "").trim();
 
     const allowedStatuses = ["pending", "confirmed", "completed", "cancelled"];
 
@@ -145,15 +246,22 @@ export default async function AdminBookingDetailsPage({
       .from("bookings")
       .select("id,status,payment_status,studio_id,customer_auth_user_id")
       .eq("id", bookingId)
-      .single();
+      .maybeSingle();
 
-    if (readError || !oldBooking) {
-      throw new Error(readError?.message || "Booking not found.");
+    if (readError) {
+      throw new Error(readError.message);
+    }
+
+    if (!oldBooking) {
+      throw new Error("Booking not found.");
     }
 
     const { error } = await supabaseAdmin
       .from("bookings")
-      .update({ status })
+      .update({
+        status,
+        updated_at: new Date().toISOString()
+      })
       .eq("id", bookingId);
 
     if (error) {
@@ -184,6 +292,7 @@ export default async function AdminBookingDetailsPage({
     revalidatePath("/admin/bookings");
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
+    revalidatePath("/owner/bookings");
 
     if (studioSlug) {
       revalidatePath(`/studios/${studioSlug}`);
@@ -193,12 +302,17 @@ export default async function AdminBookingDetailsPage({
   async function updatePaymentStatus(formData: FormData) {
     "use server";
 
-    const { user, admin } = await requireAdminRole(["operations", "finance"]);
+    const { user, admin } = await requireAdminRole([
+      "super_admin",
+      "operations",
+      "finance"
+    ]);
+
     const supabaseAdmin = createAdminClient();
 
-    const bookingId = String(formData.get("booking_id") || "");
-    const paymentStatus = String(formData.get("payment_status") || "");
-    const studioSlug = String(formData.get("studio_slug") || "");
+    const bookingId = String(formData.get("booking_id") || "").trim();
+    const paymentStatus = String(formData.get("payment_status") || "").trim();
+    const studioSlug = String(formData.get("studio_slug") || "").trim();
 
     const allowedPaymentStatuses = ["unpaid", "paid", "failed", "refunded"];
 
@@ -214,15 +328,22 @@ export default async function AdminBookingDetailsPage({
       .from("bookings")
       .select("id,status,payment_status,studio_id,customer_auth_user_id")
       .eq("id", bookingId)
-      .single();
+      .maybeSingle();
 
-    if (readError || !oldBooking) {
-      throw new Error(readError?.message || "Booking not found.");
+    if (readError) {
+      throw new Error(readError.message);
+    }
+
+    if (!oldBooking) {
+      throw new Error("Booking not found.");
     }
 
     const { error } = await supabaseAdmin
       .from("bookings")
-      .update({ payment_status: paymentStatus })
+      .update({
+        payment_status: paymentStatus,
+        updated_at: new Date().toISOString()
+      })
       .eq("id", bookingId);
 
     if (error) {
@@ -253,6 +374,7 @@ export default async function AdminBookingDetailsPage({
     revalidatePath("/admin/bookings");
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
+    revalidatePath("/owner/bookings");
 
     if (studioSlug) {
       revalidatePath(`/studios/${studioSlug}`);
@@ -263,6 +385,7 @@ export default async function AdminBookingDetailsPage({
     "use server";
 
     const { user, admin } = await requireAdminRole([
+      "super_admin",
       "operations",
       "support",
       "finance"
@@ -270,7 +393,7 @@ export default async function AdminBookingDetailsPage({
 
     const supabaseAdmin = createAdminClient();
 
-    const bookingId = String(formData.get("booking_id") || "");
+    const bookingId = String(formData.get("booking_id") || "").trim();
     const adminNotes = String(formData.get("admin_notes") || "").trim();
 
     if (!bookingId) {
@@ -281,10 +404,14 @@ export default async function AdminBookingDetailsPage({
       .from("bookings")
       .select("id,admin_notes,studio_id,customer_auth_user_id")
       .eq("id", bookingId)
-      .single();
+      .maybeSingle();
 
-    if (readError || !oldBooking) {
-      throw new Error(readError?.message || "Booking not found.");
+    if (readError) {
+      throw new Error(readError.message);
+    }
+
+    if (!oldBooking) {
+      throw new Error("Booking not found.");
     }
 
     const { error } = await supabaseAdmin
@@ -292,7 +419,8 @@ export default async function AdminBookingDetailsPage({
       .update({
         admin_notes: adminNotes || null,
         admin_notes_updated_at: new Date().toISOString(),
-        admin_notes_updated_by: user.id
+        admin_notes_updated_by: user.id,
+        updated_at: new Date().toISOString()
       })
       .eq("id", bookingId);
 
@@ -324,7 +452,7 @@ export default async function AdminBookingDetailsPage({
     revalidatePath("/admin");
   }
 
-  const { data: booking, error } = await supabaseAdmin
+  const { data: bookingData, error } = await supabaseAdmin
     .from("bookings")
     .select(`
       id,
@@ -374,24 +502,21 @@ export default async function AdminBookingDetailsPage({
     .eq("id", id)
     .single();
 
-  if (error || !booking) {
+  if (error || !bookingData) {
     notFound();
   }
 
-  const studio = Array.isArray(booking.studios)
-    ? booking.studios[0]
-    : booking.studios;
+  const booking = bookingData as BookingDetailsRow;
 
-  const reviews = Array.isArray(booking.reviews) ? booking.reviews : [];
-  const reviewRequests = Array.isArray(booking.review_requests)
-    ? booking.review_requests
-    : [];
+  const studio = normalizeStudio(booking.studios);
+  const reviews = normalizeReviews(booking.reviews);
+  const reviewRequests = normalizeReviewRequests(booking.review_requests);
 
   const { data: userData } = await supabaseAdmin.auth.admin.getUserById(
     booking.customer_auth_user_id
   );
 
-  const { data: profile } = await supabaseAdmin
+  const { data: profileData } = await supabaseAdmin
     .from("profiles")
     .select(
       "auth_user_id,email,full_name,phone,role,identity_type,identity_number,identity_locked,identity_created_at,updated_at"
@@ -399,7 +524,9 @@ export default async function AdminBookingDetailsPage({
     .eq("auth_user_id", booking.customer_auth_user_id)
     .maybeSingle();
 
+  const profile = (profileData || null) as CustomerProfileRow | null;
   const customer = userData?.user || null;
+
   const customerName = getCustomerName(customer, profile);
   const customerEmail = profile?.email || customer?.email || "—";
   const customerPhone = getCustomerPhone(customer, profile);
@@ -417,7 +544,7 @@ export default async function AdminBookingDetailsPage({
     adminNotesUpdatedByEmail = adminNoteUser?.user?.email || "—";
   }
 
-  const { data: auditLogs } = await supabaseAdmin
+  const { data: auditLogsData } = await supabaseAdmin
     .from("audit_logs")
     .select(
       "id,actor_email,action,old_values,new_values,metadata,created_at"
@@ -427,15 +554,8 @@ export default async function AdminBookingDetailsPage({
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-
+  const auditLogs = (auditLogsData || []) as AuditLogRow[];
   const latestReviewRequest = reviewRequests[0];
-  const reviewLink =
-    siteUrl && latestReviewRequest
-      ? `${siteUrl}/customer/bookings/${booking.id}/review?token=${latestReviewRequest.review_token}`
-      : "";
 
   return (
     <section>
@@ -465,17 +585,6 @@ export default async function AdminBookingDetailsPage({
           <Link href={`/studios/${studioSlug}`} className="btn btn-secondary">
             <T en="View Studio" ar="عرض الاستوديو" />
           </Link>
-        ) : null}
-
-        {reviewLink ? (
-          <a
-            href={reviewLink}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-secondary"
-          >
-            <T en="Review Link" ar="رابط التقييم" />
-          </a>
         ) : null}
       </div>
 
@@ -663,7 +772,7 @@ export default async function AdminBookingDetailsPage({
 
               <div className="admin-inline-action-grid">
                 {["pending", "confirmed", "completed", "cancelled"].map(
-                  (status) =>
+                  (status: string) =>
                     booking.status !== status ? (
                       <form action={updateBookingStatus} key={status}>
                         <input type="hidden" name="booking_id" value={booking.id} />
@@ -697,32 +806,33 @@ export default async function AdminBookingDetailsPage({
               </h3>
 
               <div className="admin-inline-action-grid">
-                {["unpaid", "paid", "failed", "refunded"].map((paymentStatus) =>
-                  booking.payment_status !== paymentStatus ? (
-                    <form action={updatePaymentStatus} key={paymentStatus}>
-                      <input type="hidden" name="booking_id" value={booking.id} />
-                      <input
-                        type="hidden"
-                        name="studio_slug"
-                        value={studioSlug}
-                      />
-                      <input
-                        type="hidden"
-                        name="payment_status"
-                        value={paymentStatus}
-                      />
-                      <button
-                        className={
-                          paymentStatus === "paid"
-                            ? "btn btn-small"
-                            : "btn btn-secondary btn-small"
-                        }
-                        type="submit"
-                      >
-                        {paymentStatus}
-                      </button>
-                    </form>
-                  ) : null
+                {["unpaid", "paid", "failed", "refunded"].map(
+                  (paymentStatus: string) =>
+                    booking.payment_status !== paymentStatus ? (
+                      <form action={updatePaymentStatus} key={paymentStatus}>
+                        <input type="hidden" name="booking_id" value={booking.id} />
+                        <input
+                          type="hidden"
+                          name="studio_slug"
+                          value={studioSlug}
+                        />
+                        <input
+                          type="hidden"
+                          name="payment_status"
+                          value={paymentStatus}
+                        />
+                        <button
+                          className={
+                            paymentStatus === "paid"
+                              ? "btn btn-small"
+                              : "btn btn-secondary btn-small"
+                          }
+                          type="submit"
+                        >
+                          {paymentStatus}
+                        </button>
+                      </form>
+                    ) : null
                 )}
               </div>
             </div>
@@ -773,7 +883,7 @@ export default async function AdminBookingDetailsPage({
           </span>
 
           {reviews.length ? (
-            reviews.map((review) => (
+            reviews.map((review: ReviewRow) => (
               <div key={review.id} className="admin-list-row">
                 <div>
                   <strong>{review.rating} ★</strong>
@@ -802,8 +912,8 @@ export default async function AdminBookingDetailsPage({
         </h2>
 
         <div className="admin-list">
-          {auditLogs?.length ? (
-            auditLogs.map((log) => (
+          {auditLogs.length ? (
+            auditLogs.map((log: AuditLogRow) => (
               <div className="admin-list-row" key={log.id}>
                 <div>
                   <strong>{log.action}</strong>
