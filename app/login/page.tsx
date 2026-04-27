@@ -4,6 +4,15 @@ import { createClient } from "../../lib/supabase/server";
 import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 
+type AccountType = "customer" | "owner";
+
+type LoginSearchParams = {
+  next?: string;
+  account?: string;
+  created?: string;
+  error?: string;
+};
+
 function safeNextPath(value: string | null | undefined) {
   if (!value) return "";
   if (!value.startsWith("/")) return "";
@@ -15,9 +24,123 @@ function cleanText(value: FormDataEntryValue | null) {
   return String(value || "").trim();
 }
 
-function normalizeAccountType(value: string) {
+function normalizeAccountType(value: string): AccountType {
   if (value === "owner") return "owner";
   return "customer";
+}
+
+function loginRedirectPath({
+  error,
+  account,
+  next
+}: {
+  error?: string;
+  account?: AccountType;
+  next?: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (error) {
+    params.set("error", error);
+  }
+
+  if (account) {
+    params.set("account", account);
+  }
+
+  const safeNext = safeNextPath(next);
+
+  if (safeNext) {
+    params.set("next", safeNext);
+  }
+
+  const query = params.toString();
+
+  return query ? `/login?${query}` : "/login";
+}
+
+function getLoginMessage({
+  error,
+  created,
+  isStaffAccess
+}: {
+  error?: string;
+  created?: string;
+  isStaffAccess: boolean;
+}) {
+  if (created && !isStaffAccess) {
+    return {
+      type: "success" as const,
+      en: "Account created. Please login to continue.",
+      ar: "تم إنشاء الحساب. الرجاء تسجيل الدخول للمتابعة."
+    };
+  }
+
+  if (error === "no_account") {
+    return {
+      type: "error" as const,
+      en: "No account was found with this email. Please create a new account first.",
+      ar: "لا يوجد حساب بهذا البريد الإلكتروني. الرجاء إنشاء حساب جديد أولًا."
+    };
+  }
+
+  if (error === "invalid_login") {
+    return {
+      type: "error" as const,
+      en: "Email or password is incorrect. Please check your details and try again.",
+      ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة. الرجاء التأكد والمحاولة مرة أخرى."
+    };
+  }
+
+  if (error === "missing_email") {
+    return {
+      type: "error" as const,
+      en: "Please enter your email address.",
+      ar: "الرجاء إدخال البريد الإلكتروني."
+    };
+  }
+
+  if (error === "missing_password") {
+    return {
+      type: "error" as const,
+      en: "Please enter your password.",
+      ar: "الرجاء إدخال كلمة المرور."
+    };
+  }
+
+  if (error === "wrong_account_type") {
+    return {
+      type: "error" as const,
+      en: "This email is registered under a different account type. Please choose the correct login type.",
+      ar: "هذا البريد مسجل بنوع حساب مختلف. الرجاء اختيار نوع الدخول الصحيح."
+    };
+  }
+
+  if (error === "not_staff") {
+    return {
+      type: "error" as const,
+      en: "This account is not approved for admin or staff access.",
+      ar: "هذا الحساب غير معتمد لدخول الأدمن أو الموظفين."
+    };
+  }
+
+  if (error === "inactive_account") {
+    return {
+      type: "error" as const,
+      en: "This account is not active. Please contact support.",
+      ar: "هذا الحساب غير نشط. الرجاء التواصل مع الدعم."
+    };
+  }
+
+  if (error === "login_failed") {
+    return {
+      type: "error" as const,
+      en: "Login failed. Please try again.",
+      ar: "فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى."
+    };
+  }
+
+  return null;
 }
 
 async function ensureProfileForUser({
@@ -27,7 +150,7 @@ async function ensureProfileForUser({
 }: {
   supabaseAdmin: any;
   user: any;
-  selectedAccountType: "customer" | "owner";
+  selectedAccountType: AccountType;
 }) {
   const { data: existingProfile } = await supabaseAdmin
     .from("profiles")
@@ -119,13 +242,19 @@ async function ensureProfileForUser({
 export default async function LoginPage({
   searchParams
 }: {
-  searchParams?: Promise<{ next?: string; account?: string; created?: string }>;
+  searchParams?: Promise<LoginSearchParams>;
 }) {
   const params = searchParams ? await searchParams : {};
   const nextPath = safeNextPath(params?.next);
 
   const isStaffAccess = nextPath === "/admin";
-  const defaultAccount = params?.account === "owner" ? "owner" : "customer";
+  const defaultAccount: AccountType = params?.account === "owner" ? "owner" : "customer";
+
+  const loginMessage = getLoginMessage({
+    error: params?.error,
+    created: params?.created,
+    isStaffAccess
+  });
 
   async function login(formData: FormData) {
     "use server";
@@ -138,14 +267,49 @@ export default async function LoginPage({
     const next = safeNextPath(String(formData.get("next") || ""));
     const selectedAccountType = normalizeAccountType(
       cleanText(formData.get("account_type"))
-    ) as "customer" | "owner";
+    );
 
     if (!email) {
-      throw new Error("Email is required.");
+      redirect(
+        loginRedirectPath({
+          error: "missing_email",
+          account: selectedAccountType,
+          next
+        })
+      );
     }
 
     if (!password) {
-      throw new Error("Password is required.");
+      redirect(
+        loginRedirectPath({
+          error: "missing_password",
+          account: selectedAccountType,
+          next
+        })
+      );
+    }
+
+    const { data: existingProfileByEmail } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, role, account_status")
+      .ilike("email", email)
+      .maybeSingle();
+
+    const { data: existingAdminByEmail } = await supabaseAdmin
+      .from("admin_users")
+      .select("id, email, status")
+      .ilike("email", email)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (!existingProfileByEmail && !existingAdminByEmail) {
+      redirect(
+        loginRedirectPath({
+          error: "no_account",
+          account: selectedAccountType,
+          next
+        })
+      );
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -154,13 +318,25 @@ export default async function LoginPage({
     });
 
     if (error) {
-      throw new Error(error.message);
+      redirect(
+        loginRedirectPath({
+          error: "invalid_login",
+          account: selectedAccountType,
+          next
+        })
+      );
     }
 
     const user = data.user;
 
     if (!user) {
-      throw new Error("Login failed.");
+      redirect(
+        loginRedirectPath({
+          error: "login_failed",
+          account: selectedAccountType,
+          next
+        })
+      );
     }
 
     const { data: adminUser } = await supabaseAdmin
@@ -175,7 +351,14 @@ export default async function LoginPage({
         redirect("/admin");
       }
 
-      redirect("/forbidden");
+      await supabase.auth.signOut();
+
+      redirect(
+        loginRedirectPath({
+          error: "not_staff",
+          next
+        })
+      );
     }
 
     if (adminUser) {
@@ -189,16 +372,44 @@ export default async function LoginPage({
     });
 
     if (profile.account_status === "deleted") {
-      redirect("/forbidden");
+      await supabase.auth.signOut();
+
+      redirect(
+        loginRedirectPath({
+          error: "inactive_account",
+          account: selectedAccountType,
+          next
+        })
+      );
     }
 
     if (profile.account_status === "pending_deletion") {
       redirect("/account/delete");
     }
 
+    if (profile.account_status && profile.account_status !== "active") {
+      await supabase.auth.signOut();
+
+      redirect(
+        loginRedirectPath({
+          error: "inactive_account",
+          account: selectedAccountType,
+          next
+        })
+      );
+    }
+
     if (selectedAccountType === "owner") {
       if (profile.role !== "owner") {
-        redirect("/forbidden");
+        await supabase.auth.signOut();
+
+        redirect(
+          loginRedirectPath({
+            error: "wrong_account_type",
+            account: selectedAccountType,
+            next
+          })
+        );
       }
 
       redirect("/owner/onboarding");
@@ -206,7 +417,15 @@ export default async function LoginPage({
 
     if (selectedAccountType === "customer") {
       if (profile.role !== "customer") {
-        redirect("/forbidden");
+        await supabase.auth.signOut();
+
+        redirect(
+          loginRedirectPath({
+            error: "wrong_account_type",
+            account: selectedAccountType,
+            next
+          })
+        );
       }
 
       redirect("/customer");
@@ -249,12 +468,23 @@ export default async function LoginPage({
             )}
           </p>
 
-          {params?.created && !isStaffAccess ? (
-            <div className="success" style={{ marginBottom: 18 }}>
-              <T
-                en="Account created. Please login to continue."
-                ar="تم إنشاء الحساب. الرجاء تسجيل الدخول للمتابعة."
-              />
+          {loginMessage ? (
+            <div
+              className={loginMessage.type === "success" ? "success" : ""}
+              style={
+                loginMessage.type === "error"
+                  ? {
+                      marginBottom: 18,
+                      padding: 14,
+                      borderRadius: 16,
+                      background: "rgba(255, 75, 75, 0.14)",
+                      border: "1px solid rgba(255, 75, 75, 0.35)",
+                      color: "#ffb3b3"
+                    }
+                  : { marginBottom: 18 }
+              }
+            >
+              <T en={loginMessage.en} ar={loginMessage.ar} />
             </div>
           ) : null}
 
@@ -334,7 +564,10 @@ export default async function LoginPage({
             </div>
           ) : (
             <>
-              <div className="actions" style={{ marginTop: 18, justifyContent: "center" }}>
+              <div
+                className="actions"
+                style={{ marginTop: 18, justifyContent: "center" }}
+              >
                 <Link href="/" className="btn btn-secondary">
                   <T en="Back to Home" ar="العودة للصفحة الرئيسية" />
                 </Link>
