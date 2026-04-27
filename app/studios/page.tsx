@@ -18,6 +18,65 @@ type SearchParams = {
   sort?: string;
 };
 
+type StudioIdRow = {
+  id: string | null;
+};
+
+type CityRow = {
+  city: string | null;
+};
+
+type DistrictRow = {
+  district: string | null;
+};
+
+type StudioFeatureRow = {
+  id: string;
+  name_en: string;
+  name_ar: string;
+  category: string | null;
+  sort_order: number | null;
+};
+
+type EquipmentFilterRow = {
+  studio_id?: string | null;
+  category: string | null;
+  brand: string | null;
+};
+
+type LinkedStudioFeatureRow = {
+  studio_id: string;
+  feature_id: string;
+};
+
+type EquipmentMatchRow = {
+  studio_id: string | null;
+  name?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  category?: string | null;
+};
+
+type StudioCardRow = {
+  id: string;
+  name: string;
+  slug: string;
+  city: string | null;
+  district: string | null;
+  price_from: number | null;
+  status: string | null;
+  cover_image_url: string | null;
+  verified: boolean | null;
+  booking_enabled: boolean | null;
+  owner_compliance_status: string | null;
+  google_rating: number | null;
+  google_user_ratings_total: number | null;
+  tripadvisor_rating: number | null;
+  tripadvisor_reviews_total: number | null;
+  created_at: string | null;
+  description?: string | null;
+};
+
 function toArray(value: string | string[] | undefined) {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
@@ -89,8 +148,10 @@ export default async function StudiosPage({
     supabase.from("studios").select("id")
   );
 
+  const bookableStudioRowsList = (bookableStudioRows || []) as StudioIdRow[];
+
   const bookableStudioIds = uniqueClean(
-    (bookableStudioRows || []).map((item) => item.id)
+    bookableStudioRowsList.map((item: StudioIdRow) => item.id)
   );
 
   const { data: cityRows } = await applyBookableStudioFilters(
@@ -101,7 +162,11 @@ export default async function StudiosPage({
       .order("city", { ascending: true })
   );
 
-  const cities = uniqueClean((cityRows || []).map((item) => item.city));
+  const cityRowsList = (cityRows || []) as CityRow[];
+
+  const cities = uniqueClean(
+    cityRowsList.map((item: CityRow) => item.city)
+  );
 
   const { data: districtRows } = await applyBookableStudioFilters(
     supabase
@@ -111,8 +176,10 @@ export default async function StudiosPage({
       .order("district", { ascending: true })
   );
 
+  const districtRowsList = (districtRows || []) as DistrictRow[];
+
   const districts = uniqueClean(
-    (districtRows || []).map((item) => item.district)
+    districtRowsList.map((item: DistrictRow) => item.district)
   );
 
   const { data: features } = await supabase
@@ -121,7 +188,9 @@ export default async function StudiosPage({
     .eq("status", "active")
     .order("sort_order", { ascending: true });
 
-  let equipmentFilterRows: any[] = [];
+  const featuresList = (features || []) as StudioFeatureRow[];
+
+  let equipmentFilterRows: EquipmentFilterRow[] = [];
 
   if (bookableStudioIds.length > 0) {
     const { data } = await supabase
@@ -130,15 +199,15 @@ export default async function StudiosPage({
       .in("studio_id", bookableStudioIds)
       .order("category", { ascending: true });
 
-    equipmentFilterRows = data || [];
+    equipmentFilterRows = (data || []) as EquipmentFilterRow[];
   }
 
   const equipmentCategories = uniqueClean(
-    equipmentFilterRows.map((item) => item.category)
+    equipmentFilterRows.map((item: EquipmentFilterRow) => item.category)
   );
 
   const equipmentBrands = uniqueClean(
-    equipmentFilterRows.map((item) => item.brand)
+    equipmentFilterRows.map((item: EquipmentFilterRow) => item.brand)
   );
 
   const studioIdFilters: string[][] = [];
@@ -159,9 +228,11 @@ export default async function StudiosPage({
 
     const { data: linkedStudios } = await linkedStudiosQuery;
 
+    const linkedStudiosList = (linkedStudios || []) as LinkedStudioFeatureRow[];
+
     const counts = new Map<string, Set<string>>();
 
-    for (const item of linkedStudios || []) {
+    for (const item of linkedStudiosList) {
       if (!counts.has(item.studio_id)) {
         counts.set(item.studio_id, new Set());
       }
@@ -171,7 +242,7 @@ export default async function StudiosPage({
 
     const matchingFeatureStudioIds = Array.from(counts.entries())
       .filter(([, featureSet]) =>
-        selectedFeatureIds.every((featureId) => featureSet.has(featureId))
+        selectedFeatureIds.every((featureId: string) => featureSet.has(featureId))
       )
       .map(([studioId]) => studioId);
 
@@ -218,8 +289,13 @@ export default async function StudiosPage({
 
     const { data: matchingEquipmentRows } = await equipmentQuery;
 
+    const matchingEquipmentRowsList =
+      (matchingEquipmentRows || []) as EquipmentMatchRow[];
+
     const matchingEquipmentStudioIds = uniqueClean(
-      (matchingEquipmentRows || []).map((item) => item.studio_id)
+      matchingEquipmentRowsList.map(
+        (item: EquipmentMatchRow) => item.studio_id
+      )
     );
 
     studioIdFilters.push(matchingEquipmentStudioIds);
@@ -302,6 +378,8 @@ export default async function StudiosPage({
 
   const { data: studios, error } = await studiosQuery;
 
+  const studiosList = (studios || []) as StudioCardRow[];
+
   if (error) {
     return (
       <div className="card">
@@ -316,7 +394,7 @@ export default async function StudiosPage({
     );
   }
 
-  const resultCount = studios?.length || 0;
+  const resultCount = studiosList.length;
 
   const hasFilters =
     queryText ||
@@ -333,8 +411,8 @@ export default async function StudiosPage({
     equipmentKeyword ||
     sort !== "newest";
 
-  const groupedFeatures =
-    features?.reduce<Record<string, any[]>>((groups, feature) => {
+  const groupedFeatures = featuresList.reduce<Record<string, StudioFeatureRow[]>>(
+    (groups, feature: StudioFeatureRow) => {
       const key = feature.category || "general";
 
       if (!groups[key]) {
@@ -344,7 +422,9 @@ export default async function StudiosPage({
       groups[key].push(feature);
 
       return groups;
-    }, {}) || {};
+    },
+    {}
+  );
 
   const featureGroupLabels: Record<
     string,
@@ -425,7 +505,7 @@ export default async function StudiosPage({
 
           <select className="input" name="city" defaultValue={selectedCity}>
             <option value="">All cities</option>
-            {cities.map((city) => (
+            {cities.map((city: string) => (
               <option value={city} key={city}>
                 {city}
               </option>
@@ -444,7 +524,7 @@ export default async function StudiosPage({
             defaultValue={selectedDistrict}
           >
             <option value="">All districts</option>
-            {districts.map((district) => (
+            {districts.map((district: string) => (
               <option value={district} key={district}>
                 {district}
               </option>
@@ -574,7 +654,7 @@ export default async function StudiosPage({
                   </summary>
 
                   <div className="feature-filter-options">
-                    {groupItems.map((feature) => {
+                    {groupItems.map((feature: StudioFeatureRow) => {
                       const checked = selectedFeatureIds.includes(feature.id);
 
                       return (
@@ -638,7 +718,7 @@ export default async function StudiosPage({
                 defaultValue={selectedEquipmentBrand}
               >
                 <option value="">Any brand</option>
-                {equipmentBrands.map((brand) => (
+                {equipmentBrands.map((brand: string) => (
                   <option value={brand} key={brand}>
                     {brand}
                   </option>
@@ -648,7 +728,7 @@ export default async function StudiosPage({
           </div>
 
           <div className="equipment-category-chips">
-            {equipmentCategories.map((category) => {
+            {equipmentCategories.map((category: string) => {
               const checked = selectedEquipmentCategories.includes(category);
 
               return (
@@ -703,8 +783,8 @@ export default async function StudiosPage({
       </div>
 
       <div className="grid">
-        {studios?.length ? (
-          studios.map((studio) => (
+        {studiosList.length ? (
+          studiosList.map((studio: StudioCardRow) => (
             <article className="card studio-card" key={studio.id}>
               <div className="studio-cover">
                 {studio.cover_image_url ? (
