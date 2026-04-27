@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
-import { requireRole } from "../../../lib/auth";
+import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
 function statusLabel(status: string) {
@@ -50,33 +51,119 @@ function badgeStyle(type: "booking" | "payment", status: string) {
   return yellow;
 }
 
-export default async function OwnerBookingsPage() {
-  const { user } = await requireRole("owner");
+async function requireOwnerOnly() {
   const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?account=owner");
+  }
+
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id, auth_user_id, status")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
+  }
+
+  const { data: profile, error } = await supabaseAdmin
+    .from("profiles")
+    .select("id, auth_user_id, email, full_name, phone, role, account_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!profile) {
+    redirect("/login?account=owner");
+  }
+
+  if (profile.account_status === "deleted") {
+    redirect("/forbidden");
+  }
+
+  if (profile.account_status === "pending_deletion") {
+    redirect("/account/delete");
+  }
+
+  if (profile.role === "customer") {
+    redirect("/customer");
+  }
+
+  if (profile.role !== "owner") {
+    redirect("/forbidden");
+  }
+
+  return { user, profile };
+}
+
+export default async function OwnerBookingsPage() {
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
 
   async function updateBookingStatus(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      throw new Error("Not authenticated");
-    }
-
-    const bookingId = String(formData.get("booking_id"));
-    const status = String(formData.get("status"));
+    const bookingId = String(formData.get("booking_id") || "");
+    const status = String(formData.get("status") || "");
 
     if (!bookingId || !["confirmed", "cancelled"].includes(status)) {
-      throw new Error("Invalid booking update");
+      throw new Error("Invalid booking update.");
     }
 
-    const { error } = await supabase
+    const { data: booking, error: bookingReadError } = await supabaseAdmin
       .from("bookings")
-      .update({ status })
+      .select(`
+        id,
+        status,
+        studio_id,
+        studios (
+          id,
+          owner_auth_user_id
+        )
+      `)
+      .eq("id", bookingId)
+      .maybeSingle();
+
+    if (bookingReadError) {
+      throw new Error(bookingReadError.message);
+    }
+
+    if (!booking) {
+      throw new Error("Booking not found.");
+    }
+
+    const studio = Array.isArray(booking.studios)
+      ? booking.studios[0]
+      : booking.studios;
+
+    if (!studio || studio.owner_auth_user_id !== user.id) {
+      throw new Error("You do not have permission to update this booking.");
+    }
+
+    if (booking.status !== "pending") {
+      throw new Error("Only pending bookings can be updated by the owner.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("bookings")
+      .update({
+        status,
+        updated_at: new Date().toISOString()
+      })
       .eq("id", bookingId);
 
     if (error) {
@@ -84,9 +171,11 @@ export default async function OwnerBookingsPage() {
     }
 
     revalidatePath("/owner/bookings");
+    revalidatePath("/admin/bookings");
+    revalidatePath("/customer/bookings");
   }
 
-  const { data: bookings, error } = await supabase
+  const { data: bookings, error } = await supabaseAdmin
     .from("bookings")
     .select(`
       id,
@@ -107,7 +196,6 @@ export default async function OwnerBookingsPage() {
         owner_auth_user_id
       )
     `)
-    .eq("studios.owner_auth_user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -137,7 +225,7 @@ export default async function OwnerBookingsPage() {
     <section>
       <div className="section-head">
         <span className="badge">
-          <T en="Studio Owner" ar="صاحب الاستوديو" />
+          <T en="Studio Owner" ar="مالك الاستوديو" />
         </span>
 
         <h1>
@@ -146,8 +234,8 @@ export default async function OwnerBookingsPage() {
 
         <p>
           <T
-            en="Review, confirm, or cancel booking requests for your studios."
-            ar="راجع طلبات الحجز الخاصة باستوديوهاتك وقم بتأكيدها أو إلغائها."
+            en="Review, confirm, or cancel booking requests for your studios only."
+            ar="راجع طلبات الحجز الخاصة باستوديوهاتك فقط وقم بتأكيدها أو إلغائها."
           />
         </p>
       </div>
@@ -159,6 +247,10 @@ export default async function OwnerBookingsPage() {
 
         <Link href="/owner/studios" className="btn">
           <T en="My Studios" ar="استوديوهاتي" />
+        </Link>
+
+        <Link href="/owner/onboarding" className="btn btn-secondary">
+          <T en="Business Onboarding" ar="بيانات النشاط" />
         </Link>
       </div>
 
@@ -176,7 +268,8 @@ export default async function OwnerBookingsPage() {
                     className="badge"
                     style={badgeStyle("booking", booking.status)}
                   >
-                    <T en="Booking:" ar="الحجز:" /> {statusLabel(booking.status)}
+                    <T en="Booking:" ar="الحجز:" />{" "}
+                    {statusLabel(booking.status)}
                   </span>
 
                   <span
