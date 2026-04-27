@@ -2,7 +2,124 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../../../lib/supabase/server";
+import { createAdminClient } from "../../../../../lib/supabase/admin";
 import T from "../../../../../components/t";
+
+type ProfileRow = {
+  id: string;
+  auth_user_id: string;
+  role: string | null;
+  account_status: string | null;
+};
+
+type StudioRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  city: string | null;
+  district: string | null;
+};
+
+type BookingRow = {
+  id: string;
+  studio_id: string;
+  customer_auth_user_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  payment_status: string;
+  studios: StudioRow | StudioRow[] | null;
+};
+
+type ReviewRequestRow = {
+  id: string;
+  status: string | null;
+  review_token: string | null;
+  expires_at: string | null;
+  customer_auth_user_id?: string | null;
+};
+
+function cleanText(value: FormDataEntryValue | null) {
+  return String(value || "").trim();
+}
+
+function isReviewAllowed(booking: {
+  status: string | null;
+  payment_status: string | null;
+}) {
+  return (
+    (booking.status === "confirmed" || booking.status === "completed") &&
+    booking.payment_status === "paid"
+  );
+}
+
+function isExpired(value: string | null | undefined) {
+  if (!value) return false;
+
+  const expiryDate = new Date(value);
+  const now = new Date();
+
+  if (Number.isNaN(expiryDate.getTime())) return false;
+
+  return expiryDate < now;
+}
+
+async function requireCustomerAccess() {
+  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
+  }
+
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("id, auth_user_id, role, account_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  const profileRow = profile as ProfileRow | null;
+  const role = profileRow?.role || user.user_metadata?.role || "customer";
+
+  if (role === "admin") {
+    redirect("/admin");
+  }
+
+  if (role === "owner") {
+    redirect("/owner");
+  }
+
+  if (role !== "customer") {
+    redirect("/login");
+  }
+
+  if (profileRow?.account_status && profileRow.account_status !== "active") {
+    redirect("/login");
+  }
+
+  return {
+    supabase,
+    supabaseAdmin,
+    user,
+    profile: profileRow
+  };
+}
 
 function RatingSelect({
   name,
@@ -47,19 +164,11 @@ export default async function ReviewBookingPage({
 }) {
   const { id } = await params;
   const query = searchParams ? await searchParams : {};
-  const token = String(query.token || "");
+  const token = String(query.token || "").trim();
 
-  const supabase = await createClient();
+  const { supabase, user } = await requireCustomerAccess();
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: booking, error: bookingError } = await supabase
+  const { data: bookingData, error: bookingError } = await supabase
     .from("bookings")
     .select(`
       id,
@@ -82,9 +191,11 @@ export default async function ReviewBookingPage({
     .eq("customer_auth_user_id", user.id)
     .single();
 
-  if (bookingError || !booking) {
+  if (bookingError || !bookingData) {
     notFound();
   }
+
+  const booking = bookingData as BookingRow;
 
   const studio = Array.isArray(booking.studios)
     ? booking.studios[0]
@@ -94,9 +205,7 @@ export default async function ReviewBookingPage({
     notFound();
   }
 
-  const canReview =
-    (booking.status === "confirmed" || booking.status === "completed") &&
-    booking.payment_status === "paid";
+  const canReview = isReviewAllowed(booking);
 
   if (!canReview) {
     return (
@@ -129,6 +238,7 @@ export default async function ReviewBookingPage({
     .from("reviews")
     .select("id")
     .eq("booking_id", booking.id)
+    .eq("customer_auth_user_id", user.id)
     .maybeSingle();
 
   if (existingReview) {
@@ -155,44 +265,47 @@ export default async function ReviewBookingPage({
               <T en="Back to My Bookings" ar="العودة إلى حجوزاتي" />
             </Link>
 
-            <Link href={`/studios/${studio.slug}`} className="btn">
-              <T en="View Studio" ar="عرض الاستوديو" />
-            </Link>
+            {studio.slug ? (
+              <Link href={`/studios/${studio.slug}`} className="btn">
+                <T en="View Studio" ar="عرض الاستوديو" />
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
     );
   }
 
-  const { data: reviewRequest } = token
+  const { data: reviewRequestData } = token
     ? await supabase
         .from("review_requests")
-        .select("id,status,review_token,expires_at")
+        .select("id,status,review_token,expires_at,customer_auth_user_id")
         .eq("booking_id", booking.id)
+        .eq("customer_auth_user_id", user.id)
         .eq("review_token", token)
         .maybeSingle()
     : await supabase
         .from("review_requests")
-        .select("id,status,review_token,expires_at")
+        .select("id,status,review_token,expires_at,customer_auth_user_id")
         .eq("booking_id", booking.id)
+        .eq("customer_auth_user_id", user.id)
         .maybeSingle();
+
+  const reviewRequest = reviewRequestData as ReviewRequestRow | null;
+
+  const validReviewRequest =
+    reviewRequest &&
+    reviewRequest.status !== "submitted" &&
+    !isExpired(reviewRequest.expires_at);
 
   async function submitReview(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { supabase, user } = await requireCustomerAccess();
 
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirect("/login");
-    }
-
-    const bookingId = String(formData.get("booking_id") || "");
-    const studioId = String(formData.get("studio_id") || "");
-    const reviewRequestId = String(formData.get("review_request_id") || "") || null;
+    const bookingId = cleanText(formData.get("booking_id"));
+    const studioId = cleanText(formData.get("studio_id"));
+    const reviewRequestId = cleanText(formData.get("review_request_id")) || null;
 
     const rating = Number(formData.get("rating") || 0);
     const cleanlinessRating = Number(formData.get("cleanliness_rating") || 0);
@@ -200,7 +313,7 @@ export default async function ReviewBookingPage({
     const soundQualityRating = Number(formData.get("sound_quality_rating") || 0);
     const communicationRating = Number(formData.get("communication_rating") || 0);
     const valueRating = Number(formData.get("value_rating") || 0);
-    const comment = String(formData.get("comment") || "").trim();
+    const comment = cleanText(formData.get("comment"));
 
     const ratings = [
       rating,
@@ -215,23 +328,74 @@ export default async function ReviewBookingPage({
       throw new Error("Please complete all ratings.");
     }
 
-    const { data: bookingCheck, error: bookingCheckError } = await supabase
+    const { data: bookingCheckData, error: bookingCheckError } = await supabase
       .from("bookings")
-      .select("id,studio_id,customer_auth_user_id,status,payment_status")
+      .select(`
+        id,
+        studio_id,
+        customer_auth_user_id,
+        status,
+        payment_status,
+        studios (
+          slug
+        )
+      `)
       .eq("id", bookingId)
       .eq("customer_auth_user_id", user.id)
       .single();
 
-    if (bookingCheckError || !bookingCheck) {
+    if (bookingCheckError || !bookingCheckData) {
       throw new Error("Booking not found.");
     }
 
-    const bookingCanReview =
-      (bookingCheck.status === "confirmed" || bookingCheck.status === "completed") &&
-      bookingCheck.payment_status === "paid";
+    const bookingCheck = bookingCheckData as {
+      id: string;
+      studio_id: string;
+      customer_auth_user_id: string;
+      status: string;
+      payment_status: string;
+      studios: { slug: string | null } | { slug: string | null }[] | null;
+    };
 
-    if (!bookingCanReview) {
+    if (bookingCheck.studio_id !== studioId) {
+      throw new Error("Invalid studio for this booking.");
+    }
+
+    if (!isReviewAllowed(bookingCheck)) {
       throw new Error("This booking cannot be reviewed yet.");
+    }
+
+    const { data: duplicateReview } = await supabase
+      .from("reviews")
+      .select("id")
+      .eq("booking_id", bookingId)
+      .eq("customer_auth_user_id", user.id)
+      .maybeSingle();
+
+    if (duplicateReview) {
+      throw new Error("You already reviewed this booking.");
+    }
+
+    if (reviewRequestId) {
+      const { data: requestCheck } = await supabase
+        .from("review_requests")
+        .select("id,status,expires_at,customer_auth_user_id")
+        .eq("id", reviewRequestId)
+        .eq("booking_id", bookingId)
+        .eq("customer_auth_user_id", user.id)
+        .maybeSingle();
+
+      if (!requestCheck) {
+        throw new Error("Invalid review request.");
+      }
+
+      if (requestCheck.status === "submitted") {
+        throw new Error("This review request was already submitted.");
+      }
+
+      if (isExpired(requestCheck.expires_at)) {
+        throw new Error("This review request has expired.");
+      }
     }
 
     const { error: reviewError } = await supabase.from("reviews").insert({
@@ -265,10 +429,20 @@ export default async function ReviewBookingPage({
         .eq("customer_auth_user_id", user.id);
     }
 
-    revalidatePath(`/customer/bookings`);
-    revalidatePath(`/studios/${studio.slug}`);
+    const studioFromBooking = Array.isArray(bookingCheck.studios)
+      ? bookingCheck.studios[0]
+      : bookingCheck.studios;
 
-    redirect(`/studios/${studio.slug}`);
+    const studioSlug = studioFromBooking?.slug || "";
+
+    revalidatePath("/customer/bookings");
+
+    if (studioSlug) {
+      revalidatePath(`/studios/${studioSlug}`);
+      redirect(`/studios/${studioSlug}`);
+    }
+
+    redirect("/customer/bookings");
   }
 
   return (
@@ -314,7 +488,7 @@ export default async function ReviewBookingPage({
             <T en="to" ar="إلى" /> <strong>{booking.end_time}</strong>
           </p>
 
-          {reviewRequest ? (
+          {validReviewRequest ? (
             <p className="success">
               <T
                 en="This review link is connected to your booking."
@@ -337,7 +511,7 @@ export default async function ReviewBookingPage({
           <input
             type="hidden"
             name="review_request_id"
-            value={reviewRequest?.id || ""}
+            value={validReviewRequest?.id || ""}
           />
 
           <RatingSelect
