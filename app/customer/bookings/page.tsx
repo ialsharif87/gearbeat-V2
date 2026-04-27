@@ -4,6 +4,38 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
 import T from "../../../components/t";
 
+type ProfileRow = {
+  id: string;
+  auth_user_id: string;
+  role: string | null;
+  account_status: string | null;
+};
+
+type StudioRow = {
+  name: string | null;
+  city: string | null;
+  district: string | null;
+  slug: string | null;
+};
+
+type ReviewRow = {
+  id: string;
+};
+
+type BookingRow = {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  total_amount: number | null;
+  status: string;
+  payment_status: string;
+  notes: string | null;
+  created_at: string | null;
+  studios: StudioRow | StudioRow[] | null;
+  reviews: ReviewRow[] | null;
+};
+
 function statusLabel(status: string) {
   if (status === "confirmed") return <T en="Confirmed" ar="مؤكد" />;
   if (status === "cancelled") return <T en="Cancelled" ar="ملغي" />;
@@ -50,7 +82,7 @@ function badgeStyle(type: "booking" | "payment", status: string) {
   return yellow;
 }
 
-export default async function CustomerBookingsPage() {
+async function requireCustomerAccess() {
   const supabase = await createClient();
 
   const {
@@ -61,23 +93,73 @@ export default async function CustomerBookingsPage() {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, auth_user_id, role, account_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  const profileRow = profile as ProfileRow | null;
+  const role = profileRow?.role || user.user_metadata?.role || "customer";
+
+  if (role === "admin") {
+    redirect("/admin");
+  }
+
+  if (role === "owner") {
+    redirect("/owner");
+  }
+
+  if (role !== "customer") {
+    redirect("/login");
+  }
+
+  if (profileRow?.account_status && profileRow.account_status !== "active") {
+    redirect("/login");
+  }
+
+  return {
+    supabase,
+    user,
+    profile: profileRow
+  };
+}
+
+export default async function CustomerBookingsPage() {
+  const { supabase, user } = await requireCustomerAccess();
+
   async function markBookingAsPaid(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { supabase, user } = await requireCustomerAccess();
 
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirect("/login");
-    }
-
-    const bookingId = String(formData.get("booking_id"));
+    const bookingId = String(formData.get("booking_id") || "").trim();
 
     if (!bookingId) {
       throw new Error("Missing booking ID");
+    }
+
+    const { data: booking, error: bookingLookupError } = await supabase
+      .from("bookings")
+      .select("id, customer_auth_user_id, status, payment_status")
+      .eq("id", bookingId)
+      .eq("customer_auth_user_id", user.id)
+      .maybeSingle();
+
+    if (bookingLookupError) {
+      throw new Error(bookingLookupError.message);
+    }
+
+    if (!booking) {
+      throw new Error("Booking not found or not allowed.");
+    }
+
+    if (booking.status !== "confirmed") {
+      throw new Error("Only confirmed bookings can be paid.");
+    }
+
+    if (booking.payment_status !== "unpaid") {
+      throw new Error("This booking is not unpaid.");
     }
 
     const { error } = await supabase
@@ -85,7 +167,8 @@ export default async function CustomerBookingsPage() {
       .update({ payment_status: "paid" })
       .eq("id", bookingId)
       .eq("customer_auth_user_id", user.id)
-      .eq("status", "confirmed");
+      .eq("status", "confirmed")
+      .eq("payment_status", "unpaid");
 
     if (error) {
       throw new Error(error.message);
@@ -118,6 +201,8 @@ export default async function CustomerBookingsPage() {
     `)
     .eq("customer_auth_user_id", user.id)
     .order("created_at", { ascending: false });
+
+  const bookingsList = (bookings || []) as BookingRow[];
 
   if (error) {
     return (
@@ -165,8 +250,8 @@ export default async function CustomerBookingsPage() {
       </div>
 
       <div className="grid">
-        {bookings?.length ? (
-          bookings.map((booking) => {
+        {bookingsList.length ? (
+          bookingsList.map((booking: BookingRow) => {
             const studio = Array.isArray(booking.studios)
               ? booking.studios[0]
               : booking.studios;
