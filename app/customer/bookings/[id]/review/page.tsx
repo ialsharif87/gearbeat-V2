@@ -293,10 +293,12 @@ export default async function ReviewBookingPage({
 
   const reviewRequest = reviewRequestData as ReviewRequestRow | null;
 
-  const validReviewRequest =
-    reviewRequest &&
+  const isValidReviewRequest =
+    !!reviewRequest &&
     reviewRequest.status !== "submitted" &&
     !isExpired(reviewRequest.expires_at);
+
+  const validReviewRequest = isValidReviewRequest ? reviewRequest : null;
 
   async function submitReview(formData: FormData) {
     "use server";
