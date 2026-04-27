@@ -5,6 +5,43 @@ import { createClient } from "../../../lib/supabase/server";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
+type ProfileRow = {
+  id: string;
+  auth_user_id: string;
+  email: string | null;
+  full_name: string | null;
+  phone: string | null;
+  role: string | null;
+  account_status: string | null;
+};
+
+type OwnerStudioIdRow = {
+  id: string;
+};
+
+type StudioRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  city: string | null;
+  district: string | null;
+  owner_auth_user_id: string | null;
+};
+
+type BookingRow = {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  total_amount: number | null;
+  status: string;
+  payment_status: string;
+  notes: string | null;
+  created_at: string | null;
+  studio_id: string;
+  studios: StudioRow | StudioRow[] | null;
+};
+
 function statusLabel(status: string) {
   if (status === "confirmed") return <T en="Confirmed" ar="مؤكد" />;
   if (status === "cancelled") return <T en="Cancelled" ar="ملغي" />;
@@ -74,7 +111,7 @@ async function requireOwnerOnly() {
     redirect("/admin");
   }
 
-  const { data: profile, error } = await supabaseAdmin
+  const { data: profileData, error } = await supabaseAdmin
     .from("profiles")
     .select("id, auth_user_id, email, full_name, phone, role, account_status")
     .eq("auth_user_id", user.id)
@@ -83,6 +120,8 @@ async function requireOwnerOnly() {
   if (error) {
     throw new Error(error.message);
   }
+
+  const profile = profileData as ProfileRow | null;
 
   if (!profile) {
     redirect("/login?account=owner");
@@ -96,6 +135,14 @@ async function requireOwnerOnly() {
     redirect("/account/delete");
   }
 
+  if (profile.account_status && profile.account_status !== "active") {
+    redirect("/login?account=owner");
+  }
+
+  if (profile.role === "admin") {
+    redirect("/admin");
+  }
+
   if (profile.role === "customer") {
     redirect("/customer");
   }
@@ -104,37 +151,31 @@ async function requireOwnerOnly() {
     redirect("/forbidden");
   }
 
-  return { user, profile };
+  return {
+    user,
+    profile,
+    supabaseAdmin
+  };
 }
 
 export default async function OwnerBookingsPage() {
-  const { user } = await requireOwnerOnly();
-  const supabaseAdmin = createAdminClient();
+  const { user, supabaseAdmin } = await requireOwnerOnly();
 
   async function updateBookingStatus(formData: FormData) {
     "use server";
 
-    const { user } = await requireOwnerOnly();
-    const supabaseAdmin = createAdminClient();
+    const { user, supabaseAdmin } = await requireOwnerOnly();
 
-    const bookingId = String(formData.get("booking_id") || "");
-    const status = String(formData.get("status") || "");
+    const bookingId = String(formData.get("booking_id") || "").trim();
+    const status = String(formData.get("status") || "").trim();
 
     if (!bookingId || !["confirmed", "cancelled"].includes(status)) {
       throw new Error("Invalid booking update.");
     }
 
-    const { data: booking, error: bookingReadError } = await supabaseAdmin
+    const { data: bookingData, error: bookingReadError } = await supabaseAdmin
       .from("bookings")
-      .select(`
-        id,
-        status,
-        studio_id,
-        studios (
-          id,
-          owner_auth_user_id
-        )
-      `)
+      .select("id, status, studio_id")
       .eq("id", bookingId)
       .maybeSingle();
 
@@ -142,15 +183,28 @@ export default async function OwnerBookingsPage() {
       throw new Error(bookingReadError.message);
     }
 
-    if (!booking) {
+    if (!bookingData) {
       throw new Error("Booking not found.");
     }
 
-    const studio = Array.isArray(booking.studios)
-      ? booking.studios[0]
-      : booking.studios;
+    const booking = bookingData as {
+      id: string;
+      status: string;
+      studio_id: string;
+    };
 
-    if (!studio || studio.owner_auth_user_id !== user.id) {
+    const { data: studioData, error: studioReadError } = await supabaseAdmin
+      .from("studios")
+      .select("id, owner_auth_user_id")
+      .eq("id", booking.studio_id)
+      .eq("owner_auth_user_id", user.id)
+      .maybeSingle();
+
+    if (studioReadError) {
+      throw new Error(studioReadError.message);
+    }
+
+    if (!studioData) {
       throw new Error("You do not have permission to update this booking.");
     }
 
@@ -164,7 +218,9 @@ export default async function OwnerBookingsPage() {
         status,
         updated_at: new Date().toISOString()
       })
-      .eq("id", bookingId);
+      .eq("id", bookingId)
+      .eq("studio_id", booking.studio_id)
+      .eq("status", "pending");
 
     if (error) {
       throw new Error(error.message);
@@ -175,30 +231,12 @@ export default async function OwnerBookingsPage() {
     revalidatePath("/customer/bookings");
   }
 
-  const { data: bookings, error } = await supabaseAdmin
-    .from("bookings")
-    .select(`
-      id,
-      booking_date,
-      start_time,
-      end_time,
-      total_amount,
-      status,
-      payment_status,
-      notes,
-      created_at,
-      studios (
-        id,
-        name,
-        slug,
-        city,
-        district,
-        owner_auth_user_id
-      )
-    `)
-    .order("created_at", { ascending: false });
+  const { data: ownerStudioRows, error: ownerStudiosError } = await supabaseAdmin
+    .from("studios")
+    .select("id")
+    .eq("owner_auth_user_id", user.id);
 
-  if (error) {
+  if (ownerStudiosError) {
     return (
       <div className="card">
         <span className="badge">
@@ -207,19 +245,63 @@ export default async function OwnerBookingsPage() {
         <h1>
           <T en="Owner Bookings" ar="حجوزات الاستوديو" />
         </h1>
-        <p>{error.message}</p>
+        <p>{ownerStudiosError.message}</p>
       </div>
     );
   }
 
-  const ownerBookings =
-    bookings?.filter((booking) => {
-      const studio = Array.isArray(booking.studios)
-        ? booking.studios[0]
-        : booking.studios;
+  const ownerStudios = (ownerStudioRows || []) as OwnerStudioIdRow[];
+  const ownerStudioIds = ownerStudios.map((studio: OwnerStudioIdRow) => studio.id);
 
-      return studio?.owner_auth_user_id === user.id;
-    }) || [];
+  let bookingsList: BookingRow[] = [];
+  let bookingsErrorMessage = "";
+
+  if (ownerStudioIds.length > 0) {
+    const { data: bookingsData, error: bookingsError } = await supabaseAdmin
+      .from("bookings")
+      .select(`
+        id,
+        booking_date,
+        start_time,
+        end_time,
+        total_amount,
+        status,
+        payment_status,
+        notes,
+        created_at,
+        studio_id,
+        studios (
+          id,
+          name,
+          slug,
+          city,
+          district,
+          owner_auth_user_id
+        )
+      `)
+      .in("studio_id", ownerStudioIds)
+      .order("created_at", { ascending: false });
+
+    if (bookingsError) {
+      bookingsErrorMessage = bookingsError.message;
+    } else {
+      bookingsList = (bookingsData || []) as BookingRow[];
+    }
+  }
+
+  if (bookingsErrorMessage) {
+    return (
+      <div className="card">
+        <span className="badge">
+          <T en="Error" ar="خطأ" />
+        </span>
+        <h1>
+          <T en="Owner Bookings" ar="حجوزات الاستوديو" />
+        </h1>
+        <p>{bookingsErrorMessage}</p>
+      </div>
+    );
+  }
 
   return (
     <section>
@@ -255,11 +337,15 @@ export default async function OwnerBookingsPage() {
       </div>
 
       <div className="grid">
-        {ownerBookings.length ? (
-          ownerBookings.map((booking) => {
+        {bookingsList.length ? (
+          bookingsList.map((booking: BookingRow) => {
             const studio = Array.isArray(booking.studios)
               ? booking.studios[0]
               : booking.studios;
+
+            if (!studio || studio.owner_auth_user_id !== user.id) {
+              return null;
+            }
 
             return (
               <article className="card" key={booking.id}>
@@ -281,11 +367,11 @@ export default async function OwnerBookingsPage() {
                   </span>
                 </div>
 
-                <h2>{studio?.name || "Studio booking"}</h2>
+                <h2>{studio.name || "Studio booking"}</h2>
 
                 <p>
-                  {studio?.city || ""}
-                  {studio?.district ? ` · ${studio.district}` : ""}
+                  {studio.city || ""}
+                  {studio.district ? ` · ${studio.district}` : ""}
                 </p>
 
                 <p>
@@ -344,12 +430,12 @@ export default async function OwnerBookingsPage() {
                     </p>
                   )}
 
-                  {studio?.slug ? (
+                  {studio.id ? (
                     <Link
-                      href={`/studios/${studio.slug}`}
+                      href={`/owner/studios/${studio.id}/manage`}
                       className="btn btn-small"
                     >
-                      <T en="View Studio" ar="عرض الاستوديو" />
+                      <T en="Manage Studio" ar="إدارة الاستوديو" />
                     </Link>
                   ) : null}
                 </div>
