@@ -77,6 +77,10 @@ export default async function RootLayout({
             </div>
 
             <div className="nav-links enhanced-nav-links">
+              <Link href="/marketplace">
+                <T en="Marketplace" ar="Marketplace" />
+              </Link>
+
               <Link href="/studios">
                 <T en="Browse Studios" ar="تصفح الاستوديوهات" />
               </Link>
