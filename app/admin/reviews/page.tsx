@@ -4,7 +4,39 @@ import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
-function averageReviewScore(review: any) {
+type StudioRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  city: string | null;
+  district: string | null;
+};
+
+type BookingRow = {
+  id: string;
+  booking_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  payment_status: string | null;
+};
+
+type ReviewRow = {
+  id: string;
+  review_type: string | null;
+  rating: number | null;
+  cleanliness_rating: number | null;
+  equipment_rating: number | null;
+  sound_quality_rating: number | null;
+  communication_rating: number | null;
+  value_rating: number | null;
+  comment: string | null;
+  status: string;
+  created_at: string | null;
+  studios: StudioRow | StudioRow[] | null;
+  bookings: BookingRow | BookingRow[] | null;
+};
+
+function averageReviewScore(review: ReviewRow) {
   const scores = [
     Number(review.rating || 0),
     Number(review.cleanliness_rating || 0),
@@ -12,16 +44,26 @@ function averageReviewScore(review: any) {
     Number(review.sound_quality_rating || 0),
     Number(review.communication_rating || 0),
     Number(review.value_rating || 0)
-  ].filter((score) => score >= 1 && score <= 5);
+  ].filter((score: number) => score >= 1 && score <= 5);
 
   if (!scores.length) return 0;
 
-  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+  return scores.reduce((sum: number, score: number) => sum + score, 0) / scores.length;
 }
 
 function formatRating(value: number) {
   if (!value) return "—";
   return value.toFixed(1);
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+
+  try {
+    return new Date(value).toLocaleDateString();
+  } catch {
+    return "—";
+  }
 }
 
 function reviewStatusStyle(status: string) {
@@ -56,21 +98,29 @@ function reviewStatusStyle(status: string) {
   };
 }
 
+function normalizeStudio(studios: StudioRow | StudioRow[] | null) {
+  return Array.isArray(studios) ? studios[0] : studios;
+}
+
+function normalizeBooking(bookings: BookingRow | BookingRow[] | null) {
+  return Array.isArray(bookings) ? bookings[0] : bookings;
+}
+
 export default async function AdminReviewsPage() {
-  await requireAdminRole(["support", "content"]);
+  await requireAdminRole(["super_admin", "support", "content"]);
 
   const supabaseAdmin = createAdminClient();
 
   async function updateReviewStatus(formData: FormData) {
     "use server";
 
-    await requireAdminRole(["support", "content"]);
+    await requireAdminRole(["super_admin", "support", "content"]);
 
     const supabaseAdmin = createAdminClient();
 
-    const reviewId = String(formData.get("review_id") || "");
-    const studioSlug = String(formData.get("studio_slug") || "");
-    const status = String(formData.get("status") || "");
+    const reviewId = String(formData.get("review_id") || "").trim();
+    const studioSlug = String(formData.get("studio_slug") || "").trim();
+    const status = String(formData.get("status") || "").trim();
 
     if (!reviewId) {
       throw new Error("Missing review ID.");
@@ -80,6 +130,20 @@ export default async function AdminReviewsPage() {
 
     if (!allowedStatuses.includes(status)) {
       throw new Error("Invalid review status.");
+    }
+
+    const { data: reviewCheck, error: reviewCheckError } = await supabaseAdmin
+      .from("reviews")
+      .select("id,status")
+      .eq("id", reviewId)
+      .maybeSingle();
+
+    if (reviewCheckError) {
+      throw new Error(reviewCheckError.message);
+    }
+
+    if (!reviewCheck) {
+      throw new Error("Review not found.");
     }
 
     const { error } = await supabaseAdmin
@@ -95,13 +159,14 @@ export default async function AdminReviewsPage() {
 
     revalidatePath("/admin/reviews");
     revalidatePath("/admin");
+    revalidatePath("/admin/bookings");
 
     if (studioSlug) {
       revalidatePath(`/studios/${studioSlug}`);
     }
   }
 
-  const { data: reviews, error } = await supabaseAdmin
+  const { data: reviewsData, error } = await supabaseAdmin
     .from("reviews")
     .select(`
       id,
@@ -132,20 +197,27 @@ export default async function AdminReviewsPage() {
     `)
     .order("created_at", { ascending: false });
 
-  const totalReviews = reviews?.length || 0;
+  const reviews = (reviewsData || []) as ReviewRow[];
 
-  const publishedReviews =
-    reviews?.filter((review) => review.status === "published").length || 0;
+  const totalReviews = reviews.length;
 
-  const hiddenReviews =
-    reviews?.filter((review) => review.status === "hidden").length || 0;
+  const publishedReviews = reviews.filter(
+    (review: ReviewRow) => review.status === "published"
+  ).length;
 
-  const flaggedReviews =
-    reviews?.filter((review) => review.status === "flagged").length || 0;
+  const hiddenReviews = reviews.filter(
+    (review: ReviewRow) => review.status === "hidden"
+  ).length;
 
-  const averageScore = reviews?.length
-    ? reviews.reduce((sum, review) => sum + averageReviewScore(review), 0) /
-      reviews.length
+  const flaggedReviews = reviews.filter(
+    (review: ReviewRow) => review.status === "flagged"
+  ).length;
+
+  const averageScore = reviews.length
+    ? reviews.reduce(
+        (sum: number, review: ReviewRow) => sum + averageReviewScore(review),
+        0
+      ) / reviews.length
     : 0;
 
   return (
@@ -278,18 +350,14 @@ export default async function AdminReviewsPage() {
             </thead>
 
             <tbody>
-              {reviews?.length ? (
-                reviews.map((review) => {
-                  const studio = Array.isArray(review.studios)
-                    ? review.studios[0]
-                    : review.studios;
-
-                  const booking = Array.isArray(review.bookings)
-                    ? review.bookings[0]
-                    : review.bookings;
+              {reviews.length ? (
+                reviews.map((review: ReviewRow) => {
+                  const studio = normalizeStudio(review.studios);
+                  const booking = normalizeBooking(review.bookings);
 
                   const avg = averageReviewScore(review);
                   const studioSlug = studio?.slug || "";
+                  const reviewStatus = review.status || "published";
 
                   return (
                     <tr key={review.id}>
@@ -304,7 +372,7 @@ export default async function AdminReviewsPage() {
                       <td>
                         <strong>{formatRating(avg)} ★</strong>
                         <p className="admin-muted-line">
-                          <T en="Overall:" ar="العام:" /> {review.rating}
+                          <T en="Overall:" ar="العام:" /> {review.rating || "—"}
                         </p>
                       </td>
 
@@ -342,12 +410,12 @@ export default async function AdminReviewsPage() {
                       <td>
                         {booking ? (
                           <>
-                            <strong>{booking.booking_date}</strong>
+                            <strong>{booking.booking_date || "—"}</strong>
                             <p className="admin-muted-line">
-                              {booking.start_time} - {booking.end_time}
+                              {booking.start_time || "—"} - {booking.end_time || "—"}
                             </p>
                             <span className="badge">
-                              {booking.payment_status}
+                              {booking.payment_status || "—"}
                             </span>
                           </>
                         ) : (
@@ -360,13 +428,13 @@ export default async function AdminReviewsPage() {
                       <td>
                         <span
                           className="badge"
-                          style={reviewStatusStyle(review.status)}
+                          style={reviewStatusStyle(reviewStatus)}
                         >
-                          {review.status}
+                          {reviewStatus}
                         </span>
 
                         <p className="admin-muted-line">
-                          {new Date(review.created_at).toLocaleDateString()}
+                          {formatDate(review.created_at)}
                         </p>
                       </td>
 
@@ -384,7 +452,7 @@ export default async function AdminReviewsPage() {
                           </div>
 
                           <div className="admin-inline-action-grid">
-                            {review.status !== "published" ? (
+                            {reviewStatus !== "published" ? (
                               <form action={updateReviewStatus}>
                                 <input
                                   type="hidden"
@@ -407,7 +475,7 @@ export default async function AdminReviewsPage() {
                               </form>
                             ) : null}
 
-                            {review.status !== "hidden" ? (
+                            {reviewStatus !== "hidden" ? (
                               <form action={updateReviewStatus}>
                                 <input
                                   type="hidden"
@@ -433,7 +501,7 @@ export default async function AdminReviewsPage() {
                               </form>
                             ) : null}
 
-                            {review.status !== "flagged" ? (
+                            {reviewStatus !== "flagged" ? (
                               <form action={updateReviewStatus}>
                                 <input
                                   type="hidden"
