@@ -68,6 +68,61 @@ function getStatusStyle(status: string) {
   };
 }
 
+async function requireOwnerAccess() {
+  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?account=owner");
+  }
+
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
+  }
+
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("id, auth_user_id, email, full_name, phone, role, account_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  const role = profile?.role || user.user_metadata?.role || "customer";
+
+  if (role === "admin") {
+    redirect("/admin");
+  }
+
+  if (role === "customer") {
+    redirect("/customer");
+  }
+
+  if (role !== "owner") {
+    redirect("/login?account=owner");
+  }
+
+  if (profile?.account_status && profile.account_status !== "active") {
+    redirect("/login?account=owner");
+  }
+
+  return {
+    supabase,
+    supabaseAdmin,
+    user,
+    profile
+  };
+}
+
 async function uploadOwnerDocument({
   supabaseAdmin,
   ownerId,
@@ -155,39 +210,7 @@ async function uploadOwnerDocument({
 }
 
 export default async function OwnerOnboardingPage() {
-  const supabase = await createClient();
-  const supabaseAdmin = createAdminClient();
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: adminUser } = await supabaseAdmin
-    .from("admin_users")
-    .select("id")
-    .eq("auth_user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (adminUser) {
-    redirect("/admin");
-  }
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("id, auth_user_id, email, full_name, phone, role, account_status")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-
-  const role = profile?.role || user.user_metadata?.role || "customer";
-
-  if (role !== "owner") {
-    redirect("/customer");
-  }
+  const { supabaseAdmin, user, profile } = await requireOwnerAccess();
 
   const { data: complianceProfile } = await supabaseAdmin
     .from("owner_compliance_profiles")
@@ -232,28 +255,7 @@ export default async function OwnerOnboardingPage() {
   async function saveOwnerOnboarding(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
-    const supabaseAdmin = createAdminClient();
-
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirect("/login");
-    }
-
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("role, email, full_name")
-      .eq("auth_user_id", user.id)
-      .maybeSingle();
-
-    const role = profile?.role || user.user_metadata?.role || "customer";
-
-    if (role !== "owner") {
-      redirect("/customer");
-    }
+    const { supabaseAdmin, user, profile } = await requireOwnerAccess();
 
     const intent = cleanText(formData.get("intent"));
 
@@ -315,7 +317,9 @@ export default async function OwnerOnboardingPage() {
       .maybeSingle();
 
     const nextStatus =
-      intent === "submit" ? "submitted" : existingComplianceProfile?.onboarding_status || "draft";
+      intent === "submit"
+        ? "submitted"
+        : existingComplianceProfile?.onboarding_status || "draft";
 
     const nextReviewStatus =
       intent === "submit"
@@ -462,7 +466,8 @@ export default async function OwnerOnboardingPage() {
 
       const signerEmail = profile?.email || user.email || "";
 
-      const signedAgreement = cleanText(formData.get("sign_agreement")) === "yes";
+      const signedAgreement =
+        cleanText(formData.get("sign_agreement")) === "yes" || agreementSigned;
 
       if (!signedAgreement) {
         await supabaseAdmin
@@ -478,18 +483,34 @@ export default async function OwnerOnboardingPage() {
         throw new Error("You must sign the electronic agreement before submitting.");
       }
 
-      await supabaseAdmin.from("owner_agreements").insert({
-        owner_auth_user_id: user.id,
-        agreement_type: "studio_owner_agreement",
-        agreement_version: "v1.0",
-        agreement_title: "GearBeat Studio Owner Agreement",
-        agreement_text_snapshot:
-          "Studio Owner confirms that company information, tax information, documents, and banking details are accurate. Studio Owner agrees to GearBeat marketplace rules, booking rules, review rules, commission/settlement terms to be defined, and platform operating standards.",
-        signed_status: "signed",
-        signed_at: new Date().toISOString(),
-        signer_full_name: signerFullName,
-        signer_email: signerEmail
-      });
+      const { data: existingAgreement } = await supabaseAdmin
+        .from("owner_agreements")
+        .select("id")
+        .eq("owner_auth_user_id", user.id)
+        .eq("agreement_type", "studio_owner_agreement")
+        .eq("signed_status", "signed")
+        .maybeSingle();
+
+      if (!existingAgreement) {
+        const { error: agreementError } = await supabaseAdmin
+          .from("owner_agreements")
+          .insert({
+            owner_auth_user_id: user.id,
+            agreement_type: "studio_owner_agreement",
+            agreement_version: "v1.0",
+            agreement_title: "GearBeat Studio Owner Agreement",
+            agreement_text_snapshot:
+              "Studio Owner confirms that company information, tax information, documents, and banking details are accurate. Studio Owner agrees to GearBeat marketplace rules, booking rules, review rules, commission/settlement terms to be defined, and platform operating standards.",
+            signed_status: "signed",
+            signed_at: new Date().toISOString(),
+            signer_full_name: signerFullName,
+            signer_email: signerEmail
+          });
+
+        if (agreementError) {
+          throw new Error(agreementError.message);
+        }
+      }
 
       await supabaseAdmin
         .from("studios")
