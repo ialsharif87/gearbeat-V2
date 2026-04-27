@@ -3,6 +3,36 @@ import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
+type StudioRow = {
+  name: string | null;
+  slug: string | null;
+  city: string | null;
+  district: string | null;
+};
+
+type BookingRow = {
+  booking_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  payment_status: string | null;
+  status: string | null;
+};
+
+type ReviewRequestRow = {
+  id: string;
+  booking_id: string | null;
+  studio_id: string | null;
+  customer_auth_user_id: string | null;
+  review_token: string | null;
+  status: string;
+  email_sent_at: string | null;
+  expires_at: string | null;
+  review_submitted_at: string | null;
+  created_at: string | null;
+  studios: StudioRow | StudioRow[] | null;
+  bookings: BookingRow | BookingRow[] | null;
+};
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "—";
 
@@ -45,12 +75,30 @@ function requestStatusStyle(status: string) {
   };
 }
 
+function normalizeStudio(studios: StudioRow | StudioRow[] | null) {
+  return Array.isArray(studios) ? studios[0] : studios;
+}
+
+function normalizeBooking(bookings: BookingRow | BookingRow[] | null) {
+  return Array.isArray(bookings) ? bookings[0] : bookings;
+}
+
+function isExpired(value: string | null | undefined) {
+  if (!value) return false;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return false;
+
+  return date < new Date();
+}
+
 export default async function AdminReviewRequestsPage() {
-  await requireAdminRole(["operations", "support"]);
+  await requireAdminRole(["super_admin", "operations", "support", "content"]);
 
   const supabaseAdmin = createAdminClient();
 
-  const { data: requests, error } = await supabaseAdmin
+  const { data: requestsData, error } = await supabaseAdmin
     .from("review_requests")
     .select(`
       id,
@@ -79,17 +127,26 @@ export default async function AdminReviewRequestsPage() {
     `)
     .order("created_at", { ascending: false });
 
-  const totalRequests = requests?.length || 0;
-  const pendingRequests =
-    requests?.filter((item) => item.status === "pending").length || 0;
-  const sentRequests =
-    requests?.filter((item) => item.status === "sent").length || 0;
-  const submittedRequests =
-    requests?.filter((item) => item.status === "submitted").length || 0;
+  const requests = (requestsData || []) as ReviewRequestRow[];
 
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  const totalRequests = requests.length;
+
+  const pendingRequests = requests.filter(
+    (item: ReviewRequestRow) => item.status === "pending"
+  ).length;
+
+  const sentRequests = requests.filter(
+    (item: ReviewRequestRow) => item.status === "sent"
+  ).length;
+
+  const submittedRequests = requests.filter(
+    (item: ReviewRequestRow) => item.status === "submitted"
+  ).length;
+
+  const expiredRequests = requests.filter(
+    (item: ReviewRequestRow) =>
+      item.status === "expired" || isExpired(item.expires_at)
+  ).length;
 
   return (
     <section>
@@ -152,6 +209,13 @@ export default async function AdminReviewRequestsPage() {
           </span>
           <strong>{submittedRequests}</strong>
         </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Expired" ar="منتهية" />
+          </span>
+          <strong>{expiredRequests}</strong>
+        </div>
       </div>
 
       <div style={{ height: 24 }} />
@@ -173,6 +237,13 @@ export default async function AdminReviewRequestsPage() {
         <h2>
           <T en="Request list" ar="قائمة الطلبات" />
         </h2>
+
+        <p>
+          <T
+            en="Review links are customer-only. Admins can monitor request status here and open the related booking details."
+            ar="روابط التقييم مخصصة للعملاء فقط. يمكن للإدارة متابعة حالة الطلب هنا وفتح تفاصيل الحجز المرتبط."
+          />
+        </p>
 
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -203,17 +274,15 @@ export default async function AdminReviewRequestsPage() {
             </thead>
 
             <tbody>
-              {requests?.length ? (
-                requests.map((item) => {
-                  const studio = Array.isArray(item.studios)
-                    ? item.studios[0]
-                    : item.studios;
+              {requests.length ? (
+                requests.map((item: ReviewRequestRow) => {
+                  const studio = normalizeStudio(item.studios);
+                  const booking = normalizeBooking(item.bookings);
 
-                  const booking = Array.isArray(item.bookings)
-                    ? item.bookings[0]
-                    : item.bookings;
-
-                  const reviewUrl = `${siteUrl}/customer/bookings/${item.booking_id}/review?token=${item.review_token}`;
+                  const requestStatus =
+                    item.status === "sent" && isExpired(item.expires_at)
+                      ? "expired"
+                      : item.status;
 
                   return (
                     <tr key={item.id}>
@@ -228,14 +297,17 @@ export default async function AdminReviewRequestsPage() {
                       <td>
                         {booking ? (
                           <>
-                            <strong>{booking.booking_date}</strong>
+                            <strong>{booking.booking_date || "—"}</strong>
                             <p className="admin-muted-line">
-                              {booking.start_time} - {booking.end_time}
+                              {booking.start_time || "—"} -{" "}
+                              {booking.end_time || "—"}
                             </p>
                             <div className="admin-badge-stack">
-                              <span className="badge">{booking.status}</span>
                               <span className="badge">
-                                {booking.payment_status}
+                                {booking.status || "—"}
+                              </span>
+                              <span className="badge">
+                                {booking.payment_status || "—"}
                               </span>
                             </div>
                           </>
@@ -249,9 +321,9 @@ export default async function AdminReviewRequestsPage() {
                       <td>
                         <span
                           className="badge"
-                          style={requestStatusStyle(item.status)}
+                          style={requestStatusStyle(requestStatus)}
                         >
-                          {item.status}
+                          {requestStatus}
                         </span>
                       </td>
 
@@ -263,24 +335,22 @@ export default async function AdminReviewRequestsPage() {
 
                       <td>
                         <div className="actions">
-                          {studio?.slug ? (
+                          {item.booking_id ? (
                             <Link
-                              href={`/studios/${studio.slug}`}
+                              href={`/admin/bookings/${item.booking_id}`}
                               className="btn btn-small"
                             >
-                              <T en="Studio" ar="الاستوديو" />
+                              <T en="Booking Details" ar="تفاصيل الحجز" />
                             </Link>
                           ) : null}
 
-                          {siteUrl ? (
-                            <a
-                              href={reviewUrl}
-                              target="_blank"
-                              rel="noreferrer"
+                          {studio?.slug ? (
+                            <Link
+                              href={`/studios/${studio.slug}`}
                               className="btn btn-secondary btn-small"
                             >
-                              <T en="Review Link" ar="رابط التقييم" />
-                            </a>
+                              <T en="Studio" ar="الاستوديو" />
+                            </Link>
                           ) : null}
                         </div>
                       </td>
