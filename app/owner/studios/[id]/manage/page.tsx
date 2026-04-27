@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../../../lib/supabase/server";
-import { requireRole } from "../../../../../lib/auth";
+import { createAdminClient } from "../../../../../lib/supabase/admin";
 import T from "../../../../../components/t";
 
 const featureGroups = [
@@ -56,6 +56,83 @@ const featureGroups = [
   }
 ];
 
+async function requireOwnerOnly() {
+  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?account=owner");
+  }
+
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id, auth_user_id, status")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
+  }
+
+  const { data: profile, error } = await supabaseAdmin
+    .from("profiles")
+    .select("id, auth_user_id, email, full_name, phone, role, account_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!profile) {
+    redirect("/login?account=owner");
+  }
+
+  if (profile.account_status === "deleted") {
+    redirect("/forbidden");
+  }
+
+  if (profile.account_status === "pending_deletion") {
+    redirect("/account/delete");
+  }
+
+  if (profile.role === "customer") {
+    redirect("/customer");
+  }
+
+  if (profile.role !== "owner") {
+    redirect("/forbidden");
+  }
+
+  return { user, profile };
+}
+
+async function verifyStudioOwnership(studioId: string, ownerAuthUserId: string) {
+  const supabaseAdmin = createAdminClient();
+
+  const { data: studio, error } = await supabaseAdmin
+    .from("studios")
+    .select("id, slug, owner_auth_user_id")
+    .eq("id", studioId)
+    .eq("owner_auth_user_id", ownerAuthUserId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!studio) {
+    throw new Error("You do not have permission to manage this studio.");
+  }
+
+  return studio;
+}
+
 function groupFeaturesByCategory(features: any[] | null | undefined) {
   const grouped: Record<string, any[]> = {
     space: [],
@@ -95,36 +172,36 @@ export default async function ManageStudioPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { user } = await requireRole("owner");
-  const supabase = await createClient();
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
 
-  const { data: studio, error: studioError } = await supabase
+  const { data: studio, error: studioError } = await supabaseAdmin
     .from("studios")
     .select(
-      "id,name,slug,city,district,address,price_from,status,cover_image_url,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
+      "id,name,slug,city,district,address,price_from,status,verified,booking_enabled,owner_compliance_status,cover_image_url,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
     )
     .eq("id", id)
     .eq("owner_auth_user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (studioError || !studio) {
     notFound();
   }
 
-  const { data: features } = await supabase
+  const { data: features } = await supabaseAdmin
     .from("studio_features")
     .select("id,name_en,name_ar,slug,category,sort_order")
     .eq("status", "active")
     .order("sort_order", { ascending: true });
 
-  const { data: selectedFeatures } = await supabase
+  const { data: selectedFeatures } = await supabaseAdmin
     .from("studio_feature_links")
     .select(
       "id,feature_id,custom_name,studio_features(id,name_en,name_ar,category)"
     )
     .eq("studio_id", studio.id);
 
-  const { data: equipment } = await supabase
+  const { data: equipment } = await supabaseAdmin
     .from("studio_equipment")
     .select("id,name,brand,model,category,quantity,notes,created_at")
     .eq("studio_id", studio.id)
@@ -165,7 +242,8 @@ export default async function ManageStudioPage({
   async function updateExternalReviewLinks(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
     const studioId = String(formData.get("studio_id") || "");
     const studioSlug = String(formData.get("studio_slug") || "");
@@ -183,13 +261,16 @@ export default async function ManageStudioPage({
       throw new Error("Missing studio ID.");
     }
 
-    const { error } = await supabase
+    await verifyStudioOwnership(studioId, user.id);
+
+    const { error } = await supabaseAdmin
       .from("studios")
       .update({
         google_maps_url: googleMapsUrl || null,
         google_reviews_url: googleReviewsUrl || null,
         google_place_id: googlePlaceId || null,
-        tripadvisor_url: tripadvisorUrl || null
+        tripadvisor_url: tripadvisorUrl || null,
+        updated_at: new Date().toISOString()
       })
       .eq("id", studioId)
       .eq("owner_auth_user_id", user.id);
@@ -208,7 +289,8 @@ export default async function ManageStudioPage({
   async function addFeature(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
     const featureId = String(formData.get("feature_id") || "");
     const studioId = String(formData.get("studio_id") || "");
@@ -217,7 +299,9 @@ export default async function ManageStudioPage({
       throw new Error("Missing feature or studio.");
     }
 
-    const { error } = await supabase.from("studio_feature_links").insert({
+    await verifyStudioOwnership(studioId, user.id);
+
+    const { error } = await supabaseAdmin.from("studio_feature_links").insert({
       studio_id: studioId,
       feature_id: featureId
     });
@@ -232,7 +316,8 @@ export default async function ManageStudioPage({
   async function addCustomFeature(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
     const studioId = String(formData.get("studio_id") || "");
     const customName = String(formData.get("custom_name") || "").trim();
@@ -241,7 +326,9 @@ export default async function ManageStudioPage({
       throw new Error("Custom feature name is required.");
     }
 
-    const { error } = await supabase.from("studio_feature_links").insert({
+    await verifyStudioOwnership(studioId, user.id);
+
+    const { error } = await supabaseAdmin.from("studio_feature_links").insert({
       studio_id: studioId,
       custom_name: customName
     });
@@ -256,7 +343,8 @@ export default async function ManageStudioPage({
   async function removeFeature(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
     const linkId = String(formData.get("link_id") || "");
     const studioId = String(formData.get("studio_id") || "");
@@ -265,10 +353,13 @@ export default async function ManageStudioPage({
       throw new Error("Missing feature link.");
     }
 
-    const { error } = await supabase
+    await verifyStudioOwnership(studioId, user.id);
+
+    const { error } = await supabaseAdmin
       .from("studio_feature_links")
       .delete()
-      .eq("id", linkId);
+      .eq("id", linkId)
+      .eq("studio_id", studioId);
 
     if (error) {
       throw new Error(error.message);
@@ -280,7 +371,8 @@ export default async function ManageStudioPage({
   async function addEquipment(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
     const studioId = String(formData.get("studio_id") || "");
     const name = String(formData.get("name") || "").trim();
@@ -294,14 +386,16 @@ export default async function ManageStudioPage({
       throw new Error("Equipment name is required.");
     }
 
-    const { error } = await supabase.from("studio_equipment").insert({
+    await verifyStudioOwnership(studioId, user.id);
+
+    const { error } = await supabaseAdmin.from("studio_equipment").insert({
       studio_id: studioId,
       name,
-      brand,
-      model,
-      category,
-      quantity,
-      notes
+      brand: brand || null,
+      model: model || null,
+      category: category || "general",
+      quantity: quantity > 0 ? quantity : 1,
+      notes: notes || null
     });
 
     if (error) {
@@ -314,7 +408,8 @@ export default async function ManageStudioPage({
   async function deleteEquipment(formData: FormData) {
     "use server";
 
-    const supabase = await createClient();
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
 
     const equipmentId = String(formData.get("equipment_id") || "");
     const studioId = String(formData.get("studio_id") || "");
@@ -323,10 +418,13 @@ export default async function ManageStudioPage({
       throw new Error("Missing equipment.");
     }
 
-    const { error } = await supabase
+    await verifyStudioOwnership(studioId, user.id);
+
+    const { error } = await supabaseAdmin
       .from("studio_equipment")
       .delete()
-      .eq("id", equipmentId);
+      .eq("id", equipmentId)
+      .eq("studio_id", studioId);
 
     if (error) {
       throw new Error(error.message);
@@ -413,7 +511,10 @@ export default async function ManageStudioPage({
         </span>
 
         <h2>
-          <T en="Google, TripAdvisor, and trusted sources" ar="Google وTripAdvisor ومصادر موثوقة" />
+          <T
+            en="Google, TripAdvisor, and trusted sources"
+            ar="Google وTripAdvisor ومصادر موثوقة"
+          />
         </h2>
 
         <p>
@@ -423,7 +524,10 @@ export default async function ManageStudioPage({
           />
         </p>
 
-        <form className="google-location-form" action={updateExternalReviewLinks}>
+        <form
+          className="google-location-form"
+          action={updateExternalReviewLinks}
+        >
           <input type="hidden" name="studio_id" value={studio.id} />
           <input type="hidden" name="studio_slug" value={studio.slug} />
 
@@ -475,7 +579,9 @@ export default async function ManageStudioPage({
               <span className="badge">Google</span>
 
               <h3>
-                {studio.google_rating ? `${studio.google_rating} ★` : "Not synced"}
+                {studio.google_rating
+                  ? `${studio.google_rating} ★`
+                  : "Not synced"}
               </h3>
 
               <p>
