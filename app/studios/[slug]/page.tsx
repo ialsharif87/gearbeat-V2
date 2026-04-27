@@ -97,41 +97,6 @@ function reviewsInLastDays(reviews: any[], days: number) {
   return reviews.filter((review) => getReviewAgeDays(review.created_at) <= days);
 }
 
-function getBookingBlockReason(studio: any) {
-  if (studio.status !== "approved") {
-    return {
-      en: "This studio is still pending approval.",
-      ar: "هذا الاستوديو لا يزال بانتظار الاعتماد."
-    };
-  }
-
-  if (!studio.verified) {
-    return {
-      en: "This studio is not verified yet.",
-      ar: "هذا الاستوديو غير موثق حتى الآن."
-    };
-  }
-
-  if (studio.owner_compliance_status !== "approved") {
-    return {
-      en: "The studio owner has not completed business verification yet.",
-      ar: "مالك الاستوديو لم يكمل التحقق التجاري حتى الآن."
-    };
-  }
-
-  if (!studio.booking_enabled) {
-    return {
-      en: "Booking is currently disabled for this studio.",
-      ar: "الحجز غير مفعل حاليًا لهذا الاستوديو."
-    };
-  }
-
-  return {
-    en: "This studio is not available for booking yet.",
-    ar: "هذا الاستوديو غير متاح للحجز حاليًا."
-  };
-}
-
 export default async function StudioDetailsPage({
   params
 }: {
@@ -147,19 +112,14 @@ export default async function StudioDetailsPage({
     )
     .eq("slug", slug)
     .eq("status", "approved")
+    .eq("verified", true)
+    .eq("booking_enabled", true)
+    .eq("owner_compliance_status", "approved")
     .single();
 
   if (error || !studio) {
     notFound();
   }
-
-  const isBookable =
-    studio.status === "approved" &&
-    studio.verified === true &&
-    studio.booking_enabled === true &&
-    studio.owner_compliance_status === "approved";
-
-  const bookingBlockReason = getBookingBlockReason(studio);
 
   const { data: images } = await supabase
     .from("studio_images")
@@ -294,11 +254,7 @@ export default async function StudioDetailsPage({
 
         <div className="studio-detail-content">
           <span className="badge">
-            {studio.verified ? (
-              <T en="Verified Studio" ar="استوديو موثق" />
-            ) : (
-              <T en="Studio" ar="استوديو" />
-            )}
+            <T en="Verified Studio" ar="استوديو موثق" />
           </span>
 
           <h1>{studio.name}</h1>
@@ -339,43 +295,10 @@ export default async function StudioDetailsPage({
             </div>
           ) : null}
 
-          {!isBookable ? (
-            <div className="studio-booking-blocked-box">
-              <strong>
-                <T en="Booking not available yet" ar="الحجز غير متاح حاليًا" />
-              </strong>
-
-              <p>
-                <T
-                  en={bookingBlockReason.en}
-                  ar={bookingBlockReason.ar}
-                />
-              </p>
-
-              <div className="admin-badge-stack">
-                <span className="badge">
-                  <T en="Studio:" ar="الاستوديو:" /> {studio.status}
-                </span>
-
-                <span className="badge">
-                  <T en="Verified:" ar="التوثيق:" />{" "}
-                  {studio.verified ? "Yes" : "No"}
-                </span>
-
-                <span className="badge">
-                  <T en="Owner compliance:" ar="امتثال المالك:" />{" "}
-                  {studio.owner_compliance_status || "incomplete"}
-                </span>
-              </div>
-            </div>
-          ) : null}
-
           <div className="actions">
-            {isBookable ? (
-              <Link href={`/studios/${studio.slug}/book`} className="btn">
-                <T en="Book Now" ar="احجز الآن" />
-              </Link>
-            ) : null}
+            <Link href={`/studios/${studio.slug}/book`} className="btn">
+              <T en="Book Now" ar="احجز الآن" />
+            </Link>
 
             <Link href="/studios" className="btn btn-secondary">
               <T en="Back to Studios" ar="العودة إلى الاستوديوهات" />
