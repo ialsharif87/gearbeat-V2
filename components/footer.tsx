@@ -15,25 +15,29 @@ export default function Footer() {
 
           <h2>
             <T
-              en="Ready to book your next creative session?"
-              ar="جاهز تحجز جلستك الإبداعية القادمة؟"
+              en="Ready to discover the creative studio marketplace?"
+              ar="جاهز تكتشف سوق الاستوديوهات الإبداعية؟"
             />
           </h2>
 
           <p>
             <T
-              en="Find trusted studios, podcast rooms, rehearsal spaces, and production rooms in one smooth booking experience."
-              ar="اكتشف استوديوهات موثوقة، غرف بودكاست، مساحات تدريب، وغرف إنتاج من خلال تجربة حجز سهلة وواضحة."
+              en="Explore trusted studios, creative rooms, podcast spaces, rehearsal rooms, and production spaces through a premium marketplace experience."
+              ar="اكتشف استوديوهات موثوقة، غرف إبداعية، مساحات بودكاست، غرف تدريب، ومساحات إنتاج من خلال تجربة Marketplace فاخرة."
             />
           </p>
         </div>
 
         <div className="footer-cta-actions">
-          <Link href="/studios" className="btn">
+          <Link href="/marketplace" className="btn">
+            <T en="Explore Marketplace" ar="استكشف Marketplace" />
+          </Link>
+
+          <Link href="/studios" className="btn btn-secondary">
             <T en="Browse Studios" ar="تصفح الاستوديوهات" />
           </Link>
 
-          <Link href="/owner" className="btn btn-secondary">
+          <Link href="/signup?account=owner" className="btn btn-secondary">
             <T en="List Your Studio" ar="أضف استوديوك" />
           </Link>
         </div>
@@ -61,6 +65,28 @@ export default function Footer() {
 
         <div className="footer-column">
           <h3>
+            <T en="Marketplace" ar="Marketplace" />
+          </h3>
+
+          <Link href="/marketplace">
+            <T en="Marketplace Home" ar="الرئيسية" />
+          </Link>
+
+          <Link href="/marketplace/creators">
+            <T en="For Creators" ar="للمبدعين" />
+          </Link>
+
+          <Link href="/marketplace/owners">
+            <T en="For Studio Owners" ar="لأصحاب الاستوديوهات" />
+          </Link>
+
+          <Link href="/marketplace/how-it-works">
+            <T en="How It Works" ar="كيف يعمل" />
+          </Link>
+        </div>
+
+        <div className="footer-column">
+          <h3>
             <T en="For Creators" ar="للمبدعين" />
           </h3>
 
@@ -76,7 +102,7 @@ export default function Footer() {
             <T en="My Profile" ar="ملفي الشخصي" />
           </Link>
 
-          <Link href="/signup">
+          <Link href="/signup?account=customer">
             <T en="Create Account" ar="إنشاء حساب" />
           </Link>
         </div>
@@ -86,7 +112,7 @@ export default function Footer() {
             <T en="For Studios" ar="للاستوديوهات" />
           </h3>
 
-          <Link href="/owner">
+          <Link href="/signup?account=owner">
             <T en="List Your Studio" ar="أضف استوديوك" />
           </Link>
 
@@ -98,8 +124,8 @@ export default function Footer() {
             <T en="Manage Bookings" ar="إدارة الحجوزات" />
           </Link>
 
-          <Link href="/about">
-            <T en="Verified Reviews" ar="التقييمات الموثقة" />
+          <Link href="/marketplace/owners">
+            <T en="Owner Benefits" ar="مميزات المالك" />
           </Link>
         </div>
 
