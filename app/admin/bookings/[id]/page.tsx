@@ -43,6 +43,7 @@ type ReviewRequestRow = {
 
 type BookingDetailsRow = {
   id: string;
+  studio_id: string;
   customer_auth_user_id: string;
   booking_date: string;
   start_time: string;
@@ -371,7 +372,7 @@ export default async function AdminBookingDetailsPage({
       throw new Error("Booking not found.");
     }
 
-    const booking = bookingData as BookingDetailsRow;
+    const booking = bookingData as unknown as BookingDetailsRow;
     const studio = normalizeStudio(booking.studios);
 
     if (!studio?.owner_auth_user_id) {
@@ -573,7 +574,7 @@ export default async function AdminBookingDetailsPage({
       throw new Error("Booking not found.");
     }
 
-    const booking = bookingData as BookingDetailsRow;
+    const booking = bookingData as unknown as BookingDetailsRow;
     const studio = normalizeStudio(booking.studios);
 
     if (!studio?.owner_auth_user_id) {
@@ -960,6 +961,7 @@ export default async function AdminBookingDetailsPage({
     .from("bookings")
     .select(`
       id,
+      studio_id,
       customer_auth_user_id,
       booking_date,
       start_time,
