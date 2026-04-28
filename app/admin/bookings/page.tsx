@@ -27,6 +27,7 @@ type ReviewRequestRow = {
 
 type BookingRow = {
   id: string;
+  studio_id: string;
   customer_auth_user_id: string;
   booking_date: string;
   start_time: string;
@@ -769,6 +770,7 @@ export default async function AdminBookingsPage() {
     .from("bookings")
     .select(`
       id,
+      studio_id,
       customer_auth_user_id,
       booking_date,
       start_time,
