@@ -1,188 +1,347 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "../../../../lib/supabase/admin";
 
-export const dynamic = "force-dynamic";
+type StudioRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  city: string | null;
+  district: string | null;
+};
 
-function createReviewToken() {
-  const randomPart = crypto.randomUUID().replaceAll("-", "");
-  const timePart = Date.now().toString(36);
+type BookingRow = {
+  id: string;
+  studio_id: string;
+  customer_auth_user_id: string;
+  booking_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  status: string | null;
+  payment_status: string | null;
+};
 
-  return `${timePart}_${randomPart}`;
+type ReviewRequestRow = {
+  id: string;
+  booking_id: string;
+  studio_id: string;
+  customer_auth_user_id: string;
+  review_token: string;
+  status: string;
+  email_sent_at: string | null;
+  expires_at: string | null;
+  created_at: string | null;
+  studios: StudioRow | StudioRow[] | null;
+  bookings: BookingRow | BookingRow[] | null;
+};
+
+type ProfileRow = {
+  auth_user_id: string;
+  email: string | null;
+  full_name: string | null;
+  preferred_language?: string | null;
+};
+
+function getSecretFromRequest(request: NextRequest) {
+  const authHeader = request.headers.get("authorization") || "";
+  const bearerToken = authHeader.startsWith("Bearer ")
+    ? authHeader.replace("Bearer ", "").trim()
+    : "";
+
+  const headerSecret =
+    request.headers.get("x-cron-secret") ||
+    request.headers.get("x-vercel-cron-signature") ||
+    "";
+
+  const querySecret = request.nextUrl.searchParams.get("secret") || "";
+
+  return bearerToken || headerSecret || querySecret;
 }
 
-function combineBookingDateTime(date: string, time: string) {
-  return new Date(`${date}T${time}`);
+function isAuthorizedCronRequest(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret || cronSecret.trim().length < 12) {
+    return {
+      ok: false,
+      status: 503,
+      message:
+        "CRON_SECRET is not configured or is too short. This endpoint is disabled."
+    };
+  }
+
+  const providedSecret = getSecretFromRequest(request);
+
+  if (!providedSecret || providedSecret !== cronSecret) {
+    return {
+      ok: false,
+      status: 401,
+      message: "Unauthorized cron request."
+    };
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    message: "Authorized."
+  };
 }
 
 function getSiteUrl() {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
-    "http://localhost:3000"
-  );
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
+
+  if (fromEnv) {
+    return fromEnv.replace(/\/$/, "");
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`.replace(/\/$/, "");
+  }
+
+  return "";
+}
+
+function normalizeStudio(studios: StudioRow | StudioRow[] | null) {
+  return Array.isArray(studios) ? studios[0] : studios;
+}
+
+function normalizeBooking(bookings: BookingRow | BookingRow[] | null) {
+  return Array.isArray(bookings) ? bookings[0] : bookings;
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+
+  try {
+    return new Date(value).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  } catch {
+    return "—";
+  }
 }
 
 function buildReviewEmail({
-  customerEmail,
+  customerName,
   studioName,
+  bookingDate,
+  startTime,
+  endTime,
   reviewUrl
 }: {
-  customerEmail: string;
+  customerName: string;
   studioName: string;
+  bookingDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
   reviewUrl: string;
 }) {
-  const subject = `How was your experience at ${studioName}?`;
+  const safeCustomerName = customerName || "Creator";
+  const safeStudioName = studioName || "GearBeat Studio";
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; background:#070b18; color:#ffffff; padding:32px;">
-      <div style="max-width:620px; margin:0 auto; background:#10172a; border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:28px;">
-        <h1 style="margin:0 0 12px; font-size:28px;">How was your studio experience?</h1>
+  return `
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>GearBeat Review</title>
+  </head>
 
-        <p style="font-size:16px; line-height:1.6; color:#cbd5e1;">
-          Thank you for booking <strong>${studioName}</strong> through GearBeat.
+  <body style="margin:0;padding:0;background:#08080c;font-family:Arial,sans-serif;color:#ffffff;">
+    <div style="max-width:640px;margin:0 auto;padding:32px;">
+      <div style="background:#11111a;border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:28px;">
+        <div style="display:inline-block;background:rgba(30,215,96,0.16);border:1px solid rgba(30,215,96,0.35);color:#1ed760;border-radius:999px;padding:8px 14px;font-size:13px;">
+          GearBeat Verified Review
+        </div>
+
+        <h1 style="margin:22px 0 12px;font-size:26px;line-height:1.3;color:#ffffff;">
+          شاركنا تجربتك في ${safeStudioName}
+        </h1>
+
+        <p style="margin:0 0 18px;color:rgba(255,255,255,0.78);font-size:16px;line-height:1.8;">
+          مرحبًا ${safeCustomerName}، نرجو منك تقييم تجربتك بعد الحجز. تقييمك يساعد المبدعين الآخرين على اختيار الاستوديو المناسب.
         </p>
 
-        <p style="font-size:16px; line-height:1.6; color:#cbd5e1;">
-          Your review helps other creators choose trusted studios. This review is linked to a verified paid booking.
-        </p>
+        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:18px;padding:18px;margin:22px 0;">
+          <p style="margin:0 0 8px;color:#ffffff;">
+            <strong>الاستوديو:</strong> ${safeStudioName}
+          </p>
+          <p style="margin:0 0 8px;color:#ffffff;">
+            <strong>التاريخ:</strong> ${formatDate(bookingDate)}
+          </p>
+          <p style="margin:0;color:#ffffff;">
+            <strong>الوقت:</strong> ${startTime || "—"} - ${endTime || "—"}
+          </p>
+        </div>
 
-        <a href="${reviewUrl}" style="display:inline-block; margin-top:18px; background:#1ed760; color:#06130c; text-decoration:none; font-weight:bold; padding:14px 22px; border-radius:999px;">
-          Write your review
+        <a href="${reviewUrl}" style="display:inline-block;background:#1ed760;color:#050507;text-decoration:none;font-weight:bold;border-radius:14px;padding:14px 22px;margin:10px 0 22px;">
+          اكتب التقييم الآن
         </a>
 
-        <p style="font-size:13px; line-height:1.6; color:#94a3b8; margin-top:24px;">
-          If the button does not work, copy and paste this link into your browser:<br />
-          <span style="word-break:break-all;">${reviewUrl}</span>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.12);margin:26px 0;" />
+
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;direction:ltr;text-align:left;">
+          How was your studio experience?
+        </h2>
+
+        <p style="margin:0 0 18px;color:rgba(255,255,255,0.78);font-size:15px;line-height:1.7;direction:ltr;text-align:left;">
+          Hi ${safeCustomerName}, please review your booking experience at ${safeStudioName}. Your verified review helps other creators choose trusted studios.
         </p>
 
-        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.12); margin:24px 0;" />
+        <div style="direction:ltr;text-align:left;">
+          <a href="${reviewUrl}" style="display:inline-block;background:#1ed760;color:#050507;text-decoration:none;font-weight:bold;border-radius:14px;padding:14px 22px;">
+            Write Review
+          </a>
+        </div>
 
-        <p style="font-size:13px; color:#94a3b8; margin:0;">
-          Sent to ${customerEmail} by GearBeat.
+        <p style="margin:28px 0 0;color:rgba(255,255,255,0.5);font-size:12px;line-height:1.6;">
+          إذا لم يعمل الزر، انسخ هذا الرابط وافتحه في المتصفح:<br />
+          <span style="direction:ltr;display:block;word-break:break-all;">${reviewUrl}</span>
         </p>
       </div>
     </div>
-  `;
-
-  const text = `
-How was your studio experience?
-
-Thank you for booking ${studioName} through GearBeat.
-
-Your review helps other creators choose trusted studios. This review is linked to a verified paid booking.
-
-Write your review:
-${reviewUrl}
-
-Sent to ${customerEmail} by GearBeat.
-  `;
-
-  return { subject, html, text };
+  </body>
+</html>
+`;
 }
 
-async function createReviewRequests(
-  supabase: ReturnType<typeof createAdminClient>
-) {
-  const now = new Date();
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+async function getCustomerProfile(customerAuthUserId: string) {
+  const supabaseAdmin = createAdminClient();
 
-  const { data: bookings, error } = await supabase
+  const [{ data: userData }, { data: profileData }] = await Promise.all([
+    supabaseAdmin.auth.admin.getUserById(customerAuthUserId),
+    supabaseAdmin
+      .from("profiles")
+      .select("auth_user_id,email,full_name,preferred_language")
+      .eq("auth_user_id", customerAuthUserId)
+      .maybeSingle()
+  ]);
+
+  const profile = (profileData || null) as ProfileRow | null;
+  const authUser = userData?.user || null;
+
+  return {
+    email: profile?.email || authUser?.email || "",
+    fullName:
+      profile?.full_name ||
+      authUser?.user_metadata?.full_name ||
+      authUser?.user_metadata?.name ||
+      authUser?.email ||
+      "Creator",
+    preferredLanguage:
+      profile?.preferred_language ||
+      authUser?.user_metadata?.preferred_language ||
+      "ar"
+  };
+}
+
+async function createMissingReviewRequests() {
+  const supabaseAdmin = createAdminClient();
+
+  const { data: eligibleBookings, error } = await supabaseAdmin
     .from("bookings")
-    .select(`
+    .select(
+      `
       id,
       studio_id,
       customer_auth_user_id,
       booking_date,
+      start_time,
       end_time,
       status,
-      payment_status,
-      review_requests (
-        id
-      ),
-      reviews (
-        id
-      )
-    `)
+      payment_status
+    `
+    )
     .in("status", ["confirmed", "completed"])
-    .eq("payment_status", "paid");
+    .eq("payment_status", "paid")
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const eligibleBookings =
-    bookings?.filter((booking) => {
-      const existingRequests = Array.isArray(booking.review_requests)
-        ? booking.review_requests
-        : [];
+  const bookings = (eligibleBookings || []) as BookingRow[];
+  let created = 0;
 
-      const existingReviews = Array.isArray(booking.reviews)
-        ? booking.reviews
-        : [];
+  for (const booking of bookings) {
+    const [{ data: existingReview }, { data: existingRequest }] =
+      await Promise.all([
+        supabaseAdmin
+          .from("reviews")
+          .select("id")
+          .eq("booking_id", booking.id)
+          .maybeSingle(),
 
-      if (existingRequests.length > 0 || existingReviews.length > 0) {
-        return false;
-      }
+        supabaseAdmin
+          .from("review_requests")
+          .select("id")
+          .eq("booking_id", booking.id)
+          .maybeSingle()
+      ]);
 
-      if (!booking.booking_date || !booking.end_time) {
-        return false;
-      }
+    if (existingReview || existingRequest) {
+      continue;
+    }
 
-      const bookingEndDateTime = combineBookingDateTime(
-        booking.booking_date,
-        booking.end_time
-      );
+    const reviewToken = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
 
-      return bookingEndDateTime <= oneDayAgo;
-    }) || [];
+    const { error: insertError } = await supabaseAdmin
+      .from("review_requests")
+      .insert({
+        booking_id: booking.id,
+        studio_id: booking.studio_id,
+        customer_auth_user_id: booking.customer_auth_user_id,
+        review_token: reviewToken,
+        status: "pending",
+        expires_at: expiresAt.toISOString()
+      });
 
-  if (!eligibleBookings.length) {
-    return 0;
+    if (!insertError) {
+      created += 1;
+    }
   }
 
-  const rows = eligibleBookings.map((booking) => ({
-    booking_id: booking.id,
-    studio_id: booking.studio_id,
-    customer_auth_user_id: booking.customer_auth_user_id,
-    review_token: createReviewToken(),
-    status: "pending",
-    expires_at: new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000
-    ).toISOString()
-  }));
-
-  const { error: insertError } = await supabase
-    .from("review_requests")
-    .insert(rows);
-
-  if (insertError) {
-    throw new Error(insertError.message);
-  }
-
-  return rows.length;
+  return created;
 }
 
-async function sendReviewEmails(
-  supabase: ReturnType<typeof createAdminClient>
-) {
+async function sendPendingReviewEmails(request: NextRequest) {
+  const supabaseAdmin = createAdminClient();
+
   const resendApiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.REVIEW_FROM_EMAIL;
+  const fromEmail =
+    process.env.REVIEW_EMAIL_FROM ||
+    process.env.RESEND_FROM ||
+    "GearBeat <noreply@gearbeat.com>";
 
   if (!resendApiKey) {
-    throw new Error("Missing RESEND_API_KEY");
+    return {
+      sent: 0,
+      failed: 0,
+      skipped: 0,
+      message: "RESEND_API_KEY is not configured. Emails were not sent."
+    };
   }
 
-  if (!fromEmail) {
-    throw new Error("Missing REVIEW_FROM_EMAIL");
-  }
-
-  const resend = new Resend(resendApiKey);
   const siteUrl = getSiteUrl();
 
-  const { data: reviewRequests, error } = await supabase
+  if (!siteUrl) {
+    return {
+      sent: 0,
+      failed: 0,
+      skipped: 0,
+      message: "NEXT_PUBLIC_SITE_URL or VERCEL_URL is not configured."
+    };
+  }
+
+  const { data: pendingRequests, error } = await supabaseAdmin
     .from("review_requests")
-    .select(`
+    .select(
+      `
       id,
       booking_id,
       studio_id,
@@ -191,125 +350,182 @@ async function sendReviewEmails(
       status,
       email_sent_at,
       expires_at,
+      created_at,
       studios (
+        id,
         name,
-        slug
+        slug,
+        city,
+        district
+      ),
+      bookings (
+        id,
+        studio_id,
+        customer_auth_user_id,
+        booking_date,
+        start_time,
+        end_time,
+        status,
+        payment_status
       )
-    `)
+    `
+    )
     .eq("status", "pending")
     .is("email_sent_at", null)
-    .limit(25);
+    .order("created_at", { ascending: true })
+    .limit(50);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  if (!reviewRequests?.length) {
-    return {
-      sent: 0,
-      failed: [] as Array<{ id: string; error: string }>
-    };
-  }
+  const resend = new Resend(resendApiKey);
+  const requests = (pendingRequests || []) as ReviewRequestRow[];
 
   let sent = 0;
-  const failed: Array<{ id: string; error: string }> = [];
+  let failed = 0;
+  let skipped = 0;
 
-  for (const requestItem of reviewRequests) {
-    const { data: userData, error: userError } =
-      await supabase.auth.admin.getUserById(requestItem.customer_auth_user_id);
+  for (const reviewRequest of requests) {
+    const booking = normalizeBooking(reviewRequest.bookings);
+    const studio = normalizeStudio(reviewRequest.studios);
 
-    if (userError || !userData?.user?.email) {
-      failed.push({
-        id: requestItem.id,
-        error: userError?.message || "Customer email not found"
-      });
+    if (!booking || !studio) {
+      skipped += 1;
+
+      await supabaseAdmin
+        .from("review_requests")
+        .update({
+          status: "failed"
+        })
+        .eq("id", reviewRequest.id);
+
       continue;
     }
 
-    const studio = Array.isArray(requestItem.studios)
-      ? requestItem.studios[0]
-      : requestItem.studios;
-
-    const studioName = studio?.name || "the studio";
-
-    const reviewUrl = `${siteUrl}/customer/bookings/${requestItem.booking_id}/review?token=${requestItem.review_token}`;
-
-    const email = buildReviewEmail({
-      customerEmail: userData.user.email,
-      studioName,
-      reviewUrl
-    });
-
-    const { error: sendError } = await resend.emails.send({
-      from: fromEmail,
-      to: userData.user.email,
-      subject: email.subject,
-      html: email.html,
-      text: email.text
-    });
-
-    if (sendError) {
-      failed.push({
-        id: requestItem.id,
-        error: sendError.message
-      });
+    if (
+      booking.payment_status !== "paid" ||
+      !["confirmed", "completed"].includes(String(booking.status || ""))
+    ) {
+      skipped += 1;
       continue;
     }
 
-    const { error: updateError } = await supabase
-      .from("review_requests")
-      .update({
-        status: "sent",
-        email_sent_at: new Date().toISOString()
-      })
-      .eq("id", requestItem.id);
+    if (reviewRequest.expires_at) {
+      const expiresAt = new Date(reviewRequest.expires_at);
 
-    if (updateError) {
-      failed.push({
-        id: requestItem.id,
-        error: updateError.message
-      });
+      if (expiresAt.getTime() < Date.now()) {
+        skipped += 1;
+
+        await supabaseAdmin
+          .from("review_requests")
+          .update({
+            status: "expired"
+          })
+          .eq("id", reviewRequest.id);
+
+        continue;
+      }
+    }
+
+    const customer = await getCustomerProfile(reviewRequest.customer_auth_user_id);
+
+    if (!customer.email) {
+      failed += 1;
+
+      await supabaseAdmin
+        .from("review_requests")
+        .update({
+          status: "failed"
+        })
+        .eq("id", reviewRequest.id);
+
       continue;
     }
 
-    sent += 1;
+    const reviewUrl = `${siteUrl}/customer/bookings/${booking.id}/review?token=${reviewRequest.review_token}`;
+
+    try {
+      await resend.emails.send({
+        from: fromEmail,
+        to: customer.email,
+        subject: `Review your GearBeat booking at ${studio.name || "the studio"}`,
+        html: buildReviewEmail({
+          customerName: customer.fullName,
+          studioName: studio.name || "GearBeat Studio",
+          bookingDate: booking.booking_date,
+          startTime: booking.start_time,
+          endTime: booking.end_time,
+          reviewUrl
+        })
+      });
+
+      await supabaseAdmin
+        .from("review_requests")
+        .update({
+          status: "sent",
+          email_sent_at: new Date().toISOString()
+        })
+        .eq("id", reviewRequest.id);
+
+      sent += 1;
+    } catch (sendError) {
+      failed += 1;
+
+      await supabaseAdmin
+        .from("review_requests")
+        .update({
+          status: "failed"
+        })
+        .eq("id", reviewRequest.id);
+    }
   }
 
-  return { sent, failed };
+  return {
+    sent,
+    failed,
+    skipped,
+    message: "Review request email processing completed."
+  };
 }
 
-export async function GET(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const providedSecret = request.headers.get("x-cron-secret");
-  const authHeader = request.headers.get("authorization");
+export async function GET(request: NextRequest) {
+  const authorization = isAuthorizedCronRequest(request);
 
-  const isValidCronSecret =
-    !cronSecret ||
-    providedSecret === cronSecret ||
-    authHeader === `Bearer ${cronSecret}`;
-
-  if (!isValidCronSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!authorization.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: authorization.message
+      },
+      {
+        status: authorization.status
+      }
+    );
   }
 
   try {
-    const supabase = createAdminClient();
-
-    const created = await createReviewRequests(supabase);
-    const emailResult = await sendReviewEmails(supabase);
+    const createdReviewRequests = await createMissingReviewRequests();
+    const emailResult = await sendPendingReviewEmails(request);
 
     return NextResponse.json({
-      created,
-      sent: emailResult.sent,
-      failed: emailResult.failed,
-      message: "Review process completed."
+      ok: true,
+      created_review_requests: createdReviewRequests,
+      email_result: emailResult
     });
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Unknown error"
+        ok: false,
+        error: error instanceof Error ? error.message : "Unknown cron error."
       },
-      { status: 500 }
+      {
+        status: 500
+      }
     );
   }
+}
+
+export async function POST(request: NextRequest) {
+  return GET(request);
 }
