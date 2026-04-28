@@ -5072,3 +5072,27 @@ body:has(.staff-login-clean-page) .main {
     padding: 28px;
   }
 }
+.brand-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.brand-logo-link svg {
+  width: 260px;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .brand-logo-link svg {
+    width: 210px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-logo-link svg {
+    width: 180px;
+  }
+}
