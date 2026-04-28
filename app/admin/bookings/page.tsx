@@ -329,7 +329,7 @@ export default async function AdminBookingsPage() {
       throw new Error("Booking not found.");
     }
 
-    const booking = bookingData as BookingRow;
+    const booking = bookingData as unknown as BookingRow;
     const studio = normalizeStudio(booking.studios);
 
     if (!studio?.owner_auth_user_id) {
@@ -507,7 +507,7 @@ export default async function AdminBookingsPage() {
       throw new Error("Booking not found.");
     }
 
-    const booking = bookingData as BookingRow;
+    const booking = bookingData as unknown as BookingRow;
     const studio = normalizeStudio(booking.studios);
 
     if (!studio?.owner_auth_user_id) {
@@ -711,18 +711,16 @@ export default async function AdminBookingsPage() {
         }
       });
 
-      await supabaseAdmin
-        .from("platform_refunds")
-        .insert({
-          payment_id: booking.platform_payment_id,
-          source_type: "studio_booking",
-          source_id: booking.id,
-          amount: totalAmount,
-          reason: "Manual admin refund",
-          status: "refunded",
-          approved_by: null,
-          gateway_refund_id: `manual-admin-refund-${booking.id}`
-        });
+      await supabaseAdmin.from("platform_refunds").insert({
+        payment_id: booking.platform_payment_id,
+        source_type: "studio_booking",
+        source_id: booking.id,
+        amount: totalAmount,
+        reason: "Manual admin refund",
+        status: "refunded",
+        approved_by: null,
+        gateway_refund_id: `manual-admin-refund-${booking.id}`
+      });
 
       await supabaseAdmin
         .from("platform_settlements")
@@ -813,7 +811,7 @@ export default async function AdminBookingsPage() {
     new Set(
       bookings
         .map((booking: BookingRow) => booking.customer_auth_user_id)
-        .filter((customerId: string | null | undefined) => Boolean(customerId))
+        .filter((customerId): customerId is string => Boolean(customerId))
     )
   );
 
@@ -1389,10 +1387,7 @@ export default async function AdminBookingsPage() {
                                     className="btn btn-secondary btn-small"
                                     type="submit"
                                   >
-                                    <T
-                                      en="Request Payment"
-                                      ar="طلب الدفع"
-                                    />
+                                    <T en="Request Payment" ar="طلب الدفع" />
                                   </button>
                                 </form>
                               ) : null}
