@@ -1,11 +1,12 @@
-import { requireCompleteProfile } from "../../lib/profile-completion";
+import type { ReactNode } from "react";
+import { requireOwnerLayoutAccess } from "../../lib/route-guards";
 
 export default async function OwnerLayout({
   children
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
-  await requireCompleteProfile();
+  await requireOwnerLayoutAccess();
 
   return <>{children}</>;
 }
