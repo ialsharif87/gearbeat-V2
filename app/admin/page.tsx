@@ -8,15 +8,18 @@ function roleLabel(role: string) {
   if (role === "support") return "Support";
   if (role === "content") return "Content";
   if (role === "sales") return "Sales";
+  if (role === "finance") return "Finance";
   return role || "Admin";
 }
 
 export default async function AdminDashboardPage() {
   const { admin, user } = await requireAdminRole([
+    "super_admin",
     "operations",
     "support",
     "content",
-    "sales"
+    "sales",
+    "finance"
   ]);
 
   const isSuperAdmin = admin.admin_role === "super_admin";
@@ -35,13 +38,19 @@ export default async function AdminDashboardPage() {
     admin.admin_role === "super_admin" ||
     admin.admin_role === "operations" ||
     admin.admin_role === "support" ||
-    admin.admin_role === "sales";
+    admin.admin_role === "sales" ||
+    admin.admin_role === "finance";
 
   const canManageReviews =
     admin.admin_role === "super_admin" ||
     admin.admin_role === "operations" ||
     admin.admin_role === "support" ||
     admin.admin_role === "content";
+
+  const canManageFinance =
+    admin.admin_role === "super_admin" ||
+    admin.admin_role === "operations" ||
+    admin.admin_role === "finance";
 
   const canViewAudit =
     admin.admin_role === "super_admin" ||
@@ -60,8 +69,8 @@ export default async function AdminDashboardPage() {
 
         <p>
           <T
-            en="Manage studios, bookings, reviews, owner onboarding, account deletion requests, and internal platform operations."
-            ar="إدارة الاستوديوهات، الحجوزات، التقييمات، إعداد ملاك الاستوديوهات، طلبات حذف الحسابات، وعمليات المنصة الداخلية."
+            en="Manage studios, bookings, reviews, owner onboarding, finance, payouts, account deletion requests, and internal platform operations."
+            ar="إدارة الاستوديوهات، الحجوزات، التقييمات، إعداد ملاك الاستوديوهات، المالية، البياوت، طلبات حذف الحسابات، وعمليات المنصة الداخلية."
           />
         </p>
       </div>
@@ -138,6 +147,19 @@ export default async function AdminDashboardPage() {
             />
           </p>
         </div>
+
+        <div className="card admin-kpi-card">
+          <span>
+            <T en="Finance" ar="المالية" />
+          </span>
+          <strong>READY</strong>
+          <p className="admin-muted-line">
+            <T
+              en="Monitor studio payments, owner bank accounts, settlements, and payouts."
+              ar="مراقبة مدفوعات الاستوديو، الحسابات البنكية، التسويات، والبياوت."
+            />
+          </p>
+        </div>
       </div>
 
       <div style={{ height: 24 }} />
@@ -206,8 +228,8 @@ export default async function AdminDashboardPage() {
 
                 <p>
                   <T
-                    en="Monitor booking activity, booking status, customer records, and studio reservations."
-                    ar="مراقبة نشاط الحجوزات، حالة الحجز، سجلات العملاء، وحجوزات الاستوديوهات."
+                    en="Monitor booking activity, booking status, customer records, payment status, and studio reservations."
+                    ar="مراقبة نشاط الحجوزات، حالة الحجز، سجلات العملاء، حالة الدفع، وحجوزات الاستوديوهات."
                   />
                 </p>
 
@@ -242,6 +264,105 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
+        <div className="card">
+          <span className="badge">
+            <T en="Finance Center" ar="مركز المالية" />
+          </span>
+
+          <h2>
+            <T en="Payments, settlements, and payouts" ar="المدفوعات، التسويات، والبياوت" />
+          </h2>
+
+          <div className="admin-role-list">
+            {canManageFinance ? (
+              <>
+                <div>
+                  <strong>
+                    <T en="Owner Bank Accounts" ar="حسابات الملاك البنكية" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Review and approve owner bank accounts before payouts can be sent."
+                      ar="مراجعة واعتماد الحسابات البنكية للملاك قبل إرسال البياوت."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link
+                      href="/admin/owner-bank-accounts"
+                      className="btn btn-secondary"
+                    >
+                      <T en="Open Bank Accounts" ar="فتح الحسابات البنكية" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>
+                    <T en="Studio Payments" ar="مدفوعات الاستوديو" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Monitor paid bookings, create payment records, and create settlements for completed studio bookings."
+                      ar="مراقبة الحجوزات المدفوعة، إنشاء سجلات الدفع، وإنشاء التسويات لحجوزات الاستوديو المكتملة."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link
+                      href="/admin/studio-payments"
+                      className="btn btn-secondary"
+                    >
+                      <T en="Open Studio Payments" ar="فتح مدفوعات الاستوديو" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>
+                    <T en="Studio Payouts" ar="بياوت الاستوديو" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Create payouts from eligible settlements, approve payouts, mark them as paid, or handle failed transfers."
+                      ar="إنشاء البياوت من التسويات المؤهلة، اعتماد البياوت، تحديده كمدفوع، أو معالجة التحويلات الفاشلة."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link
+                      href="/admin/studio-payouts"
+                      className="btn btn-secondary"
+                    >
+                      <T en="Open Studio Payouts" ar="فتح بياوت الاستوديو" />
+                    </Link>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div>
+                <strong>
+                  <T en="Finance access restricted" ar="الدخول المالي محدود" />
+                </strong>
+
+                <p>
+                  <T
+                    en="Your current admin role does not have access to finance tools."
+                    ar="صلاحيتك الحالية لا تملك دخولًا إلى أدوات المالية."
+                  />
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="admin-two-column">
         <div className="card">
           <span className="badge">
             <T en="Admin Tools" ar="أدوات الإدارة" />
@@ -317,29 +438,33 @@ export default async function AdminDashboardPage() {
                 </div>
               </div>
             ) : null}
+          </div>
+        </div>
 
-            <div>
-              <strong>
-                <T en="Public Site" ar="الموقع العام" />
-              </strong>
+        <div className="card">
+          <span className="badge">
+            <T en="Public Site" ar="الموقع العام" />
+          </span>
 
-              <p>
-                <T
-                  en="Return to the public GearBeat website."
-                  ar="العودة إلى موقع GearBeat العام."
-                />
-              </p>
+          <h2>
+            <T en="Website navigation" ar="التنقل في الموقع" />
+          </h2>
 
-              <div className="actions">
-                <Link href="/" className="btn btn-secondary">
-                  <T en="Back to Home" ar="العودة للرئيسية" />
-                </Link>
+          <p>
+            <T
+              en="Return to the public GearBeat website or browse the public studio listings."
+              ar="العودة إلى موقع GearBeat العام أو تصفح قوائم الاستوديوهات العامة."
+            />
+          </p>
 
-                <Link href="/studios" className="btn btn-secondary">
-                  <T en="Browse Studios" ar="تصفح الاستوديوهات" />
-                </Link>
-              </div>
-            </div>
+          <div className="actions">
+            <Link href="/" className="btn btn-secondary">
+              <T en="Back to Home" ar="العودة للرئيسية" />
+            </Link>
+
+            <Link href="/studios" className="btn btn-secondary">
+              <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+            </Link>
           </div>
         </div>
       </div>
@@ -353,8 +478,8 @@ export default async function AdminDashboardPage() {
 
         <h2>
           <T
-            en="How studio activation should work"
-            ar="كيف يجب أن يتم تفعيل الاستوديو"
+            en="How studio activation and finance should work"
+            ar="كيف يجب أن يتم تفعيل الاستوديو والمالية"
           />
         </h2>
 
@@ -383,8 +508,8 @@ export default async function AdminDashboardPage() {
               </strong>
               <p>
                 <T
-                  en="Company details, commercial registration, national address, zakat certificate, invoice information, and agreement are completed."
-                  ar="يتم إكمال بيانات الشركة، السجل التجاري، العنوان الوطني، شهادة الزكاة، بيانات الفوترة، والعقد."
+                  en="Company details, commercial registration, national address, zakat certificate, invoice information, agreement, and bank account are completed."
+                  ar="يتم إكمال بيانات الشركة، السجل التجاري، العنوان الوطني، شهادة الزكاة، بيانات الفوترة، العقد، والحساب البنكي."
                 />
               </p>
             </div>
@@ -393,12 +518,15 @@ export default async function AdminDashboardPage() {
           <div className="feature-row">
             <div>
               <strong>
-                <T en="3. Admin approves compliance" ar="٣. الإدارة تعتمد الامتثال" />
+                <T
+                  en="3. Admin approves compliance and bank account"
+                  ar="٣. الإدارة تعتمد الامتثال والحساب البنكي"
+                />
               </strong>
               <p>
                 <T
-                  en="Admin reviews the owner compliance profile and approves or rejects it."
-                  ar="الإدارة تراجع ملف امتثال المالك وتقوم بالاعتماد أو الرفض."
+                  en="Admin reviews the owner compliance profile and bank account before payouts are enabled."
+                  ar="الإدارة تراجع ملف امتثال المالك والحساب البنكي قبل تفعيل البياوت."
                 />
               </p>
             </div>
@@ -407,12 +535,32 @@ export default async function AdminDashboardPage() {
           <div className="feature-row">
             <div>
               <strong>
-                <T en="4. Bookings become active" ar="٤. يتم تفعيل الحجوزات" />
+                <T
+                  en="4. Customer books and pays"
+                  ar="٤. العميل يحجز ويدفع"
+                />
               </strong>
               <p>
                 <T
-                  en="Only approved studios with approved owner compliance become bookable."
-                  ar="فقط الاستوديوهات المعتمدة والمرتبطة بمالك معتمد تصبح قابلة للحجز."
+                  en="Owner confirms the booking, customer pays GearBeat, and the payment is recorded in the finance system."
+                  ar="المالك يؤكد الحجز، العميل يدفع لـ GearBeat، ويتم تسجيل الدفع في النظام المالي."
+                />
+              </p>
+            </div>
+          </div>
+
+          <div className="feature-row">
+            <div>
+              <strong>
+                <T
+                  en="5. Admin settles and pays out"
+                  ar="٥. الإدارة تنشئ التسوية والبياوت"
+                />
+              </strong>
+              <p>
+                <T
+                  en="After completion, finance creates settlement, creates payout, approves it, and marks it as paid."
+                  ar="بعد اكتمال الحجز، المالية تنشئ التسوية، تنشئ البياوت، تعتمده، وتحدده كمدفوع."
                 />
               </p>
             </div>
