@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
+import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
 
 type ProfileRow = {
@@ -12,10 +13,12 @@ type ProfileRow = {
 };
 
 type StudioRow = {
+  id?: string | null;
   name: string | null;
   city: string | null;
   district: string | null;
   slug: string | null;
+  owner_auth_user_id?: string | null;
 };
 
 type ReviewRow = {
@@ -30,6 +33,9 @@ type BookingRow = {
   total_amount: number | null;
   status: string;
   payment_status: string;
+  settlement_status: string | null;
+  payout_status: string | null;
+  platform_payment_id: string | null;
   notes: string | null;
   created_at: string | null;
   studios: StudioRow | StudioRow[] | null;
@@ -44,13 +50,15 @@ function statusLabel(status: string) {
 }
 
 function paymentLabel(status: string) {
+  if (status === "payment_required") return <T en="Payment Required" ar="الدفع مطلوب" />;
   if (status === "paid") return <T en="Paid" ar="مدفوع" />;
   if (status === "failed") return <T en="Failed" ar="فشل الدفع" />;
   if (status === "refunded") return <T en="Refunded" ar="مسترد" />;
+  if (status === "partially_refunded") return <T en="Partially Refunded" ar="مسترد جزئيًا" />;
   return <T en="Unpaid" ar="غير مدفوع" />;
 }
 
-function badgeStyle(type: "booking" | "payment", status: string) {
+function badgeStyle(type: "booking" | "payment" | "settlement", status: string | null | undefined) {
   const green = {
     background: "rgba(30, 215, 96, 0.18)",
     color: "#1ed760",
@@ -69,21 +77,39 @@ function badgeStyle(type: "booking" | "payment", status: string) {
     border: "1px solid rgba(255, 75, 75, 0.45)"
   };
 
+  const muted = {
+    background: "rgba(255, 255, 255, 0.12)",
+    color: "rgba(255, 255, 255, 0.78)",
+    border: "1px solid rgba(255, 255, 255, 0.22)"
+  };
+
   if (type === "booking") {
     if (status === "confirmed" || status === "completed") return green;
     if (status === "cancelled") return red;
     return yellow;
   }
 
-  if (status === "paid") return green;
-  if (status === "unpaid" || status === "failed") return red;
-  if (status === "refunded") return yellow;
+  if (type === "payment") {
+    if (status === "paid") return green;
+    if (status === "unpaid" || status === "payment_required" || status === "failed") return red;
+    if (status === "refunded" || status === "partially_refunded") return yellow;
+    return muted;
+  }
 
-  return yellow;
+  if (status === "eligible" || status === "paid_out") return green;
+  if (status === "cancelled" || status === "on_hold") return red;
+  if (status === "pending" || status === "not_ready" || status === "included_in_payout") return yellow;
+
+  return muted;
+}
+
+function normalizeStudio(studios: StudioRow | StudioRow[] | null) {
+  return Array.isArray(studios) ? studios[0] : studios;
 }
 
 async function requireCustomerAccess() {
   const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
 
   const {
     data: { user }
@@ -93,7 +119,18 @@ async function requireCustomerAccess() {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: adminUser } = await supabaseAdmin
+    .from("admin_users")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (adminUser) {
+    redirect("/admin");
+  }
+
+  const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("id, auth_user_id, role, account_status")
     .eq("auth_user_id", user.id)
@@ -120,6 +157,7 @@ async function requireCustomerAccess() {
 
   return {
     supabase,
+    supabaseAdmin,
     user,
     profile: profileRow
   };
@@ -131,17 +169,37 @@ export default async function CustomerBookingsPage() {
   async function markBookingAsPaid(formData: FormData) {
     "use server";
 
-    const { supabase, user } = await requireCustomerAccess();
+    const { supabaseAdmin, user } = await requireCustomerAccess();
 
     const bookingId = String(formData.get("booking_id") || "").trim();
 
     if (!bookingId) {
-      throw new Error("Missing booking ID");
+      throw new Error("Missing booking ID.");
     }
 
-    const { data: booking, error: bookingLookupError } = await supabase
+    const { data: bookingData, error: bookingLookupError } = await supabaseAdmin
       .from("bookings")
-      .select("id, customer_auth_user_id, status, payment_status")
+      .select(`
+        id,
+        studio_id,
+        customer_auth_user_id,
+        booking_date,
+        start_time,
+        end_time,
+        total_amount,
+        status,
+        payment_status,
+        settlement_status,
+        payout_status,
+        platform_payment_id,
+        paid_at,
+        studios (
+          id,
+          name,
+          slug,
+          owner_auth_user_id
+        )
+      `)
       .eq("id", bookingId)
       .eq("customer_auth_user_id", user.id)
       .maybeSingle();
@@ -150,31 +208,166 @@ export default async function CustomerBookingsPage() {
       throw new Error(bookingLookupError.message);
     }
 
-    if (!booking) {
+    if (!bookingData) {
       throw new Error("Booking not found or not allowed.");
+    }
+
+    const booking = bookingData as {
+      id: string;
+      studio_id: string;
+      customer_auth_user_id: string;
+      booking_date: string | null;
+      start_time: string | null;
+      end_time: string | null;
+      total_amount: number | null;
+      status: string;
+      payment_status: string;
+      settlement_status: string | null;
+      payout_status: string | null;
+      platform_payment_id: string | null;
+      paid_at: string | null;
+      studios: StudioRow | StudioRow[] | null;
+    };
+
+    const studio = normalizeStudio(booking.studios);
+
+    if (!studio?.owner_auth_user_id) {
+      throw new Error("Studio owner is missing.");
     }
 
     if (booking.status !== "confirmed") {
       throw new Error("Only confirmed bookings can be paid.");
     }
 
-    if (booking.payment_status !== "unpaid") {
-      throw new Error("This booking is not unpaid.");
+    if (!["unpaid", "payment_required", "failed"].includes(booking.payment_status)) {
+      throw new Error("This booking is not ready for payment.");
     }
 
-    const { error } = await supabase
-      .from("bookings")
-      .update({ payment_status: "paid" })
-      .eq("id", bookingId)
-      .eq("customer_auth_user_id", user.id)
-      .eq("status", "confirmed")
-      .eq("payment_status", "unpaid");
+    const totalAmount = Number(booking.total_amount || 0);
 
-    if (error) {
-      throw new Error(error.message);
+    if (totalAmount <= 0) {
+      throw new Error("Booking amount must be greater than zero.");
+    }
+
+    const now = new Date().toISOString();
+
+    let paymentId = booking.platform_payment_id;
+
+    if (paymentId) {
+      const { data: existingPayment, error: existingPaymentError } =
+        await supabaseAdmin
+          .from("platform_payments")
+          .select("id, payment_status")
+          .eq("id", paymentId)
+          .maybeSingle();
+
+      if (existingPaymentError) {
+        throw new Error(existingPaymentError.message);
+      }
+
+      if (existingPayment?.payment_status === "paid") {
+        throw new Error("This booking is already paid.");
+      }
+
+      const { error: paymentUpdateError } = await supabaseAdmin
+        .from("platform_payments")
+        .update({
+          payment_status: "paid",
+          amount: totalAmount,
+          tax_amount: 0,
+          total_amount: totalAmount,
+          currency: "SAR",
+          gateway: "manual",
+          gateway_reference: `manual-customer-payment-${booking.id}`,
+          paid_at: now,
+          failed_at: null,
+          updated_at: now
+        })
+        .eq("id", paymentId);
+
+      if (paymentUpdateError) {
+        throw new Error(paymentUpdateError.message);
+      }
+    } else {
+      const { data: newPayment, error: paymentInsertError } = await supabaseAdmin
+        .from("platform_payments")
+        .insert({
+          source_type: "studio_booking",
+          source_id: booking.id,
+          customer_auth_user_id: user.id,
+          provider_type: "studio_owner",
+          provider_id: studio.owner_auth_user_id,
+          amount: totalAmount,
+          tax_amount: 0,
+          total_amount: totalAmount,
+          currency: "SAR",
+          payment_status: "paid",
+          gateway: "manual",
+          gateway_reference: `manual-customer-payment-${booking.id}`,
+          paid_at: now,
+          metadata: {
+            created_from: "customer_pay_now",
+            booking_id: booking.id,
+            studio_id: booking.studio_id
+          }
+        })
+        .select("id")
+        .single();
+
+      if (paymentInsertError) {
+        throw new Error(paymentInsertError.message);
+      }
+
+      paymentId = newPayment.id;
+    }
+
+    const { error: transactionError } = await supabaseAdmin
+      .from("platform_payment_transactions")
+      .insert({
+        payment_id: paymentId,
+        transaction_type: "payment",
+        amount: totalAmount,
+        status: "succeeded",
+        gateway_reference: `manual-customer-payment-${booking.id}`,
+        raw_response: {
+          source: "manual_customer_pay_now",
+          booking_id: booking.id
+        }
+      });
+
+    if (transactionError) {
+      throw new Error(transactionError.message);
+    }
+
+    const { error: bookingUpdateError } = await supabaseAdmin
+      .from("bookings")
+      .update({
+        payment_status: "paid",
+        platform_payment_id: paymentId,
+        paid_at: now,
+        settlement_status: "pending",
+        payout_status: "not_started",
+        updated_at: now
+      })
+      .eq("id", booking.id)
+      .eq("customer_auth_user_id", user.id)
+      .eq("status", "confirmed");
+
+    if (bookingUpdateError) {
+      throw new Error(bookingUpdateError.message);
     }
 
     revalidatePath("/customer/bookings");
+    revalidatePath("/owner/bookings");
+    revalidatePath("/owner/finance");
+    revalidatePath("/owner/payouts");
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/studio-payments");
+    revalidatePath("/admin/studio-payouts");
+
+    if (studio.slug) {
+      revalidatePath(`/studios/${studio.slug}`);
+    }
   }
 
   const { data: bookings, error } = await supabase
@@ -187,9 +380,13 @@ export default async function CustomerBookingsPage() {
       total_amount,
       status,
       payment_status,
+      settlement_status,
+      payout_status,
+      platform_payment_id,
       notes,
       created_at,
       studios (
+        id,
         name,
         city,
         district,
@@ -252,9 +449,7 @@ export default async function CustomerBookingsPage() {
       <div className="grid">
         {bookingsList.length ? (
           bookingsList.map((booking: BookingRow) => {
-            const studio = Array.isArray(booking.studios)
-              ? booking.studios[0]
-              : booking.studios;
+            const studio = normalizeStudio(booking.studios);
 
             const reviews = Array.isArray(booking.reviews)
               ? booking.reviews
@@ -264,7 +459,9 @@ export default async function CustomerBookingsPage() {
 
             const canPay =
               booking.status === "confirmed" &&
-              booking.payment_status === "unpaid";
+              ["unpaid", "payment_required", "failed"].includes(
+                booking.payment_status
+              );
 
             const canReview =
               (booking.status === "confirmed" ||
@@ -290,6 +487,19 @@ export default async function CustomerBookingsPage() {
                     <T en="Payment:" ar="الدفع:" />{" "}
                     {paymentLabel(booking.payment_status)}
                   </span>
+
+                  {booking.payment_status === "paid" ? (
+                    <span
+                      className="badge"
+                      style={badgeStyle(
+                        "settlement",
+                        booking.settlement_status || "pending"
+                      )}
+                    >
+                      <T en="Settlement:" ar="التسوية:" />{" "}
+                      {booking.settlement_status || "pending"}
+                    </span>
+                  ) : null}
 
                   {hasReview ? (
                     <span className="badge">
@@ -331,7 +541,7 @@ export default async function CustomerBookingsPage() {
                 ) : null}
 
                 {booking.status === "confirmed" &&
-                booking.payment_status === "unpaid" ? (
+                booking.payment_status !== "paid" ? (
                   <p>
                     <T
                       en="Your booking is confirmed. Please complete the payment."
@@ -350,11 +560,21 @@ export default async function CustomerBookingsPage() {
                   </p>
                 ) : null}
 
+                {booking.status === "completed" &&
+                booking.payment_status === "paid" ? (
+                  <p>
+                    <T
+                      en="Your booking is completed and paid."
+                      ar="تم إكمال الحجز والدفع."
+                    />
+                  </p>
+                ) : null}
+
                 {booking.status === "cancelled" ? (
                   <p>
                     <T
-                      en="This booking was cancelled by the studio owner."
-                      ar="تم إلغاء هذا الحجز من قبل صاحب الاستوديو."
+                      en="This booking was cancelled."
+                      ar="تم إلغاء هذا الحجز."
                     />
                   </p>
                 ) : null}
