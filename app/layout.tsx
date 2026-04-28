@@ -13,14 +13,38 @@ export const metadata: Metadata = {
   description: "Book music studios and creative spaces."
 };
 
-function getDashboardPath(user: any, adminUser: any) {
+type ProfileRow = {
+  id: string;
+  auth_user_id: string;
+  email: string | null;
+  full_name: string | null;
+  phone: string | null;
+  role: string | null;
+  account_status: string | null;
+};
+
+type AdminUserRow = {
+  id: string;
+  auth_user_id: string;
+  email: string | null;
+  admin_role: string;
+  status: string;
+};
+
+function getDashboardPath({
+  profile,
+  adminUser
+}: {
+  profile: ProfileRow | null;
+  adminUser: AdminUserRow | null;
+}) {
   if (adminUser) return "/admin";
 
-  const role = user?.user_metadata?.role;
+  if (profile?.role === "owner") return "/owner";
 
-  if (role === "owner") return "/owner";
+  if (profile?.role === "customer") return "/customer";
 
-  return "/customer";
+  return "/login";
 }
 
 export default async function RootLayout({
@@ -29,23 +53,34 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const supabaseAdmin = createAdminClient();
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
-  let adminUser = null;
+  let adminUser: AdminUserRow | null = null;
+  let profile: ProfileRow | null = null;
 
   if (user) {
-    const { data } = await supabaseAdmin
-      .from("admin_users")
-      .select("id, email, admin_role, status")
-      .eq("auth_user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
+    const supabaseAdmin = createAdminClient();
 
-    adminUser = data;
+    const [adminResult, profileResult] = await Promise.all([
+      supabaseAdmin
+        .from("admin_users")
+        .select("id, auth_user_id, email, admin_role, status")
+        .eq("auth_user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle(),
+
+      supabaseAdmin
+        .from("profiles")
+        .select("id, auth_user_id, email, full_name, phone, role, account_status")
+        .eq("auth_user_id", user.id)
+        .maybeSingle()
+    ]);
+
+    adminUser = (adminResult.data || null) as AdminUserRow | null;
+    profile = (profileResult.data || null) as ProfileRow | null;
   }
 
   async function logout() {
@@ -57,9 +92,15 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const dashboardPath = user ? getDashboardPath(user, adminUser) : "/login";
+  const dashboardPath = user
+    ? getDashboardPath({
+        profile,
+        adminUser
+      })
+    : "/login";
+
   const isAdmin = Boolean(adminUser);
-  const userRole = user?.user_metadata?.role || "customer";
+  const userRole = profile?.role || null;
 
   return (
     <html lang="ar" dir="rtl">
@@ -77,10 +118,6 @@ export default async function RootLayout({
             </div>
 
             <div className="nav-links enhanced-nav-links">
-              <Link href="/marketplace">
-                <T en="Marketplace" ar="Marketplace" />
-              </Link>
-
               <Link href="/studios">
                 <T en="Browse Studios" ar="تصفح الاستوديوهات" />
               </Link>
@@ -103,7 +140,7 @@ export default async function RootLayout({
                     )}
                   </Link>
 
-                  {!isAdmin ? (
+                  {!isAdmin && userRole === "customer" ? (
                     <>
                       <Link href="/customer/bookings">
                         <T en="My Bookings" ar="حجوزاتي" />
@@ -116,9 +153,19 @@ export default async function RootLayout({
                   ) : null}
 
                   {!isAdmin && userRole === "owner" ? (
-                    <Link href="/owner">
-                      <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
-                    </Link>
+                    <>
+                      <Link href="/owner">
+                        <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
+                      </Link>
+
+                      <Link href="/owner/studios">
+                        <T en="My Studios" ar="استوديوهاتي" />
+                      </Link>
+
+                      <Link href="/owner/bookings">
+                        <T en="Owner Bookings" ar="حجوزات الاستوديو" />
+                      </Link>
+                    </>
                   ) : null}
 
                   <form action={logout}>
