@@ -1,0 +1,47 @@
+<svg width="320" height="96" viewBox="0 0 320 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GearBeat">
+  <defs>
+    <linearGradient id="gold" x1="40" y1="8" x2="92" y2="82" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F3D982"/>
+      <stop offset="0.45" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#9C7621"/>
+    </linearGradient>
+    <linearGradient id="text" x1="112" y1="30" x2="310" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D8DDE6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="320" height="96" rx="18" fill="none"/>
+
+  <!-- G mark -->
+  <path
+    d="M64 12L88 26L80 39L64 30L37 46V50L64 66L80 57L88 70L64 84L24 61V35L64 12Z"
+    fill="url(#gold)"
+  />
+
+  <path
+    d="M57 39H84V52H70V60H57V39Z"
+    fill="url(#gold)"
+  />
+
+  <!-- sound bars -->
+  <rect x="38" y="41" width="4" height="14" rx="2" fill="#F3D982"/>
+  <rect x="45" y="34" width="4" height="28" rx="2" fill="#D4AF37"/>
+  <rect x="52" y="28" width="4" height="40" rx="2" fill="#F3D982"/>
+  <rect x="59" y="34" width="4" height="28" rx="2" fill="#D4AF37"/>
+
+  <!-- wordmark -->
+  <text x="112" y="56"
+        font-family="Space Grotesk, Arial, sans-serif"
+        font-size="34"
+        font-weight="700"
+        letter-spacing="0.5"
+        fill="url(#text)">GearBeat</text>
+
+  <text x="114" y="78"
+        font-family="Arial, sans-serif"
+        font-size="9"
+        font-weight="700"
+        letter-spacing="5"
+        fill="#D4AF37">STUDIO · SOUND · CONNECTED</text>
+</svg>
