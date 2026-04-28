@@ -50,6 +50,14 @@ type BookingDetailsRow = {
   total_amount: number | null;
   status: string;
   payment_status: string;
+  settlement_status: string | null;
+  payout_status: string | null;
+  refund_status: string | null;
+  platform_payment_id: string | null;
+  payment_required_at: string | null;
+  paid_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
   notes: string | null;
   admin_notes: string | null;
   admin_notes_updated_at: string | null;
@@ -73,6 +81,59 @@ type CustomerProfileRow = {
   updated_at: string | null;
 };
 
+type PlatformPaymentRow = {
+  id: string;
+  source_type: string;
+  source_id: string;
+  customer_auth_user_id: string;
+  provider_type: string;
+  provider_id: string;
+  amount: number | null;
+  tax_amount: number | null;
+  total_amount: number | null;
+  currency: string | null;
+  payment_status: string;
+  gateway: string | null;
+  gateway_payment_id: string | null;
+  gateway_reference: string | null;
+  paid_at: string | null;
+  failed_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+type PlatformSettlementRow = {
+  id: string;
+  source_type: string;
+  source_id: string;
+  provider_type: string;
+  provider_id: string;
+  payment_id: string | null;
+  gross_amount: number | null;
+  commission_amount: number | null;
+  tax_amount: number | null;
+  net_amount: number | null;
+  currency: string | null;
+  settlement_status: string;
+  available_for_payout_at: string | null;
+  hold_reason: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+type PlatformRefundRow = {
+  id: string;
+  payment_id: string | null;
+  source_type: string;
+  source_id: string;
+  amount: number | null;
+  reason: string | null;
+  status: string;
+  gateway_refund_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
 type AuditLogRow = {
   id: string;
   actor_email: string | null;
@@ -83,36 +144,78 @@ type AuditLogRow = {
   created_at: string | null;
 };
 
-function badgeStyle(type: "booking" | "payment", status: string) {
-  const green = {
-    background: "rgba(30, 215, 96, 0.18)",
-    color: "#1ed760",
-    border: "1px solid rgba(30, 215, 96, 0.45)"
-  };
+function cleanText(value: FormDataEntryValue | null) {
+  return String(value || "").trim();
+}
 
-  const yellow = {
-    background: "rgba(255, 193, 7, 0.18)",
-    color: "#ffc107",
-    border: "1px solid rgba(255, 193, 7, 0.45)"
-  };
+function money(value: number | null | undefined) {
+  return `${Number(value || 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })} SAR`;
+}
 
-  const red = {
-    background: "rgba(255, 75, 75, 0.18)",
-    color: "#ff4b4b",
-    border: "1px solid rgba(255, 75, 75, 0.45)"
-  };
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
 
-  if (type === "booking") {
-    if (status === "confirmed" || status === "completed") return green;
-    if (status === "cancelled") return red;
-    return yellow;
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return "—";
+  }
+}
+
+function statusStyle(status: string | null | undefined) {
+  if (
+    status === "approved" ||
+    status === "paid" ||
+    status === "paid_out" ||
+    status === "eligible" ||
+    status === "completed" ||
+    status === "confirmed"
+  ) {
+    return {
+      background: "rgba(30, 215, 96, 0.18)",
+      color: "#1ed760",
+      border: "1px solid rgba(30, 215, 96, 0.45)"
+    };
   }
 
-  if (status === "paid") return green;
-  if (status === "unpaid" || status === "failed") return red;
-  if (status === "refunded") return yellow;
+  if (
+    status === "failed" ||
+    status === "cancelled" ||
+    status === "rejected" ||
+    status === "refunded"
+  ) {
+    return {
+      background: "rgba(255, 75, 75, 0.18)",
+      color: "#ff4b4b",
+      border: "1px solid rgba(255, 75, 75, 0.45)"
+    };
+  }
 
-  return yellow;
+  if (
+    status === "pending" ||
+    status === "pending_approval" ||
+    status === "payment_required" ||
+    status === "unpaid" ||
+    status === "not_ready" ||
+    status === "included_in_payout" ||
+    status === "on_hold" ||
+    status === "requested"
+  ) {
+    return {
+      background: "rgba(255, 193, 7, 0.18)",
+      color: "#ffc107",
+      border: "1px solid rgba(255, 193, 7, 0.45)"
+    };
+  }
+
+  return {
+    background: "rgba(255, 255, 255, 0.12)",
+    color: "rgba(255, 255, 255, 0.78)",
+    border: "1px solid rgba(255, 255, 255, 0.22)"
+  };
 }
 
 function getIdentityLabel(identityType: string | null | undefined) {
@@ -157,19 +260,12 @@ function getCustomerIdentityType(user: any, profile: CustomerProfileRow | null) 
   return profile?.identity_type || metadata.identity_type || "";
 }
 
-function getCustomerIdentityNumber(user: any, profile: CustomerProfileRow | null) {
+function getCustomerIdentityNumber(
+  user: any,
+  profile: CustomerProfileRow | null
+) {
   const metadata = user?.user_metadata || {};
   return profile?.identity_number || metadata.identity_number || "—";
-}
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "—";
-
-  try {
-    return new Date(value).toLocaleString();
-  } catch {
-    return "—";
-  }
 }
 
 function normalizeStudio(studios: StudioRow | StudioRow[] | null) {
@@ -228,9 +324,9 @@ export default async function AdminBookingDetailsPage({
 
     const supabaseAdmin = createAdminClient();
 
-    const bookingId = String(formData.get("booking_id") || "").trim();
-    const status = String(formData.get("status") || "").trim();
-    const studioSlug = String(formData.get("studio_slug") || "").trim();
+    const bookingId = cleanText(formData.get("booking_id"));
+    const status = cleanText(formData.get("status"));
+    const studioSlug = cleanText(formData.get("studio_slug"));
 
     const allowedStatuses = ["pending", "confirmed", "completed", "cancelled"];
 
@@ -242,9 +338,28 @@ export default async function AdminBookingDetailsPage({
       throw new Error("Invalid booking status.");
     }
 
-    const { data: oldBooking, error: readError } = await supabaseAdmin
+    const { data: bookingData, error: readError } = await supabaseAdmin
       .from("bookings")
-      .select("id,status,payment_status,studio_id,customer_auth_user_id")
+      .select(`
+        id,
+        studio_id,
+        customer_auth_user_id,
+        total_amount,
+        status,
+        payment_status,
+        settlement_status,
+        payout_status,
+        refund_status,
+        platform_payment_id,
+        paid_at,
+        completed_at,
+        cancelled_at,
+        studios (
+          id,
+          slug,
+          owner_auth_user_id
+        )
+      `)
       .eq("id", bookingId)
       .maybeSingle();
 
@@ -252,20 +367,113 @@ export default async function AdminBookingDetailsPage({
       throw new Error(readError.message);
     }
 
-    if (!oldBooking) {
+    if (!bookingData) {
       throw new Error("Booking not found.");
+    }
+
+    const booking = bookingData as BookingDetailsRow;
+    const studio = normalizeStudio(booking.studios);
+
+    if (!studio?.owner_auth_user_id) {
+      throw new Error("Studio owner is missing.");
+    }
+
+    const now = new Date().toISOString();
+
+    const updatePayload: Record<string, any> = {
+      status,
+      updated_at: now
+    };
+
+    if (status === "pending") {
+      if (booking.payment_status === "paid") {
+        throw new Error("Paid bookings cannot be returned to pending.");
+      }
+
+      updatePayload.payment_status = "unpaid";
+      updatePayload.payment_required_at = null;
+      updatePayload.settlement_status = "not_ready";
+      updatePayload.payout_status = "not_started";
+      updatePayload.cancelled_at = null;
+      updatePayload.completed_at = null;
+    }
+
+    if (status === "confirmed") {
+      if (booking.payment_status !== "paid") {
+        updatePayload.payment_status = "payment_required";
+        updatePayload.payment_required_at = now;
+        updatePayload.settlement_status = "not_ready";
+        updatePayload.payout_status = "not_started";
+      }
+
+      updatePayload.cancelled_at = null;
+    }
+
+    if (status === "completed") {
+      if (booking.payment_status !== "paid") {
+        throw new Error("Only paid bookings can be completed.");
+      }
+
+      updatePayload.completed_at = booking.completed_at || now;
+      updatePayload.settlement_status = "eligible";
+      updatePayload.payout_status = booking.payout_status || "not_started";
+      updatePayload.cancelled_at = null;
+    }
+
+    if (status === "cancelled") {
+      updatePayload.cancelled_at = booking.cancelled_at || now;
+
+      if (booking.payment_status === "paid") {
+        updatePayload.settlement_status = "on_hold";
+        updatePayload.payout_status = "not_started";
+        updatePayload.refund_status = "requested";
+      } else {
+        updatePayload.settlement_status = "cancelled";
+        updatePayload.payout_status = "cancelled";
+      }
     }
 
     const { error } = await supabaseAdmin
       .from("bookings")
-      .update({
-        status,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq("id", bookingId);
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    if (status === "completed" && booking.payment_status === "paid") {
+      await supabaseAdmin
+        .from("platform_settlements")
+        .update({
+          settlement_status: "eligible",
+          available_for_payout_at: now,
+          updated_at: now
+        })
+        .eq("source_type", "studio_booking")
+        .eq("source_id", bookingId)
+        .eq("provider_type", "studio_owner")
+        .eq("provider_id", studio.owner_auth_user_id)
+        .in("settlement_status", ["pending", "not_ready"]);
+    }
+
+    if (status === "cancelled") {
+      await supabaseAdmin
+        .from("platform_settlements")
+        .update({
+          settlement_status:
+            booking.payment_status === "paid" ? "on_hold" : "cancelled",
+          hold_reason:
+            booking.payment_status === "paid"
+              ? "Booking cancelled after payment. Refund review required."
+              : null,
+          updated_at: now
+        })
+        .eq("source_type", "studio_booking")
+        .eq("source_id", bookingId)
+        .eq("provider_type", "studio_owner")
+        .eq("provider_id", studio.owner_auth_user_id)
+        .in("settlement_status", ["not_ready", "pending", "eligible"]);
     }
 
     await createAuditLog({
@@ -275,16 +483,16 @@ export default async function AdminBookingDetailsPage({
       entityType: "booking",
       entityId: bookingId,
       oldValues: {
-        status: oldBooking.status
+        status: booking.status,
+        payment_status: booking.payment_status,
+        settlement_status: booking.settlement_status
       },
-      newValues: {
-        status
-      },
+      newValues: updatePayload,
       metadata: {
         admin_role: admin.admin_role,
         studio_slug: studioSlug,
-        studio_id: oldBooking.studio_id,
-        customer_auth_user_id: oldBooking.customer_auth_user_id
+        studio_id: booking.studio_id,
+        customer_auth_user_id: booking.customer_auth_user_id
       }
     });
 
@@ -293,6 +501,10 @@ export default async function AdminBookingDetailsPage({
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
     revalidatePath("/owner/bookings");
+    revalidatePath("/owner/finance");
+    revalidatePath("/owner/payouts");
+    revalidatePath("/admin/studio-payments");
+    revalidatePath("/admin/studio-payouts");
 
     if (studioSlug) {
       revalidatePath(`/studios/${studioSlug}`);
@@ -310,11 +522,17 @@ export default async function AdminBookingDetailsPage({
 
     const supabaseAdmin = createAdminClient();
 
-    const bookingId = String(formData.get("booking_id") || "").trim();
-    const paymentStatus = String(formData.get("payment_status") || "").trim();
-    const studioSlug = String(formData.get("studio_slug") || "").trim();
+    const bookingId = cleanText(formData.get("booking_id"));
+    const paymentStatus = cleanText(formData.get("payment_status"));
+    const studioSlug = cleanText(formData.get("studio_slug"));
 
-    const allowedPaymentStatuses = ["unpaid", "paid", "failed", "refunded"];
+    const allowedPaymentStatuses = [
+      "unpaid",
+      "payment_required",
+      "paid",
+      "failed",
+      "refunded"
+    ];
 
     if (!bookingId) {
       throw new Error("Missing booking ID.");
@@ -324,57 +542,343 @@ export default async function AdminBookingDetailsPage({
       throw new Error("Invalid payment status.");
     }
 
-    const { data: oldBooking, error: readError } = await supabaseAdmin
+    const { data: bookingData, error: bookingCheckError } = await supabaseAdmin
       .from("bookings")
-      .select("id,status,payment_status,studio_id,customer_auth_user_id")
+      .select(`
+        id,
+        studio_id,
+        customer_auth_user_id,
+        total_amount,
+        status,
+        payment_status,
+        settlement_status,
+        payout_status,
+        refund_status,
+        platform_payment_id,
+        paid_at,
+        studios (
+          id,
+          slug,
+          owner_auth_user_id
+        )
+      `)
       .eq("id", bookingId)
       .maybeSingle();
 
-    if (readError) {
-      throw new Error(readError.message);
+    if (bookingCheckError) {
+      throw new Error(bookingCheckError.message);
     }
 
-    if (!oldBooking) {
+    if (!bookingData) {
       throw new Error("Booking not found.");
     }
 
-    const { error } = await supabaseAdmin
-      .from("bookings")
-      .update({
-        payment_status: paymentStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", bookingId);
+    const booking = bookingData as BookingDetailsRow;
+    const studio = normalizeStudio(booking.studios);
 
-    if (error) {
-      throw new Error(error.message);
+    if (!studio?.owner_auth_user_id) {
+      throw new Error("Studio owner is missing.");
     }
 
-    await createAuditLog({
-      actorAuthUserId: user.id,
-      actorEmail: user.email,
-      action: "booking_payment_status_updated",
-      entityType: "booking",
-      entityId: bookingId,
-      oldValues: {
-        payment_status: oldBooking.payment_status
-      },
-      newValues: {
-        payment_status: paymentStatus
-      },
-      metadata: {
-        admin_role: admin.admin_role,
-        studio_slug: studioSlug,
-        studio_id: oldBooking.studio_id,
-        customer_auth_user_id: oldBooking.customer_auth_user_id
+    const now = new Date().toISOString();
+    const totalAmount = Number(booking.total_amount || 0);
+
+    if (paymentStatus === "paid") {
+      if (booking.status !== "confirmed" && booking.status !== "completed") {
+        throw new Error(
+          "Only confirmed or completed bookings can be marked as paid."
+        );
       }
-    });
+
+      if (totalAmount <= 0) {
+        throw new Error("Booking amount must be greater than zero.");
+      }
+
+      let paymentId = booking.platform_payment_id;
+
+      if (paymentId) {
+        const { error: paymentUpdateError } = await supabaseAdmin
+          .from("platform_payments")
+          .update({
+            payment_status: "paid",
+            amount: totalAmount,
+            tax_amount: 0,
+            total_amount: totalAmount,
+            currency: "SAR",
+            gateway: "manual",
+            gateway_reference: `manual-admin-payment-${booking.id}`,
+            paid_at: now,
+            failed_at: null,
+            updated_at: now
+          })
+          .eq("id", paymentId);
+
+        if (paymentUpdateError) {
+          throw new Error(paymentUpdateError.message);
+        }
+      } else {
+        const { data: payment, error: paymentInsertError } = await supabaseAdmin
+          .from("platform_payments")
+          .insert({
+            source_type: "studio_booking",
+            source_id: booking.id,
+            customer_auth_user_id: booking.customer_auth_user_id,
+            provider_type: "studio_owner",
+            provider_id: studio.owner_auth_user_id,
+            amount: totalAmount,
+            tax_amount: 0,
+            total_amount: totalAmount,
+            currency: "SAR",
+            payment_status: "paid",
+            gateway: "manual",
+            gateway_reference: `manual-admin-payment-${booking.id}`,
+            paid_at: now,
+            metadata: {
+              created_from: "admin_booking_details_mark_paid",
+              booking_id: booking.id,
+              studio_id: booking.studio_id
+            }
+          })
+          .select("id")
+          .single();
+
+        if (paymentInsertError) {
+          throw new Error(paymentInsertError.message);
+        }
+
+        paymentId = payment.id;
+      }
+
+      const { error: transactionError } = await supabaseAdmin
+        .from("platform_payment_transactions")
+        .insert({
+          payment_id: paymentId,
+          transaction_type: "payment",
+          amount: totalAmount,
+          status: "succeeded",
+          gateway_reference: `manual-admin-payment-${booking.id}`,
+          raw_response: {
+            source: "manual_admin_booking_details_mark_paid",
+            booking_id: booking.id
+          }
+        });
+
+      if (transactionError) {
+        throw new Error(transactionError.message);
+      }
+
+      const { error: bookingUpdateError } = await supabaseAdmin
+        .from("bookings")
+        .update({
+          payment_status: "paid",
+          platform_payment_id: paymentId,
+          paid_at: booking.paid_at || now,
+          settlement_status:
+            booking.status === "completed" ? "eligible" : "pending",
+          payout_status: "not_started",
+          updated_at: now
+        })
+        .eq("id", booking.id);
+
+      if (bookingUpdateError) {
+        throw new Error(bookingUpdateError.message);
+      }
+
+      await createAuditLog({
+        actorAuthUserId: user.id,
+        actorEmail: user.email,
+        action: "booking_payment_marked_paid",
+        entityType: "booking",
+        entityId: booking.id,
+        oldValues: {
+          payment_status: booking.payment_status,
+          platform_payment_id: booking.platform_payment_id
+        },
+        newValues: {
+          payment_status: "paid",
+          platform_payment_id: paymentId
+        },
+        metadata: {
+          admin_role: admin.admin_role,
+          studio_id: booking.studio_id,
+          owner_auth_user_id: studio.owner_auth_user_id
+        }
+      });
+    }
+
+    if (paymentStatus === "payment_required") {
+      if (booking.payment_status === "paid") {
+        throw new Error("Paid bookings cannot be changed to payment required.");
+      }
+
+      const { error } = await supabaseAdmin
+        .from("bookings")
+        .update({
+          payment_status: "payment_required",
+          payment_required_at: now,
+          settlement_status: "not_ready",
+          payout_status: "not_started",
+          updated_at: now
+        })
+        .eq("id", booking.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    if (paymentStatus === "unpaid") {
+      if (booking.payment_status === "paid") {
+        throw new Error(
+          "Paid bookings cannot be changed to unpaid. Use refund flow."
+        );
+      }
+
+      const { error } = await supabaseAdmin
+        .from("bookings")
+        .update({
+          payment_status: "unpaid",
+          payment_required_at: null,
+          settlement_status: "not_ready",
+          payout_status: "not_started",
+          updated_at: now
+        })
+        .eq("id", booking.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    if (paymentStatus === "failed") {
+      if (booking.platform_payment_id) {
+        await supabaseAdmin
+          .from("platform_payments")
+          .update({
+            payment_status: "failed",
+            failed_at: now,
+            updated_at: now
+          })
+          .eq("id", booking.platform_payment_id);
+      }
+
+      const { error } = await supabaseAdmin
+        .from("bookings")
+        .update({
+          payment_status: "failed",
+          settlement_status: "not_ready",
+          payout_status: "not_started",
+          updated_at: now
+        })
+        .eq("id", booking.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    if (paymentStatus === "refunded") {
+      if (!booking.platform_payment_id) {
+        throw new Error("Cannot refund a booking without a payment record.");
+      }
+
+      await supabaseAdmin
+        .from("platform_payments")
+        .update({
+          payment_status: "refunded",
+          updated_at: now
+        })
+        .eq("id", booking.platform_payment_id);
+
+      await supabaseAdmin.from("platform_payment_transactions").insert({
+        payment_id: booking.platform_payment_id,
+        transaction_type: "refund",
+        amount: totalAmount,
+        status: "succeeded",
+        gateway_reference: `manual-admin-refund-${booking.id}`,
+        raw_response: {
+          source: "manual_admin_booking_details_refund",
+          booking_id: booking.id
+        }
+      });
+
+      await supabaseAdmin.from("platform_refunds").insert({
+        payment_id: booking.platform_payment_id,
+        source_type: "studio_booking",
+        source_id: booking.id,
+        amount: totalAmount,
+        reason: "Manual admin refund",
+        status: "refunded",
+        requested_by: user.id,
+        approved_by: user.id,
+        gateway_refund_id: `manual-admin-refund-${booking.id}`
+      });
+
+      await supabaseAdmin
+        .from("platform_settlements")
+        .update({
+          settlement_status: "cancelled",
+          updated_at: now
+        })
+        .eq("source_type", "studio_booking")
+        .eq("source_id", booking.id)
+        .eq("provider_type", "studio_owner")
+        .eq("provider_id", studio.owner_auth_user_id)
+        .in("settlement_status", [
+          "not_ready",
+          "pending",
+          "eligible",
+          "on_hold"
+        ]);
+
+      const { error } = await supabaseAdmin
+        .from("bookings")
+        .update({
+          payment_status: "refunded",
+          refund_status: "refunded",
+          settlement_status: "cancelled",
+          payout_status: "cancelled",
+          updated_at: now
+        })
+        .eq("id", booking.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      await createAuditLog({
+        actorAuthUserId: user.id,
+        actorEmail: user.email,
+        action: "booking_payment_refunded",
+        entityType: "booking",
+        entityId: booking.id,
+        oldValues: {
+          payment_status: booking.payment_status,
+          refund_status: booking.refund_status,
+          settlement_status: booking.settlement_status
+        },
+        newValues: {
+          payment_status: "refunded",
+          refund_status: "refunded",
+          settlement_status: "cancelled"
+        },
+        metadata: {
+          admin_role: admin.admin_role,
+          studio_id: booking.studio_id,
+          owner_auth_user_id: studio.owner_auth_user_id
+        }
+      });
+    }
 
     revalidatePath(`/admin/bookings/${bookingId}`);
     revalidatePath("/admin/bookings");
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
     revalidatePath("/owner/bookings");
+    revalidatePath("/owner/finance");
+    revalidatePath("/owner/payouts");
+    revalidatePath("/admin/studio-payments");
+    revalidatePath("/admin/studio-payouts");
 
     if (studioSlug) {
       revalidatePath(`/studios/${studioSlug}`);
@@ -393,8 +897,8 @@ export default async function AdminBookingDetailsPage({
 
     const supabaseAdmin = createAdminClient();
 
-    const bookingId = String(formData.get("booking_id") || "").trim();
-    const adminNotes = String(formData.get("admin_notes") || "").trim();
+    const bookingId = cleanText(formData.get("booking_id"));
+    const adminNotes = cleanText(formData.get("admin_notes"));
 
     if (!bookingId) {
       throw new Error("Missing booking ID.");
@@ -463,6 +967,14 @@ export default async function AdminBookingDetailsPage({
       total_amount,
       status,
       payment_status,
+      settlement_status,
+      payout_status,
+      refund_status,
+      platform_payment_id,
+      payment_required_at,
+      paid_at,
+      completed_at,
+      cancelled_at,
       notes,
       admin_notes,
       admin_notes_updated_at,
@@ -534,6 +1046,45 @@ export default async function AdminBookingDetailsPage({
   const identityNumber = getCustomerIdentityNumber(customer, profile);
   const studioSlug = studio?.slug || "";
 
+  let payment: PlatformPaymentRow | null = null;
+
+  if (booking.platform_payment_id) {
+    const { data: paymentData } = await supabaseAdmin
+      .from("platform_payments")
+      .select("*")
+      .eq("id", booking.platform_payment_id)
+      .maybeSingle();
+
+    payment = (paymentData || null) as PlatformPaymentRow | null;
+  } else {
+    const { data: paymentData } = await supabaseAdmin
+      .from("platform_payments")
+      .select("*")
+      .eq("source_type", "studio_booking")
+      .eq("source_id", booking.id)
+      .maybeSingle();
+
+    payment = (paymentData || null) as PlatformPaymentRow | null;
+  }
+
+  const { data: settlementData } = await supabaseAdmin
+    .from("platform_settlements")
+    .select("*")
+    .eq("source_type", "studio_booking")
+    .eq("source_id", booking.id)
+    .maybeSingle();
+
+  const settlement = (settlementData || null) as PlatformSettlementRow | null;
+
+  const { data: refundsData } = await supabaseAdmin
+    .from("platform_refunds")
+    .select("*")
+    .eq("source_type", "studio_booking")
+    .eq("source_id", booking.id)
+    .order("created_at", { ascending: false });
+
+  const refunds = (refundsData || []) as PlatformRefundRow[];
+
   let adminNotesUpdatedByEmail = "—";
 
   if (booking.admin_notes_updated_by) {
@@ -546,13 +1097,11 @@ export default async function AdminBookingDetailsPage({
 
   const { data: auditLogsData } = await supabaseAdmin
     .from("audit_logs")
-    .select(
-      "id,actor_email,action,old_values,new_values,metadata,created_at"
-    )
+    .select("id,actor_email,action,old_values,new_values,metadata,created_at")
     .eq("entity_type", "booking")
     .eq("entity_id", booking.id)
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(12);
 
   const auditLogs = (auditLogsData || []) as AuditLogRow[];
   const latestReviewRequest = reviewRequests[0];
@@ -570,8 +1119,8 @@ export default async function AdminBookingDetailsPage({
 
         <p>
           <T
-            en="Full booking view with customer, identity, studio, payment, review, internal notes, and audit history."
-            ar="عرض كامل للحجز مع بيانات العميل، الهوية، الاستوديو، الدفع، التقييم، الملاحظات الداخلية، وسجل التغييرات."
+            en="Full booking view with customer, identity, studio, payment, settlement, payout, refund, review, internal notes, and audit history."
+            ar="عرض كامل للحجز مع بيانات العميل، الهوية، الاستوديو، الدفع، التسوية، البياوت، الاسترجاع، التقييم، الملاحظات الداخلية، وسجل التغييرات."
           />
         </p>
       </div>
@@ -579,6 +1128,14 @@ export default async function AdminBookingDetailsPage({
       <div className="actions" style={{ marginBottom: 24 }}>
         <Link href="/admin/bookings" className="btn btn-secondary">
           <T en="Back to Bookings" ar="العودة إلى الحجوزات" />
+        </Link>
+
+        <Link href="/admin/studio-payments" className="btn btn-secondary">
+          <T en="Studio Payments" ar="مدفوعات الاستوديو" />
+        </Link>
+
+        <Link href="/admin/studio-payouts" className="btn btn-secondary">
+          <T en="Studio Payouts" ar="بياوت الاستوديو" />
         </Link>
 
         {studioSlug ? (
@@ -605,18 +1162,15 @@ export default async function AdminBookingDetailsPage({
 
           <p>
             <T en="Amount:" ar="المبلغ:" />{" "}
-            <strong>{booking.total_amount} SAR</strong>
+            <strong>{money(booking.total_amount)}</strong>
           </p>
 
           <div className="admin-badge-stack">
-            <span className="badge" style={badgeStyle("booking", booking.status)}>
+            <span className="badge" style={statusStyle(booking.status)}>
               {booking.status}
             </span>
 
-            <span
-              className="badge"
-              style={badgeStyle("payment", booking.payment_status)}
-            >
+            <span className="badge" style={statusStyle(booking.payment_status)}>
               {booking.payment_status}
             </span>
           </div>
@@ -628,6 +1182,53 @@ export default async function AdminBookingDetailsPage({
           <p>
             <T en="Customer notes:" ar="ملاحظات العميل:" />{" "}
             {booking.notes || "—"}
+          </p>
+        </div>
+
+        <div className="card">
+          <span className="badge">
+            <T en="Finance" ar="المالية" />
+          </span>
+
+          <div className="admin-badge-stack">
+            <span className="badge" style={statusStyle(booking.settlement_status)}>
+              <T en="Settlement:" ar="التسوية:" />{" "}
+              {booking.settlement_status || "not_ready"}
+            </span>
+
+            <span className="badge" style={statusStyle(booking.payout_status)}>
+              <T en="Payout:" ar="البياوت:" />{" "}
+              {booking.payout_status || "not_started"}
+            </span>
+
+            <span className="badge" style={statusStyle(booking.refund_status)}>
+              <T en="Refund:" ar="الاسترجاع:" />{" "}
+              {booking.refund_status || "none"}
+            </span>
+          </div>
+
+          <p>
+            <T en="Platform payment ID:" ar="رقم الدفع:" />{" "}
+            <small>{booking.platform_payment_id || "—"}</small>
+          </p>
+
+          <p>
+            <T en="Payment required:" ar="طلب الدفع:" />{" "}
+            {formatDate(booking.payment_required_at)}
+          </p>
+
+          <p>
+            <T en="Paid:" ar="تم الدفع:" /> {formatDate(booking.paid_at)}
+          </p>
+
+          <p>
+            <T en="Completed:" ar="تم الإكمال:" />{" "}
+            {formatDate(booking.completed_at)}
+          </p>
+
+          <p>
+            <T en="Cancelled:" ar="تم الإلغاء:" />{" "}
+            {formatDate(booking.cancelled_at)}
           </p>
         </div>
 
@@ -696,58 +1297,10 @@ export default async function AdminBookingDetailsPage({
           </p>
 
           <p>{studio?.address || "—"}</p>
-        </div>
-      </div>
-
-      <div style={{ height: 24 }} />
-
-      <div className="card admin-notes-card">
-        <span className="badge">
-          <T en="Internal Admin Notes" ar="ملاحظات الإدارة الداخلية" />
-        </span>
-
-        <h2>
-          <T en="Private notes" ar="ملاحظات خاصة" />
-        </h2>
-
-        <p>
-          <T
-            en="These notes are visible only to admin users. Customers and studio owners cannot see them."
-            ar="هذه الملاحظات تظهر فقط لمستخدمي الإدارة. العميل وصاحب الاستوديو لا يستطيعان رؤيتها."
-          />
-        </p>
-
-        {canManageAdminNotes ? (
-          <form className="form" action={updateAdminNotes}>
-            <input type="hidden" name="booking_id" value={booking.id} />
-
-            <label>
-              <T en="Admin notes" ar="ملاحظات الإدارة" />
-            </label>
-
-            <textarea
-              className="input"
-              name="admin_notes"
-              rows={6}
-              defaultValue={booking.admin_notes || ""}
-              placeholder="Write internal notes about this booking..."
-            />
-
-            <button className="btn" type="submit">
-              <T en="Save Admin Notes" ar="حفظ ملاحظات الإدارة" />
-            </button>
-          </form>
-        ) : null}
-
-        <div className="admin-notes-meta">
-          <p>
-            <T en="Last updated:" ar="آخر تحديث:" />{" "}
-            {formatDate(booking.admin_notes_updated_at)}
-          </p>
 
           <p>
-            <T en="Updated by:" ar="تم التحديث بواسطة:" />{" "}
-            {adminNotesUpdatedByEmail}
+            <T en="Owner ID:" ar="رقم المالك:" />{" "}
+            <small>{studio?.owner_auth_user_id || "—"}</small>
           </p>
         </div>
       </div>
@@ -806,37 +1359,215 @@ export default async function AdminBookingDetailsPage({
               </h3>
 
               <div className="admin-inline-action-grid">
-                {["unpaid", "paid", "failed", "refunded"].map(
-                  (paymentStatus: string) =>
-                    booking.payment_status !== paymentStatus ? (
-                      <form action={updatePaymentStatus} key={paymentStatus}>
-                        <input type="hidden" name="booking_id" value={booking.id} />
-                        <input
-                          type="hidden"
-                          name="studio_slug"
-                          value={studioSlug}
-                        />
-                        <input
-                          type="hidden"
-                          name="payment_status"
-                          value={paymentStatus}
-                        />
-                        <button
-                          className={
-                            paymentStatus === "paid"
-                              ? "btn btn-small"
-                              : "btn btn-secondary btn-small"
-                          }
-                          type="submit"
-                        >
-                          {paymentStatus}
-                        </button>
-                      </form>
-                    ) : null
-                )}
+                {booking.payment_status !== "paid" ? (
+                  <form action={updatePaymentStatus}>
+                    <input type="hidden" name="booking_id" value={booking.id} />
+                    <input type="hidden" name="studio_slug" value={studioSlug} />
+                    <input type="hidden" name="payment_status" value="paid" />
+                    <button className="btn btn-small" type="submit">
+                      <T en="Mark Paid" ar="تحديد مدفوع" />
+                    </button>
+                  </form>
+                ) : null}
+
+                {booking.payment_status !== "payment_required" &&
+                booking.payment_status !== "paid" ? (
+                  <form action={updatePaymentStatus}>
+                    <input type="hidden" name="booking_id" value={booking.id} />
+                    <input type="hidden" name="studio_slug" value={studioSlug} />
+                    <input
+                      type="hidden"
+                      name="payment_status"
+                      value="payment_required"
+                    />
+                    <button className="btn btn-secondary btn-small" type="submit">
+                      <T en="Request Payment" ar="طلب الدفع" />
+                    </button>
+                  </form>
+                ) : null}
+
+                {booking.payment_status !== "unpaid" &&
+                booking.payment_status !== "paid" ? (
+                  <form action={updatePaymentStatus}>
+                    <input type="hidden" name="booking_id" value={booking.id} />
+                    <input type="hidden" name="studio_slug" value={studioSlug} />
+                    <input type="hidden" name="payment_status" value="unpaid" />
+                    <button className="btn btn-secondary btn-small" type="submit">
+                      <T en="Unpaid" ar="غير مدفوع" />
+                    </button>
+                  </form>
+                ) : null}
+
+                {booking.payment_status !== "failed" &&
+                booking.payment_status !== "paid" ? (
+                  <form action={updatePaymentStatus}>
+                    <input type="hidden" name="booking_id" value={booking.id} />
+                    <input type="hidden" name="studio_slug" value={studioSlug} />
+                    <input type="hidden" name="payment_status" value="failed" />
+                    <button className="btn btn-secondary btn-small" type="submit">
+                      <T en="Failed" ar="فشل الدفع" />
+                    </button>
+                  </form>
+                ) : null}
+
+                {booking.payment_status === "paid" ? (
+                  <form action={updatePaymentStatus}>
+                    <input type="hidden" name="booking_id" value={booking.id} />
+                    <input type="hidden" name="studio_slug" value={studioSlug} />
+                    <input type="hidden" name="payment_status" value="refunded" />
+                    <button className="btn btn-secondary btn-small" type="submit">
+                      <T en="Refund" ar="استرجاع" />
+                    </button>
+                  </form>
+                ) : null}
               </div>
             </div>
           ) : null}
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="card admin-notes-card">
+        <span className="badge">
+          <T en="Internal Admin Notes" ar="ملاحظات الإدارة الداخلية" />
+        </span>
+
+        <h2>
+          <T en="Private notes" ar="ملاحظات خاصة" />
+        </h2>
+
+        <p>
+          <T
+            en="These notes are visible only to admin users. Customers and studio owners cannot see them."
+            ar="هذه الملاحظات تظهر فقط لمستخدمي الإدارة. العميل وصاحب الاستوديو لا يستطيعان رؤيتها."
+          />
+        </p>
+
+        {canManageAdminNotes ? (
+          <form className="form" action={updateAdminNotes}>
+            <input type="hidden" name="booking_id" value={booking.id} />
+
+            <label>
+              <T en="Admin notes" ar="ملاحظات الإدارة" />
+            </label>
+
+            <textarea
+              className="input"
+              name="admin_notes"
+              rows={6}
+              defaultValue={booking.admin_notes || ""}
+              placeholder="Write internal notes about this booking..."
+            />
+
+            <button className="btn" type="submit">
+              <T en="Save Admin Notes" ar="حفظ ملاحظات الإدارة" />
+            </button>
+          </form>
+        ) : null}
+
+        <div className="admin-notes-meta">
+          <p>
+            <T en="Last updated:" ar="آخر تحديث:" />{" "}
+            {formatDate(booking.admin_notes_updated_at)}
+          </p>
+
+          <p>
+            <T en="Updated by:" ar="تم التحديث بواسطة:" />{" "}
+            {adminNotesUpdatedByEmail}
+          </p>
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="admin-two-column">
+        <div className="card">
+          <span className="badge">
+            <T en="Payment Record" ar="سجل الدفع" />
+          </span>
+
+          {payment ? (
+            <>
+              <h2>{payment.payment_status}</h2>
+
+              <p>
+                <T en="Amount:" ar="المبلغ:" />{" "}
+                <strong>{money(payment.total_amount)}</strong>
+              </p>
+
+              <p>
+                <T en="Gateway:" ar="بوابة الدفع:" /> {payment.gateway || "—"}
+              </p>
+
+              <p>
+                <T en="Reference:" ar="المرجع:" />{" "}
+                {payment.gateway_reference || "—"}
+              </p>
+
+              <p>
+                <T en="Paid:" ar="تم الدفع:" /> {formatDate(payment.paid_at)}
+              </p>
+
+              <p>
+                <T en="Created:" ar="تم الإنشاء:" />{" "}
+                {formatDate(payment.created_at)}
+              </p>
+            </>
+          ) : (
+            <p>
+              <T
+                en="No platform payment record exists yet."
+                ar="لا يوجد سجل دفع في النظام المالي حتى الآن."
+              />
+            </p>
+          )}
+        </div>
+
+        <div className="card">
+          <span className="badge">
+            <T en="Settlement" ar="التسوية" />
+          </span>
+
+          {settlement ? (
+            <>
+              <h2>{settlement.settlement_status}</h2>
+
+              <p>
+                <T en="Gross:" ar="الإجمالي:" />{" "}
+                <strong>{money(settlement.gross_amount)}</strong>
+              </p>
+
+              <p>
+                <T en="Commission:" ar="العمولة:" />{" "}
+                <strong>{money(settlement.commission_amount)}</strong>
+              </p>
+
+              <p>
+                <T en="Net:" ar="الصافي:" />{" "}
+                <strong>{money(settlement.net_amount)}</strong>
+              </p>
+
+              <p>
+                <T en="Available for payout:" ar="متاح للبياوت:" />{" "}
+                {formatDate(settlement.available_for_payout_at)}
+              </p>
+
+              {settlement.hold_reason ? (
+                <p>
+                  <T en="Hold reason:" ar="سبب التعليق:" />{" "}
+                  {settlement.hold_reason}
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p>
+              <T
+                en="No settlement has been created yet."
+                ar="لم يتم إنشاء تسوية حتى الآن."
+              />
+            </p>
+          )}
         </div>
       </div>
 
@@ -897,6 +1628,70 @@ export default async function AdminBookingDetailsPage({
               <T en="No review submitted yet." ar="لم يتم إرسال تقييم بعد." />
             </p>
           )}
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="card">
+        <span className="badge">
+          <T en="Refunds" ar="الاسترجاعات" />
+        </span>
+
+        <h2>
+          <T en="Refund activity" ar="نشاط الاسترجاع" />
+        </h2>
+
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>
+                  <T en="Amount" ar="المبلغ" />
+                </th>
+                <th>
+                  <T en="Status" ar="الحالة" />
+                </th>
+                <th>
+                  <T en="Reason" ar="السبب" />
+                </th>
+                <th>
+                  <T en="Reference" ar="المرجع" />
+                </th>
+                <th>
+                  <T en="Created" ar="تم الإنشاء" />
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {refunds.length ? (
+                refunds.map((refund: PlatformRefundRow) => (
+                  <tr key={refund.id}>
+                    <td>{money(refund.amount)}</td>
+
+                    <td>
+                      <span className="badge" style={statusStyle(refund.status)}>
+                        {refund.status}
+                      </span>
+                    </td>
+
+                    <td>{refund.reason || "—"}</td>
+
+                    <td>{refund.gateway_refund_id || "—"}</td>
+
+                    <td>{formatDate(refund.created_at)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5}>
+                    <T en="No refunds found." ar="لا توجد استرجاعات." />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
