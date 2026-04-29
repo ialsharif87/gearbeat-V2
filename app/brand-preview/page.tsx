@@ -51,7 +51,7 @@ const palette = [
 
 export default function BrandPreviewPage() {
   return (
-    <main className={`${styles.page} ${spaceGrotesk.variable} ${cairo.variable}`}>
+    <main className={`brandPreviewRoot ${styles.page} ${spaceGrotesk.variable} ${cairo.variable}`}>
       <section className={styles.shell}>
         <nav className={styles.navbar}>
           <a href="/brand-preview" className={styles.logo}>
