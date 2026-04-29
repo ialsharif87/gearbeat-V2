@@ -32,6 +32,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  min-height: 76px;
   padding: 14px 16px;
   border: 1px solid rgba(212, 175, 55, 0.22);
   border-radius: 24px;
@@ -43,152 +44,34 @@
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
   color: var(--color-ivory);
   text-decoration: none;
 }
 
-.iconMark {
-  --mark-size: 46px;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--mark-size);
-  height: var(--mark-size);
+.logoImage {
+  display: block;
+  width: 230px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.markSmall {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
   flex: 0 0 auto;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  overflow: visible;
 }
 
-.iconMark::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(145deg, #f6d87a 0%, #d4af37 48%, #8b6b1d 100%);
-  clip-path: polygon(
-    25% 5%,
-    75% 5%,
-    100% 28%,
-    100% 72%,
-    75% 95%,
-    25% 95%,
-    0% 72%,
-    0% 28%
-  );
-  box-shadow:
-    0 10px 24px rgba(212, 175, 55, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.iconMark::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  background: #111720;
-  clip-path: polygon(
-    25% 5%,
-    75% 5%,
-    100% 28%,
-    100% 72%,
-    75% 95%,
-    25% 95%,
-    0% 72%,
-    0% 28%
-  );
-  z-index: 1;
-}
-
-.iconMarkSm {
-  --mark-size: 38px;
-}
-
-.iconMarkMd {
-  --mark-size: 48px;
-}
-
-.iconMarkLg {
-  --mark-size: 64px;
-}
-
-.iconBars {
-  position: absolute;
-  left: calc(var(--mark-size) * 0.23);
-  top: 50%;
-  z-index: 3;
-  display: flex;
-  align-items: end;
-  gap: calc(var(--mark-size) * 0.035);
-  transform: translateY(-50%);
-}
-
-.iconBars span {
+.markLarge {
+  position: relative;
+  z-index: 2;
   display: block;
-  width: calc(var(--mark-size) * 0.04);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ffe58a, #d4af37);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.32);
-}
-
-.iconBars span:nth-child(1) {
-  height: calc(var(--mark-size) * 0.15);
-}
-
-.iconBars span:nth-child(2) {
-  height: calc(var(--mark-size) * 0.24);
-}
-
-.iconBars span:nth-child(3) {
-  height: calc(var(--mark-size) * 0.35);
-}
-
-.iconBars span:nth-child(4) {
-  height: calc(var(--mark-size) * 0.24);
-}
-
-.iconBars span:nth-child(5) {
-  height: calc(var(--mark-size) * 0.15);
-}
-
-.iconLetter {
-  position: absolute;
-  right: calc(var(--mark-size) * 0.19);
-  top: 50%;
-  z-index: 3;
-  transform: translateY(-50%);
-  color: var(--color-champagne-gold);
-  font-size: calc(var(--mark-size) * 0.43);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.1em;
-  text-shadow: 0 0 16px rgba(212, 175, 55, 0.18);
-}
-
-.logoText strong {
-  display: block;
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  color: var(--color-ivory);
-}
-
-.logoText strong span:first-child {
-  color: var(--color-ivory);
-}
-
-.logoText strong span:last-child {
-  color: var(--color-champagne-gold);
-}
-
-.logoText small {
-  display: block;
-  margin-top: 5px;
-  color: var(--color-champagne-gold);
-  font-size: 10px;
-  letter-spacing: 0.22em;
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 28px rgba(212, 175, 55, 0.18));
 }
 
 .navLinks {
@@ -846,6 +729,11 @@
     justify-content: center;
   }
 
+  .logoImage {
+    width: 220px;
+    margin: 0 auto;
+  }
+
   .navActions {
     width: 100%;
   }
@@ -880,13 +768,5 @@
 
   .bookingDetails {
     grid-template-columns: 1fr;
-  }
-
-  .logoText strong {
-    font-size: 20px;
-  }
-
-  .logoText small {
-    font-size: 9px;
   }
 }
