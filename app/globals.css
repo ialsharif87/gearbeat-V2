@@ -5096,3 +5096,225 @@ body:has(.staff-login-clean-page) .main {
     width: 180px;
   }
 }
+.gb-site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 16px 20px;
+  background:
+    linear-gradient(180deg, rgba(6, 9, 14, 0.96), rgba(6, 9, 14, 0.76)),
+    rgba(11, 15, 22, 0.92);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+}
+
+.gb-header-shell {
+  width: min(1180px, 100%);
+  min-height: 82px;
+  margin: 0 auto;
+  padding: 12px 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 22px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), transparent 22rem),
+    linear-gradient(135deg, rgba(21, 26, 34, 0.92), rgba(11, 15, 22, 0.9));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+}
+
+.gb-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 220px;
+  text-decoration: none;
+}
+
+.gb-header-logo-image {
+  display: block;
+  width: 260px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.gb-header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gb-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  color: rgba(242, 239, 233, 0.72);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.gb-nav-link:hover {
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.08);
+  transform: translateY(-1px);
+}
+
+.gb-nav-link-strong {
+  color: #f2efe9;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+}
+
+.gb-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.gb-logout-form {
+  margin: 0;
+}
+
+.gb-header-ghost-button,
+.gb-header-primary-button {
+  min-height: 42px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.gb-header-ghost-button {
+  border: 1px solid rgba(242, 239, 233, 0.16);
+  background: rgba(242, 239, 233, 0.04);
+  color: #f2efe9;
+}
+
+.gb-header-ghost-button:hover {
+  color: #d4af37;
+  border-color: rgba(212, 175, 55, 0.42);
+  background: rgba(212, 175, 55, 0.07);
+  transform: translateY(-1px);
+}
+
+.gb-header-primary-button {
+  border: 0;
+  background: linear-gradient(135deg, #f0d67c, #d4af37);
+  color: #0b0f16;
+  box-shadow: 0 14px 34px rgba(212, 175, 55, 0.2);
+}
+
+.gb-header-primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 44px rgba(212, 175, 55, 0.28);
+}
+
+@media (max-width: 1080px) {
+  .gb-header-shell {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .gb-logo-link {
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .gb-header-logo-image {
+    width: 260px;
+  }
+
+  .gb-header-nav {
+    justify-content: center;
+  }
+
+  .gb-header-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .gb-site-header {
+    padding: 10px;
+  }
+
+  .gb-header-shell {
+    min-height: auto;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .gb-header-logo-image {
+    width: 230px;
+  }
+
+  .gb-header-nav {
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 4px 0 8px;
+    scrollbar-width: none;
+  }
+
+  .gb-header-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gb-nav-link {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .gb-header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gb-header-actions > * {
+    width: 100%;
+  }
+
+  .gb-header-ghost-button,
+  .gb-header-primary-button {
+    width: 100%;
+  }
+
+  .gb-logout-form {
+    grid-column: 1 / -1;
+  }
+}
