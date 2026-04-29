@@ -58,7 +58,7 @@ export default function BrandPreviewPage() {
         <nav className={styles.navbar}>
           <a href="/brand-preview" className={styles.logo} aria-label="GearBeat">
             <img
-              src="/brand/logo-horizontal.svg"
+              src="/brand/logo-horizontal-ai.png"
               alt="GearBeat"
               className={styles.logoImage}
             />
@@ -109,7 +109,7 @@ export default function BrandPreviewPage() {
           <aside className={styles.previewCard}>
             <div className={styles.phoneTop}>
               <img
-                src="/brand/logo-mark.svg"
+                src="/brand/logo-mark-ai.png"
                 alt=""
                 className={styles.markSmall}
               />
@@ -183,7 +183,7 @@ export default function BrandPreviewPage() {
                 <div className={styles.studioVisual}>
                   <span className={styles.wave} />
                   <img
-                    src="/brand/logo-mark.svg"
+                    src="/brand/logo-mark-ai.png"
                     alt=""
                     className={styles.markLarge}
                   />
