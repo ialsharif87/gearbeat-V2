@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import T from "../components/t";
 
@@ -6,21 +7,39 @@ export default function HomePage() {
     <section className="home-page">
       <div className="home-hero card">
         <div className="home-hero-content">
+          <div style={{ marginBottom: 22 }}>
+            <Image
+              src="/brand/logo-horizontal-ai.png"
+              alt="GearBeat"
+              width={210}
+              height={70}
+              priority
+              style={{
+                width: "210px",
+                height: "auto",
+                display: "block",
+              }}
+            />
+          </div>
+
           <span className="badge">
-            <T en="Studio Booking Platform" ar="منصة حجز الاستوديوهات" />
+            <T
+              en="Premium Studio Booking Marketplace"
+              ar="منصة فاخرة لحجز الاستوديوهات"
+            />
           </span>
 
           <h1>
             <T
-              en="Find the right studio for your next sound."
-              ar="اعثر على الاستوديو المناسب لصوتك القادم."
+              en="Book the right studio for your next sound."
+              ar="احجز الاستوديو المناسب لصوتك القادم."
             />
           </h1>
 
           <p>
             <T
-              en="GearBeat connects creators with trusted music studios, podcast rooms, rehearsal spaces, and production rooms through a simple and transparent booking experience."
-              ar="GearBeat تربط المبدعين باستوديوهات موسيقية موثوقة، غرف بودكاست، مساحات تدريب، وغرف إنتاج من خلال تجربة حجز سهلة وواضحة."
+              en="GearBeat connects artists, producers, podcasters, and creators with trusted music and audio studios across Saudi Arabia and the GCC."
+              ar="GearBeat تربط الفنانين، المنتجين، صناع البودكاست، والمبدعين باستوديوهات موسيقية وصوتية موثوقة في السعودية والخليج."
             />
           </p>
 
@@ -45,7 +64,7 @@ export default function HomePage() {
           <div className="hero-mini-card hero-mini-card-one">
             <strong>4.8 ★</strong>
             <p>
-              <T en="Verified reviews" ar="تقييمات موثقة" />
+              <T en="Verified studio ratings" ar="تقييمات استوديو موثقة" />
             </p>
           </div>
 
@@ -58,24 +77,24 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div style={{ height: 28 }} />
+      <div style={{ height: 34 }} />
 
       <div className="section-head">
         <span className="badge">
-          <T en="Why GearBeat" ar="لماذا GearBeat" />
+          <T en="Marketplace" ar="الماركت بليس" />
         </span>
 
         <h1>
           <T
-            en="A smoother way to book creative spaces."
-            ar="طريقة أسهل لحجز المساحات الإبداعية."
+            en="One platform for every creative session."
+            ar="منصة واحدة لكل جلسة إبداعية."
           />
         </h1>
 
         <p>
           <T
-            en="We focus on trust, clarity, and a better booking flow for creators and studio owners."
-            ar="نركز على الثقة، الوضوح، وتجربة حجز أفضل للمبدعين وأصحاب الاستوديوهات."
+            en="From recording and podcasting to rehearsal and production, GearBeat helps creators find, compare, and book the right space with confidence."
+            ar="من التسجيل والبودكاست إلى التدريب والإنتاج، GearBeat تساعد المبدعين على البحث، المقارنة، والحجز بثقة."
           />
         </p>
       </div>
@@ -84,38 +103,101 @@ export default function HomePage() {
         <div className="card home-feature-card">
           <div className="home-feature-icon">🎙️</div>
           <h2>
-            <T en="Find the right space" ar="اعثر على المساحة المناسبة" />
+            <T en="Recording Studios" ar="استوديوهات تسجيل" />
           </h2>
           <p>
             <T
-              en="Search for music studios, podcast rooms, rehearsal spaces, and production rooms."
-              ar="ابحث عن استوديوهات موسيقية، غرف بودكاست، مساحات تدريب، وغرف إنتاج."
+              en="Book premium rooms for vocals, instruments, music production, and full recording sessions."
+              ar="احجز غرف فاخرة للتسجيل الصوتي، الآلات، الإنتاج الموسيقي، والجلسات الكاملة."
             />
           </p>
         </div>
 
         <div className="card home-feature-card">
-          <div className="home-feature-icon">✅</div>
+          <div className="home-feature-icon">🎧</div>
           <h2>
-            <T en="Book with confidence" ar="احجز بثقة" />
+            <T en="Podcast Rooms" ar="غرف بودكاست" />
           </h2>
           <p>
             <T
-              en="Clear booking details, customer profiles, verified flows, and transparent reviews."
-              ar="تفاصيل حجز واضحة، ملفات عملاء، خطوات موثقة، وتقييمات شفافة."
+              en="Find ready-to-record podcast spaces with the right setup, sound treatment, and atmosphere."
+              ar="اعثر على غرف بودكاست جاهزة للتسجيل مع التجهيز، العزل، والأجواء المناسبة."
             />
           </p>
         </div>
 
         <div className="card home-feature-card">
-          <div className="home-feature-icon">⚡</div>
+          <div className="home-feature-icon">🥁</div>
           <h2>
-            <T en="Manage from one place" ar="إدارة من مكان واحد" />
+            <T en="Rehearsal Spaces" ar="مساحات تدريب" />
           </h2>
           <p>
             <T
-              en="Studio owners can manage listings, bookings, reviews, and visibility."
-              ar="أصحاب الاستوديوهات يقدرون يديرون القوائم، الحجوزات، التقييمات، والظهور."
+              en="Compare rehearsal rooms for bands, artists, and creative teams before booking."
+              ar="قارن مساحات التدريب للفرق، الفنانين، والفرق الإبداعية قبل الحجز."
+            />
+          </p>
+        </div>
+      </div>
+
+      <div style={{ height: 34 }} />
+
+      <div className="section-head">
+        <span className="badge">
+          <T en="How It Works" ar="كيف تعمل المنصة" />
+        </span>
+
+        <h1>
+          <T
+            en="Simple booking. Clear choices. Trusted spaces."
+            ar="حجز بسيط. خيارات واضحة. مساحات موثوقة."
+          />
+        </h1>
+
+        <p>
+          <T
+            en="GearBeat is built to make studio booking easier for both creators and studio owners."
+            ar="GearBeat صُممت لتسهيل حجز الاستوديوهات للمبدعين وأصحاب الاستوديوهات."
+          />
+        </p>
+      </div>
+
+      <div className="grid">
+        <div className="card home-feature-card">
+          <div className="home-feature-icon">01</div>
+          <h2>
+            <T en="Discover" ar="اكتشف" />
+          </h2>
+          <p>
+            <T
+              en="Browse studios by type, location, features, price, and creative use case."
+              ar="تصفح الاستوديوهات حسب النوع، الموقع، المميزات، السعر، والاستخدام الإبداعي."
+            />
+          </p>
+        </div>
+
+        <div className="card home-feature-card">
+          <div className="home-feature-icon">02</div>
+          <h2>
+            <T en="Compare" ar="قارن" />
+          </h2>
+          <p>
+            <T
+              en="Review studio details, photos, ratings, rules, and booking information before choosing."
+              ar="راجع تفاصيل الاستوديو، الصور، التقييمات، الشروط، ومعلومات الحجز قبل الاختيار."
+            />
+          </p>
+        </div>
+
+        <div className="card home-feature-card">
+          <div className="home-feature-icon">03</div>
+          <h2>
+            <T en="Book" ar="احجز" />
+          </h2>
+          <p>
+            <T
+              en="Send your booking request and manage your session through a clear platform flow."
+              ar="أرسل طلب الحجز وتابع جلستك من خلال تجربة واضحة داخل المنصة."
             />
           </p>
         </div>
@@ -131,27 +213,27 @@ export default function HomePage() {
 
           <h2>
             <T
-              en="Create more. Search less."
-              ar="اصنع أكثر. وابحث أقل."
+              en="Find the right room without wasting time."
+              ar="اعثر على الغرفة المناسبة بدون تضييع وقت."
             />
           </h2>
 
           <p>
             <T
-              en="Compare studios, understand what each space offers, book your session, and leave a verified review after your visit."
-              ar="قارن الاستوديوهات، افهم ما تقدمه كل مساحة، احجز جلستك، واترك تقييمًا موثقًا بعد زيارتك."
+              en="Search, compare, and book studios designed for music, voice, podcasting, rehearsal, and production."
+              ar="ابحث، قارن، واحجز استوديوهات مخصصة للموسيقى، الصوت، البودكاست، التدريب، والإنتاج."
             />
           </p>
 
           <div className="home-check-list">
             <span>
-              <T en="Easy studio discovery" ar="اكتشاف الاستوديوهات بسهولة" />
+              <T en="Premium studio discovery" ar="اكتشاف استوديوهات فاخرة" />
             </span>
             <span>
-              <T en="Clear booking details" ar="تفاصيل حجز واضحة" />
+              <T en="Clear prices and details" ar="أسعار وتفاصيل واضحة" />
             </span>
             <span>
-              <T en="Verified review flow" ar="تقييمات مرتبطة بالحجز" />
+              <T en="Booking-linked reviews" ar="تقييمات مرتبطة بالحجز" />
             </span>
           </div>
 
@@ -167,15 +249,15 @@ export default function HomePage() {
 
           <h2>
             <T
-              en="Turn your space into a bookable business."
-              ar="حوّل مساحتك إلى نشاط قابل للحجز."
+              en="Turn your studio into a bookable business."
+              ar="حوّل استوديوك إلى نشاط قابل للحجز."
             />
           </h2>
 
           <p>
             <T
-              en="List your studio, manage bookings, build trust with reviews, and improve your visibility with a stronger digital presence."
-              ar="أضف استوديوك، أدر الحجوزات، ابنِ الثقة بالتقييمات، وحسّن ظهورك الرقمي."
+              en="Create your studio profile, show your rooms, manage booking requests, and improve your visibility."
+              ar="أنشئ ملف استوديوك، اعرض غرفك، أدر طلبات الحجز، وحسّن ظهورك."
             />
           </p>
 
@@ -184,10 +266,10 @@ export default function HomePage() {
               <T en="Studio profile management" ar="إدارة ملف الاستوديو" />
             </span>
             <span>
-              <T en="Booking monitoring" ar="متابعة الحجوزات" />
+              <T en="Booking request tracking" ar="متابعة طلبات الحجز" />
             </span>
             <span>
-              <T en="Review visibility" ar="إظهار التقييمات" />
+              <T en="Visibility and growth tools" ar="أدوات ظهور ونمو" />
             </span>
           </div>
 
@@ -207,15 +289,15 @@ export default function HomePage() {
 
           <h2>
             <T
-              en="Built around real bookings and clear accountability."
-              ar="مبنية حول حجوزات حقيقية ووضوح في المسؤولية."
+              en="Built for real bookings and clear accountability."
+              ar="مبنية لحجوزات حقيقية ومسؤولية واضحة."
             />
           </h2>
 
           <p>
             <T
-              en="GearBeat uses required customer profile details, locked identity information, booking-linked reviews, admin monitoring, and internal audit logs to improve trust across the platform."
-              ar="GearBeat تستخدم بيانات العميل الإلزامية، الهوية المقفلة، التقييمات المرتبطة بالحجز، مراقبة الإدارة، وسجل التغييرات الداخلي لرفع مستوى الثقة داخل المنصة."
+              en="GearBeat is designed with customer profiles, studio approval flows, booking-linked reviews, admin monitoring, and internal audit logs to support a trusted marketplace."
+              ar="GearBeat صُممت بملفات عملاء، موافقات استوديو، تقييمات مرتبطة بالحجز، مراقبة إدارية، وسجل تغييرات داخلي لدعم ماركت بليس موثوق."
             />
           </p>
         </div>
@@ -224,21 +306,21 @@ export default function HomePage() {
           <div>
             <strong>01</strong>
             <span>
-              <T en="Profile completion required" ar="إكمال الملف إلزامي" />
+              <T en="Studio approval flow" ar="اعتماد الاستوديوهات" />
             </span>
           </div>
 
           <div>
             <strong>02</strong>
             <span>
-              <T en="Identity details locked" ar="بيانات الهوية مقفلة" />
+              <T en="Customer profile details" ar="بيانات ملف العميل" />
             </span>
           </div>
 
           <div>
             <strong>03</strong>
             <span>
-              <T en="Reviews linked to bookings" ar="التقييمات مرتبطة بالحجوزات" />
+              <T en="Reviews linked to bookings" ar="تقييمات مرتبطة بالحجوزات" />
             </span>
           </div>
 
@@ -255,20 +337,20 @@ export default function HomePage() {
 
       <div className="card home-about-preview">
         <span className="badge">
-          <T en="About GearBeat" ar="عن GearBeat" />
+          <T en="GearBeat Vision" ar="رؤية GearBeat" />
         </span>
 
         <h2>
           <T
-            en="A platform for creators, studios, and the sound community."
-            ar="منصة للمبدعين، الاستوديوهات، ومجتمع الصوت."
+            en="A premium sound-first marketplace for Saudi Arabia and the GCC."
+            ar="ماركت بليس فاخر يركز على الصوت في السعودية والخليج."
           />
         </h2>
 
         <p>
           <T
-            en="GearBeat is designed to make studio booking simpler, more trusted, and more organized for everyone involved."
-            ar="GearBeat صُممت لجعل حجز الاستوديوهات أسهل، أكثر ثقة، وأكثر تنظيمًا لكل الأطراف."
+            en="GearBeat is built to support the creative economy by making professional studio spaces easier to discover, trust, and book."
+            ar="GearBeat بُنيت لدعم الاقتصاد الإبداعي من خلال تسهيل اكتشاف الاستوديوهات الاحترافية، الثقة بها، وحجزها."
           />
         </p>
 
