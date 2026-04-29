@@ -49,28 +49,46 @@ const palette = [
   { name: "Steel Gray", hex: "#6B7280", className: styles.swatchSteel },
 ];
 
+function GearBeatMark({ size }: { size: "sm" | "md" | "lg" }) {
+  const sizeClass =
+    size === "sm"
+      ? styles.iconMarkSm
+      : size === "lg"
+        ? styles.iconMarkLg
+        : styles.iconMarkMd;
+
+  return (
+    <span className={`${styles.iconMark} ${sizeClass}`} aria-hidden="true">
+      <span className={styles.iconBars}>
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </span>
+      <span className={styles.iconLetter}>G</span>
+    </span>
+  );
+}
+
 export default function BrandPreviewPage() {
   return (
-    <main className={`brandPreviewRoot ${styles.page} ${spaceGrotesk.variable} ${cairo.variable}`}>
+    <main
+      className={`brandPreviewRoot ${styles.page} ${spaceGrotesk.variable} ${cairo.variable}`}
+    >
       <section className={styles.shell}>
         <nav className={styles.navbar}>
           <a href="/brand-preview" className={styles.logo}>
-  <span className={`${styles.iconMark} ${styles.iconMarkMd}`} aria-hidden="true">
-    <span className={styles.iconBars}>
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-    </span>
-    <span className={styles.iconLetter}>G</span>
-  </span>
+            <GearBeatMark size="md" />
 
-  <span className={styles.logoText}>
-    <strong>GearBeat</strong>
-    <small>STUDIO. SOUND. CONNECTED.</small>
-  </span>
-</a>
+            <span className={styles.logoText}>
+              <strong>
+                <span>Gear</span>
+                <span>Beat</span>
+              </strong>
+              <small>STUDIO. SOUND. CONNECTED.</small>
+            </span>
+          </a>
 
           <div className={styles.navLinks}>
             <a href="#studios">Studios</a>
@@ -86,13 +104,17 @@ export default function BrandPreviewPage() {
 
         <section className={styles.hero}>
           <div className={styles.heroContent}>
-            <p className={styles.eyebrow}>STUDIO. SOUND. CONNECTED.</p>
+            <p className={styles.eyebrow}>
+              <span className={styles.eyebrowLine} />
+              STUDIO. SOUND. CONNECTED.
+            </p>
 
             <h1>Book premium creative studios across Saudi Arabia.</h1>
 
             <p className={styles.heroText}>
-              GearBeat connects audio creators with verified studios, clear pricing,
-              and a smoother booking experience built for the Saudi and GCC market.
+              GearBeat connects audio creators with verified studios, clear
+              pricing, and a smoother booking experience built for the Saudi and
+              GCC market.
             </p>
 
             <div className={styles.arabicBox} dir="rtl" lang="ar">
@@ -112,16 +134,8 @@ export default function BrandPreviewPage() {
 
           <aside className={styles.previewCard}>
             <div className={styles.phoneTop}>
-              <span className={`${styles.iconMark} ${styles.iconMarkSm}`} aria-hidden="true">
-  <span className={styles.iconBars}>
-    <span />
-    <span />
-    <span />
-    <span />
-    <span />
-  </span>
-  <span className={styles.iconLetter}>G</span>
-</span>
+              <GearBeatMark size="sm" />
+
               <div>
                 <small>GearBeat</small>
                 <strong>Find the perfect studio</strong>
@@ -190,7 +204,7 @@ export default function BrandPreviewPage() {
               <article className={styles.studioCard} key={studio.name}>
                 <div className={styles.studioVisual}>
                   <span className={styles.wave} />
-                  <span className={styles.bigMark}>G</span>
+                  <GearBeatMark size="lg" />
                 </div>
 
                 <div className={styles.studioBody}>
@@ -302,7 +316,8 @@ export default function BrandPreviewPage() {
               <span>Arabic Typeface</span>
               <h2>خط Cairo</h2>
               <p>
-                منصة فاخرة لحجز الاستوديوهات الصوتية والموسيقية في السعودية والخليج.
+                منصة فاخرة لحجز الاستوديوهات الصوتية والموسيقية في السعودية
+                والخليج.
               </p>
             </div>
           </div>
