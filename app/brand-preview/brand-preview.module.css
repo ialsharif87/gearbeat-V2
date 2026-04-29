@@ -764,3 +764,7 @@
     grid-template-columns: 1fr;
   }
 }
+:global(body:has(.brandPreviewRoot) header),
+:global(body:has(.brandPreviewRoot) footer) {
+  display: none !important;
+}
