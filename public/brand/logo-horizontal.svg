@@ -1,0 +1,28 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GearBeat logo">
+  <defs>
+    <linearGradient id="gold" x1="50" y1="28" x2="250" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F6D87A"/>
+      <stop offset="0.48" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#8B641C"/>
+    </linearGradient>
+    <linearGradient id="text" x1="350" y1="70" x2="980" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D8D8D8"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g transform="translate(40 25) scale(0.48)" filter="url(#softShadow)">
+    <path d="M329 72L168 72L72 128V304L256 440L440 333V256H352" stroke="url(#gold)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M352 256H440" stroke="url(#gold)" stroke-width="42" stroke-linecap="round"/>
+    <rect x="143" y="235" width="16" height="42" rx="8" fill="url(#gold)"/>
+    <rect x="184" y="206" width="18" height="100" rx="9" fill="url(#gold)"/>
+    <rect x="228" y="170" width="20" height="172" rx="10" fill="url(#gold)"/>
+    <rect x="270" y="128" width="20" height="256" rx="10" fill="url(#gold)"/>
+    <rect x="313" y="170" width="20" height="172" rx="10" fill="url(#gold)"/>
+    <rect x="359" y="206" width="18" height="100" rx="9" fill="url(#gold)"/>
+  </g>
+  <text x="315" y="145" fill="url(#text)" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="92" font-weight="500" letter-spacing="-3">GearBeat</text>
+  <text x="322" y="222" fill="#D4AF37" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="30" font-weight="500" letter-spacing="16">STUDIO. SOUND. CONNECTED.</text>
+</svg>
