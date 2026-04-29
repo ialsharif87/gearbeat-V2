@@ -55,12 +55,22 @@ export default function BrandPreviewPage() {
       <section className={styles.shell}>
         <nav className={styles.navbar}>
           <a href="/brand-preview" className={styles.logo}>
-            <span className={styles.logoMark}>G</span>
-            <span className={styles.logoText}>
-              <strong>GearBeat</strong>
-              <small>STUDIO. SOUND. CONNECTED.</small>
-            </span>
-          </a>
+  <span className={`${styles.iconMark} ${styles.iconMarkMd}`} aria-hidden="true">
+    <span className={styles.iconBars}>
+      <span />
+      <span />
+      <span />
+      <span />
+      <span />
+    </span>
+    <span className={styles.iconLetter}>G</span>
+  </span>
+
+  <span className={styles.logoText}>
+    <strong>GearBeat</strong>
+    <small>STUDIO. SOUND. CONNECTED.</small>
+  </span>
+</a>
 
           <div className={styles.navLinks}>
             <a href="#studios">Studios</a>
@@ -102,7 +112,16 @@ export default function BrandPreviewPage() {
 
           <aside className={styles.previewCard}>
             <div className={styles.phoneTop}>
-              <span className={styles.miniLogo}>G</span>
+              <span className={`${styles.iconMark} ${styles.iconMarkSm}`} aria-hidden="true">
+  <span className={styles.iconBars}>
+    <span />
+    <span />
+    <span />
+    <span />
+    <span />
+  </span>
+  <span className={styles.iconLetter}>G</span>
+</span>
               <div>
                 <small>GearBeat</small>
                 <strong>Find the perfect studio</strong>
