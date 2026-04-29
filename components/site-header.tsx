@@ -1,5 +1,4 @@
 import Link from "next/link";
-import GearBeatLogo from "./brand/GearBeatLogo";
 import LanguageSwitcher from "./language-switcher";
 import T from "./t";
 
@@ -37,15 +36,17 @@ export default function SiteHeader({
   return (
     <header className="gb-site-header">
       <div className="gb-header-shell">
-        <div className="gb-header-logo">
-          <Link href="/" aria-label="GearBeat Home" className="gb-logo-link">
-            <GearBeatLogo size="md" variant="dark" />
-          </Link>
-        </div>
+        <Link href="/" aria-label="GearBeat Home" className="gb-logo-link">
+          <img
+            src="/brand/logo-horizontal-ai.png"
+            alt="GearBeat"
+            className="gb-header-logo-image"
+          />
+        </Link>
 
         <nav className="gb-header-nav" aria-label="Main navigation">
           <NavLink href="/studios" en="Studios" ar="تصفح الاستوديوهات" />
-          <NavLink href="/marketplace" en="Marketplace" ar="Marketplace" />
+          <NavLink href="/marketplace" en="Marketplace" ar="السوق" />
           <NavLink href="/about" en="About" ar="من نحن" />
           <NavLink href="/support" en="Support" ar="الدعم" />
 
@@ -83,7 +84,7 @@ export default function SiteHeader({
           <LanguageSwitcher />
 
           {isLoggedIn && logoutAction ? (
-            <form action={logoutAction}>
+            <form action={logoutAction} className="gb-logout-form">
               <button type="submit" className="gb-header-ghost-button">
                 <T en="Logout" ar="تسجيل الخروج" />
               </button>
