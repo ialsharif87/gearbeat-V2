@@ -49,28 +49,6 @@ const palette = [
   { name: "Steel Gray", hex: "#6B7280", className: styles.swatchSteel },
 ];
 
-function GearBeatMark({ size }: { size: "sm" | "md" | "lg" }) {
-  const sizeClass =
-    size === "sm"
-      ? styles.iconMarkSm
-      : size === "lg"
-        ? styles.iconMarkLg
-        : styles.iconMarkMd;
-
-  return (
-    <span className={`${styles.iconMark} ${sizeClass}`} aria-hidden="true">
-      <span className={styles.iconBars}>
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-      </span>
-      <span className={styles.iconLetter}>G</span>
-    </span>
-  );
-}
-
 export default function BrandPreviewPage() {
   return (
     <main
@@ -78,16 +56,12 @@ export default function BrandPreviewPage() {
     >
       <section className={styles.shell}>
         <nav className={styles.navbar}>
-          <a href="/brand-preview" className={styles.logo}>
-            <GearBeatMark size="md" />
-
-            <span className={styles.logoText}>
-              <strong>
-                <span>Gear</span>
-                <span>Beat</span>
-              </strong>
-              <small>STUDIO. SOUND. CONNECTED.</small>
-            </span>
+          <a href="/brand-preview" className={styles.logo} aria-label="GearBeat">
+            <img
+              src="/brand/logo-horizontal.svg"
+              alt="GearBeat"
+              className={styles.logoImage}
+            />
           </a>
 
           <div className={styles.navLinks}>
@@ -134,7 +108,11 @@ export default function BrandPreviewPage() {
 
           <aside className={styles.previewCard}>
             <div className={styles.phoneTop}>
-              <GearBeatMark size="sm" />
+              <img
+                src="/brand/logo-mark.svg"
+                alt=""
+                className={styles.markSmall}
+              />
 
               <div>
                 <small>GearBeat</small>
@@ -204,7 +182,11 @@ export default function BrandPreviewPage() {
               <article className={styles.studioCard} key={studio.name}>
                 <div className={styles.studioVisual}>
                   <span className={styles.wave} />
-                  <GearBeatMark size="lg" />
+                  <img
+                    src="/brand/logo-mark.svg"
+                    alt=""
+                    className={styles.markLarge}
+                  />
                 </div>
 
                 <div className={styles.studioBody}>
