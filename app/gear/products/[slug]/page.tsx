@@ -2,6 +2,7 @@ import { createClient } from "../../../../lib/supabase/server";
 import T from "../../../../components/t";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AddToCartButton from "../../../../components/add-to-cart-button";
 
 export default async function ProductDetailsPage({
   params
