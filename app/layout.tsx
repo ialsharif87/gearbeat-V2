@@ -69,11 +69,12 @@ export default async function RootLayout({
 
   let adminUser: AdminUserRow | null = null;
   let profile: ProfileRow | null = null;
+  let isVendor = false;
 
   if (user) {
     const supabaseAdmin = createAdminClient();
 
-    const [adminResult, profileResult] = await Promise.all([
+    const [adminResult, profileResult, vendorResult] = await Promise.all([
       supabaseAdmin
         .from("admin_users")
         .select("id, auth_user_id, email, admin_role, status")
@@ -86,10 +87,17 @@ export default async function RootLayout({
         .select("id, auth_user_id, email, full_name, phone, role, account_status")
         .eq("auth_user_id", user.id)
         .maybeSingle(),
+
+      supabaseAdmin
+        .from("vendor_profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle(),
     ]);
 
     adminUser = (adminResult.data || null) as AdminUserRow | null;
     profile = (profileResult.data || null) as ProfileRow | null;
+    isVendor = Boolean(vendorResult.data);
   }
 
   async function logout() {
@@ -114,6 +122,7 @@ export default async function RootLayout({
         <SiteHeader
           isLoggedIn={Boolean(user)}
           isAdmin={isAdmin}
+          isVendor={Boolean(isVendor)}
           userRole={userRole}
           dashboardPath={dashboardPath}
           logoutAction={logout}

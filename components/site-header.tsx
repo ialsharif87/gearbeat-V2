@@ -5,6 +5,7 @@ import T from "./t";
 type SiteHeaderProps = {
   isLoggedIn: boolean;
   isAdmin: boolean;
+  isVendor: boolean;
   userRole: string | null;
   dashboardPath: string;
   logoutAction?: () => Promise<void>;
@@ -29,6 +30,7 @@ function NavLink({
 export default function SiteHeader({
   isLoggedIn,
   isAdmin,
+  isVendor,
   userRole,
   dashboardPath,
   logoutAction,
@@ -45,10 +47,9 @@ export default function SiteHeader({
         </Link>
 
         <nav className="gb-header-nav" aria-label="Main navigation">
-          <NavLink href="/studios" en="Studios" ar="تصفح الاستوديوهات" />
-          <NavLink href="/marketplace" en="Marketplace" ar="السوق" />
-          <NavLink href="/about" en="About" ar="من نحن" />
-          <NavLink href="/support" en="Support" ar="الدعم" />
+          <NavLink href="/studios" en="Studios" ar="الاستوديوهات" />
+          <NavLink href="/gear" en="Gear" ar="المعدات" />
+          <NavLink href="/how-it-works" en="How it Works" ar="كيف يعمل" />
 
           {isLoggedIn ? (
             <>
@@ -56,31 +57,26 @@ export default function SiteHeader({
                 <T en="Dashboard" ar="لوحة التحكم" />
               </Link>
 
-              {!isAdmin && userRole === "owner" ? (
-                <>
-                  <NavLink href="/owner/studios" en="My studios" ar="استوديوهاتي" />
-                  <NavLink href="/owner/bookings" en="Bookings" ar="الحجوزات" />
-                </>
-              ) : null}
-
-              {!isAdmin && userRole === "customer" ? (
-                <>
-                  <NavLink href="/customer/bookings" en="My bookings" ar="حجوزاتي" />
-                  <NavLink href="/customer/profile" en="Profile" ar="ملفي الشخصي" />
-                </>
-              ) : null}
-
-              {isAdmin ? (
-                <>
-                  <NavLink href="/admin/bookings" en="Bookings" ar="الحجوزات" />
-                  <NavLink href="/admin/studios" en="Studios" ar="الاستوديوهات" />
-                </>
-              ) : null}
+              {isVendor && (
+                <Link href="/vendor" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
+                  <T en="Vendor Portal" ar="بوابة التاجر" />
+                </Link>
+              )}
             </>
-          ) : null}
+          ) : (
+            <>
+              <NavLink href="/owner/onboarding" en="Become a Partner" ar="كن شريكاً" />
+              <NavLink href="/vendor/onboarding" en="Become a Vendor" ar="كن تاجراً" />
+            </>
+          )}
         </nav>
 
         <div className="gb-header-actions">
+          <Link href="/cart" className="gb-cart-link" aria-label="Cart">
+            <span className="icon">🛒</span>
+            <span className="badge">0</span>
+          </Link>
+
           <LanguageSwitcher />
 
           {isLoggedIn && logoutAction ? (
