@@ -7,6 +7,7 @@ import { createClient } from "../lib/supabase/server";
 import { createAdminClient } from "../lib/supabase/admin";
 import Footer from "../components/footer";
 import SiteHeader from "../components/site-header";
+import { ClientProviders } from "../components/client-providers";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
