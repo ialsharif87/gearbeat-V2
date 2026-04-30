@@ -207,3 +207,18 @@ CREATE INDEX idx_variants_product ON marketplace_product_variants(product_id);
 CREATE INDEX idx_order_customer ON marketplace_orders(customer_auth_user_id);
 CREATE INDEX idx_order_items_order ON marketplace_order_items(order_id);
 CREATE INDEX idx_order_items_vendor ON marketplace_order_items(vendor_id);
+
+-- STUDIO REVIEWS
+CREATE TABLE studio_reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  studio_id UUID REFERENCES studios(id),
+  customer_auth_user_id UUID REFERENCES auth.users(id),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  owner_reply TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE studio_reviews ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Studio reviews viewable by everyone" ON studio_reviews FOR SELECT USING (true);
+CREATE POLICY "Customers can create studio reviews" ON studio_reviews FOR INSERT WITH CHECK (auth.uid() = customer_auth_user_id);

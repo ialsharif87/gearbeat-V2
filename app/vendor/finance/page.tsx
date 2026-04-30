@@ -101,6 +101,51 @@ export default async function VendorFinancePage() {
           </div>
         </div>
       </div>
+
+      <div className="card" style={{ marginTop: 30, padding: 0 }}>
+        <div className="card-head" style={{ padding: '25px 25px 10px' }}>
+          <h3><T en="Detailed Sales Report" ar="تقرير المبيعات التفصيلي" /></h3>
+        </div>
+        <div className="table-responsive">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th><T en="Order ID" ar="رقم الطلب" /></th>
+                <th><T en="Product" ar="المنتج" /></th>
+                <th><T en="Date" ar="التاريخ" /></th>
+                <th><T en="Gross" ar="الإجمالي" /></th>
+                <th><T en="Fee" ar="العمولة" /></th>
+                <th><T en="Net" ar="الصافي" /></th>
+                <th><T en="Status" ar="الحالة" /></th>
+              </tr>
+            </thead>
+            <tbody>
+              {orderItems?.slice(0, 10).map((item: any, idx: number) => (
+                <tr key={idx}>
+                  <td style={{ fontSize: '0.8rem' }}>#{item.id.slice(0, 8)}</td>
+                  <td><T en="Marketplace Item" ar="منتج من السوق" /></td>
+                  <td style={{ fontSize: '0.85rem' }}>{new Date().toLocaleDateString()}</td>
+                  <td>{item.total_price}</td>
+                  <td style={{ color: '#ff4d4d' }}>{item.commission_amount}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--gb-gold)' }}>{item.vendor_net_amount}</td>
+                  <td>
+                    <span className={`badge badge-small badge-${item.status === 'delivered' ? 'success' : 'warning'}`}>
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {(!orderItems || orderItems.length === 0) && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>
+                    <T en="No sales data found." ar="لا توجد بيانات مبيعات." />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
