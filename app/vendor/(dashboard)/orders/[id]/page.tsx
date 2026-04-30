@@ -1,5 +1,5 @@
-import { requireVendorLayoutAccess } from "../../../../lib/route-guards";
-import T from "../../../../components/t";
+import { requireVendorLayoutAccess } from "@/lib/route-guards";
+import T from "@/components/t";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -34,7 +34,7 @@ export default async function VendorOrderDetailPage({
     const itemId = formData.get("item_id") as string;
     const status = formData.get("status") as string;
 
-    const { createAdminClient } = await import("../../../../lib/supabase/admin");
+    const { createAdminClient } = await import("@/lib/supabase/admin");
     const admin = createAdminClient();
 
     await admin

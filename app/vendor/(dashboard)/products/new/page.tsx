@@ -1,8 +1,8 @@
-import { requireVendorLayoutAccess } from "../../../../lib/route-guards";
-import T from "../../../../components/t";
+import { requireVendorLayoutAccess } from "@/lib/route-guards";
+import T from "@/components/t";
 import { redirect } from "next/navigation";
-import { createAdminClient } from "../../../../lib/supabase/admin";
-import { createClient } from "../../../../lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function NewProductPage() {
   const { supabaseAdmin, user } = await requireVendorLayoutAccess();

@@ -1,5 +1,5 @@
-import { requireVendorLayoutAccess } from "../../../lib/route-guards";
-import T from "../../../components/t";
+import { requireVendorLayoutAccess } from "@/lib/route-guards";
+import T from "@/components/t";
 import Link from "next/link";
 
 export default async function VendorProductsPage() {
