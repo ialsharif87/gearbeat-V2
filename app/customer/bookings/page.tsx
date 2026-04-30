@@ -406,8 +406,8 @@ export default async function CustomerBookingsPage() {
         tax_amount: 0,
         net_amount: studioNetAmount,
         currency: "SAR",
-        settlement_status: booking.status === "completed" ? "eligible" : "pending",
-        available_for_payout_at: booking.status === "completed" ? now : null
+        settlement_status: (booking.status as string) === "completed" ? "eligible" : "pending",
+        available_for_payout_at: (booking.status as string) === "completed" ? now : null
       });
     // --- END COMMISSION CALCULATION ---
 
