@@ -1648,6 +1648,15 @@ html[dir="rtl"] .filter-action-row {
     flex-direction: column;
   }
 }
+
+.advanced-filter-content {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .review-layout {
   display: grid;
   grid-template-columns: 0.75fr 1.25fr;
