@@ -222,3 +222,46 @@ CREATE TABLE studio_reviews (
 ALTER TABLE studio_reviews ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Studio reviews viewable by everyone" ON studio_reviews FOR SELECT USING (true);
 CREATE POLICY "Customers can create studio reviews" ON studio_reviews FOR INSERT WITH CHECK (auth.uid() = customer_auth_user_id);
+
+-- 12. MARKETPLACE REVIEWS
+CREATE TABLE IF NOT EXISTS marketplace_reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL REFERENCES marketplace_products(id) ON DELETE CASCADE,
+  customer_auth_user_id UUID NOT NULL REFERENCES auth.users(id),
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  vendor_reply TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 13. MARKETPLACE WISHLISTS
+CREATE TABLE IF NOT EXISTS marketplace_wishlists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_auth_user_id UUID NOT NULL REFERENCES auth.users(id),
+  product_id UUID NOT NULL REFERENCES marketplace_products(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(customer_auth_user_id, product_id)
+);
+
+-- ENABLE RLS FOR NEW TABLES
+ALTER TABLE marketplace_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marketplace_wishlists ENABLE ROW LEVEL SECURITY;
+
+-- REVIEWS POLICIES
+CREATE POLICY "Product reviews are viewable by everyone" ON marketplace_reviews FOR SELECT USING (true);
+CREATE POLICY "Customers can insert their own reviews" ON marketplace_reviews FOR INSERT WITH CHECK (auth.uid() = customer_auth_user_id);
+CREATE POLICY "Vendors can reply to reviews on their products" ON marketplace_reviews FOR UPDATE 
+  USING (EXISTS (SELECT 1 FROM marketplace_products WHERE id = marketplace_reviews.product_id AND vendor_id = auth.uid()));
+
+-- WISHLIST POLICIES
+CREATE POLICY "Users can manage their own wishlist" ON marketplace_wishlists 
+  FOR ALL USING (auth.uid() = customer_auth_user_id);
+
+-- OWNER REPLY POLICY FOR STUDIO REVIEWS
+CREATE POLICY "Owners can reply to reviews on their studios" ON studio_reviews FOR UPDATE 
+  USING (EXISTS (SELECT 1 FROM studios WHERE id = studio_reviews.studio_id AND owner_auth_user_id = auth.uid()));
+
+-- FINAL PERFORMANCE INDEXES
+CREATE INDEX idx_reviews_product ON marketplace_reviews(product_id);
+CREATE INDEX idx_wishlist_user ON marketplace_wishlists(customer_auth_user_id);
+CREATE INDEX idx_studio_reviews_studio ON studio_reviews(studio_id);
