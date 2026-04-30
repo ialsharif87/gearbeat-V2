@@ -1,4 +1,4 @@
-import T from "../../components/t";
+import T from "@/components/t";
 import Link from "next/link";
 
 export default function JoinPage() {

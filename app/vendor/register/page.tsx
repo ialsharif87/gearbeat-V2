@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import T from "../../../components/t";
+import T from "@/components/t";
 import Link from "next/link";
-import { createClient } from "../../../lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 export default function VendorRegisterPage() {
