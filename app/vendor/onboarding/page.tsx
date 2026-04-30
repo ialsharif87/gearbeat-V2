@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import T from "@/components/t";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getActiveCountries } from "@/lib/countries";
 
 function getText(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
@@ -9,20 +10,6 @@ function getText(formData: FormData, key: string) {
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
-}
-
-function normalizePhone(value: string) {
-  const cleaned = value.replace(/[\s-]/g, "").trim();
-
-  if (cleaned.startsWith("05")) {
-    return `+966${cleaned.slice(1)}`;
-  }
-
-  if (cleaned.startsWith("9665")) {
-    return `+${cleaned}`;
-  }
-
-  return cleaned;
 }
 
 function slugify(value: string) {
@@ -40,17 +27,14 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function isValidSaudiMobile(value: string) {
-  const cleaned = value.replace(/[\s-]/g, "");
-  return /^(?:\+9665|9665|05)\d{8}$/.test(cleaned);
-}
-
-function isValidCommercialRegistration(value: string) {
-  return /^\d{10}$/.test(value.trim());
-}
-
 function isValidSaudiVatNumber(value: string) {
   return /^3\d{13}3$/.test(value.trim());
+}
+
+function isReasonableRegistrationNumber(value: string) {
+  const cleaned = value.trim();
+
+  return cleaned.length >= 4 && cleaned.length <= 40;
 }
 
 async function isSlugAvailable({
@@ -88,35 +72,48 @@ export default async function VendorOnboardingPage() {
   }
 
   const supabaseAdmin = createAdminClient();
+  const countries = await getActiveCountries();
 
-  const [{ data: profile, error: profileError }, { data: vendorProfile, error: vendorProfileError }] =
-    await Promise.all([
-      supabaseAdmin
-        .from("profiles")
-        .select("id, auth_user_id, email, full_name, phone, role, account_status")
-        .eq("auth_user_id", user.id)
-        .maybeSingle(),
+  const [
+    { data: profile, error: profileError },
+    { data: vendorProfile, error: vendorProfileError },
+  ] = await Promise.all([
+    supabaseAdmin
+      .from("profiles")
+      .select(
+        "id, auth_user_id, email, full_name, phone, country_code, phone_e164, role, account_status"
+      )
+      .eq("auth_user_id", user.id)
+      .maybeSingle(),
 
-      supabaseAdmin
-        .from("vendor_profiles")
-        .select(`
-          id,
-          business_name_en,
-          business_name_ar,
-          slug,
-          contact_email,
-          contact_phone,
-          vat_number,
-          cr_number,
-          website_url,
-          status,
-          compliance_status,
-          agreement_status,
-          payout_status
-        `)
-        .eq("id", user.id)
-        .maybeSingle(),
-    ]);
+    supabaseAdmin
+      .from("vendor_profiles")
+      .select(`
+        id,
+        business_name_en,
+        business_name_ar,
+        slug,
+        contact_email,
+        contact_phone,
+        country_code,
+        city_name,
+        district,
+        address_line,
+        business_type,
+        business_registration_type,
+        business_verification_status,
+        document_verification_status,
+        vat_number,
+        cr_number,
+        website_url,
+        status,
+        compliance_status,
+        agreement_status,
+        payout_status
+      `)
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
   if (profileError) {
     throw new Error(profileError.message);
@@ -138,9 +135,15 @@ export default async function VendorOnboardingPage() {
     redirect("/vendor");
   }
 
-  if (vendorProfile.status === "rejected" || vendorProfile.status === "suspended") {
+  if (
+    vendorProfile.status === "rejected" ||
+    vendorProfile.status === "suspended"
+  ) {
     redirect("/vendor-pending");
   }
+
+  const defaultCountryCode =
+    vendorProfile.country_code || profile.country_code || "SA";
 
   async function handleSubmit(formData: FormData) {
     "use server";
@@ -156,8 +159,12 @@ export default async function VendorOnboardingPage() {
     }
 
     const supabaseAdmin = createAdminClient();
+    const countries = await getActiveCountries();
 
-    const [{ data: profile }, { data: currentVendorProfile }] = await Promise.all([
+    const [
+      { data: profile, error: profileError },
+      { data: currentVendorProfile, error: currentVendorProfileError },
+    ] = await Promise.all([
       supabaseAdmin
         .from("profiles")
         .select("id, role, account_status")
@@ -170,6 +177,14 @@ export default async function VendorOnboardingPage() {
         .eq("id", user.id)
         .maybeSingle(),
     ]);
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    if (currentVendorProfileError) {
+      throw new Error(currentVendorProfileError.message);
+    }
 
     if (!profile || profile.role !== "vendor") {
       redirect("/forbidden");
@@ -194,10 +209,27 @@ export default async function VendorOnboardingPage() {
     const businessNameAr = getText(formData, "business_name_ar");
     const requestedSlug = slugify(getText(formData, "slug"));
     const contactEmail = normalizeEmail(getText(formData, "email"));
-    const phone = normalizePhone(getText(formData, "phone"));
-    const crNumber = getText(formData, "cr_number");
-    const vatNumber = getText(formData, "vat_number");
+    const phone = getText(formData, "phone");
+    const countryCode = getText(formData, "country_code");
+    const cityName = getText(formData, "city_name");
+    const district = getText(formData, "district");
+    const addressLine = getText(formData, "address_line");
+    const businessType = getText(formData, "business_type");
+    const businessRegistrationType = getText(
+      formData,
+      "business_registration_type"
+    );
+    const registrationNumber = getText(formData, "registration_number");
+    const taxNumber = getText(formData, "tax_number");
     const websiteUrl = getText(formData, "website_url");
+
+    const selectedCountry = countries.find(
+      (country) => country.country_code === countryCode
+    );
+
+    if (!selectedCountry) {
+      throw new Error("Selected country is invalid.");
+    }
 
     if (!businessNameEn || businessNameEn.length < 2) {
       throw new Error("Business English name is required.");
@@ -215,16 +247,37 @@ export default async function VendorOnboardingPage() {
       throw new Error("Valid contact email is required.");
     }
 
-    if (!phone || !isValidSaudiMobile(phone)) {
-      throw new Error("Valid Saudi mobile number is required.");
+    if (!phone || phone.length < 8) {
+      throw new Error("Valid contact phone is required.");
     }
 
-    if (!crNumber || !isValidCommercialRegistration(crNumber)) {
-      throw new Error("Commercial Registration must be 10 digits.");
+    if (!cityName) {
+      throw new Error("City is required.");
     }
 
-    if (!vatNumber || !isValidSaudiVatNumber(vatNumber)) {
-      throw new Error("Saudi VAT number must be 15 digits and follow ZATCA format.");
+    if (!addressLine || addressLine.length < 5) {
+      throw new Error("Business address is required.");
+    }
+
+    if (!businessType) {
+      throw new Error("Business type is required.");
+    }
+
+    if (!businessRegistrationType) {
+      throw new Error("Business registration type is required.");
+    }
+
+    if (
+      !registrationNumber ||
+      !isReasonableRegistrationNumber(registrationNumber)
+    ) {
+      throw new Error("Business registration number is required.");
+    }
+
+    if (countryCode === "SA" && taxNumber && !isValidSaudiVatNumber(taxNumber)) {
+      throw new Error(
+        "Saudi VAT number must be 15 digits and follow ZATCA format."
+      );
     }
 
     const slugAvailable = await isSlugAvailable({
@@ -237,25 +290,40 @@ export default async function VendorOnboardingPage() {
       throw new Error("This store URL is already used by another vendor.");
     }
 
-    const { error: updateError } = await supabaseAdmin
-      .from("vendor_profiles")
-      .update({
-        business_name_en: businessNameEn,
-        business_name_ar: businessNameAr,
-        slug: requestedSlug,
-        contact_email: contactEmail,
-        contact_phone: phone,
-        cr_number: crNumber,
-        vat_number: vatNumber,
-        website_url: websiteUrl || null,
-        compliance_status: "pending",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id)
-      .eq("status", "pending");
+    const { data: updatedVendorProfile, error: updateError } =
+      await supabaseAdmin
+        .from("vendor_profiles")
+        .update({
+          business_name_en: businessNameEn,
+          business_name_ar: businessNameAr,
+          slug: requestedSlug,
+          contact_email: contactEmail,
+          contact_phone: phone,
+          country_code: countryCode,
+          city_name: cityName,
+          district: district || null,
+          address_line: addressLine,
+          business_type: businessType,
+          business_registration_type: businessRegistrationType,
+          cr_number: registrationNumber,
+          vat_number: taxNumber || null,
+          website_url: websiteUrl || null,
+          business_verification_status: "pending",
+          document_verification_status: "not_started",
+          compliance_status: "pending",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id)
+        .eq("status", "pending")
+        .select("id")
+        .maybeSingle();
 
     if (updateError) {
       throw new Error(updateError.message);
+    }
+
+    if (!updatedVendorProfile) {
+      redirect("/vendor-pending");
     }
 
     redirect("/vendor-pending");
@@ -265,7 +333,7 @@ export default async function VendorOnboardingPage() {
     <div className="owner-onboarding-page">
       <div className="owner-onboarding-hero">
         <span className="badge badge-gold">
-          <T en="Partner Program" ar="برنامج الشركاء" />
+          <T en="Vendor Verification" ar="توثيق التاجر" />
         </span>
 
         <h1>
@@ -274,13 +342,13 @@ export default async function VendorOnboardingPage() {
 
         <p>
           <T
-            en="Complete your business details. Your application will stay under review until approved by GearBeat admin."
-            ar="أكمل بيانات المنشأة. سيبقى طلبك قيد المراجعة حتى تتم الموافقة عليه من إدارة GearBeat."
+            en="Complete your business details. Your account will remain pending until GearBeat reviews and approves it."
+            ar="أكمل بيانات المنشأة. سيبقى حسابك قيد المراجعة حتى يتم اعتماده من GearBeat."
           />
         </p>
       </div>
 
-      <div className="portal-main" style={{ maxWidth: 800, margin: "0 auto" }}>
+      <div className="portal-main" style={{ maxWidth: 900, margin: "0 auto" }}>
         <form action={handleSubmit} className="card owner-onboarding-form">
           <div className="grid grid-2">
             <div>
@@ -332,6 +400,66 @@ export default async function VendorOnboardingPage() {
           <div className="grid grid-2" style={{ marginTop: 20 }}>
             <div>
               <label>
+                <T en="Country" ar="الدولة" />
+              </label>
+              <select
+                name="country_code"
+                className="input"
+                required
+                defaultValue={defaultCountryCode}
+              >
+                {countries.map((country) => (
+                  <option key={country.country_code} value={country.country_code}>
+                    {country.name_en} / {country.name_ar}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label>
+                <T en="City" ar="المدينة" />
+              </label>
+              <input
+                name="city_name"
+                className="input"
+                required
+                defaultValue={vendorProfile.city_name || ""}
+                placeholder="Riyadh / Amman / Dubai"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-2" style={{ marginTop: 20 }}>
+            <div>
+              <label>
+                <T en="District / Area" ar="الحي / المنطقة" />
+              </label>
+              <input
+                name="district"
+                className="input"
+                defaultValue={vendorProfile.district || ""}
+                placeholder="District or area"
+              />
+            </div>
+
+            <div>
+              <label>
+                <T en="Business Address" ar="عنوان المنشأة" />
+              </label>
+              <input
+                name="address_line"
+                className="input"
+                required
+                defaultValue={vendorProfile.address_line || ""}
+                placeholder="Street, building, office"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-2" style={{ marginTop: 20 }}>
+            <div>
+              <label>
                 <T en="Contact Email" ar="البريد الإلكتروني للتواصل" />
               </label>
               <input
@@ -352,8 +480,13 @@ export default async function VendorOnboardingPage() {
                 name="phone"
                 className="input"
                 required
-                defaultValue={vendorProfile.contact_phone || profile.phone || ""}
-                placeholder="+966 50 XXX XXXX"
+                defaultValue={
+                  vendorProfile.contact_phone ||
+                  profile.phone_e164 ||
+                  profile.phone ||
+                  ""
+                }
+                placeholder="+966501234567"
               />
             </div>
           </div>
@@ -369,27 +502,105 @@ export default async function VendorOnboardingPage() {
           <div className="grid grid-2">
             <div>
               <label>
-                <T en="Commercial Registration (CR)" ar="السجل التجاري" />
+                <T en="Business Type" ar="نوع النشاط التجاري" />
+              </label>
+              <select
+                name="business_type"
+                className="input"
+                required
+                defaultValue={vendorProfile.business_type || ""}
+              >
+                <option value="">
+                  Select business type
+                </option>
+                <option value="individual_seller">
+                  Individual Seller
+                </option>
+                <option value="sole_proprietorship">
+                  Sole Proprietorship
+                </option>
+                <option value="company">
+                  Company
+                </option>
+                <option value="distributor">
+                  Distributor
+                </option>
+                <option value="authorized_reseller">
+                  Authorized Reseller
+                </option>
+                <option value="music_store">
+                  Music Store
+                </option>
+                <option value="equipment_rental_company">
+                  Equipment Rental Company
+                </option>
+                <option value="other">
+                  Other
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label>
+                <T en="Registration Type" ar="نوع التسجيل التجاري" />
+              </label>
+              <select
+                name="business_registration_type"
+                className="input"
+                required
+                defaultValue={vendorProfile.business_registration_type || ""}
+              >
+                <option value="">
+                  Select registration type
+                </option>
+                <option value="commercial_registration">
+                  Commercial Registration
+                </option>
+                <option value="trade_license">
+                  Trade License
+                </option>
+                <option value="freelance_license">
+                  Freelance License
+                </option>
+                <option value="municipal_license">
+                  Municipal License
+                </option>
+                <option value="tax_registration">
+                  Tax Registration
+                </option>
+                <option value="other">
+                  Other
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-2" style={{ marginTop: 20 }}>
+            <div>
+              <label>
+                <T
+                  en="Business Registration Number"
+                  ar="رقم التسجيل التجاري"
+                />
               </label>
               <input
-                name="cr_number"
+                name="registration_number"
                 className="input"
                 required
                 defaultValue={vendorProfile.cr_number || ""}
-                placeholder="1010XXXXXX"
+                placeholder="CR / Trade License / Business ID"
               />
             </div>
 
             <div>
               <label>
-                <T en="VAT Number" ar="الرقم الضريبي" />
+                <T en="Tax / VAT Number (Optional)" ar="الرقم الضريبي (اختياري)" />
               </label>
               <input
-                name="vat_number"
+                name="tax_number"
                 className="input"
-                required
                 defaultValue={vendorProfile.vat_number || ""}
-                placeholder="300XXXXXXXXXXXX"
+                placeholder="Tax ID / VAT Number"
               />
             </div>
           </div>
@@ -404,6 +615,29 @@ export default async function VendorOnboardingPage() {
               defaultValue={vendorProfile.website_url || ""}
               placeholder="https://example.com"
             />
+          </div>
+
+          <div
+            style={{
+              marginTop: 24,
+              padding: 18,
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.04)",
+              color: "var(--muted)",
+              lineHeight: 1.8,
+            }}
+          >
+            <h3 style={{ color: "white", marginBottom: 8 }}>
+              <T en="Documents will be requested next" ar="سيتم طلب الوثائق لاحقًا" />
+            </h3>
+
+            <p>
+              <T
+                en="After this step, GearBeat may request documents such as business registration, tax certificate, municipal license, proof of address, or authorized reseller proof depending on your country and business type."
+                ar="بعد هذه الخطوة، قد تطلب GearBeat وثائق مثل السجل التجاري، الشهادة الضريبية، رخصة البلدية، إثبات العنوان، أو إثبات الوكيل المعتمد حسب الدولة ونوع النشاط."
+              />
+            </p>
           </div>
 
           <div
