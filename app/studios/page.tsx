@@ -534,6 +534,29 @@ export default async function StudiosPage({
         </p>
       </div>
 
+      <StudioFilter
+        cities={cities}
+        districts={districts}
+        features={featuresList}
+        equipmentCategories={equipmentCategories}
+        equipmentBrands={equipmentBrands}
+        initialValues={{
+          q: queryText,
+          city: selectedCity,
+          district: selectedDistrict,
+          min_price: minPrice,
+          max_price: maxPrice,
+          verified: verifiedOnly,
+          min_google_rating: minGoogleRating,
+          min_tripadvisor_rating: minTripAdvisorRating,
+          selectedFeatureIds,
+          selectedEquipmentCategories,
+          selectedEquipmentBrand,
+          equipmentKeyword,
+          sort
+        }}
+      />
+
       <div className="studio-results-bar">
         <div>
           <span className="badge">
