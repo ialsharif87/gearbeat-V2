@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-import { createAdminClient } from "../../../../lib/supabase/admin";
+import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getCronAuthFailureResponse } from "@/lib/cron-auth";
 
 function createReviewToken() {
   const randomPart = crypto.randomUUID().replaceAll("-", "");
@@ -12,13 +13,9 @@ function combineBookingDateTime(date: string, time: string) {
   return new Date(`${date}T${time}`);
 }
 
-export async function GET(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const providedSecret = request.headers.get("x-cron-secret");
-
-  if (cronSecret && providedSecret !== cronSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export async function GET(request: NextRequest) {
+  const authFailure = getCronAuthFailureResponse(request);
+  if (authFailure) return authFailure;
 
   const supabase = createAdminClient();
 

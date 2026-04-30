@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { requireRole } from "../../lib/auth";
-import T from "../../components/t";
+import { requireCustomerLayoutAccess } from "@/lib/route-guards";
+import T from "@/components/t";
 
 export default async function CustomerPage() {
-  const { profile } = await requireRole("customer");
+  const { profile } = await requireCustomerLayoutAccess();
 
   return (
     <section>

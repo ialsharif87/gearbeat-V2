@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
-import { createClient } from "../../../lib/supabase/server";
-import { createAdminClient } from "../../../lib/supabase/admin";
-import T from "../../../components/t";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import T from "@/components/t";
+import { validateRequiredSaudiBusinessFields } from "@/lib/validation/saudi";
 
 export default async function VendorOnboardingPage() {
   const supabase = await createClient();
@@ -11,14 +12,21 @@ export default async function VendorOnboardingPage() {
 
   const supabaseAdmin = createAdminClient();
 
-  // Check if they already have a vendor profile
-  const { data: existingVendor } = await supabaseAdmin
+  // Check their current vendor profile
+  const { data: vendorProfile } = await supabaseAdmin
     .from("vendor_profiles")
-    .select("id, status")
+    .select("id, status, cr_number")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (existingVendor) {
+  // If no vendor profile at all, they shouldn't be here (or we create one)
+  // But with the new flow, they should have one.
+  if (!vendorProfile) {
+    redirect("/vendor-signup");
+  }
+
+  // If they already finished onboarding (has CR), go to dashboard
+  if (vendorProfile.cr_number) {
     redirect("/vendor");
   }
 
@@ -29,30 +37,39 @@ export default async function VendorOnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const businessNameEn = formData.get("business_name_en") as string;
-    const businessNameAr = formData.get("business_name_ar") as string;
-    const slug = (formData.get("slug") as string).toLowerCase().replace(/[^a-z0-9-]/g, '-');
-    const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
     const crNumber = formData.get("cr_number") as string;
     const vatNumber = formData.get("vat_number") as string;
+    const businessNameEn = formData.get("business_name_en") as string;
+    const businessNameAr = formData.get("business_name_ar") as string;
+
+    // Validate Saudi fields
+    const validation = validateRequiredSaudiBusinessFields({
+      phone,
+      commercialRegistration: crNumber,
+      vatNumber,
+    });
+
+    if (!validation.valid) {
+      // In a real app, we'd return errors to the UI. For now, we'll log or throw.
+      // Ideally, this should be a Client Component with useActionState.
+      console.error("Validation failed:", validation.errors);
+      return;
+    }
 
     const supabaseAdmin = createAdminClient();
 
     const { error } = await supabaseAdmin
       .from("vendor_profiles")
-      .insert({
-        id: user.id,
+      .update({
         business_name_en: businessNameEn,
         business_name_ar: businessNameAr,
-        slug,
-        contact_email: email,
         contact_phone: phone,
         cr_number: crNumber,
         vat_number: vatNumber,
-        status: 'pending',
-        compliance_status: 'pending'
-      });
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", user.id);
 
     if (error) {
       console.error(error);

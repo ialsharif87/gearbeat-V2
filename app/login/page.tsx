@@ -77,67 +77,11 @@ function getLoginMessage({
     };
   }
 
-  if (error === "no_account") {
+  if (error && error !== "none") {
     return {
       type: "error" as const,
-      en: "No account was found with this email. Please create a new account first.",
-      ar: "لا يوجد حساب بهذا البريد الإلكتروني. الرجاء إنشاء حساب جديد أولًا."
-    };
-  }
-
-  if (error === "invalid_login") {
-    return {
-      type: "error" as const,
-      en: "Email or password is incorrect. Please check your details and try again.",
-      ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة. الرجاء التأكد والمحاولة مرة أخرى."
-    };
-  }
-
-  if (error === "missing_email") {
-    return {
-      type: "error" as const,
-      en: "Please enter your email address.",
-      ar: "الرجاء إدخال البريد الإلكتروني."
-    };
-  }
-
-  if (error === "missing_password") {
-    return {
-      type: "error" as const,
-      en: "Please enter your password.",
-      ar: "الرجاء إدخال كلمة المرور."
-    };
-  }
-
-  if (error === "wrong_account_type") {
-    return {
-      type: "error" as const,
-      en: "This email is registered under a different account type. Please choose the correct login type.",
-      ar: "هذا البريد مسجل بنوع حساب مختلف. الرجاء اختيار نوع الدخول الصحيح."
-    };
-  }
-
-  if (error === "not_staff") {
-    return {
-      type: "error" as const,
-      en: "This account is not approved for admin or staff access.",
-      ar: "هذا الحساب غير معتمد لدخول الأدمن أو الموظفين."
-    };
-  }
-
-  if (error === "inactive_account") {
-    return {
-      type: "error" as const,
-      en: "This account is not active. Please contact support.",
-      ar: "هذا الحساب غير نشط. الرجاء التواصل مع الدعم."
-    };
-  }
-
-  if (error === "login_failed") {
-    return {
-      type: "error" as const,
-      en: "Login failed. Please try again.",
-      ar: "فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى."
+      en: "Email or password is incorrect.",
+      ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة."
     };
   }
 
@@ -290,28 +234,6 @@ export default async function LoginPage({
       );
     }
 
-    const { data: existingProfileByEmail } = await supabaseAdmin
-      .from("profiles")
-      .select("id, email, role, account_status")
-      .ilike("email", email)
-      .maybeSingle();
-
-    const { data: existingAdminByEmail } = await supabaseAdmin
-      .from("admin_users")
-      .select("id, email, status")
-      .ilike("email", email)
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (!existingProfileByEmail && !existingAdminByEmail) {
-      redirect(
-        loginRedirectPath({
-          error: "no_account",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

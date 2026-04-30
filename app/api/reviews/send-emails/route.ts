@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { createAdminClient } from "../../../../lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getCronAuthFailureResponse } from "@/lib/cron-auth";
 
 function getSiteUrl() {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` ||
+    (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
     "http://localhost:3000"
   );
 }
@@ -13,7 +14,7 @@ function getSiteUrl() {
 function buildReviewEmail({
   customerEmail,
   studioName,
-  reviewUrl
+  reviewUrl,
 }: {
   customerEmail: string;
   studioName: string;
@@ -62,13 +63,9 @@ Sent to ${customerEmail} by GearBeat.
   return { subject, html, text };
 }
 
-export async function GET(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const providedSecret = request.headers.get("x-cron-secret");
-
-  if (cronSecret && providedSecret !== cronSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export async function GET(request: NextRequest) {
+  const authFailure = getCronAuthFailureResponse(request);
+  if (authFailure) return authFailure;
 
   const resendApiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.REVIEW_FROM_EMAIL;
