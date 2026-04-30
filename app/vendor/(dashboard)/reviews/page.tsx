@@ -1,77 +1,280 @@
-import { requireVendorLayoutAccess } from "@/lib/route-guards";
 import T from "@/components/t";
-import Link from "next/link";
+import { requireVendorLayoutAccess } from "@/lib/route-guards";
+
+function formatDate(value: unknown) {
+  if (!value) {
+    return "—";
+  }
+
+  const date = new Date(String(value));
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleDateString("en-SA", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+}
+
+function renderStars(rating: unknown) {
+  const value = Number(rating || 0);
+  const safeValue = Number.isFinite(value)
+    ? Math.max(0, Math.min(5, Math.round(value)))
+    : 0;
+
+  return "★".repeat(safeValue) + "☆".repeat(5 - safeValue);
+}
 
 export default async function VendorReviewsPage() {
   const { supabaseAdmin, user } = await requireVendorLayoutAccess();
 
-  // Fetch reviews for this vendor's products
-  const { data: reviews } = await supabaseAdmin
+  const { data: products, error: productsError } = await supabaseAdmin
+    .from("marketplace_products")
+    .select("id, name_en, name_ar")
+    .eq("vendor_id", user.id);
+
+  if (productsError) {
+    throw new Error(productsError.message);
+  }
+
+  const productIds = (products || []).map((product: any) => product.id);
+
+  if (productIds.length === 0) {
+    return (
+      <div className="dashboard-page">
+        <div className="page-header">
+          <span className="badge">
+            <T en="Reviews" ar="التقييمات" />
+          </span>
+          <h1>
+            <T en="Customer Reviews" ar="تقييمات العملاء" />
+          </h1>
+          <p>
+            <T
+              en="You do not have products yet, so there are no reviews to show."
+              ar="لا توجد لديك منتجات حتى الآن، لذلك لا توجد تقييمات لعرضها."
+            />
+          </p>
+        </div>
+
+        <div className="card" style={{ marginTop: 30, textAlign: "center" }}>
+          <h2>
+            <T en="No products found" ar="لا توجد منتجات" />
+          </h2>
+          <p>
+            <T
+              en="Create products first. Reviews will appear here after customers review them."
+              ar="أنشئ المنتجات أولًا. ستظهر التقييمات هنا بعد أن يقيّمها العملاء."
+            />
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { data: reviews, error: reviewsError } = await supabaseAdmin
     .from("marketplace_reviews")
     .select(`
-      *,
-      product:marketplace_products(id, name_en, name_ar, slug),
-      profile:profiles(full_name)
+      id,
+      product_id,
+      customer_id,
+      rating,
+      title,
+      comment,
+      status,
+      created_at,
+      product:marketplace_products(
+        id,
+        name_en,
+        name_ar
+      ),
+      customer:profiles(
+        id,
+        full_name,
+        email
+      )
     `)
-    .eq("marketplace_products.vendor_id", user.id) // This join might need careful handling in Supabase or a view
+    .in("product_id", productIds)
     .order("created_at", { ascending: false });
 
-  // Note: If the direct join above fails due to RLS or schema, 
-  // we would fetch products first then reviews.
+  if (reviewsError) {
+    throw new Error(reviewsError.message);
+  }
+
+  const reviewRows = reviews || [];
+
+  const totalReviews = reviewRows.length;
+  const averageRating =
+    totalReviews > 0
+      ? reviewRows.reduce(
+          (sum: number, review: any) => sum + Number(review.rating || 0),
+          0
+        ) / totalReviews
+      : 0;
+
+  const approvedReviews = reviewRows.filter(
+    (review: any) => review.status === "approved"
+  ).length;
+
+  const pendingReviews = reviewRows.filter(
+    (review: any) => review.status !== "approved"
+  ).length;
 
   return (
     <div className="dashboard-page">
       <div className="page-header">
-        <div>
-          <span className="badge badge-gold"><T en="Feedback" ar="المراجعات" /></span>
-          <h1><T en="Customer Reviews" ar="تقييمات العملاء" /></h1>
-          <p><T en="Listen to your customers and improve your gear business." ar="استمع لعملائك وطوّر تجارتك في عالم المعدات." /></p>
+        <span className="badge">
+          <T en="Reviews" ar="التقييمات" />
+        </span>
+        <h1>
+          <T en="Customer Reviews" ar="تقييمات العملاء" />
+        </h1>
+        <p>
+          <T
+            en="Monitor customer feedback for products that belong to your vendor account."
+            ar="تابع آراء العملاء على المنتجات التابعة لحساب التاجر الخاص بك."
+          />
+        </p>
+      </div>
+
+      <div className="stats-grid" style={{ marginTop: 30 }}>
+        <div className="card stat-card">
+          <div className="stat-icon">⭐</div>
+          <div className="stat-content">
+            <label>
+              <T en="Average Rating" ar="متوسط التقييم" />
+            </label>
+            <div className="stat-value">
+              {averageRating.toFixed(1)}
+            </div>
+          </div>
+        </div>
+
+        <div className="card stat-card">
+          <div className="stat-icon">💬</div>
+          <div className="stat-content">
+            <label>
+              <T en="Total Reviews" ar="إجمالي التقييمات" />
+            </label>
+            <div className="stat-value">{totalReviews}</div>
+          </div>
+        </div>
+
+        <div className="card stat-card">
+          <div className="stat-icon">✅</div>
+          <div className="stat-content">
+            <label>
+              <T en="Approved" ar="المعتمدة" />
+            </label>
+            <div className="stat-value">{approvedReviews}</div>
+          </div>
+        </div>
+
+        <div className="card stat-card">
+          <div className="stat-icon">⏳</div>
+          <div className="stat-content">
+            <label>
+              <T en="Pending / Other" ar="معلقة / أخرى" />
+            </label>
+            <div className="stat-value">{pendingReviews}</div>
+          </div>
         </div>
       </div>
 
-      <div className="reviews-list" style={{ marginTop: 30, display: 'grid', gap: 20 }}>
-        {!reviews || reviews.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: 80 }}>
-            <div style={{ fontSize: '3rem', marginBottom: 20 }}>⭐</div>
-            <h3><T en="No reviews yet" ar="لا توجد مراجعات بعد" /></h3>
-            <p><T en="Reviews will appear here once customers start rating your products." ar="ستظهر المراجعات هنا بمجرد أن يبدأ العملاء بتقييم منتجاتك." /></p>
+      <div style={{ marginTop: 30, display: "grid", gap: 16 }}>
+        {reviewRows.length === 0 ? (
+          <div className="card" style={{ textAlign: "center" }}>
+            <h2>
+              <T en="No reviews yet" ar="لا توجد تقييمات بعد" />
+            </h2>
+            <p>
+              <T
+                en="Reviews will appear here after customers submit feedback for your products."
+                ar="ستظهر التقييمات هنا بعد أن يرسل العملاء آراءهم حول منتجاتك."
+              />
+            </p>
           </div>
         ) : (
-          reviews.map((review: any) => (
-            <div key={review.id} className="card review-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 15 }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{review.profile?.full_name || 'Customer'}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--gb-gold)' }}>
-                    {Array(review.rating).fill('⭐').join('')}
+          reviewRows.map((review: any) => {
+            const product = Array.isArray(review.product)
+              ? review.product[0]
+              : review.product;
+
+            const customer = Array.isArray(review.customer)
+              ? review.customer[0]
+              : review.customer;
+
+            const productName =
+              product?.name_en ||
+              product?.name_ar ||
+              "Product";
+
+            const customerName =
+              customer?.full_name ||
+              customer?.email ||
+              "Customer";
+
+            return (
+              <div key={review.id} className="card">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        color: "var(--gb-gold)",
+                        fontSize: "1.1rem",
+                        letterSpacing: 2,
+                      }}
+                    >
+                      {renderStars(review.rating)}
+                    </div>
+
+                    <h3 style={{ marginTop: 8 }}>
+                      {review.title || (
+                        <T en="Customer Review" ar="تقييم العميل" />
+                      )}
+                    </h3>
+
+                    <p style={{ color: "var(--muted)", marginTop: 4 }}>
+                      {productName} · {customerName}
+                    </p>
+                  </div>
+
+                  <div style={{ textAlign: "right" }}>
+                    <span className="badge">{review.status || "pending"}</span>
+                    <div
+                      style={{
+                        marginTop: 8,
+                        color: "var(--muted)",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      {formatDate(review.created_at)}
+                    </div>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right', fontSize: '0.85rem', color: 'var(--muted)' }}>
-                  {new Date(review.created_at).toLocaleDateString()}
-                </div>
-              </div>
 
-              <div style={{ marginBottom: 15, padding: '10px 15px', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
-                <Link href={`/gear/products/${review.product?.slug}`} className="text-link" style={{ fontSize: '0.9rem' }}>
-                  {review.product?.name_en}
-                </Link>
-                <p style={{ marginTop: 8, fontStyle: 'italic' }}>"{review.comment}"</p>
+                {review.comment ? (
+                  <p style={{ marginTop: 18, lineHeight: 1.7 }}>
+                    {review.comment}
+                  </p>
+                ) : (
+                  <p style={{ marginTop: 18, color: "var(--muted)" }}>
+                    <T en="No written comment." ar="لا يوجد تعليق مكتوب." />
+                  </p>
+                )}
               </div>
-
-              {review.vendor_reply ? (
-                <div className="vendor-reply" style={{ borderLeft: '3px solid var(--gb-gold)', paddingLeft: 15, marginTop: 15 }}>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--gb-gold)', fontWeight: 700 }}>
-                    <T en="YOUR REPLY" ar="ردك" />
-                  </label>
-                  <p style={{ margin: '5px 0 0', fontSize: '0.9rem' }}>{review.vendor_reply}</p>
-                </div>
-              ) : (
-                <button className="btn btn-secondary btn-small" style={{ marginTop: 10 }}>
-                  <T en="Reply to review" ar="الرد على المراجعة" />
-                </button>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
