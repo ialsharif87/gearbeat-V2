@@ -31,7 +31,7 @@ function buildReviewEmail({
         <p style="font-size:16px; line-height:1.6; color:#cbd5e1;">
           Your review helps other creators choose trusted studios. This review is linked to a verified paid booking.
         </p>
-        <a href="${reviewUrl}" style="display:inline-block; margin-top:18px; background:#1ed760; color:#06130c; text-decoration:none; font-weight:bold; padding:14px 22px; border-radius:999px;">
+        <a href="${reviewUrl}" style="display:inline-block; margin-top:18px; background:#67C587; color:#06130c; text-decoration:none; font-weight:bold; padding:14px 22px; border-radius:999px;">
           Write your review
         </a>
         <p style="font-size:13px; line-height:1.6; color:#94a3b8; margin-top:24px;">

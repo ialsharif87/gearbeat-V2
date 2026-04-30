@@ -477,9 +477,9 @@ export default async function LoginPage({
                       marginBottom: 18,
                       padding: 14,
                       borderRadius: 16,
-                      background: "rgba(255, 75, 75, 0.14)",
-                      border: "1px solid rgba(255, 75, 75, 0.35)",
-                      color: "#ffb3b3"
+                      background: "rgba(226, 109, 90, 0.14)",
+                      border: "1px solid rgba(226, 109, 90, 0.35)",
+                      color: "var(--gb-danger)"
                     }
                   : { marginBottom: 18 }
               }

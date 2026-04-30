@@ -176,9 +176,9 @@ function statusStyle(status: string | null | undefined) {
     status === "confirmed"
   ) {
     return {
-      background: "rgba(30, 215, 96, 0.18)",
-      color: "#1ed760",
-      border: "1px solid rgba(30, 215, 96, 0.45)"
+      background: "rgba(103, 197, 135, 0.18)",
+      color: "var(--gb-success)",
+      border: "1px solid rgba(103, 197, 135, 0.45)"
     };
   }
 
@@ -189,9 +189,9 @@ function statusStyle(status: string | null | undefined) {
     status === "refunded"
   ) {
     return {
-      background: "rgba(255, 75, 75, 0.18)",
-      color: "#ff4b4b",
-      border: "1px solid rgba(255, 75, 75, 0.45)"
+      background: "rgba(226, 109, 90, 0.18)",
+      color: "var(--gb-danger)",
+      border: "1px solid rgba(226, 109, 90, 0.45)"
     };
   }
 
@@ -207,7 +207,7 @@ function statusStyle(status: string | null | undefined) {
   ) {
     return {
       background: "rgba(255, 193, 7, 0.18)",
-      color: "#ffc107",
+      color: "var(--gb-warning)",
       border: "1px solid rgba(255, 193, 7, 0.45)"
     };
   }

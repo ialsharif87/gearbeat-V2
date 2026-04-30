@@ -46,31 +46,31 @@ function formatDate(value: string | null | undefined) {
 function requestStatusStyle(status: string) {
   if (status === "submitted") {
     return {
-      background: "rgba(30, 215, 96, 0.18)",
-      color: "#1ed760",
-      border: "1px solid rgba(30, 215, 96, 0.45)"
+      background: "rgba(103, 197, 135, 0.18)",
+      color: "var(--gb-success)",
+      border: "1px solid rgba(103, 197, 135, 0.45)"
     };
   }
 
   if (status === "sent") {
     return {
       background: "rgba(53, 216, 255, 0.16)",
-      color: "#35d8ff",
+      color: "var(--gb-blue)",
       border: "1px solid rgba(53, 216, 255, 0.4)"
     };
   }
 
   if (status === "expired" || status === "failed") {
     return {
-      background: "rgba(255, 75, 75, 0.18)",
-      color: "#ff4b4b",
-      border: "1px solid rgba(255, 75, 75, 0.45)"
+      background: "rgba(226, 109, 90, 0.18)",
+      color: "var(--gb-danger)",
+      border: "1px solid rgba(226, 109, 90, 0.45)"
     };
   }
 
   return {
     background: "rgba(255, 193, 7, 0.18)",
-    color: "#ffc107",
+    color: "var(--gb-warning)",
     border: "1px solid rgba(255, 193, 7, 0.45)"
   };
 }

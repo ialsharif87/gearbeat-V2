@@ -44,7 +44,7 @@ const palette = [
   { name: "Midnight Navy", hex: "#0B0F16", className: styles.swatchMidnight },
   { name: "Charcoal", hex: "#151A22", className: styles.swatchCharcoal },
   { name: "Champagne Gold", hex: "#D4AF37", className: styles.swatchGold },
-  { name: "Emerald Teal", hex: "#0FA08A", className: styles.swatchTeal },
+  { name: "Emerald Teal", hex: "var(--gb-copper)", className: styles.swatchTeal },
   { name: "Ivory", hex: "#F2EFE9", className: styles.swatchIvory },
   { name: "Steel Gray", hex: "#6B7280", className: styles.swatchSteel },
 ];

@@ -152,7 +152,7 @@ function buildReviewEmail({
   <body style="margin:0;padding:0;background:#08080c;font-family:Arial,sans-serif;color:#ffffff;">
     <div style="max-width:640px;margin:0 auto;padding:32px;">
       <div style="background:#11111a;border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:28px;">
-        <div style="display:inline-block;background:rgba(30,215,96,0.16);border:1px solid rgba(30,215,96,0.35);color:#1ed760;border-radius:999px;padding:8px 14px;font-size:13px;">
+        <div style="display:inline-block;background:rgba(30,215,96,0.16);border:1px solid rgba(30,215,96,0.35);color:#67C587;border-radius:999px;padding:8px 14px;font-size:13px;">
           GearBeat Verified Review
         </div>
 
@@ -176,7 +176,7 @@ function buildReviewEmail({
           </p>
         </div>
 
-        <a href="${reviewUrl}" style="display:inline-block;background:#1ed760;color:#050507;text-decoration:none;font-weight:bold;border-radius:14px;padding:14px 22px;margin:10px 0 22px;">
+        <a href="${reviewUrl}" style="display:inline-block;background:#67C587;color:#050507;text-decoration:none;font-weight:bold;border-radius:14px;padding:14px 22px;margin:10px 0 22px;">
           اكتب التقييم الآن
         </a>
 
@@ -191,7 +191,7 @@ function buildReviewEmail({
         </p>
 
         <div style="direction:ltr;text-align:left;">
-          <a href="${reviewUrl}" style="display:inline-block;background:#1ed760;color:#050507;text-decoration:none;font-weight:bold;border-radius:14px;padding:14px 22px;">
+          <a href="${reviewUrl}" style="display:inline-block;background:#67C587;color:#050507;text-decoration:none;font-weight:bold;border-radius:14px;padding:14px 22px;">
             Write Review
           </a>
         </div>
