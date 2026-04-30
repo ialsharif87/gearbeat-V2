@@ -28,6 +28,20 @@ function renderStars(rating: unknown) {
   return "★".repeat(safeValue) + "☆".repeat(5 - safeValue);
 }
 
+function profileNameByAuthUserId(profiles: any[], authUserId: string) {
+  const profile = profiles.find(
+    (item: any) => item.auth_user_id === authUserId
+  );
+
+  return profile?.full_name || profile?.email || "Customer";
+}
+
+function productNameById(products: any[], productId: string) {
+  const product = products.find((item: any) => item.id === productId);
+
+  return product?.name_en || product?.name_ar || "Product";
+}
+
 export default async function VendorReviewsPage() {
   const { supabaseAdmin, user } = await requireVendorLayoutAccess();
 
@@ -40,7 +54,8 @@ export default async function VendorReviewsPage() {
     throw new Error(productsError.message);
   }
 
-  const productIds = (products || []).map((product: any) => product.id);
+  const vendorProducts = products || [];
+  const productIds = vendorProducts.map((product: any) => product.id);
 
   if (productIds.length === 0) {
     return (
@@ -80,22 +95,11 @@ export default async function VendorReviewsPage() {
     .select(`
       id,
       product_id,
-      customer_id,
+      customer_auth_user_id,
       rating,
-      title,
       comment,
-      status,
-      created_at,
-      product:marketplace_products(
-        id,
-        name_en,
-        name_ar
-      ),
-      customer:profiles(
-        id,
-        full_name,
-        email
-      )
+      vendor_reply,
+      created_at
     `)
     .in("product_id", productIds)
     .order("created_at", { ascending: false });
@@ -106,6 +110,28 @@ export default async function VendorReviewsPage() {
 
   const reviewRows = reviews || [];
 
+  const customerAuthUserIds = Array.from(
+    new Set(
+      reviewRows
+        .map((review: any) => review.customer_auth_user_id)
+        .filter(Boolean)
+    )
+  );
+
+  const { data: customerProfiles, error: customerProfilesError } =
+    customerAuthUserIds.length > 0
+      ? await supabaseAdmin
+          .from("profiles")
+          .select("auth_user_id, full_name, email")
+          .in("auth_user_id", customerAuthUserIds)
+      : { data: [], error: null };
+
+  if (customerProfilesError) {
+    throw new Error(customerProfilesError.message);
+  }
+
+  const profiles = customerProfiles || [];
+
   const totalReviews = reviewRows.length;
   const averageRating =
     totalReviews > 0
@@ -114,14 +140,6 @@ export default async function VendorReviewsPage() {
           0
         ) / totalReviews
       : 0;
-
-  const approvedReviews = reviewRows.filter(
-    (review: any) => review.status === "approved"
-  ).length;
-
-  const pendingReviews = reviewRows.filter(
-    (review: any) => review.status !== "approved"
-  ).length;
 
   return (
     <div className="dashboard-page">
@@ -147,9 +165,7 @@ export default async function VendorReviewsPage() {
             <label>
               <T en="Average Rating" ar="متوسط التقييم" />
             </label>
-            <div className="stat-value">
-              {averageRating.toFixed(1)}
-            </div>
+            <div className="stat-value">{averageRating.toFixed(1)}</div>
           </div>
         </div>
 
@@ -160,26 +176,6 @@ export default async function VendorReviewsPage() {
               <T en="Total Reviews" ar="إجمالي التقييمات" />
             </label>
             <div className="stat-value">{totalReviews}</div>
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <label>
-              <T en="Approved" ar="المعتمدة" />
-            </label>
-            <div className="stat-value">{approvedReviews}</div>
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <label>
-              <T en="Pending / Other" ar="معلقة / أخرى" />
-            </label>
-            <div className="stat-value">{pendingReviews}</div>
           </div>
         </div>
       </div>
@@ -199,23 +195,15 @@ export default async function VendorReviewsPage() {
           </div>
         ) : (
           reviewRows.map((review: any) => {
-            const product = Array.isArray(review.product)
-              ? review.product[0]
-              : review.product;
+            const productName = productNameById(
+              vendorProducts,
+              review.product_id
+            );
 
-            const customer = Array.isArray(review.customer)
-              ? review.customer[0]
-              : review.customer;
-
-            const productName =
-              product?.name_en ||
-              product?.name_ar ||
-              "Product";
-
-            const customerName =
-              customer?.full_name ||
-              customer?.email ||
-              "Customer";
+            const customerName = profileNameByAuthUserId(
+              profiles,
+              review.customer_auth_user_id
+            );
 
             return (
               <div key={review.id} className="card">
@@ -239,9 +227,7 @@ export default async function VendorReviewsPage() {
                     </div>
 
                     <h3 style={{ marginTop: 8 }}>
-                      {review.title || (
-                        <T en="Customer Review" ar="تقييم العميل" />
-                      )}
+                      <T en="Customer Review" ar="تقييم العميل" />
                     </h3>
 
                     <p style={{ color: "var(--muted)", marginTop: 4 }}>
@@ -249,17 +235,14 @@ export default async function VendorReviewsPage() {
                     </p>
                   </div>
 
-                  <div style={{ textAlign: "right" }}>
-                    <span className="badge">{review.status || "pending"}</span>
-                    <div
-                      style={{
-                        marginTop: 8,
-                        color: "var(--muted)",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      {formatDate(review.created_at)}
-                    </div>
+                  <div
+                    style={{
+                      color: "var(--muted)",
+                      fontSize: "0.85rem",
+                      textAlign: "right",
+                    }}
+                  >
+                    {formatDate(review.created_at)}
                   </div>
                 </div>
 
@@ -272,6 +255,23 @@ export default async function VendorReviewsPage() {
                     <T en="No written comment." ar="لا يوجد تعليق مكتوب." />
                   </p>
                 )}
+
+                {review.vendor_reply ? (
+                  <div
+                    style={{
+                      marginTop: 18,
+                      padding: 14,
+                      borderRadius: 12,
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: "rgba(255,255,255,0.03)",
+                    }}
+                  >
+                    <strong>
+                      <T en="Vendor Reply" ar="رد التاجر" />
+                    </strong>
+                    <p style={{ marginTop: 8 }}>{review.vendor_reply}</p>
+                  </div>
+                ) : null}
               </div>
             );
           })
