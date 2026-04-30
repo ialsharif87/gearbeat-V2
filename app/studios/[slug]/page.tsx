@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "../../../lib/supabase/server";
-import T from "../../../components/t";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import T from "@/components/t";
+import ShareButton from "@/components/share-button";
+import FavoriteButton from "@/components/favorite-button";
+import StudioPhotoGallery from "@/components/studio-photo-gallery";
+import GoogleMapsLink from "@/components/google-maps-link";
 
 function formatSyncDate(value: string | null | undefined) {
   if (!value) return null;
@@ -104,12 +109,50 @@ export default async function StudioDetailsPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
 
   const { data: studio, error } = await supabase
     .from("studios")
-    .select(
-      "id,name,slug,city,district,address,description,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_maps_url,google_reviews_url,google_place_id,google_rating,google_user_ratings_total,google_rating_last_synced_at,tripadvisor_url,tripadvisor_rating,tripadvisor_reviews_total,tripadvisor_rating_last_synced_at"
-    )
+    .select(`
+      id,
+      slug,
+      name,
+      name_en,
+      name_ar,
+      description,
+      description_en,
+      description_ar,
+      city,
+      city_name,
+      district,
+      address,
+      address_line,
+      google_maps_url,
+      google_reviews_url,
+      google_place_id,
+      google_rating,
+      google_user_ratings_total,
+      google_rating_last_synced_at,
+      tripadvisor_url,
+      tripadvisor_rating,
+      tripadvisor_reviews_total,
+      tripadvisor_rating_last_synced_at,
+      latitude,
+      longitude,
+      price_from,
+      cover_image_url,
+      verified,
+      verified_location,
+      instant_booking_enabled,
+      booking_enabled,
+      owner_compliance_status,
+      owner_auth_user_id,
+      owner_trust_summary,
+      minimum_photos_required,
+      capacity,
+      size_sqm,
+      created_at
+    `)
     .eq("slug", slug)
     .eq("status", "approved")
     .eq("verified", true)
@@ -121,7 +164,15 @@ export default async function StudioDetailsPage({
     notFound();
   }
 
-  const { data: images } = await supabase
+  const { data: ownerProfile } = studio.owner_auth_user_id 
+    ? await supabaseAdmin
+      .from("profiles")
+      .select("auth_user_id, full_name, email, phone_verified, email_verified, identity_verification_status")
+      .eq("auth_user_id", studio.owner_auth_user_id)
+      .maybeSingle()
+    : { data: null };
+
+  const { data: studioImages } = await supabase
     .from("studio_images")
     .select("id,image_url,is_cover,sort_order")
     .eq("studio_id", studio.id)
@@ -132,7 +183,7 @@ export default async function StudioDetailsPage({
     .select("id,custom_name,studio_features(name_en,name_ar,category)")
     .eq("studio_id", studio.id);
 
-  const { data: equipment } = await supabase
+  const { data: studioEquipment } = await supabase
     .from("studio_equipment")
     .select("id,name,brand,model,category,quantity,notes")
     .eq("studio_id", studio.id)
@@ -173,17 +224,6 @@ export default async function StudioDetailsPage({
     });
   }
 
-  const hasFeatures = Object.values(featureGroups).some(
-    (items) => items.length > 0
-  );
-
-  const hasExternalTrust =
-    studio.google_maps_url ||
-    studio.google_reviews_url ||
-    studio.tripadvisor_url ||
-    studio.google_rating ||
-    studio.tripadvisor_rating;
-
   const reviewList = reviews || [];
   const reviewCount = reviewList.length;
 
@@ -194,675 +234,313 @@ export default async function StudioDetailsPage({
   const allTimeAverage = average(reviewScores);
   const timeWeightedAverage = weightedAverageByTime(reviewList);
 
-  const recent90Reviews = reviewsInLastDays(reviewList, 90);
-  const recent180Reviews = reviewsInLastDays(reviewList, 180);
-
-  const recent90Average = average(
-    recent90Reviews.map((review) => getReviewScore(review)).filter(Boolean)
-  );
-
-  const recent180Average = average(
-    recent180Reviews.map((review) => getReviewScore(review)).filter(Boolean)
-  );
-
-  const cleanlinessAverage = average(
-    reviewList
-      .map((review) => Number(review.cleanliness_rating || 0))
-      .filter(Boolean)
-  );
-
-  const equipmentAverage = average(
-    reviewList
-      .map((review) => Number(review.equipment_rating || 0))
-      .filter(Boolean)
-  );
-
-  const soundAverage = average(
-    reviewList
-      .map((review) => Number(review.sound_quality_rating || 0))
-      .filter(Boolean)
-  );
-
-  const communicationAverage = average(
-    reviewList
-      .map((review) => Number(review.communication_rating || 0))
-      .filter(Boolean)
-  );
-
-  const valueAverage = average(
-    reviewList
-      .map((review) => Number(review.value_rating || 0))
-      .filter(Boolean)
-  );
-
-  const lastReviewDate = reviewList[0]?.created_at
-    ? formatSyncDate(reviewList[0].created_at)
-    : null;
+  const studioName = studio.name_en || studio.name || studio.name_ar || "Studio";
+  const displayCity = studio.city_name || studio.city || "";
+  const displayLocation = [studio.district, displayCity].filter(Boolean).join(", ");
+  const minimumPhotosRequired = Number(studio.minimum_photos_required || 6);
+  const photoCount = studioImages?.length || 0;
 
   return (
-    <section>
-      <div className="studio-detail-hero card">
-        <div className="studio-detail-image">
-          {studio.cover_image_url ? (
-            <img src={studio.cover_image_url} alt={studio.name} />
-          ) : (
-            <div className="placeholder">
-              <T en="No Image" ar="لا توجد صورة" />
+    <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
+      <section style={{ marginTop: 24 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <span className="badge badge-gold">
+              <T en="Premium Studio" ar="استوديو مميز" />
+            </span>
+
+            <h1 style={{ marginTop: 10 }}>{studioName}</h1>
+
+            <p style={{ color: "var(--muted)" }}>{displayLocation}</p>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+              {studio.verified ? (
+                <span className="badge badge-success">
+                  <T en="Verified studio" ar="استوديو موثق" />
+                </span>
+              ) : null}
+
+              {studio.verified_location ? (
+                <span className="badge badge-success">
+                  <T en="Location verified" ar="الموقع موثق" />
+                </span>
+              ) : null}
+
+              {studio.instant_booking_enabled ? (
+                <span className="badge">
+                  <T en="Instant booking" ar="حجز فوري" />
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <ShareButton
+              title={studioName}
+              text={`Check out ${studioName} on GearBeat`}
+            />
+
+            <FavoriteButton
+              type="studio"
+              studioId={studio.id}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section style={{ marginTop: 24 }}>
+        <StudioPhotoGallery
+          images={studioImages || []}
+          studioName={studioName}
+          coverImageUrl={studio.cover_image_url}
+        />
+
+        {photoCount < minimumPhotosRequired ? (
+          <div
+            className="card"
+            style={{
+              marginTop: 14,
+              borderColor: "rgba(255,176,32,0.35)",
+              background: "rgba(255,176,32,0.08)",
+            }}
+          >
+            <T
+              en="This studio has not completed the recommended photo gallery yet."
+              ar="هذا الاستوديو لم يكمل عدد الصور الموصى به بعد."
+            />
+          </div>
+        ) : null}
+      </section>
+
+      <section
+        style={{
+          marginTop: 30,
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1fr) 360px",
+          gap: 24,
+          alignItems: "start",
+        }}
+      >
+        <div style={{ display: "grid", gap: 20 }}>
+          <div className="card">
+            <h2>
+              <T en="About this studio" ar="عن هذا الاستوديو" />
+            </h2>
+            <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+              {studio.description_en || studio.description || studio.description_ar || "A premium creative space listed on GearBeat."}
+            </p>
+          </div>
+
+          <div className="card">
+            <h2>
+              <T en="Space details" ar="تفاصيل المكان" />
+            </h2>
+
+            <div className="grid grid-3" style={{ marginTop: 16 }}>
+              <div>
+                <span style={{ color: "var(--muted)" }}>
+                  <T en="Capacity" ar="السعة" />
+                </span>
+                <strong style={{ display: "block", marginTop: 6 }}>
+                  {studio.capacity || "—"}
+                </strong>
+              </div>
+
+              <div>
+                <span style={{ color: "var(--muted)" }}>
+                  <T en="Size" ar="المساحة" />
+                </span>
+                <strong style={{ display: "block", marginTop: 6 }}>
+                  {studio.size_sqm ? `${studio.size_sqm} sqm` : "—"}
+                </strong>
+              </div>
+
+              <div>
+                <span style={{ color: "var(--muted)" }}>
+                  <T en="Starting price" ar="السعر يبدأ من" />
+                </span>
+                <strong style={{ display: "block", marginTop: 6 }}>
+                  {Number(studio.price_from || 0).toFixed(2)} SAR
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <h2>
+              <T en="Equipment" ar="المعدات" />
+            </h2>
+
+            {studioEquipment && studioEquipment.length > 0 ? (
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+                {studioEquipment.map((item: any) => (
+                  <span key={item.id} className="badge">
+                    {item.name} {item.brand ? `· ${item.brand}` : ""}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: "var(--muted)" }}>
+                <T
+                  en="Equipment details will be added soon."
+                  ar="سيتم إضافة تفاصيل المعدات قريبًا."
+                />
+              </p>
+            )}
+          </div>
+
+          <div className="card">
+            <h2>
+              <T en="Location" ar="الموقع" />
+            </h2>
+
+            <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+              {[studio.address_line, studio.district, studio.city_name || studio.city]
+                .filter(Boolean)
+                .join(", ") || "Location details coming soon."}
+            </p>
+
+            <div style={{ marginTop: 16 }}>
+              <GoogleMapsLink
+                googleMapsUrl={studio.google_maps_url}
+                latitude={studio.latitude}
+                longitude={studio.longitude}
+                cityName={studio.city_name || studio.city}
+                district={studio.district}
+                addressLine={studio.address_line}
+                mode="directions"
+                className="btn"
+              />
+            </div>
+          </div>
+
+          <div className="card">
+            <h2>
+              <T en="Hosted by" ar="المضيف" />
+            </h2>
+
+            <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+              {ownerProfile?.full_name || "Verified GearBeat studio owner"}
+            </p>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
+              {ownerProfile?.email_verified ? (
+                <span className="badge badge-success">Email verified</span>
+              ) : null}
+
+              {ownerProfile?.phone_verified ? (
+                <span className="badge badge-success">Phone verified</span>
+              ) : null}
+
+              {ownerProfile?.identity_verification_status === "verified" ? (
+                <span className="badge badge-success">Identity verified</span>
+              ) : null}
+
+              {studio.verified ? (
+                <span className="badge badge-success">Studio verified</span>
+              ) : null}
+            </div>
+          </div>
+
+          {reviewCount > 0 && (
+            <div className="card">
+              <h2><T en="Reviews" ar="التقييمات" /></h2>
+              <div className="gearbeat-rating-mini" style={{ marginBottom: 20 }}>
+                <strong style={{ fontSize: '2rem' }}>{formatRating(timeWeightedAverage)} ★</strong>
+                <p style={{ color: 'var(--muted)', marginTop: 4 }}>
+                  <T en="GearBeat weighted rating" ar="تقييم GearBeat المرجّح" /> · {reviewCount} <T en="verified reviews" ar="تقييم موثق" />
+                </p>
+              </div>
+
+              <div className="review-card-grid" style={{ display: 'grid', gap: 16 }}>
+                {reviewList.slice(0, 3).map((review) => {
+                  const reviewScore = getReviewScore(review);
+                  return (
+                    <article className="review-card" key={review.id} style={{ padding: 16, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <strong>{formatRating(reviewScore)} ★</strong>
+                        <small style={{ color: 'var(--muted)' }}>{formatSyncDate(review.created_at)}</small>
+                      </div>
+                      <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.95rem' }}>{review.comment || (review.rating >= 4 ? "Excellent experience!" : "Good experience.")}</p>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
 
-        <div className="studio-detail-content">
-          <span className="badge">
-            <T en="Verified Studio" ar="استوديو موثق" />
-          </span>
+        <aside
+          className="card"
+          style={{
+            position: "sticky",
+            top: 90,
+          }}
+        >
+          <div style={{ color: "var(--muted)" }}>
+            <T en="Starts from" ar="يبدأ من" />
+          </div>
 
-          <h1>{studio.name}</h1>
+          <div style={{ fontSize: "2rem", fontWeight: 800, marginTop: 6 }}>
+            {Number(studio.price_from || 0).toFixed(2)} SAR
+          </div>
 
-          <p className="studio-location">
-            {studio.city}
-            {studio.district ? ` · ${studio.district}` : ""}
+          <p style={{ color: "var(--muted)", marginTop: 6 }}>
+            <T en="per hour" ar="بالساعة" />
           </p>
 
-          {studio.address ? <p>{studio.address}</p> : null}
-
-          <p>
-            {studio.description || (
-              <T
-                en="No description available yet."
-                ar="لا يوجد وصف متاح حاليًا."
-              />
+          <div style={{ marginTop: 20, display: "grid", gap: 10 }}>
+            {studio.booking_enabled ? (
+              <Link
+                href={`/studios/${studio.slug || studio.id}/book`}
+                className="btn btn-primary btn-large"
+              >
+                <T en="Book this studio" ar="احجز هذا الاستوديو" />
+              </Link>
+            ) : (
+              <div
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  background: "rgba(255,77,77,0.08)",
+                  color: "#ffb0b0",
+                }}
+              >
+                <T
+                  en="Booking is currently unavailable."
+                  ar="الحجز غير متاح حاليًا."
+                />
+              </div>
             )}
-          </p>
 
-          <div className="studio-price-box">
-            <span>
-              <T en="Starting from" ar="يبدأ من" />
-            </span>
-            <strong>{studio.price_from ?? 0} SAR / hour</strong>
+            <GoogleMapsLink
+              googleMapsUrl={studio.google_maps_url}
+              latitude={studio.latitude}
+              longitude={studio.longitude}
+              cityName={studio.city_name || studio.city}
+              district={studio.district}
+              addressLine={studio.address_line}
+              mode="directions"
+              className="btn"
+            />
           </div>
 
-          {reviewCount > 0 ? (
-            <div className="gearbeat-rating-mini">
-              <strong>{formatRating(timeWeightedAverage)} ★</strong>
-              <span>
-                <T
-                  en="GearBeat weighted rating"
-                  ar="تقييم GearBeat المرجّح"
-                />{" "}
-                · {reviewCount} <T en="verified reviews" ar="تقييم موثق" />
-              </span>
-            </div>
-          ) : null}
-
-          <div className="actions">
-            <Link href={`/studios/${studio.slug}/book`} className="btn">
-              <T en="Book Now" ar="احجز الآن" />
-            </Link>
-
-            <Link href="/studios" className="btn btn-secondary">
-              <T en="Back to Studios" ar="العودة إلى الاستوديوهات" />
-            </Link>
-          </div>
-
-          <div className="actions">
-            {studio.google_maps_url ? (
-              <a
-                href={studio.google_maps_url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary btn-small"
-              >
-                <T en="Open in Google Maps" ar="فتح في Google Maps" />
-              </a>
-            ) : null}
-
-            {studio.google_reviews_url ? (
-              <a
-                href={studio.google_reviews_url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary btn-small"
-              >
-                <T en="Google Reviews" ar="تقييمات Google" />
-              </a>
-            ) : null}
-
-            {studio.tripadvisor_url ? (
-              <a
-                href={studio.tripadvisor_url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary btn-small"
-              >
-                TripAdvisor
-              </a>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ height: 28 }} />
-
-      <div className="pulse-panel">
-        <div className="card">
-          <span className="badge">
-            <T en="Studio Trust" ar="ثقة الاستوديو" />
-          </span>
-
-          <h2>
-            <T en="Review sources" ar="مصادر التقييم" />
-          </h2>
-
-          <p>
+          <p style={{ color: "var(--muted)", marginTop: 18, fontSize: "0.9rem", lineHeight: 1.7 }}>
             <T
-              en="External review links help customers validate the studio quality. Ratings are not entered manually by the owner."
-              ar="روابط التقييمات الخارجية تساعد العملاء على التأكد من جودة الاستوديو. التقييمات لا يتم إدخالها يدويًا من صاحب الاستوديو."
+              en="GearBeat helps verify studios and owners to create a safer creative booking experience."
+              ar="تساعد GearBeat في توثيق الاستوديوهات والملاك لتجربة حجز إبداعية أكثر أمانًا."
             />
           </p>
-
-          <div className="external-rating-grid">
-            <div className="external-rating-card">
-              <span className="badge">Google</span>
-
-              <h3>
-                {studio.google_rating ? `${studio.google_rating} ★` : "—"}
-              </h3>
-
-              <p>
-                {studio.google_user_ratings_total ? (
-                  <>
-                    {studio.google_user_ratings_total}{" "}
-                    <T en="reviews" ar="تقييم" />
-                  </>
-                ) : (
-                  <T
-                    en="Rating not synced yet."
-                    ar="لم يتم جلب التقييم بعد."
-                  />
-                )}
-              </p>
-
-              {studio.google_rating_last_synced_at ? (
-                <p>
-                  <T en="Last sync:" ar="آخر تحديث:" />{" "}
-                  {formatSyncDate(studio.google_rating_last_synced_at)}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="external-rating-card">
-              <span className="badge">TripAdvisor</span>
-
-              <h3>
-                {studio.tripadvisor_rating
-                  ? `${studio.tripadvisor_rating} ★`
-                  : "—"}
-              </h3>
-
-              <p>
-                {studio.tripadvisor_reviews_total ? (
-                  <>
-                    {studio.tripadvisor_reviews_total}{" "}
-                    <T en="reviews" ar="تقييم" />
-                  </>
-                ) : (
-                  <T
-                    en="Rating not verified yet."
-                    ar="لم يتم التحقق من التقييم بعد."
-                  />
-                )}
-              </p>
-
-              {studio.tripadvisor_rating_last_synced_at ? (
-                <p>
-                  <T en="Last sync:" ar="آخر تحديث:" />{" "}
-                  {formatSyncDate(studio.tripadvisor_rating_last_synced_at)}
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          {!hasExternalTrust ? (
-            <p>
-              <T
-                en="No external review sources have been added yet."
-                ar="لم تتم إضافة مصادر تقييم خارجية حتى الآن."
-              />
-            </p>
-          ) : null}
-        </div>
-
-        <div className="card wave-card">
-          <span className="badge">
-            <T en="Sound Profile" ar="الملف الصوتي" />
-          </span>
-
-          <h2>
-            <T en="Studio pulse" ar="نبض الاستوديو" />
-          </h2>
-
-          <p>
-            <T
-              en="A quick visual signal for the studio experience."
-              ar="إشارة بصرية سريعة لتجربة هذا الاستوديو."
-            />
-          </p>
-
-          <div className="waveform" aria-hidden="true">
-            {Array.from({ length: 36 }).map((_, index) => (
-              <i key={index} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ height: 28 }} />
-
-      <div className="card verified-reviews-card">
-        <div className="section-head compact-section-head">
-          <span className="badge">
-            <T en="Verified GearBeat Reviews" ar="تقييمات GearBeat الموثقة" />
-          </span>
-
-          <h1>
-            <T
-              en="Transparent rating from paid bookings"
-              ar="تقييم شفاف من حجوزات مدفوعة"
-            />
-          </h1>
-
-          <p>
-            <T
-              en="GearBeat rating is calculated from verified paid bookings only, using 6 review categories. Recent reviews carry more weight."
-              ar="يتم احتساب تقييم GearBeat من حجوزات مدفوعة وموثقة فقط، بناءً على 6 نقاط تقييم. التقييمات الحديثة لها وزن أعلى."
-            />
-          </p>
-        </div>
-
-        {reviewCount > 0 ? (
-          <>
-            <div className="review-summary-grid">
-              <div className="review-score-hero">
-                <strong>{formatRating(timeWeightedAverage)}</strong>
-                <span>{stars(timeWeightedAverage)}</span>
-                <p>
-                  <T en="Weighted GearBeat rating" ar="تقييم GearBeat المرجّح" />
-                </p>
-              </div>
-
-              <div className="review-breakdown-grid">
-                <div>
-                  <span>
-                    <T en="All-time average" ar="المتوسط العام" />
-                  </span>
-                  <strong>{formatRating(allTimeAverage)}</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <T en="Verified reviews" ar="التقييمات الموثقة" />
-                  </span>
-                  <strong>{reviewCount}</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <T en="Last 90 days" ar="آخر 90 يوم" />
-                  </span>
-                  <strong>
-                    {recent90Reviews.length
-                      ? `${formatRating(recent90Average)} · ${
-                          recent90Reviews.length
-                        }`
-                      : "—"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>
-                    <T en="Last 180 days" ar="آخر 180 يوم" />
-                  </span>
-                  <strong>
-                    {recent180Reviews.length
-                      ? `${formatRating(recent180Average)} · ${
-                          recent180Reviews.length
-                        }`
-                      : "—"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>
-                    <T en="Last review" ar="آخر تقييم" />
-                  </span>
-                  <strong>{lastReviewDate || "—"}</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <T en="Calculation" ar="طريقة الحساب" />
-                  </span>
-                  <strong>
-                    <T en="6 categories" ar="6 نقاط" />
-                  </strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="review-transparency-box">
-              <h3>
-                <T en="How this rating is calculated" ar="كيف يتم احتساب التقييم" />
-              </h3>
-
-              <p>
-                <T
-                  en="Each customer review is calculated as the average of 6 categories: overall experience, cleanliness, equipment quality, sound quality, communication, and value for money."
-                  ar="يتم احتساب كل تقييم عميل كمتوسط 6 نقاط: التجربة العامة، النظافة، جودة المعدات، جودة الصوت، التواصل، والقيمة مقابل السعر."
-                />
-              </p>
-
-              <p>
-                <T
-                  en="Time weighting: reviews from the last 90 days count 100%, 91–180 days count 70%, 181–365 days count 40%, and older reviews count 20%."
-                  ar="الوزن الزمني: تقييمات آخر 90 يوم تُحتسب 100%، من 91 إلى 180 يوم تُحتسب 70%، من 181 إلى 365 يوم تُحتسب 40%، والتقييمات الأقدم تُحتسب 20%."
-                />
-              </p>
-            </div>
-
-            <div className="review-breakdown-grid review-category-grid">
-              <div>
-                <span>
-                  <T en="Cleanliness" ar="النظافة" />
-                </span>
-                <strong>{formatRating(cleanlinessAverage)}</strong>
-              </div>
-
-              <div>
-                <span>
-                  <T en="Equipment" ar="المعدات" />
-                </span>
-                <strong>{formatRating(equipmentAverage)}</strong>
-              </div>
-
-              <div>
-                <span>
-                  <T en="Sound quality" ar="جودة الصوت" />
-                </span>
-                <strong>{formatRating(soundAverage)}</strong>
-              </div>
-
-              <div>
-                <span>
-                  <T en="Communication" ar="التواصل" />
-                </span>
-                <strong>{formatRating(communicationAverage)}</strong>
-              </div>
-
-              <div>
-                <span>
-                  <T en="Value" ar="القيمة" />
-                </span>
-                <strong>{formatRating(valueAverage)}</strong>
-              </div>
-            </div>
-
-            <div className="review-card-grid">
-              {reviewList.slice(0, 6).map((review) => {
-                const reviewScore = getReviewScore(review);
-                const reviewAge = getReviewAgeDays(review.created_at);
-                const reviewWeight = getTimeWeight(review.created_at);
-
-                return (
-                  <article className="review-card" key={review.id}>
-                    <div className="review-card-head">
-                      <span className="badge">
-                        <T en="Verified booking" ar="حجز موثق" />
-                      </span>
-                      <strong>{formatRating(reviewScore)} ★</strong>
-                    </div>
-
-                    <p className="review-stars">{stars(reviewScore)}</p>
-
-                    <p className="review-meta-line">
-                      <T en="Age:" ar="العمر:" /> {reviewAge}{" "}
-                      <T en="days" ar="يوم" /> ·{" "}
-                      <T en="Weight:" ar="الوزن:" />{" "}
-                      {Math.round(reviewWeight * 100)}%
-                    </p>
-
-                    {review.comment ? (
-                      <p>{review.comment}</p>
-                    ) : (
-                      <p>
-                        <T
-                          en="The customer did not leave a written comment."
-                          ar="لم يترك العميل تعليقًا مكتوبًا."
-                        />
-                      </p>
-                    )}
-
-                    <small>{formatSyncDate(review.created_at)}</small>
-                  </article>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="empty-review-box">
-            <h2>
-              <T en="No GearBeat reviews yet" ar="لا توجد تقييمات GearBeat بعد" />
-            </h2>
-
-            <p>
-              <T
-                en="Verified reviews will appear here after customers complete paid bookings and share their feedback."
-                ar="ستظهر التقييمات الموثقة هنا بعد أن يكمل العملاء حجوزات مدفوعة ويشاركون آراءهم."
-              />
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div style={{ height: 28 }} />
-
-      <div className="section-head">
-        <span className="badge">
-          <T en="Studio Setup" ar="إعدادات الاستوديو" />
-        </span>
-
-        <h1>
-          <T en="Features and amenities" ar="المميزات والخدمات" />
-        </h1>
-
-        <p>
-          <T
-            en="Explore the space type, amenities, equipment features, services, and media capabilities selected by the studio owner."
-            ar="استعرض نوع المساحة، المميزات، المعدات، الخدمات، وإمكانيات الإنتاج التي أضافها صاحب الاستوديو."
-          />
-        </p>
-      </div>
-
-      {hasFeatures ? (
-        <div className="public-feature-grid">
-          {[
-            {
-              key: "space",
-              icon: "🎙️",
-              en: "Studio Space Type",
-              ar: "نوع مساحة الاستوديو"
-            },
-            {
-              key: "amenity",
-              icon: "✨",
-              en: "Amenities",
-              ar: "المميزات"
-            },
-            {
-              key: "equipment",
-              icon: "🎛️",
-              en: "Equipment Features",
-              ar: "مميزات المعدات"
-            },
-            {
-              key: "service",
-              icon: "🧑‍💻",
-              en: "Services Available",
-              ar: "الخدمات المتاحة"
-            },
-            {
-              key: "media",
-              icon: "🎥",
-              en: "Media & Production",
-              ar: "الإنتاج والتصوير"
-            },
-            {
-              key: "custom",
-              icon: "➕",
-              en: "Custom Features",
-              ar: "مميزات مخصصة"
-            }
-          ].map((group) => {
-            const items = featureGroups[group.key] || [];
-
-            if (!items.length) return null;
-
-            return (
-              <div className="card public-feature-card" key={group.key}>
-                <div className="public-feature-head">
-                  <span className="accordion-icon">{group.icon}</span>
-
-                  <div>
-                    <h2>
-                      <T en={group.en} ar={group.ar} />
-                    </h2>
-                    <p>
-                      {items.length} <T en="items" ar="عنصر" />
-                    </p>
-                  </div>
-                </div>
-
-                <div className="feature-pill-wrap">
-                  {items.map((item) => (
-                    <span className="feature-pill" key={item.id}>
-                      <T
-                        en={
-                          item.feature?.name_en ||
-                          item.custom_name ||
-                          "Feature"
-                        }
-                        ar={
-                          item.feature?.name_ar ||
-                          item.custom_name ||
-                          "ميزة"
-                        }
-                      />
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="card">
-          <h2>
-            <T en="No features added yet" ar="لم تتم إضافة مميزات بعد" />
-          </h2>
-          <p>
-            <T
-              en="The studio owner has not added detailed features yet."
-              ar="لم يقم صاحب الاستوديو بإضافة تفاصيل المميزات حتى الآن."
-            />
-          </p>
-        </div>
-      )}
-
-      <div style={{ height: 28 }} />
-
-      <div className="section-head">
-        <span className="badge">
-          <T en="Equipment" ar="المعدات" />
-        </span>
-
-        <h1>
-          <T en="Studio equipment" ar="معدات الاستوديو" />
-        </h1>
-      </div>
-
-      {equipment?.length ? (
-        <div className="equipment-public-grid">
-          {equipment.map((item) => (
-            <div className="card equipment-public-card" key={item.id}>
-              <div className="equipment-icon">🎚️</div>
-
-              <div>
-                <h2>{item.name}</h2>
-
-                <p>
-                  {[item.brand, item.model, item.category]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-
-                <p>
-                  <T en="Quantity:" ar="الكمية:" /> {item.quantity}
-                </p>
-
-                {item.notes ? <p>{item.notes}</p> : null}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="card">
-          <h2>
-            <T en="No equipment listed yet" ar="لا توجد معدات مدرجة بعد" />
-          </h2>
-          <p>
-            <T
-              en="Detailed equipment will appear here once the studio owner adds it."
-              ar="ستظهر المعدات التفصيلية هنا بعد أن يضيفها صاحب الاستوديو."
-            />
-          </p>
-        </div>
-      )}
-
-      <div style={{ height: 34 }} />
-
-      <div className="section-head">
-        <span className="badge">
-          <T en="Gallery" ar="المعرض" />
-        </span>
-
-        <h1>
-          <T en="Studio images" ar="صور الاستوديو" />
-        </h1>
-      </div>
-
-      <div className="grid">
-        {images?.length ? (
-          images.map((image) => (
-            <div className="card studio-card" key={image.id}>
-              <div className="studio-cover">
-                <img src={image.image_url} alt={studio.name} />
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="card">
-            <h2>
-              <T en="No gallery images yet" ar="لا توجد صور في المعرض بعد" />
-            </h2>
-            <p>
-              <T
-                en="Gallery images for this studio will appear here later."
-                ar="صور هذا الاستوديو ستظهر هنا لاحقًا."
-              />
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
+        </aside>
+      </section>
+    </main>
   );
 }
