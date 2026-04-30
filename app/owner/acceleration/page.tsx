@@ -61,6 +61,39 @@ export default async function OwnerAccelerationPage() {
     });
   }
 
+  async function requestBoost(formData: FormData) {
+    "use server";
+    const supabaseAdmin = createAdminClient();
+    
+    const packageName = formData.get("package_name")?.toString();
+    const price = Number(formData.get("price"));
+    const studioId = formData.get("studio_id")?.toString();
+    
+    if (!packageName || !studioId || isNaN(price)) {
+      throw new Error("Invalid boost request parameters");
+    }
+
+    // Verify studio belongs to the owner
+    if (!studioIds.includes(studioId)) {
+      throw new Error("Unauthorized studio");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("studio_accelerations")
+      .insert({
+        studio_id: studioId,
+        package_name: packageName,
+        price: price,
+        status: "pending",
+      });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/owner/acceleration");
+  }
+
   return (
     <section className="page">
       <div className="container">
@@ -127,9 +160,22 @@ export default async function OwnerAccelerationPage() {
               <li>Marketplace priority</li>
               <li>Featured badge</li>
             </ul>
-            <button className="btn btn-secondary" style={{ width: "100%" }}>
-              Request Boost
-            </button>
+            <form action={requestBoost}>
+              <input type="hidden" name="package_name" value="Starter Boost" />
+              <input type="hidden" name="price" value="99" />
+              {studiosList.length === 1 ? (
+                <input type="hidden" name="studio_id" value={studiosList[0].id} />
+              ) : (
+                <select name="studio_id" required className="input" style={{ marginBottom: 10, width: "100%" }}>
+                  {studiosList.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              )}
+              <button className="btn btn-secondary" style={{ width: "100%" }} type="submit" disabled={studiosList.length === 0}>
+                Request Boost (99 SAR)
+              </button>
+            </form>
           </div>
 
           <div className="card" style={{ borderColor: "var(--gb-gold)" }}>
@@ -140,9 +186,22 @@ export default async function OwnerAccelerationPage() {
               <li>Featured badge</li>
               <li>Homepage featured area</li>
             </ul>
-            <button className="btn" style={{ width: "100%" }}>
-              Request Boost
-            </button>
+            <form action={requestBoost}>
+              <input type="hidden" name="package_name" value="Growth Boost" />
+              <input type="hidden" name="price" value="199" />
+              {studiosList.length === 1 ? (
+                <input type="hidden" name="studio_id" value={studiosList[0].id} />
+              ) : (
+                <select name="studio_id" required className="input" style={{ marginBottom: 10, width: "100%" }}>
+                  {studiosList.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              )}
+              <button className="btn" style={{ width: "100%" }} type="submit" disabled={studiosList.length === 0}>
+                Request Boost (199 SAR)
+              </button>
+            </form>
           </div>
 
           <div className="card">
@@ -154,9 +213,22 @@ export default async function OwnerAccelerationPage() {
               <li>Featured badge</li>
               <li>Performance report</li>
             </ul>
-            <button className="btn btn-secondary" style={{ width: "100%" }}>
-              Request Boost
-            </button>
+            <form action={requestBoost}>
+              <input type="hidden" name="package_name" value="Premium Boost" />
+              <input type="hidden" name="price" value="399" />
+              {studiosList.length === 1 ? (
+                <input type="hidden" name="studio_id" value={studiosList[0].id} />
+              ) : (
+                <select name="studio_id" required className="input" style={{ marginBottom: 10, width: "100%" }}>
+                  {studiosList.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              )}
+              <button className="btn btn-secondary" style={{ width: "100%" }} type="submit" disabled={studiosList.length === 0}>
+                Request Boost (399 SAR)
+              </button>
+            </form>
           </div>
         </div>
 

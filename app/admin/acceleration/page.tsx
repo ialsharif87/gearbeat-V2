@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 import T from "../../../components/t";
 
 export default async function AdminAccelerationPage() {
@@ -27,6 +28,53 @@ export default async function AdminAccelerationPage() {
   const pendingRequests = accelerations?.filter((a) => a.status === "pending") || [];
   const activeAccelerations = accelerations?.filter((a) => a.status === "active") || [];
   const otherAccelerations = accelerations?.filter((a) => a.status !== "pending" && a.status !== "active") || [];
+
+  async function approveBoost(formData: FormData) {
+    "use server";
+    const supabaseAdmin = createAdminClient();
+    const id = formData.get("id")?.toString();
+    if (!id) throw new Error("Missing ID");
+
+    const { data: request } = await supabaseAdmin.from("studio_accelerations").select("package_name").eq("id", id).single();
+    if (!request) throw new Error("Not found");
+    
+    let days = 7;
+    let score = 10;
+    if (request.package_name === "Growth Boost") { days = 14; score = 20; }
+    if (request.package_name === "Premium Boost") { days = 30; score = 50; }
+
+    const start_date = new Date();
+    const end_date = new Date();
+    end_date.setDate(start_date.getDate() + days);
+
+    const { error } = await supabaseAdmin
+      .from("studio_accelerations")
+      .update({
+        status: "active",
+        priority_score: score,
+        start_date: start_date.toISOString(),
+        end_date: end_date.toISOString()
+      })
+      .eq("id", id);
+      
+    if (error) throw new Error(error.message);
+    revalidatePath("/admin/acceleration");
+  }
+
+  async function rejectBoost(formData: FormData) {
+    "use server";
+    const supabaseAdmin = createAdminClient();
+    const id = formData.get("id")?.toString();
+    if (!id) throw new Error("Missing ID");
+
+    const { error } = await supabaseAdmin
+      .from("studio_accelerations")
+      .update({ status: "rejected" })
+      .eq("id", id);
+
+    if (error) throw new Error(error.message);
+    revalidatePath("/admin/acceleration");
+  }
 
   return (
     <section className="page">
@@ -94,13 +142,13 @@ export default async function AdminAccelerationPage() {
                     <td style={{ padding: 12 }}>{req.package_name}</td>
                     <td style={{ padding: 12 }}>{new Date(req.created_at).toLocaleDateString()}</td>
                     <td style={{ padding: 12 }}>
-                      <form action="/api/admin/acceleration/approve" method="POST" style={{ display: "inline-block", marginRight: 10 }}>
+                      <form action={approveBoost} style={{ display: "inline-block", marginRight: 10 }}>
                         <input type="hidden" name="id" value={req.id} />
                         <button type="submit" className="btn btn-small">
                           Approve
                         </button>
                       </form>
-                      <form action="/api/admin/acceleration/reject" method="POST" style={{ display: "inline-block" }}>
+                      <form action={rejectBoost} style={{ display: "inline-block" }}>
                         <input type="hidden" name="id" value={req.id} />
                         <button type="submit" className="btn btn-small btn-secondary" style={{ color: "var(--gb-danger)", borderColor: "var(--gb-danger)" }}>
                           Reject
