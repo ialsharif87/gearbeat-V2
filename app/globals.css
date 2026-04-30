@@ -6306,3 +6306,84 @@ body:has(.home-page) {
 .admin-table th { text-align: left; padding: 15px; background: rgba(255,255,255,0.03); color: var(--gb-muted); font-size: 0.8rem; }
 .admin-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 [dir="rtl"] .admin-table th { text-align: right; }
+
+/* PARTNER DROPDOWN */
+.partner-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.partner-trigger {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px 15px;
+}
+
+.partner-trigger .chevron {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.partner-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 250px;
+  background: var(--gb-surface-2);
+  border: 1px solid var(--gb-border);
+  border-radius: 12px;
+  padding: 10px;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  margin-top: 10px;
+}
+
+.partner-dropdown-container:hover .partner-dropdown-menu {
+  display: block;
+}
+
+.partner-item {
+  display: flex;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.partner-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.partner-icon {
+  font-size: 1.5rem;
+  background: rgba(199, 164, 93, 0.1);
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.partner-text strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.partner-text p {
+  font-size: 0.75rem;
+  color: var(--gb-muted);
+  margin: 0;
+}
+
+[dir="rtl"] .partner-dropdown-menu {
+  left: auto;
+  right: 0;
+}

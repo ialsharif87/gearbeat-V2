@@ -57,7 +57,6 @@ export default function SiteHeader({
               <Link href={dashboardPath} className="gb-nav-link gb-nav-link-strong">
                 <T en="Dashboard" ar="لوحة التحكم" />
               </Link>
-
               {isVendor && (
                 <Link href="/vendor" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
                   <T en="Vendor Portal" ar="بوابة التاجر" />
@@ -65,16 +64,33 @@ export default function SiteHeader({
               )}
             </>
           ) : (
-            <>
-              <NavLink href="/owner/onboarding" en="Become a Partner" ar="كن شريكاً" />
-              <NavLink href="/vendor/onboarding" en="Become a Vendor" ar="كن تاجراً" />
-            </>
+            <div className="partner-dropdown-container">
+              <button className="gb-nav-link partner-trigger">
+                <T en="Partner with Us" ar="انضم كشريك" />
+                <span className="chevron">▾</span>
+              </button>
+              <div className="partner-dropdown-menu">
+                <Link href="/owner/onboarding" className="partner-item">
+                  <span className="partner-icon">🎧</span>
+                  <div className="partner-text">
+                    <strong><T en="Studio Owner" ar="صاحب استديو" /></strong>
+                    <p><T en="List your space" ar="اعرض مساحتك" /></p>
+                  </div>
+                </Link>
+                <Link href="/vendor/onboarding" className="partner-item">
+                  <span className="partner-icon">📦</span>
+                  <div className="partner-text">
+                    <strong><T en="Gear Vendor" ar="تاجر معدات" /></strong>
+                    <p><T en="Sell your gear" ar="بع معداتك" /></p>
+                  </div>
+                </Link>
+              </div>
+            </div>
           )}
         </nav>
 
         <div className="gb-header-actions">
           <CartBadge />
-
           <LanguageSwitcher />
 
           {isLoggedIn && logoutAction ? (
@@ -86,11 +102,10 @@ export default function SiteHeader({
           ) : (
             <>
               <Link href="/login" className="gb-header-ghost-button">
-                <T en="Login" ar="تسجيل الدخول" />
+                <T en="Login" ar="دخول" />
               </Link>
-
               <Link href="/signup" className="gb-header-primary-button">
-                <T en="Create account" ar="إنشاء حساب" />
+                <T en="Sign Up" ar="تسجيل" />
               </Link>
             </>
           )}
