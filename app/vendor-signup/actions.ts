@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveCountries } from "@/lib/countries";
+import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
 
 type VendorSignupResult = {
   error?: string;
@@ -14,10 +16,6 @@ function getText(formData: FormData, key: string) {
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
-}
-
-function normalizePhone(phone: string) {
-  return phone.replace(/\s+/g, "").trim();
 }
 
 function isValidEmail(email: string) {
@@ -103,17 +101,46 @@ export async function signUpVendor(
   const password = getText(formData, "password");
   const fullName = getText(formData, "fullName");
   const businessName = getText(formData, "businessName");
-  const phone = normalizePhone(getText(formData, "phone"));
+  const countryCode = getText(formData, "country_code");
+  const phoneCountryCode = getText(formData, "phone_country_code");
+  const phoneLocal = getText(formData, "phone_local");
+  const rawPhoneE164 = getText(formData, "phone_e164");
 
-  if (!email || !password || !fullName || !businessName || !phone) {
+  const countries = await getActiveCountries();
+  const selectedCountry = countries.find(
+    (country) => country.country_code === countryCode
+  );
+
+  const phoneE164 =
+    rawPhoneE164 ||
+    normalizePhoneToE164({
+      countryCode,
+      localPhone: phoneLocal,
+      countries,
+    });
+
+  if (!email || !password || !fullName || !businessName || !countryCode || !phoneE164) {
     return {
       error: "جميع الحقول مطلوبة. / All fields are required.",
+    };
+  }
+
+  if (!selectedCountry) {
+    return {
+      error: "الدولة المختارة غير صحيحة. / Selected country is invalid.",
     };
   }
 
   if (!isValidEmail(email)) {
     return {
       error: "البريد الإلكتروني غير صحيح. / Email address is invalid.",
+    };
+  }
+
+  if (!isValidE164(phoneE164)) {
+    return {
+      error:
+        "رقم الجوال غير صحيح. اختر الدولة واكتب رقم الهاتف بشكل صحيح. / Phone number is invalid. Select a country and enter a valid number.",
     };
   }
 
@@ -192,7 +219,7 @@ export async function signUpVendor(
       data: {
         full_name: fullName,
         name: fullName,
-        phone,
+        phone: phoneE164,
       },
     },
   });
@@ -217,9 +244,14 @@ export async function signUpVendor(
     auth_user_id: authUserId,
     email,
     full_name: fullName,
-    phone,
+    phone: phoneE164,
+    country_code: countryCode,
+    phone_country_code: phoneCountryCode || selectedCountry.phone_code,
+    phone_e164: phoneE164,
+    phone_verified: false,
     role: "vendor",
     account_status: "active",
+    preferred_currency: selectedCountry.currency_code,
     updated_at: new Date().toISOString(),
   });
 
@@ -241,7 +273,10 @@ export async function signUpVendor(
       business_name_ar: businessName,
       slug,
       contact_email: email,
-      contact_phone: phone,
+      contact_phone: phoneE164,
+      country_code: countryCode,
+      business_verification_status: "not_started",
+      document_verification_status: "not_started",
       status: "pending",
       updated_at: new Date().toISOString(),
     });
