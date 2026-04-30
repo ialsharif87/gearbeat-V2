@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "../../lib/supabase/server";
 import T from "../../components/t";
 import StudioFilter from "../../components/studio-filter";
