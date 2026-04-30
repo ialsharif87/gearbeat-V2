@@ -40,9 +40,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="product-price">
             <strong>{product.base_price}</strong> <small>SAR</small>
           </div>
-          <button className="btn btn-small btn-gold">
-            <T en="Add to Cart" ar="أضف للسلة" />
-          </button>
+          <AddToCartButton product={product} />
         </div>
       </div>
     </article>

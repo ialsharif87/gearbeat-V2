@@ -119,18 +119,20 @@ export default async function RootLayout({
       className={`${spaceGrotesk.variable} ${cairo.variable}`}
     >
       <body>
-        <SiteHeader
-          isLoggedIn={Boolean(user)}
-          isAdmin={isAdmin}
-          isVendor={Boolean(isVendor)}
-          userRole={userRole}
-          dashboardPath={dashboardPath}
-          logoutAction={logout}
-        />
+        <ClientProviders>
+          <SiteHeader
+            isLoggedIn={Boolean(user)}
+            isAdmin={isAdmin}
+            isVendor={Boolean(isVendor)}
+            userRole={userRole}
+            dashboardPath={dashboardPath}
+            logoutAction={logout}
+          />
 
-        <main className="main">{children}</main>
+          <main className="main">{children}</main>
 
-        <Footer />
+          <Footer />
+        </ClientProviders>
       </body>
     </html>
   );

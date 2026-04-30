@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LanguageSwitcher from "./language-switcher";
 import T from "./t";
+import CartBadge from "./cart-badge";
 
 type SiteHeaderProps = {
   isLoggedIn: boolean;
@@ -72,10 +73,7 @@ export default function SiteHeader({
         </nav>
 
         <div className="gb-header-actions">
-          <Link href="/cart" className="gb-cart-link" aria-label="Cart">
-            <span className="icon">🛒</span>
-            <span className="badge">0</span>
-          </Link>
+          <CartBadge />
 
           <LanguageSwitcher />
 

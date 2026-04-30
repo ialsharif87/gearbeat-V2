@@ -6176,3 +6176,102 @@ body:has(.home-page) {
   color: white !important;
   font-weight: 600;
 }
+
+/* PRODUCT DETAILS PAGE */
+
+.breadcrumb {
+  display: flex;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--gb-gold);
+}
+
+.breadcrumb .current {
+  color: white;
+  font-weight: 600;
+}
+
+.main-image-box {
+  aspect-ratio: 1;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.main-image-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.thumb-box {
+  aspect-ratio: 1;
+  background: white;
+  padding: 5px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(199, 164, 93, 0.1);
+  color: var(--gb-gold);
+  border-radius: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+}
+
+.product-title {
+  font-size: 3rem;
+  margin: 15px 0 5px;
+  line-height: 1.1;
+}
+
+.product-subtitle {
+  font-size: 1.4rem;
+  color: var(--muted);
+}
+
+.price-tag {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.price-tag .currency {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gb-gold);
+}
+
+.price-tag .amount {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: white;
+}
+
+.price-tag .tax-info {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-left: 10px;
+}
