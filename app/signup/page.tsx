@@ -1,61 +1,163 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "../../lib/supabase/server";
-import { createAdminClient } from "../../lib/supabase/admin";
-import T from "../../components/t";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import T from "@/components/t";
+import CountryPhoneFields from "@/components/country-phone-fields";
+import { getActiveCountries } from "@/lib/countries";
+import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
 
 function cleanText(value: FormDataEntryValue | null) {
   return String(value || "").trim();
 }
 
-function cleanPhone(value: string) {
-  return value.replace(/\s+/g, "").trim();
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
 }
 
 function normalizeRole(value: string) {
-  if (value === "owner") return "owner";
+  if (value === "owner") {
+    return "owner";
+  }
+
   return "customer";
 }
 
-export default async function SignupPage({
-  searchParams
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function redirectWithError({
+  message,
+  account,
 }: {
-  searchParams?: Promise<{ account?: string }>;
+  message: string;
+  account: "customer" | "owner";
+}): never {
+  redirect(
+    `/signup?account=${account}&error=${encodeURIComponent(message)}`
+  );
+}
+
+async function deleteAuthUserSafely(
+  supabaseAdmin: ReturnType<typeof createAdminClient>,
+  userId: string
+) {
+  try {
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (error) {
+      console.error("Failed to clean up auth user after signup failure:", error);
+    }
+  } catch (error) {
+    console.error("Unexpected auth cleanup error:", error);
+  }
+}
+
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ account?: string; error?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const defaultAccount = params?.account === "owner" ? "owner" : "customer";
+  const countries = await getActiveCountries();
 
-  async function signup(formData: FormData) {
+  async function signup(formData: FormData): Promise<void> {
     "use server";
 
     const supabase = await createClient();
     const supabaseAdmin = createAdminClient();
 
     const fullName = cleanText(formData.get("full_name"));
-    const email = cleanText(formData.get("email")).toLowerCase();
-    const phone = cleanPhone(cleanText(formData.get("phone")));
+    const email = normalizeEmail(cleanText(formData.get("email")));
     const password = String(formData.get("password") || "");
     const confirmPassword = String(formData.get("confirm_password") || "");
     const role = normalizeRole(cleanText(formData.get("role")));
 
+    const countryCode = cleanText(formData.get("country_code"));
+    const phoneCountryCode = cleanText(formData.get("phone_country_code"));
+    const phoneLocal = cleanText(formData.get("phone_local"));
+    const rawPhoneE164 = cleanText(formData.get("phone_e164"));
+
+    const countries = await getActiveCountries();
+
+    const selectedCountry = countries.find(
+      (country) => country.country_code === countryCode
+    );
+
+    const phoneE164 =
+      rawPhoneE164 ||
+      normalizePhoneToE164({
+        countryCode,
+        localPhone: phoneLocal,
+        countries,
+      });
+
     if (!fullName || fullName.length < 2) {
-      throw new Error("Full name is required.");
+      redirectWithError({
+        account: role,
+        message: "Full name is required.",
+      });
     }
 
-    if (!email || !email.includes("@")) {
-      throw new Error("Valid email is required.");
+    if (!email || !isValidEmail(email)) {
+      redirectWithError({
+        account: role,
+        message: "Valid email is required.",
+      });
     }
 
-    if (!phone || phone.length < 8) {
-      throw new Error("Valid phone number is required.");
+    if (!selectedCountry) {
+      redirectWithError({
+        account: role,
+        message: "Selected country is invalid.",
+      });
     }
 
-    if (!password || password.length < 6) {
-      throw new Error("Password must be at least 6 characters.");
+    if (!phoneE164 || !isValidE164(phoneE164)) {
+      redirectWithError({
+        account: role,
+        message:
+          "Phone number is invalid. Please select your country and enter a valid phone number.",
+      });
+    }
+
+    if (!password || password.length < 8) {
+      redirectWithError({
+        account: role,
+        message: "Password must be at least 8 characters.",
+      });
     }
 
     if (password !== confirmPassword) {
-      throw new Error("Passwords do not match.");
+      redirectWithError({
+        account: role,
+        message: "Passwords do not match.",
+      });
+    }
+
+    const { data: existingProfile, error: existingProfileError } =
+      await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+    if (existingProfileError) {
+      console.error("Signup profile lookup error:", existingProfileError);
+
+      redirectWithError({
+        account: role,
+        message: "Could not verify account availability.",
+      });
+    }
+
+    if (existingProfile) {
+      redirectWithError({
+        account: role,
+        message: "An account already exists with this email.",
+      });
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -65,53 +167,57 @@ export default async function SignupPage({
         data: {
           full_name: fullName,
           name: fullName,
-          phone,
-          phone_number: phone,
-          mobile: phone,
-          role,
-          account_type: role
-        }
-      }
+          phone: phoneE164,
+          phone_number: phoneE164,
+          mobile: phoneE164,
+        },
+      },
     });
 
     if (error) {
-      throw new Error(error.message);
+      console.error("Signup auth error:", error);
+
+      redirectWithError({
+        account: role,
+        message:
+          "Could not create account. Please check your details and try again.",
+      });
     }
 
     const userId = data.user?.id;
 
-    if (userId) {
-      const { error: profileError } = await supabaseAdmin
-        .from("profiles")
-        .upsert(
-          {
-            auth_user_id: userId,
-            email,
-            full_name: fullName,
-            phone,
-            role,
-            account_status: "active",
-            updated_at: new Date().toISOString()
-          },
-          {
-            onConflict: "auth_user_id"
-          }
-        );
+    if (!userId) {
+      redirectWithError({
+        account: role,
+        message: "Could not create account.",
+      });
+    }
 
-      if (profileError) {
-        throw new Error(profileError.message);
-      }
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        auth_user_id: userId,
+        email,
+        full_name: fullName,
+        phone: phoneE164,
+        country_code: countryCode,
+        phone_country_code: phoneCountryCode || selectedCountry.phone_code,
+        phone_e164: phoneE164,
+        phone_verified: false,
+        role,
+        account_status: "active",
+        preferred_currency: selectedCountry.currency_code,
+        preferred_language: "ar",
+        updated_at: new Date().toISOString(),
+      });
 
-      await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: {
-          full_name: fullName,
-          name: fullName,
-          phone,
-          phone_number: phone,
-          mobile: phone,
-          role,
-          account_type: role
-        }
+    if (profileError) {
+      console.error("Signup profile creation error:", profileError);
+      await deleteAuthUserSafely(supabaseAdmin, userId);
+
+      redirectWithError({
+        account: role,
+        message: "Failed to create user profile. Please try again.",
       });
     }
 
@@ -141,6 +247,19 @@ export default async function SignupPage({
             />
           </p>
 
+          {params?.error ? (
+            <div
+              className="card"
+              style={{
+                marginBottom: 18,
+                borderColor: "rgba(255,77,77,0.4)",
+                background: "rgba(255,77,77,0.08)",
+              }}
+            >
+              {params.error}
+            </div>
+          ) : null}
+
           <form className="form" action={signup}>
             <label>
               <T en="Full name" ar="الاسم الكامل" />
@@ -165,16 +284,13 @@ export default async function SignupPage({
               required
             />
 
-            <label>
-              <T en="Phone number" ar="رقم الجوال" />
-            </label>
-            <input
-              className="input"
-              name="phone"
-              type="tel"
-              placeholder="+9665XXXXXXXX"
-              required
-              minLength={8}
+            <CountryPhoneFields
+              countries={countries}
+              defaultCountryCode="SA"
+              countryName="country_code"
+              phoneCountryCodeName="phone_country_code"
+              phoneLocalName="phone_local"
+              phoneE164Name="phone_e164"
             />
 
             <label>
@@ -197,6 +313,16 @@ export default async function SignupPage({
               />
             </p>
 
+            <p className="admin-muted-line">
+              <T
+                en="Want to sell gear instead?"
+                ar="تريد بيع المعدات بدلًا من ذلك؟"
+              />{" "}
+              <Link href="/vendor-signup">
+                <T en="Apply as a vendor" ar="سجل كتاجر" />
+              </Link>
+            </p>
+
             <label>
               <T en="Password" ar="كلمة المرور" />
             </label>
@@ -204,9 +330,9 @@ export default async function SignupPage({
               className="input"
               name="password"
               type="password"
-              placeholder="Minimum 6 characters"
+              placeholder="Minimum 8 characters"
               required
-              minLength={6}
+              minLength={8}
             />
 
             <label>
@@ -218,7 +344,7 @@ export default async function SignupPage({
               type="password"
               placeholder="Confirm password"
               required
-              minLength={6}
+              minLength={8}
             />
 
             <button className="btn" type="submit">
