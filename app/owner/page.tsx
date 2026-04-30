@@ -232,51 +232,49 @@ export default async function OwnerPage() {
           />
         </p>
 
-        <div className="stats-row">
-          <div className="stat">
-            <b>{studiosCountResult.count || 0}</b>
-            <span>
-              <T en="Studios" ar="الاستوديوهات" />
-            </span>
+        <div className="stats-grid">
+          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-blue)' }}>
+            <div className="stat-content">
+              <label><T en="Total Studios" ar="إجمالي الاستوديوهات" /></label>
+              <div className="stat-value">{studiosCountResult.count || 0}</div>
+            </div>
+            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>🎹</div>
           </div>
 
-          <div className="stat">
-            <b>{bookingsCountResult.count || 0}</b>
-            <span>
-              <T en="Total bookings" ar="إجمالي الحجوزات" />
-            </span>
+          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-gold)' }}>
+            <div className="stat-content">
+              <label><T en="Total Bookings" ar="إجمالي الحجوزات" /></label>
+              <div className="stat-value">{bookingsCountResult.count || 0}</div>
+            </div>
+            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>📅</div>
           </div>
 
-          <div className="stat">
-            <b>{pendingBookingsCountResult.count || 0}</b>
-            <span>
-              <T en="Pending requests" ar="طلبات معلقة" />
-            </span>
+          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-warning)' }}>
+            <div className="stat-content">
+              <label><T en="Pending Requests" ar="طلبات معلقة" /></label>
+              <div className="stat-value">{pendingBookingsCountResult.count || 0}</div>
+            </div>
+            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>⏳</div>
           </div>
 
-          <div className="stat">
-            <b>{paidBookingsCountResult.count || 0}</b>
-            <span>
-              <T en="Paid bookings" ar="حجوزات مدفوعة" />
-            </span>
+          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-success)' }}>
+            <div className="stat-content">
+              <label><T en="Customer Rating" ar="تقييم العملاء" /></label>
+              <div className="stat-value">4.9 ⭐</div>
+            </div>
+            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>🌟</div>
           </div>
         </div>
 
-        <div className="actions">
-          <Link href="/owner/onboarding" className="btn">
-            <T en="Complete Business Onboarding" ar="إكمال بيانات النشاط" />
+        <div className="actions" style={{ marginTop: 30, display: 'flex', gap: 15 }}>
+          <Link href="/owner/create-studio" className="btn btn-primary">
+            <T en="+ Create New Studio" ar="+ إنشاء استوديو جديد" />
           </Link>
-
-          <Link href="/owner/create-studio" className="btn btn-secondary">
-            <T en="Create Studio" ar="إنشاء استوديو" />
-          </Link>
-
-          <Link href="/owner/studios" className="btn btn-secondary">
-            <T en="My Studios" ar="استوديوهاتي" />
-          </Link>
-
           <Link href="/owner/bookings" className="btn btn-secondary">
-            <T en="View Bookings" ar="عرض الحجوزات" />
+            <T en="View All Bookings" ar="عرض كافة الحجوزات" />
+          </Link>
+          <Link href="/owner/reviews" className="btn btn-secondary">
+            <T en="Read Reviews" ar="قراءة المراجعات" />
           </Link>
         </div>
       </div>

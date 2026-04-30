@@ -6387,3 +6387,43 @@ body:has(.home-page) {
   left: auto;
   right: 0;
 }
+
+/* HOME JOIN CARDS */
+.home-join-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 50px 30px !important;
+  text-decoration: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home-join-card:hover {
+  transform: translateY(-12px);
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.join-icon {
+  font-size: 3.5rem;
+  margin-bottom: 25px;
+  background: rgba(199, 164, 93, 0.1);
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+}
+
+.home-join-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.home-join-card p {
+  color: var(--gb-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
