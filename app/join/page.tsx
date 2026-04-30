@@ -41,7 +41,7 @@ export default function JoinPage() {
         </Link>
 
         {/* VENDOR */}
-        <Link href="/vendor/onboarding" className="card join-card" style={{ textAlign: 'center', padding: 50, textDecoration: 'none' }}>
+        <Link href="/vendor/register" className="card join-card" style={{ textAlign: 'center', padding: 50, textDecoration: 'none' }}>
            <div style={{ fontSize: '4rem', marginBottom: 20 }}>📦</div>
            <h3><T en="I am a Vendor" ar="أنا مورد / تاجر" /></h3>
            <p><T en="Sell your music equipment to a curated audience." ar="بع معداتك الموسيقية لجمهور مختار ومهتم." /></p>

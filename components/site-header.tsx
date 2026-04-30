@@ -77,11 +77,11 @@ export default function SiteHeader({
                     <p><T en="List your space" ar="اعرض مساحتك" /></p>
                   </div>
                 </Link>
-                <Link href="/vendor/onboarding" className="partner-item">
-                  <span className="partner-icon">📦</span>
+                <Link href="/vendor/register" className="partner-item">
+                  <div className="partner-icon">📦</div>
                   <div className="partner-text">
                     <strong><T en="Gear Vendor" ar="تاجر معدات" /></strong>
-                    <p><T en="Sell your gear" ar="بع معداتك" /></p>
+                    <p><T en="Sell your gear" ar="بع معداتك هنا" /></p>
                   </div>
                 </Link>
               </div>
