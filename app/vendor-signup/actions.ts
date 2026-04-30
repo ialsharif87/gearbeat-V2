@@ -9,9 +9,14 @@ export async function signUpVendor(formData: FormData) {
   const password = formData.get("password") as string;
   const fullName = formData.get("fullName") as string;
   const businessName = formData.get("businessName") as string;
+  const phone = (formData.get("phone") as string) || "";
 
   if (!email || !password || !fullName || !businessName) {
-    return { error: "All fields are required." };
+    return { error: "جميع الحقول مطلوبة. / All fields are required." };
+  }
+
+  if (password.length < 8) {
+    return { error: "كلمة المرور يجب أن تكون 8 أحرف على الأقل. / Password must be at least 8 characters." };
   }
 
   const supabase = await createClient();
@@ -24,6 +29,8 @@ export async function signUpVendor(formData: FormData) {
     options: {
       data: {
         full_name: fullName,
+        name: fullName,
+        phone,
       },
     },
   });
@@ -38,20 +45,37 @@ export async function signUpVendor(formData: FormData) {
   
   const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Math.random().toString(36).slice(2, 7);
 
+  // 2a. Upsert into profiles table
+  await supabaseAdmin
+    .from("profiles")
+    .upsert(
+      {
+        auth_user_id: authData.user.id,
+        email,
+        full_name: fullName,
+        phone,
+        role: "vendor",
+        account_status: "pending",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "auth_user_id" }
+    );
+
+  // 2b. Create vendor profile with status pending
   const { error: profileError } = await supabaseAdmin
     .from("vendor_profiles")
     .insert({
       id: authData.user.id,
       business_name_en: businessName,
-      business_name_ar: businessName, // Temporary, can be updated later
+      business_name_ar: businessName,
       slug,
       contact_email: email,
+      contact_phone: phone,
       status: "pending",
     });
 
   if (profileError) {
-    console.error("Profile creation error:", profileError);
-    // Note: User is already created in Auth. We might want to handle this better in a real app.
+    console.error("Vendor profile creation error:", profileError);
   }
 
   return redirect("/login?created=true&account=vendor");
