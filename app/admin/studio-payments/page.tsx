@@ -495,7 +495,7 @@ export default async function AdminStudioPaymentsPage() {
         booking_id: booking.id,
         studio_id: booking.studio_id,
         owner_auth_user_id: studio.owner_auth_user_id,
-        commission_rule_id: commissionRule?.id || null
+        commission_percentage: commissionPercentage
       }
     });
 
