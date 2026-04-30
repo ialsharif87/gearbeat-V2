@@ -6,10 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveCountries } from "@/lib/countries";
 import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
 
-type VendorSignupResult = {
-  error?: string;
-};
-
 function getText(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
 }
@@ -20,6 +16,10 @@ function normalizeEmail(email: string) {
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function redirectWithError(message: string): never {
+  redirect(`/vendor-signup?error=${encodeURIComponent(message)}`);
 }
 
 function slugify(value: string) {
@@ -87,16 +87,17 @@ async function deleteAuthUserSafely(
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (error) {
-      console.error("Failed to clean up auth user after vendor signup failure:", error);
+      console.error(
+        "Failed to clean up auth user after vendor signup failure:",
+        error
+      );
     }
   } catch (error) {
     console.error("Unexpected auth cleanup error:", error);
   }
 }
 
-export async function signUpVendor(
-  formData: FormData
-): Promise<VendorSignupResult | never> {
+export async function signUpVendor(formData: FormData): Promise<void> {
   const email = normalizeEmail(getText(formData, "email"));
   const password = getText(formData, "password");
   const fullName = getText(formData, "fullName");
@@ -107,6 +108,7 @@ export async function signUpVendor(
   const rawPhoneE164 = getText(formData, "phone_e164");
 
   const countries = await getActiveCountries();
+
   const selectedCountry = countries.find(
     (country) => country.country_code === countryCode
   );
@@ -119,48 +121,43 @@ export async function signUpVendor(
       countries,
     });
 
-  if (!email || !password || !fullName || !businessName || !countryCode || !phoneE164) {
-    return {
-      error: "جميع الحقول مطلوبة. / All fields are required.",
-    };
+  if (
+    !email ||
+    !password ||
+    !fullName ||
+    !businessName ||
+    !countryCode ||
+    !phoneE164
+  ) {
+    redirectWithError("جميع الحقول مطلوبة. / All fields are required.");
   }
 
   if (!selectedCountry) {
-    return {
-      error: "الدولة المختارة غير صحيحة. / Selected country is invalid.",
-    };
+    redirectWithError("الدولة المختارة غير صحيحة. / Selected country is invalid.");
   }
 
   if (!isValidEmail(email)) {
-    return {
-      error: "البريد الإلكتروني غير صحيح. / Email address is invalid.",
-    };
+    redirectWithError("البريد الإلكتروني غير صحيح. / Email address is invalid.");
   }
 
   if (!isValidE164(phoneE164)) {
-    return {
-      error:
-        "رقم الجوال غير صحيح. اختر الدولة واكتب رقم الهاتف بشكل صحيح. / Phone number is invalid. Select a country and enter a valid number.",
-    };
+    redirectWithError(
+      "رقم الجوال غير صحيح. اختر الدولة واكتب رقم الهاتف بشكل صحيح. / Phone number is invalid. Select a country and enter a valid number."
+    );
   }
 
   if (fullName.length < 2) {
-    return {
-      error: "الاسم الكامل قصير جدًا. / Full name is too short.",
-    };
+    redirectWithError("الاسم الكامل قصير جدًا. / Full name is too short.");
   }
 
   if (businessName.length < 2) {
-    return {
-      error: "اسم المتجر قصير جدًا. / Business name is too short.",
-    };
+    redirectWithError("اسم المتجر قصير جدًا. / Business name is too short.");
   }
 
   if (password.length < 8) {
-    return {
-      error:
-        "كلمة المرور يجب أن تكون 8 أحرف على الأقل. / Password must be at least 8 characters.",
-    };
+    redirectWithError(
+      "كلمة المرور يجب أن تكون 8 أحرف على الأقل. / Password must be at least 8 characters."
+    );
   }
 
   const supabase = await createClient();
@@ -177,17 +174,15 @@ export async function signUpVendor(
 
   if (existingVendorError) {
     console.error("Vendor email lookup error:", existingVendorError);
-    return {
-      error:
-        "حدث خطأ أثناء التحقق من البريد الإلكتروني. / Could not verify email availability.",
-    };
+    redirectWithError(
+      "حدث خطأ أثناء التحقق من البريد الإلكتروني. / Could not verify email availability."
+    );
   }
 
   if (existingVendorByEmail) {
-    return {
-      error:
-        "يوجد طلب تاجر مسجل بهذا البريد الإلكتروني. / A vendor application already exists with this email.",
-    };
+    redirectWithError(
+      "يوجد طلب تاجر مسجل بهذا البريد الإلكتروني. / A vendor application already exists with this email."
+    );
   }
 
   const { data: existingProfileByEmail, error: existingProfileError } =
@@ -199,17 +194,15 @@ export async function signUpVendor(
 
   if (existingProfileError) {
     console.error("Profile email lookup error:", existingProfileError);
-    return {
-      error:
-        "حدث خطأ أثناء التحقق من الحساب. / Could not verify account availability.",
-    };
+    redirectWithError(
+      "حدث خطأ أثناء التحقق من الحساب. / Could not verify account availability."
+    );
   }
 
   if (existingProfileByEmail) {
-    return {
-      error:
-        "يوجد حساب مسجل بهذا البريد الإلكتروني. / An account already exists with this email.",
-    };
+    redirectWithError(
+      "يوجد حساب مسجل بهذا البريد الإلكتروني. / An account already exists with this email."
+    );
   }
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -226,16 +219,13 @@ export async function signUpVendor(
 
   if (authError) {
     console.error("Vendor auth signup error:", authError);
-    return {
-      error:
-        "تعذر إنشاء الحساب. تأكد من البيانات وحاول مرة أخرى. / Could not create account. Please check your details and try again.",
-    };
+    redirectWithError(
+      "تعذر إنشاء الحساب. تأكد من البيانات وحاول مرة أخرى. / Could not create account. Please check your details and try again."
+    );
   }
 
   if (!authData.user) {
-    return {
-      error: "تعذر إنشاء الحساب. / Signup failed.",
-    };
+    redirectWithError("تعذر إنشاء الحساب. / Signup failed.");
   }
 
   const authUserId = authData.user.id;
@@ -259,10 +249,9 @@ export async function signUpVendor(
     console.error("Vendor profile table creation error:", profileError);
     await deleteAuthUserSafely(supabaseAdmin, authUserId);
 
-    return {
-      error:
-        "فشل إنشاء ملف المستخدم. الرجاء المحاولة مرة أخرى. / Failed to create user profile. Please try again.",
-    };
+    redirectWithError(
+      "فشل إنشاء ملف المستخدم. الرجاء المحاولة مرة أخرى. / Failed to create user profile. Please try again."
+    );
   }
 
   const { error: vendorProfileError } = await supabaseAdmin
@@ -291,10 +280,9 @@ export async function signUpVendor(
 
     await deleteAuthUserSafely(supabaseAdmin, authUserId);
 
-    return {
-      error:
-        "فشل إنشاء ملف التاجر. الرجاء المحاولة مرة أخرى. / Failed to create vendor profile. Please try again.",
-    };
+    redirectWithError(
+      "فشل إنشاء ملف التاجر. الرجاء المحاولة مرة أخرى. / Failed to create vendor profile. Please try again."
+    );
   }
 
   redirect("/login?created=true&account=vendor");
