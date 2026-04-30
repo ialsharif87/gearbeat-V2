@@ -169,3 +169,31 @@ export async function requireAdminLayoutAccess(
     adminUser: context.adminUser
   };
 }
+
+export async function requireVendorLayoutAccess() {
+  const context = await getProtectedContext("/login?account=vendor");
+
+  if (context.adminUser) {
+    redirect("/admin");
+  }
+
+  const profile = requireActiveProfile(context.profile, "/login?account=vendor");
+
+  // Vendors are tracked in vendor_profiles, not in profile.role necessarily
+  const { data: vendorProfile } = await context.supabaseAdmin
+    .from("vendor_profiles")
+    .select("id, status")
+    .eq("id", context.user.id)
+    .maybeSingle();
+
+  if (!vendorProfile) {
+    // If no vendor profile, redirect to onboarding if they are a customer or owner
+    redirect("/vendor/onboarding");
+  }
+
+  return {
+    ...context,
+    profile,
+    vendorProfile
+  };
+}
