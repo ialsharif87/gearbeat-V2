@@ -351,6 +351,22 @@ export default async function LoginPage({
         );
       }
 
+      // Check vendor profile status
+      const { data: vendorProfile } = await supabaseAdmin
+        .from("vendor_profiles")
+        .select("id, status")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!vendorProfile) {
+        // No vendor profile yet — go to onboarding to complete it
+        redirect("/vendor/onboarding");
+      }
+
+      if (vendorProfile.status === "pending" || vendorProfile.status === "rejected") {
+        redirect("/vendor-pending");
+      }
+
       redirect("/vendor");
     }
 

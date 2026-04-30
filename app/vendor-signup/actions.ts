@@ -45,7 +45,8 @@ export async function signUpVendor(formData: FormData) {
   
   const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Math.random().toString(36).slice(2, 7);
 
-  // 2a. Upsert into profiles table
+  // 2a. Upsert into profiles table — account_status must be 'active' so login works.
+  // Vendor approval is controlled via vendor_profiles.status, not profiles.account_status.
   await supabaseAdmin
     .from("profiles")
     .upsert(
@@ -55,7 +56,7 @@ export async function signUpVendor(formData: FormData) {
         full_name: fullName,
         phone,
         role: "vendor",
-        account_status: "pending",
+        account_status: "active",
         updated_at: new Date().toISOString(),
       },
       { onConflict: "auth_user_id" }

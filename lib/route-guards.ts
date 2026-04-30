@@ -187,8 +187,11 @@ export async function requireVendorLayoutAccess() {
     .maybeSingle();
 
   if (!vendorProfile) {
-    // If no vendor profile, redirect to onboarding if they are a customer or owner
     redirect("/vendor/onboarding");
+  }
+
+  if (vendorProfile.status === "pending" || vendorProfile.status === "rejected") {
+    redirect("/vendor-pending");
   }
 
   return {
