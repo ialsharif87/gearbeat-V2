@@ -1,113 +1,332 @@
-import { requireVendorLayoutAccess } from "@/lib/route-guards";
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 import T from "@/components/t";
-import { notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { requireVendorLayoutAccess } from "@/lib/route-guards";
+
+const ALLOWED_VENDOR_ITEM_STATUSES = [
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+] as const;
+
+type AllowedVendorItemStatus = (typeof ALLOWED_VENDOR_ITEM_STATUSES)[number];
+
+function getText(formData: FormData, key: string) {
+  return String(formData.get(key) || "").trim();
+}
+
+function isAllowedVendorItemStatus(
+  status: string
+): status is AllowedVendorItemStatus {
+  return ALLOWED_VENDOR_ITEM_STATUSES.includes(
+    status as AllowedVendorItemStatus
+  );
+}
+
+function formatMoney(value: unknown) {
+  const numberValue = Number(value || 0);
+
+  if (!Number.isFinite(numberValue)) {
+    return "0.00 SAR";
+  }
+
+  return `${numberValue.toFixed(2)} SAR`;
+}
+
+function getOrderFromItems(items: any[]) {
+  const firstItem = items[0];
+
+  if (!firstItem) {
+    return null;
+  }
+
+  if (Array.isArray(firstItem.order)) {
+    return firstItem.order[0] || null;
+  }
+
+  return firstItem.order || null;
+}
 
 export default async function VendorOrderDetailPage({
-  params
+  params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id: orderId } = await params;
   const { supabaseAdmin, user } = await requireVendorLayoutAccess();
 
-  // Fetch the order and the items belonging to this vendor
-  const { data: order } = await supabaseAdmin
-    .from("marketplace_orders")
+  const { data: vendorItems, error } = await supabaseAdmin
+    .from("marketplace_order_items")
     .select(`
-      *,
-      items:marketplace_order_items(
-        *,
-        product:marketplace_products(name_en, name_ar)
+      id,
+      order_id,
+      vendor_id,
+      product_id,
+      variant_id,
+      product_name,
+      variant_name,
+      sku,
+      quantity,
+      unit_price,
+      total_price,
+      commission_amount,
+      vendor_net_amount,
+      status,
+      created_at,
+      product:marketplace_products(
+        id,
+        name_en,
+        name_ar
+      ),
+      order:marketplace_orders(
+        id,
+        order_number,
+        status,
+        payment_status,
+        total_amount,
+        customer_id,
+        created_at
       )
     `)
-    .eq("id", id)
-    .maybeSingle();
+    .eq("order_id", orderId)
+    .eq("vendor_id", user.id)
+    .order("created_at", { ascending: true });
 
-  if (!order) notFound();
+  if (error) {
+    throw new Error(error.message);
+  }
 
-  // Filter items for this vendor only
-  const vendorItems = order.items.filter((i: any) => i.vendor_id === user.id);
+  if (!vendorItems || vendorItems.length === 0) {
+    notFound();
+  }
+
+  const order = getOrderFromItems(vendorItems);
 
   async function updateItemStatus(formData: FormData) {
     "use server";
-    const itemId = formData.get("item_id") as string;
-    const status = formData.get("status") as string;
 
-    const { createAdminClient } = await import("@/lib/supabase/admin");
-    const admin = createAdminClient();
+    const { supabaseAdmin, user } = await requireVendorLayoutAccess();
 
-    await admin
+    const itemId = getText(formData, "item_id");
+    const status = getText(formData, "status");
+
+    if (!itemId) {
+      throw new Error("Missing order item id.");
+    }
+
+    if (!isAllowedVendorItemStatus(status)) {
+      throw new Error("Invalid vendor item status.");
+    }
+
+    const { data: updatedItem, error: updateError } = await supabaseAdmin
       .from("marketplace_order_items")
-      .update({ status })
-      .eq("id", itemId);
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", itemId)
+      .eq("vendor_id", user.id)
+      .select("id")
+      .maybeSingle();
 
-    revalidatePath(`/vendor/orders/${id}`);
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    if (!updatedItem) {
+      throw new Error("Order item not found or not owned by this vendor.");
+    }
+
+    redirect(`/vendor/orders/${orderId}`);
   }
+
+  const vendorSubtotal = vendorItems.reduce(
+    (sum: number, item: any) => sum + Number(item.total_price || 0),
+    0
+  );
+
+  const vendorCommission = vendorItems.reduce(
+    (sum: number, item: any) => sum + Number(item.commission_amount || 0),
+    0
+  );
+
+  const vendorNet = vendorItems.reduce(
+    (sum: number, item: any) => sum + Number(item.vendor_net_amount || 0),
+    0
+  );
 
   return (
     <div className="dashboard-page">
-      <div className="page-header">
+      <div
+        className="page-header"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          gap: 16,
+          flexWrap: "wrap",
+        }}
+      >
         <div>
           <span className="badge">
             <T en="Order Details" ar="تفاصيل الطلب" />
           </span>
-          <h1><T en="Order" ar="طلب" /> #{order.order_number}</h1>
-          <p><T en="Review items and update fulfillment status." ar="مراجعة العناصر وتحديث حالة التنفيذ." /></p>
+
+          <h1>
+            <T en="Vendor Order" ar="طلب التاجر" />{" "}
+            {order?.order_number ? `#${order.order_number}` : `#${orderId.slice(0, 8)}`}
+          </h1>
+
+          <p>
+            <T
+              en="This page only shows the items in this order that belong to your vendor account."
+              ar="هذه الصفحة تعرض فقط المنتجات التابعة لحساب التاجر الخاص بك داخل هذا الطلب."
+            />
+          </p>
+        </div>
+
+        <Link href="/vendor/orders" className="btn">
+          <T en="Back to Orders" ar="الرجوع للطلبات" />
+        </Link>
+      </div>
+
+      <div className="grid grid-3" style={{ marginTop: 30 }}>
+        <div className="card">
+          <span className="stat-label">
+            <T en="Vendor Subtotal" ar="إجمالي منتجاتك" />
+          </span>
+          <strong className="stat-value">{formatMoney(vendorSubtotal)}</strong>
+        </div>
+
+        <div className="card">
+          <span className="stat-label">
+            <T en="Commission" ar="العمولة" />
+          </span>
+          <strong className="stat-value">{formatMoney(vendorCommission)}</strong>
+        </div>
+
+        <div className="card">
+          <span className="stat-label">
+            <T en="Vendor Net" ar="صافي التاجر" />
+          </span>
+          <strong className="stat-value">{formatMoney(vendorNet)}</strong>
         </div>
       </div>
 
-      <div className="grid grid-2" style={{ marginTop: 30 }}>
-        {/* ITEMS LIST */}
-        <div className="card">
-          <div className="card-head">
-            <h3><T en="My Items" ar="عناصري في هذا الطلب" /></h3>
-          </div>
-          <div style={{ marginTop: 20, display: 'grid', gap: 20 }}>
-            {vendorItems.map((item: any) => (
-              <div key={item.id} className="item-fulfillment-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{item.product?.name_en}</div>
-                  <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Qty: {item.quantity} · {item.total_price} SAR</div>
-                </div>
-                
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <span className={`badge badge-${item.status === 'shipped' ? 'success' : 'warning'}`}>
-                    {item.status}
-                  </span>
-                  
-                  <form action={updateItemStatus}>
-                    <input type="hidden" name="item_id" value={item.id} />
-                    <select name="status" className="input input-small" style={{ width: 120, height: 34 }} onChange={(e) => e.target.form?.requestSubmit()}>
-                      <option value="pending" disabled={item.status !== 'pending'}>Pending</option>
-                      <option value="confirmed" selected={item.status === 'confirmed'}>Confirmed</option>
-                      <option value="processing" selected={item.status === 'processing'}>Processing</option>
-                      <option value="shipped" selected={item.status === 'shipped'}>Shipped</option>
-                      <option value="delivered" selected={item.status === 'delivered'}>Delivered</option>
-                    </select>
-                  </form>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="card" style={{ marginTop: 30, padding: 0, overflow: "hidden" }}>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>
+                <T en="Product" ar="المنتج" />
+              </th>
+              <th>
+                <T en="SKU" ar="SKU" />
+              </th>
+              <th>
+                <T en="Quantity" ar="الكمية" />
+              </th>
+              <th>
+                <T en="Unit Price" ar="سعر الوحدة" />
+              </th>
+              <th>
+                <T en="Total" ar="الإجمالي" />
+              </th>
+              <th>
+                <T en="Status" ar="الحالة" />
+              </th>
+              <th>
+                <T en="Update" ar="تحديث" />
+              </th>
+            </tr>
+          </thead>
 
-        {/* CUSTOMER & SHIPPING */}
-        <div className="card">
-          <div className="card-head">
-            <h3><T en="Customer & Shipping" ar="العميل والشحن" /></h3>
-          </div>
-          <div style={{ marginTop: 20, display: 'grid', gap: 15 }}>
-            <div>
-              <label style={{ fontSize: '0.8rem', color: 'var(--muted)' }}><T en="Order Status" ar="حالة الطلب العامة" /></label>
-              <div style={{ fontWeight: 700, color: 'var(--gb-gold)' }}>{order.status.toUpperCase()}</div>
-            </div>
-            <hr style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.05)' }} />
-            <p>
-              <T en="Shipping address and customer contact details will appear here once the order is confirmed." ar="ستظهر تفاصيل عنوان الشحن والاتصال بالعميل هنا بمجرد تأكيد الطلب." />
-            </p>
-          </div>
-        </div>
+          <tbody>
+            {vendorItems.map((item: any) => {
+              const productName =
+                item.product_name ||
+                item.product?.name_en ||
+                item.product?.name_ar ||
+                "Product";
+
+              return (
+                <tr key={item.id}>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{productName}</div>
+                    {item.variant_name ? (
+                      <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                        {item.variant_name}
+                      </div>
+                    ) : null}
+                  </td>
+
+                  <td>{item.sku || "—"}</td>
+
+                  <td>{item.quantity || 0}</td>
+
+                  <td>{formatMoney(item.unit_price)}</td>
+
+                  <td>{formatMoney(item.total_price)}</td>
+
+                  <td>
+                    <span className="badge">{item.status || "pending"}</span>
+                  </td>
+
+                  <td>
+                    <form
+                      action={updateItemStatus}
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <input type="hidden" name="item_id" value={item.id} />
+
+                      <select
+                        name="status"
+                        className="input"
+                        defaultValue={item.status || "confirmed"}
+                        style={{ minWidth: 140 }}
+                      >
+                        <option value="confirmed">
+                          Confirmed
+                        </option>
+                        <option value="processing">
+                          Processing
+                        </option>
+                        <option value="shipped">
+                          Shipped
+                        </option>
+                        <option value="delivered">
+                          Delivered
+                        </option>
+                      </select>
+
+                      <button type="submit" className="btn btn-small">
+                        <T en="Save" ar="حفظ" />
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="card" style={{ marginTop: 30 }}>
+        <h2>
+          <T en="Security Rule" ar="قاعدة الأمان" />
+        </h2>
+        <p>
+          <T
+            en="This page intentionally displays only this vendor's own order items. Full customer/order management remains an admin responsibility."
+            ar="هذه الصفحة تعرض فقط منتجات هذا التاجر داخل الطلب. إدارة الطلب الكامل وبيانات العميل تبقى من صلاحيات الإدارة."
+          />
+        </p>
       </div>
     </div>
   );
