@@ -266,6 +266,25 @@ export default async function AdminDashboardPage() {
               <>
                 <div>
                   <strong>
+                    <T en="Marketplace & Vendors" ar="السوق والتجار" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Review and approve gear vendor applications, manage vendor compliance, and marketplace products."
+                      ar="مراجعة واعتماد طلبات تجار المعدات، إدارة امتثال التجار، ومنتجات السوق."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link href="/admin/vendors" className="btn btn-secondary">
+                      <T en="Manage Vendors" ar="إدارة التجار" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>
                     <T en="Commission Settings" ar="إعدادات العمولة" />
                   </strong>
 

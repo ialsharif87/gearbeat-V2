@@ -47,7 +47,7 @@ export async function signUpVendor(formData: FormData) {
 
   // 2a. Upsert into profiles table — account_status must be 'active' so login works.
   // Vendor approval is controlled via vendor_profiles.status, not profiles.account_status.
-  await supabaseAdmin
+  const { error: profileTableError } = await supabaseAdmin
     .from("profiles")
     .upsert(
       {
@@ -62,8 +62,13 @@ export async function signUpVendor(formData: FormData) {
       { onConflict: "auth_user_id" }
     );
 
+  if (profileTableError) {
+    console.error("Profile table error:", profileTableError);
+    return { error: "Failed to create user profile. Please try again." };
+  }
+
   // 2b. Create vendor profile with status pending
-  const { error: profileError } = await supabaseAdmin
+  const { error: vendorProfileError } = await supabaseAdmin
     .from("vendor_profiles")
     .insert({
       id: authData.user.id,
@@ -75,8 +80,9 @@ export async function signUpVendor(formData: FormData) {
       status: "pending",
     });
 
-  if (profileError) {
-    console.error("Vendor profile creation error:", profileError);
+  if (vendorProfileError) {
+    console.error("Vendor profile creation error:", vendorProfileError);
+    return { error: "Failed to create vendor profile. Please try again." };
   }
 
   return redirect("/login?created=true&account=vendor");

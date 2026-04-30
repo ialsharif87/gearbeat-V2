@@ -5,10 +5,14 @@ import { revalidatePath } from "next/cache";
 export default async function AdminVendorsPage() {
   const { supabaseAdmin } = await requireAdminLayoutAccess();
 
-  const { data: vendors } = await supabaseAdmin
+  const { data: vendors, error } = await supabaseAdmin
     .from("vendor_profiles")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching vendors:", error);
+  }
 
   async function updateVendorStatus(formData: FormData) {
     "use server";
@@ -38,7 +42,17 @@ export default async function AdminVendorsPage() {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 30, padding: 0, overflow: 'hidden' }}>
+      {error && (
+        <div style={{ padding: 15, background: 'rgba(226, 109, 90, 0.1)', color: 'var(--gb-danger)', borderRadius: 8, marginTop: 20 }}>
+          <T en="Error loading vendors: " ar="خطأ في تحميل التجار: " /> {error.message}
+        </div>
+      )}
+
+      <div style={{ marginTop: 20, color: 'var(--muted)' }}>
+        <T en="Total Vendors:" ar="إجمالي التجار:" /> {vendors?.length || 0}
+      </div>
+
+      <div className="card" style={{ marginTop: 10, padding: 0, overflow: 'hidden' }}>
         <table className="admin-table">
           <thead>
             <tr>
