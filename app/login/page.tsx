@@ -4,7 +4,7 @@ import { createClient } from "../../lib/supabase/server";
 import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 
-type AccountType = "customer" | "owner";
+type AccountType = "customer" | "owner" | "vendor";
 
 type LoginSearchParams = {
   next?: string;
@@ -26,6 +26,7 @@ function cleanText(value: FormDataEntryValue | null) {
 
 function normalizeAccountType(value: string): AccountType {
   if (value === "owner") return "owner";
+  if (value === "vendor") return "vendor";
   return "customer";
 }
 
@@ -162,14 +163,14 @@ async function ensureProfileForUser({
     const metadataRole = user.user_metadata?.role;
 
     if (
-      selectedAccountType === "owner" &&
-      existingProfile.role !== "owner" &&
-      metadataRole === "owner"
+      (selectedAccountType === "owner" || selectedAccountType === "vendor") &&
+      existingProfile.role !== selectedAccountType &&
+      metadataRole === selectedAccountType
     ) {
       const { data: updatedProfile, error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({
-          role: "owner",
+          role: selectedAccountType,
           account_status: "active",
           updated_at: new Date().toISOString()
         })
@@ -189,8 +190,8 @@ async function ensureProfileForUser({
 
   const metadataRole = user.user_metadata?.role;
   const role =
-    selectedAccountType === "owner" || metadataRole === "owner"
-      ? "owner"
+    selectedAccountType === "owner" || selectedAccountType === "vendor" || metadataRole === "owner" || metadataRole === "vendor"
+      ? (selectedAccountType || metadataRole)
       : "customer";
 
   const fullName =
@@ -248,7 +249,7 @@ export default async function LoginPage({
   const nextPath = safeNextPath(params?.next);
 
   const isStaffAccess = nextPath === "/admin";
-  const defaultAccount: AccountType = params?.account === "owner" ? "owner" : "customer";
+  const defaultAccount: AccountType = params?.account === "owner" ? "owner" : (params?.account === "vendor" ? "vendor" : "customer");
 
   const loginMessage = getLoginMessage({
     error: params?.error,
@@ -415,6 +416,22 @@ export default async function LoginPage({
       redirect("/owner/onboarding");
     }
 
+    if (selectedAccountType === "vendor") {
+      if (profile.role !== "vendor") {
+        await supabase.auth.signOut();
+
+        redirect(
+          loginRedirectPath({
+            error: "wrong_account_type",
+            account: selectedAccountType,
+            next
+          })
+        );
+      }
+
+      redirect("/vendor");
+    }
+
     if (selectedAccountType === "customer") {
       if (profile.role !== "customer") {
         await supabase.auth.signOut();
@@ -462,8 +479,8 @@ export default async function LoginPage({
               />
             ) : (
               <T
-                en="Login as a customer or studio owner."
-                ar="سجّل الدخول كمستخدم أو مالك استوديو."
+                en="Login as a customer, studio owner, or gear vendor."
+                ar="سجّل الدخول كمستخدم، صاحب استوديو، أو تاجر معدات."
               />
             )}
           </p>
@@ -507,6 +524,7 @@ export default async function LoginPage({
                 >
                   <option value="customer">Customer / مستخدم</option>
                   <option value="owner">Studio Owner / مالك استوديو</option>
+                  <option value="vendor">Gear Vendor / تاجر معدات</option>
                 </select>
               </>
             )}
@@ -555,6 +573,13 @@ export default async function LoginPage({
                 <T
                   en="Create Studio Owner Account"
                   ar="إنشاء حساب مالك استوديو"
+                />
+              </Link>
+
+              <Link href="/vendor/register" className="btn btn-secondary" style={{ border: '1px solid var(--gb-gold)' }}>
+                <T
+                  en="Create Gear Vendor Account"
+                  ar="إنشاء حساب تاجر معدات"
                 />
               </Link>
 
