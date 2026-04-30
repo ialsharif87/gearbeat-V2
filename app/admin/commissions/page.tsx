@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdminRole } from "../../../lib/admin";
 import { createAdminClient } from "../../../lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 import T from "../../../components/t";
 
 export default async function AdminCommissionsPage() {
@@ -35,6 +36,86 @@ export default async function AdminCommissionsPage() {
     .eq("status", "approved")
     .order("name", { ascending: true });
 
+  async function updateGlobalCommission(formData: FormData) {
+    "use server";
+    const supabaseAdmin = createAdminClient();
+    const percentage = Number(formData.get("percentage"));
+
+    if (isNaN(percentage) || percentage < 10 || percentage > 30) {
+      throw new Error("Invalid percentage value (must be 10-30)");
+    }
+
+    // Upsert: update first row or insert if none exists
+    const { data: existing } = await supabaseAdmin
+      .from("commission_settings")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabaseAdmin
+        .from("commission_settings")
+        .update({ default_percentage: percentage })
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin
+        .from("commission_settings")
+        .insert({ default_percentage: percentage });
+      if (error) throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/commissions");
+  }
+
+  async function assignCustomCommission(formData: FormData) {
+    "use server";
+    const supabaseAdmin = createAdminClient();
+    const studioId = formData.get("studio_id")?.toString();
+    const percentage = Number(formData.get("percentage"));
+
+    if (!studioId || isNaN(percentage) || percentage < 10 || percentage > 30) {
+      throw new Error("Invalid parameters");
+    }
+
+    // Upsert by studio_id
+    const { data: existing } = await supabaseAdmin
+      .from("studio_commissions")
+      .select("id")
+      .eq("studio_id", studioId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabaseAdmin
+        .from("studio_commissions")
+        .update({ commission_percentage: percentage })
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin
+        .from("studio_commissions")
+        .insert({ studio_id: studioId, commission_percentage: percentage });
+      if (error) throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/commissions");
+  }
+
+  async function removeCustomCommission(formData: FormData) {
+    "use server";
+    const supabaseAdmin = createAdminClient();
+    const id = formData.get("id")?.toString();
+    if (!id) throw new Error("Missing ID");
+
+    const { error } = await supabaseAdmin
+      .from("studio_commissions")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw new Error(error.message);
+    revalidatePath("/admin/commissions");
+  }
+
   return (
     <section className="page">
       <div className="container">
@@ -64,7 +145,7 @@ export default async function AdminCommissionsPage() {
               <T en="Default Commission" ar="العمولة الافتراضية" />
             </h2>
             
-            <form action="/api/admin/commission/global" method="POST" style={{ marginTop: 20 }}>
+            <form action={updateGlobalCommission} style={{ marginTop: 20 }}>
               <label>
                 <T en="Percentage (10-30%)" ar="النسبة (10-30٪)" />
               </label>
@@ -94,7 +175,7 @@ export default async function AdminCommissionsPage() {
               <T en="Assign Studio Commission" ar="تعيين عمولة الاستوديو" />
             </h2>
 
-            <form action="/api/admin/commission/custom" method="POST" style={{ marginTop: 20 }}>
+            <form action={assignCustomCommission} style={{ marginTop: 20 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 120px auto", gap: 14, alignItems: "end" }}>
                 <div>
                   <label>
@@ -155,7 +236,7 @@ export default async function AdminCommissionsPage() {
                     <td style={{ padding: 12, fontWeight: "bold", color: "var(--gb-gold)" }}>{c.commission_percentage}%</td>
                     <td style={{ padding: 12 }}>{new Date(c.created_at).toLocaleDateString()}</td>
                     <td style={{ padding: 12 }}>
-                      <form action="/api/admin/commission/remove" method="POST">
+                      <form action={removeCustomCommission}>
                         <input type="hidden" name="id" value={c.id} />
                         <button type="submit" className="badge" style={{ border: 0, background: "rgba(226, 109, 90, 0.1)", color: "var(--gb-danger)", cursor: "pointer" }}>
                           Remove
