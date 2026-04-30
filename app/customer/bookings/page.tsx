@@ -391,6 +391,24 @@ export default async function CustomerBookingsPage() {
         commission_amount: commissionAmount,
         studio_net_amount: studioNetAmount
       });
+
+    // 5. Record settlement for payout system
+    await supabaseAdmin
+      .from("platform_settlements")
+      .insert({
+        source_type: "studio_booking",
+        source_id: booking.id,
+        provider_type: "studio_owner",
+        provider_id: studio.owner_auth_user_id,
+        payment_id: paymentId,
+        gross_amount: totalAmount,
+        commission_amount: commissionAmount,
+        tax_amount: 0,
+        net_amount: studioNetAmount,
+        currency: "SAR",
+        settlement_status: booking.status === "completed" ? "eligible" : "pending",
+        available_for_payout_at: booking.status === "completed" ? now : null
+      });
     // --- END COMMISSION CALCULATION ---
 
     revalidatePath("/customer/bookings");

@@ -157,59 +157,25 @@ function statusStyle(status: string | null | undefined) {
   };
 }
 
-function calculateCommission({
-  amount,
-  rule
-}: {
-  amount: number;
-  rule: StudioCommissionRuleRow | null;
-}) {
-  if (!rule) {
-    return amount * 0.1;
-  }
+// Unified GearBeat Commission Logic
+async function getGearBeatCommissionRule(supabaseAdmin: any, studioId: string) {
+  // 1. Get default commission rate
+  const { data: globalSettings } = await supabaseAdmin
+    .from("commission_settings")
+    .select("default_percentage")
+    .limit(1)
+    .maybeSingle();
 
-  const value = Number(rule.commission_value || 0);
+  const defaultCommission = globalSettings?.default_percentage || 15;
 
-  if (rule.commission_type === "fixed") {
-    return Math.min(value, amount);
-  }
-
-  return amount * (value / 100);
-}
-
-async function getActiveCommissionRule({
-  supabaseAdmin,
-  studioId,
-  ownerAuthUserId
-}: {
-  supabaseAdmin: any;
-  studioId: string;
-  ownerAuthUserId: string;
-}) {
-  const { data: studioRule } = await supabaseAdmin
-    .from("studio_commission_rules")
-    .select("*")
+  // 2. Check for custom studio commission rate
+  const { data: customCommission } = await supabaseAdmin
+    .from("studio_commissions")
+    .select("commission_percentage")
     .eq("studio_id", studioId)
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(1)
     .maybeSingle();
 
-  if (studioRule) {
-    return studioRule as StudioCommissionRuleRow;
-  }
-
-  const { data: ownerRule } = await supabaseAdmin
-    .from("studio_commission_rules")
-    .select("*")
-    .eq("owner_auth_user_id", ownerAuthUserId)
-    .is("studio_id", null)
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  return (ownerRule || null) as StudioCommissionRuleRow | null;
+  return customCommission?.commission_percentage ?? defaultCommission;
 }
 
 export default async function AdminStudioPaymentsPage() {
@@ -457,17 +423,13 @@ export default async function AdminStudioPaymentsPage() {
       throw new Error("Gross amount must be greater than zero.");
     }
 
-    const commissionRule = await getActiveCommissionRule({
+    const commissionPercentage = await getGearBeatCommissionRule(
       supabaseAdmin,
-      studioId: booking.studio_id,
-      ownerAuthUserId: studio.owner_auth_user_id
-    });
+      booking.studio_id
+    );
 
     const commissionAmount = Number(
-      calculateCommission({
-        amount: grossAmount,
-        rule: commissionRule
-      }).toFixed(2)
+      ((grossAmount * commissionPercentage) / 100).toFixed(2)
     );
 
     const taxAmount = 0;

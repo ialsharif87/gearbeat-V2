@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
 import { createAdminClient } from "../../../lib/supabase/admin";
+import { createAuditLog } from "../../../lib/audit";
 import T from "../../../components/t";
 
 type ProfileRow = {
@@ -219,6 +221,95 @@ async function requireOwnerOnly() {
 export default async function OwnerFinancePage() {
   const { user, supabaseAdmin } = await requireOwnerOnly();
 
+  async function requestPayout() {
+    "use server";
+    const { user, supabaseAdmin } = await requireOwnerOnly();
+
+    // 1. Get approved bank account
+    const { data: bankAccount, error: bankError } = await supabaseAdmin
+      .from("owner_bank_accounts")
+      .select("id,account_status,is_default")
+      .eq("owner_auth_user_id", user.id)
+      .eq("is_default", true)
+      .eq("account_status", "approved")
+      .maybeSingle();
+
+    if (bankError || !bankAccount) {
+      throw new Error("You must have an approved default bank account to request a payout.");
+    }
+
+    // 2. Get eligible settlements
+    const { data: eligibleSettlements, error: settlementsError } = await supabaseAdmin
+      .from("platform_settlements")
+      .select("*")
+      .eq("provider_id", user.id)
+      .eq("settlement_status", "eligible");
+
+    if (settlementsError || !eligibleSettlements || eligibleSettlements.length === 0) {
+      throw new Error("No eligible funds available for withdrawal.");
+    }
+
+    const totalAmount = eligibleSettlements.reduce((sum: number, s: any) => sum + Number(s.net_amount || 0), 0);
+
+    // 3. Create payout record
+    const { data: payout, error: payoutError } = await supabaseAdmin
+      .from("platform_payouts")
+      .insert({
+        provider_type: "studio_owner",
+        provider_id: user.id,
+        bank_account_type: "owner_bank_account",
+        bank_account_id: bankAccount.id,
+        total_amount: totalAmount,
+        currency: "SAR",
+        status: "pending_approval"
+      })
+      .select("id,payout_number")
+      .single();
+
+    if (payoutError) throw new Error(payoutError.message);
+
+    // 4. Link items
+    const payoutItems = eligibleSettlements.map((s: any) => ({
+      payout_id: payout.id,
+      settlement_id: s.id,
+      source_type: s.source_type,
+      source_id: s.source_id,
+      gross_amount: s.gross_amount,
+      commission_amount: s.commission_amount,
+      net_amount: s.net_amount
+    }));
+
+    await supabaseAdmin.from("platform_payout_items").insert(payoutItems);
+
+    // 5. Update statuses
+    const settlementIds = eligibleSettlements.map((s: any) => s.id);
+    const bookingIds = eligibleSettlements.map((s: any) => s.source_id);
+
+    await supabaseAdmin.from("platform_settlements")
+      .update({ settlement_status: "included_in_payout", updated_at: new Date().toISOString() })
+      .in("id", settlementIds);
+
+    await supabaseAdmin.from("bookings")
+      .update({ settlement_status: "included_in_payout", payout_status: "included_in_payout", updated_at: new Date().toISOString() })
+      .in("id", bookingIds);
+
+    // 6. Audit Log
+    await createAuditLog({
+      actorAuthUserId: user.id,
+      actorEmail: user.email || "owner",
+      action: "owner_requested_payout",
+      entityType: "platform_payout",
+      entityId: payout.id,
+      oldValues: {},
+      newValues: { status: "pending_approval", total_amount: totalAmount },
+      metadata: { payout_number: payout.payout_number }
+    });
+
+    revalidatePath("/owner/finance");
+    revalidatePath("/owner/payouts");
+    revalidatePath("/admin/studio-payouts");
+  }
+
   const { data: bankAccountData } = await supabaseAdmin
     .from("owner_bank_accounts")
     .select("id,bank_name,iban,beneficiary_name,account_status,is_default,rejection_reason")
@@ -427,6 +518,14 @@ export default async function OwnerFinancePage() {
         <Link href="/owner/bookings" className="btn btn-secondary">
           <T en="Bookings" ar="الحجوزات" />
         </Link>
+
+        {eligibleSettlementTotal > 0 && bankAccount?.account_status === "approved" && (
+          <form action={requestPayout} style={{ display: "inline-block" }}>
+            <button type="submit" className="btn btn-primary">
+              <T en="Request Withdrawal" ar="طلب سحب الرصيد" />
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="admin-kpi-grid">
