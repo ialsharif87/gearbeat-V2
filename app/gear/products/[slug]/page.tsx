@@ -3,6 +3,8 @@ import T from "../../../../components/t";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "../../../../components/add-to-cart-button";
+import AddReviewForm from "../../../../components/add-review-form";
+import ProductGallery from "../../../../components/product-gallery";
 
 export default async function ProductDetailsPage({
   params
@@ -46,24 +48,7 @@ export default async function ProductDetailsPage({
 
       <div className="grid grid-2" style={{ gap: 60, marginTop: 30 }}>
         {/* LEFT: IMAGES */}
-        <div className="product-gallery">
-          <div className="main-image-box card">
-            {mainImage ? (
-              <img src={mainImage} alt={product.name_en} />
-            ) : (
-              <div className="placeholder">No Image</div>
-            )}
-          </div>
-          {otherImages.length > 0 && (
-            <div className="image-thumbnails" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 15, marginTop: 20 }}>
-              {otherImages.map((img: any, i: number) => (
-                <div key={i} className="card thumb-box">
-                  <img src={img.image_url} alt="" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery images={product.images || []} productName={product.name_en} />
 
         {/* RIGHT: INFO */}
         <div className="product-info">
@@ -101,7 +86,7 @@ export default async function ProductDetailsPage({
             </Link>
           </div>
 
-          <div className="product-description" style={{ marginTop: 40 }}>
+      <div className="product-description" style={{ marginTop: 40 }}>
             <div className="card-head">
               <h3><T en="Description" ar="الوصف" /></h3>
             </div>
@@ -111,6 +96,40 @@ export default async function ProductDetailsPage({
               <p style={{ textAlign: 'right' }}>{product.description_ar}</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* REVIEWS SECTION */}
+      <div className="product-reviews-section section-padding" style={{ marginTop: 60, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="section-head">
+          <h2><T en="Customer Reviews" ar="مراجعات العملاء" /></h2>
+        </div>
+        
+        <div className="grid grid-checkout" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 60, marginTop: 40 }}>
+           <div className="rating-sidebar">
+              <div className="rating-summary card">
+                 <div style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--gb-gold)' }}>4.8</div>
+                 <div style={{ display: 'flex', gap: 5, fontSize: '1.5rem', marginBottom: 10 }}>⭐⭐⭐⭐⭐</div>
+                 <p style={{ color: 'var(--muted)' }}><T en="Based on 12 reviews" ar="بناءً على 12 مراجعة" /></p>
+              </div>
+              <AddReviewForm productId={product.id} />
+           </div>
+           
+           <div className="reviews-list" style={{ display: 'grid', gap: 30 }}>
+              <div className="card review-card">
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 15 }}>
+                    <strong>Ahmed A.</strong>
+                    <span style={{ color: 'var(--gb-gold)' }}>⭐⭐⭐⭐⭐</span>
+                 </div>
+                 <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
+                    <T 
+                      en="Incredible audio interface! The preamps are super clean and the build quality is top-notch. Highly recommended for home studios." 
+                      ar="واجهة صوتية مذهلة! المكبرات الصوتية نقية جداً وجودة التصنيع ممتازة. أنصح بها بشدة للاستوديوهات المنزلية." 
+                    />
+                 </p>
+                 <div style={{ marginTop: 15, fontSize: '0.8rem', color: 'rgba(255,255,255,0.2)' }}>April 28, 2026</div>
+              </div>
+           </div>
         </div>
       </div>
     </div>
