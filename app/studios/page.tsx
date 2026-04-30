@@ -1,12 +1,17 @@
 import Link from "next/link";
-import { createClient } from "../../lib/supabase/server";
-import T from "../../components/t";
-import StudioFilter from "../../components/studio-filter";
+import { createClient } from "@/lib/supabase/server";
+import T from "@/components/t";
+import StudioFilter from "@/components/studio-filter";
+import { getActiveCountries } from "@/lib/countries";
+import { getActiveCities } from "@/lib/locations";
 
 type SearchParams = {
   q?: string;
+  country?: string;
+  city_id?: string;
   city?: string;
   district?: string;
+  studio_type?: string;
   min_price?: string;
   max_price?: string;
   verified?: string;
@@ -21,6 +26,21 @@ type SearchParams = {
 
 type StudioIdRow = {
   id: string | null;
+};
+
+type CountryRow = {
+  country_code: string;
+  name_en: string;
+  name_ar: string;
+  phone_code: string;
+  currency_code: string;
+};
+
+type CityOptionRow = {
+  id: string;
+  country_code: string;
+  name_en: string;
+  name_ar: string;
 };
 
 type CityRow = {
@@ -79,6 +99,17 @@ type StudioCardRow = {
   is_featured?: boolean | null;
   completion_score?: number | null;
   is_accelerated?: boolean;
+  // Global / Location Standard fields
+  country_code?: string | null;
+  city_id?: string | null;
+  city_name?: string | null;
+  address_line?: string | null;
+  google_maps_url?: string | null;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  minimum_photos_required?: number | null;
+  instant_booking_enabled?: boolean | null;
+  verified_location?: boolean | null;
 };
 
 function toArray(value: string | string[] | undefined) {
@@ -125,8 +156,11 @@ export default async function StudiosPage({
   const params = searchParams ? await searchParams : {};
 
   const queryText = String(params.q || "").trim().replaceAll(",", " ");
+  const selectedCountry = String(params.country || "").trim();
+  const selectedCityId = String(params.city_id || "").trim();
   const selectedCity = String(params.city || "").trim();
   const selectedDistrict = String(params.district || "").trim();
+  const selectedStudioType = String(params.studio_type || "").trim();
 
   const minPrice = Number(params.min_price || 0);
   const maxPrice = Number(params.max_price || 0);
@@ -148,6 +182,11 @@ export default async function StudiosPage({
 
   const supabase = await createClient();
 
+  const [countries, activeCities] = await Promise.all([
+    getActiveCountries(),
+    getActiveCities(),
+  ]);
+
   const { data: bookableStudioRows } = await applyBookableStudioFilters(
     supabase.from("studios").select("id")
   );
@@ -168,7 +207,7 @@ export default async function StudiosPage({
 
   const cityRowsList = (cityRows || []) as CityRow[];
 
-  const cities = uniqueClean(
+  const legacyCities = uniqueClean(
     cityRowsList.map((item: CityRow) => item.city)
   );
 
@@ -311,17 +350,25 @@ export default async function StudiosPage({
     supabase
       .from("studios")
       .select(
-        "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at,description,is_featured,completion_score"
+        "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at,description,is_featured,completion_score,country_code,city_id,city_name,address_line,google_maps_url,latitude,longitude,minimum_photos_required,instant_booking_enabled,verified_location"
       )
   );
 
   if (queryText) {
     studiosQuery = studiosQuery.or(
-      `name.ilike.%${queryText}%,city.ilike.%${queryText}%,district.ilike.%${queryText}%,description.ilike.%${queryText}%`
+      `name.ilike.%${queryText}%,city.ilike.%${queryText}%,city_name.ilike.%${queryText}%,district.ilike.%${queryText}%,address_line.ilike.%${queryText}%,description.ilike.%${queryText}%`
     );
   }
 
-  if (selectedCity) {
+  if (selectedCountry) {
+    studiosQuery = studiosQuery.eq("country_code", selectedCountry);
+  }
+
+  if (selectedCityId) {
+    studiosQuery = studiosQuery.eq("city_id", selectedCityId);
+  }
+
+  if (selectedCity && !selectedCityId) {
     studiosQuery = studiosQuery.eq("city", selectedCity);
   }
 
@@ -448,8 +495,11 @@ export default async function StudiosPage({
 
   const hasFilters =
     queryText ||
+    selectedCountry ||
+    selectedCityId ||
     selectedCity ||
     selectedDistrict ||
+    selectedStudioType ||
     minPrice ||
     maxPrice ||
     verifiedOnly ||
@@ -460,57 +510,6 @@ export default async function StudiosPage({
     selectedEquipmentBrand ||
     equipmentKeyword ||
     sort !== "newest";
-
-  const groupedFeatures = featuresList.reduce<Record<string, StudioFeatureRow[]>>(
-    (groups, feature: StudioFeatureRow) => {
-      const key = feature.category || "general";
-
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-
-      groups[key].push(feature);
-
-      return groups;
-    },
-    {}
-  );
-
-  const featureGroupLabels: Record<
-    string,
-    { en: string; ar: string; icon: string }
-  > = {
-    space: {
-      en: "Space type",
-      ar: "نوع المساحة",
-      icon: "🎙️"
-    },
-    amenity: {
-      en: "Amenities",
-      ar: "المميزات",
-      icon: "✨"
-    },
-    equipment: {
-      en: "Equipment",
-      ar: "المعدات",
-      icon: "🎛️"
-    },
-    service: {
-      en: "Services",
-      ar: "الخدمات",
-      icon: "🧑‍💻"
-    },
-    media: {
-      en: "Media",
-      ar: "الإنتاج",
-      icon: "🎥"
-    },
-    general: {
-      en: "Other",
-      ar: "أخرى",
-      icon: "➕"
-    }
-  };
 
   return (
     <section>
@@ -532,14 +531,25 @@ export default async function StudiosPage({
             ar="ابحث، فلتر، وقارن بين غرف التسجيل، مساحات البودكاست، استوديوهات التدريب، وغرف الإنتاج."
           />
         </p>
+
+        <div style={{ marginTop: 24 }}>
+          <Link href="/studios/near-me" className="btn btn-secondary">
+            <T en="Studios near me" ar="استوديوهات قريبة مني" />
+          </Link>
+        </div>
       </div>
 
       <StudioFilter
-        cities={cities}
+        cities={legacyCities}
         districts={districts}
         features={featuresList}
         equipmentCategories={equipmentCategories}
         equipmentBrands={equipmentBrands}
+        countries={countries}
+        cityOptions={activeCities}
+        selectedCountry={selectedCountry}
+        selectedCityId={selectedCityId}
+        selectedStudioType={selectedStudioType}
         initialValues={{
           q: queryText,
           city: selectedCity,
@@ -583,93 +593,110 @@ export default async function StudiosPage({
 
       <div className="grid">
         {studiosList.length ? (
-          studiosList.map((studio: StudioCardRow) => (
-            <article className="card studio-card" key={studio.id}>
-              <div className="studio-cover">
-                {studio.cover_image_url ? (
-                  <img src={studio.cover_image_url} alt={studio.name} />
-                ) : (
-                  <div className="placeholder">
-                    <T en="No Image" ar="لا توجد صورة" />
-                  </div>
-                )}
+          studiosList.map((studio: StudioCardRow) => {
+            const displayCity = studio.city_name || studio.city;
+            const displayDistrict = studio.district;
 
-                <div className="studio-card-floating-badges">
-                  {studio.is_accelerated ? (
-                    <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
-                      <T en="Featured" ar="مميز" />
-                    </span>
-                  ) : studio.is_featured ? (
-                    <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
-                      <T en="Featured" ar="مميز" />
-                    </span>
-                  ) : null}
+            return (
+              <article className="card studio-card" key={studio.id}>
+                <div className="studio-cover">
+                  {studio.cover_image_url ? (
+                    <img src={studio.cover_image_url} alt={studio.name} />
+                  ) : (
+                    <div className="placeholder">
+                      <T en="No Image" ar="لا توجد صورة" />
+                    </div>
+                  )}
 
-                  <span className="badge studio-bookable-badge">
-                    <T en="Bookable" ar="قابل للحجز" />
-                  </span>
-
-                  <span className="badge">
-                    <T en="Verified" ar="موثق" />
-                  </span>
-
-                  {studio.google_rating ? (
-                    <span className="badge">
-                      {studio.google_rating} ★ Google
-                    </span>
-                  ) : null}
-
-                  {studio.tripadvisor_rating ? (
-                    <span className="badge">
-                      {studio.tripadvisor_rating} ★ TripAdvisor
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="studio-card-body">
-                <div>
-                  <span className="badge">
-                    <T en="Available for booking" ar="متاح للحجز" />
-                  </span>
-
-                  <h2>{studio.name}</h2>
-
-                  <p>
-                    {studio.city}
-                    {studio.district ? ` · ${studio.district}` : ""}
-                  </p>
-
-                  <div className="studio-trust-mini">
-                    {studio.google_user_ratings_total ? (
-                      <span>
-                        Google: {studio.google_user_ratings_total}{" "}
-                        <T en="reviews" ar="تقييم" />
+                  <div className="studio-card-floating-badges">
+                    {studio.is_accelerated ? (
+                      <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
+                        <T en="Featured" ar="مميز" />
+                      </span>
+                    ) : studio.is_featured ? (
+                      <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
+                        <T en="Featured" ar="مميز" />
                       </span>
                     ) : null}
 
-                    {studio.tripadvisor_reviews_total ? (
-                      <span>
-                        TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
-                        <T en="reviews" ar="تقييم" />
+                    <span className="badge studio-bookable-badge">
+                      <T en="Bookable" ar="قابل للحجز" />
+                    </span>
+
+                    <span className="badge">
+                      <T en="Verified" ar="موثق" />
+                    </span>
+
+                    {studio.instant_booking_enabled ? (
+                      <span className="badge badge-success">
+                        <T en="Instant booking" ar="حجز فوري" />
+                      </span>
+                    ) : null}
+
+                    {studio.verified_location ? (
+                      <span className="badge badge-success">
+                        <T en="Location verified" ar="الموقع موثق" />
+                      </span>
+                    ) : null}
+
+                    {studio.google_rating ? (
+                      <span className="badge">
+                        {studio.google_rating} ★ Google
+                      </span>
+                    ) : null}
+
+                    {studio.tripadvisor_rating ? (
+                      <span className="badge">
+                        {studio.tripadvisor_rating} ★ TripAdvisor
                       </span>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="studio-card-footer">
-                  <p>
-                    <T en="From" ar="من" />{" "}
-                    <strong>{studio.price_from ?? 0} SAR</strong>
-                  </p>
+                <div className="studio-card-body">
+                  <div>
+                    <span className="badge">
+                      <T en="Available for booking" ar="متاح للحجز" />
+                    </span>
 
-                  <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                    <T en="View & Book" ar="عرض وحجز" />
-                  </Link>
+                    <h2>{studio.name}</h2>
+
+                    <p>
+                      {displayCity}
+                      {displayDistrict ? ` · ${displayDistrict}` : ""}
+                    </p>
+
+                    <div className="studio-trust-mini">
+                      {studio.google_user_ratings_total ? (
+                        <span>
+                          Google: {studio.google_user_ratings_total}{" "}
+                          <T en="reviews" ar="تقييم" />
+                        </span>
+                      ) : null}
+
+                      {studio.tripadvisor_reviews_total ? (
+                        <span>
+                          TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
+                          <T en="reviews" ar="تقييم" />
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="studio-card-footer">
+                    <p>
+                      <T en="From" ar="من" />{" "}
+                      <strong>{studio.price_from ?? 0} SAR</strong>
+                    </p>
+
+                    <Link href={`/studios/${studio.slug}`} className="btn btn-small">
+                      <T en="View & Book" ar="عرض وحجز" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            );
+          })
         ) : (
           <div className="card">
             <h2>
@@ -691,3 +718,4 @@ export default async function StudiosPage({
     </section>
   );
 }
+

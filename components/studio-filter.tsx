@@ -11,12 +11,32 @@ type StudioFeatureRow = {
   sort_order: number | null;
 };
 
+type CountryOption = {
+  country_code: string;
+  name_en: string;
+  name_ar: string;
+  phone_code: string;
+  currency_code: string;
+};
+
+type CityOption = {
+  id: string;
+  country_code: string;
+  name_en: string;
+  name_ar: string;
+};
+
 type StudioFilterProps = {
   cities: string[];
   districts: string[];
   features: StudioFeatureRow[];
   equipmentCategories: string[];
   equipmentBrands: string[];
+  countries?: CountryOption[];
+  cityOptions?: CityOption[];
+  selectedCountry?: string;
+  selectedCityId?: string;
+  selectedStudioType?: string;
   initialValues: {
     q: string;
     city: string;
@@ -40,6 +60,11 @@ export default function StudioFilter({
   features,
   equipmentCategories,
   equipmentBrands,
+  countries = [],
+  cityOptions = [],
+  selectedCountry = "",
+  selectedCityId = "",
+  selectedStudioType = "",
   initialValues
 }: StudioFilterProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -77,7 +102,33 @@ export default function StudioFilter({
       </div>
 
       <div>
+        <label><T en="Country" ar="الدولة" /></label>
+        <select className="input" name="country" defaultValue={selectedCountry}>
+          <option value="">All countries</option>
+          {countries.map((country) => (
+            <option value={country.country_code} key={country.country_code}>
+              {country.name_en} / {country.name_ar}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
         <label><T en="City" ar="المدينة" /></label>
+        <select className="input" name="city_id" defaultValue={selectedCityId}>
+          <option value="">All cities</option>
+          {cityOptions
+            .filter((city) => !selectedCountry || city.country_code === selectedCountry)
+            .map((city) => (
+              <option value={city.id} key={city.id}>
+                {city.name_en} / {city.name_ar}
+              </option>
+            ))}
+        </select>
+      </div>
+
+      <div>
+        <label><T en="Legacy City" ar="مدينة قديمة" /></label>
         <select className="input" name="city" defaultValue={initialValues.city}>
           <option value="">All cities</option>
           {cities.map((city) => (
@@ -134,6 +185,10 @@ export default function StudioFilter({
           <T en="Apply Filters" ar="تطبيق الفلاتر" />
         </button>
 
+        <a href="/studios/near-me" className="btn btn-secondary">
+          <T en="Near me" ar="قريب مني" />
+        </a>
+
         <a href="/studios" className="btn btn-secondary">
           <T en="Reset" ar="إعادة ضبط" />
         </a>
@@ -142,6 +197,20 @@ export default function StudioFilter({
       {/* ADVANCED SECTION */}
       {showAdvanced && (
         <div className="advanced-filter-content" style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <div>
+            <label><T en="Studio Type" ar="نوع الاستوديو" /></label>
+            <select className="input" name="studio_type" defaultValue={selectedStudioType}>
+              <option value="">Any type</option>
+              <option value="recording_studio">Recording Studio</option>
+              <option value="podcast_studio">Podcast Studio</option>
+              <option value="rehearsal_room">Rehearsal Room</option>
+              <option value="mixing_mastering">Mixing / Mastering</option>
+              <option value="voice_over">Voice-over Studio</option>
+              <option value="production_house">Production House</option>
+              <option value="creative_space">Creative Space</option>
+            </select>
+          </div>
+
           <div>
             <label><T en="Min Google Rating" ar="أقل تقييم Google" /></label>
             <select className="input" name="min_google_rating" defaultValue={initialValues.min_google_rating || ""}>
@@ -253,3 +322,4 @@ export default function StudioFilter({
     </form>
   );
 }
+
