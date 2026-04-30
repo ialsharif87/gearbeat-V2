@@ -261,6 +261,48 @@ export default async function AdminDashboardPage() {
                 </div>
               </div>
             ) : null}
+
+            {canManageStudios ? (
+              <>
+                <div>
+                  <strong>
+                    <T en="Commission Settings" ar="إعدادات العمولة" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Manage global commission percentage (10% to 30%) and set custom rates per studio."
+                      ar="إدارة نسبة العمولة العامة (10٪ إلى 30٪) وتحديد نسب مخصصة لكل استوديو."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link href="/admin/commissions" className="btn btn-secondary">
+                      <T en="Manage Commissions" ar="إدارة العمولات" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>
+                    <T en="Acceleration Requests" ar="طلبات التسريع" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Review, approve, and manage studio visibility acceleration requests."
+                      ar="مراجعة واعتماد وإدارة طلبات تسريع ظهور الاستوديوهات."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link href="/admin/acceleration" className="btn btn-secondary">
+                      <T en="Manage Acceleration" ar="إدارة التسريع" />
+                    </Link>
+                  </div>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
 

@@ -75,6 +75,9 @@ type StudioCardRow = {
   tripadvisor_reviews_total: number | null;
   created_at: string | null;
   description?: string | null;
+  is_featured?: boolean | null;
+  completion_score?: number | null;
+  is_accelerated?: boolean;
 };
 
 function toArray(value: string | string[] | undefined) {
@@ -307,7 +310,7 @@ export default async function StudiosPage({
     supabase
       .from("studios")
       .select(
-        "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at,description"
+        "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at,description,is_featured,completion_score"
       )
   );
 
@@ -378,7 +381,53 @@ export default async function StudiosPage({
 
   const { data: studios, error } = await studiosQuery;
 
-  const studiosList = (studios || []) as StudioCardRow[];
+  let studiosList = (studios || []) as StudioCardRow[];
+
+  if (!error) {
+    const { data: activeAccelerations } = await supabase
+      .from("studio_accelerations")
+      .select("studio_id, priority_score")
+      .eq("status", "active")
+      .gte("end_date", new Date().toISOString());
+
+    const accelerationMap = new Map<string, number>();
+    if (activeAccelerations) {
+      for (const acc of activeAccelerations) {
+        accelerationMap.set(acc.studio_id, acc.priority_score || 0);
+      }
+    }
+
+    if (sort === "newest") {
+      studiosList.sort((a, b) => {
+        const aBoost = accelerationMap.has(a.id);
+        const bBoost = accelerationMap.has(b.id);
+        
+        if (aBoost && !bBoost) return -1;
+        if (!aBoost && bBoost) return 1;
+
+        if (aBoost && bBoost) {
+          const aScore = accelerationMap.get(a.id)!;
+          const bScore = accelerationMap.get(b.id)!;
+          if (aScore !== bScore) return bScore - aScore;
+        }
+
+        if (a.is_featured && !b.is_featured) return -1;
+        if (!a.is_featured && b.is_featured) return 1;
+
+        const aComp = a.completion_score || 0;
+        const bComp = b.completion_score || 0;
+        if (aComp !== bComp) return bComp - aComp;
+
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+    }
+    
+    // Add is_accelerated flag to the objects for rendering badges
+    studiosList = studiosList.map((studio) => ({
+      ...studio,
+      is_accelerated: accelerationMap.has(studio.id)
+    }));
+  }
 
   if (error) {
     return (
@@ -796,6 +845,16 @@ export default async function StudiosPage({
                 )}
 
                 <div className="studio-card-floating-badges">
+                  {studio.is_accelerated ? (
+                    <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
+                      <T en="Featured" ar="مميز" />
+                    </span>
+                  ) : studio.is_featured ? (
+                    <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
+                      <T en="Featured" ar="مميز" />
+                    </span>
+                  ) : null}
+
                   <span className="badge studio-bookable-badge">
                     <T en="Bookable" ar="قابل للحجز" />
                   </span>

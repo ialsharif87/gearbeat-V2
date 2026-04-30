@@ -286,6 +286,56 @@ export default async function OwnerPage() {
       <div className="admin-detail-grid">
         <div className="card">
           <span className="badge">
+            <T en="Growth & Visibility" ar="النمو والظهور" />
+          </span>
+
+          <h2>
+            <T en="Acceleration" ar="التسريع" />
+          </h2>
+
+          <p>
+            <T
+              en="Boost your studio visibility in the marketplace and track your performance metrics."
+              ar="ارفع مستوى ظهور استوديوك في المنصة وتابع أداء الظهور."
+            />
+          </p>
+
+          <div className="actions">
+            <Link href="/owner/acceleration" className="btn">
+              <T en="Manage Acceleration" ar="إدارة التسريع" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="card">
+          <span className="badge">
+            <T en="Fees & Deductions" ar="الرسوم والخصومات" />
+          </span>
+
+          <h2>
+            <T en="Commission" ar="العمولة" />
+          </h2>
+
+          <p>
+            <T
+              en="View your current commission percentage and history of deductions on paid bookings."
+              ar="عرض نسبة العمولة الحالية وتاريخ الخصومات على الحجوزات المدفوعة."
+            />
+          </p>
+
+          <div className="actions">
+            <Link href="/owner/commission" className="btn">
+              <T en="View Commission" ar="عرض العمولة" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: 24 }} />
+
+      <div className="admin-detail-grid">
+        <div className="card">
+          <span className="badge">
             <T en="Finance" ar="المالية" />
           </span>
 

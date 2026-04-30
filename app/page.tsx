@@ -7,19 +7,13 @@ export default function HomePage() {
     <section className="home-page">
       <div className="home-hero card">
         <div className="home-hero-content">
-          <div style={{ marginBottom: 22 }}>
-            <Image
-              src="/brand/logo-horizontal-ai.png"
-              alt="GearBeat"
-              width={210}
-              height={70}
-              priority
-              style={{
-                width: "210px",
-                height: "auto",
-                display: "block",
-              }}
-            />
+          <div style={{ marginBottom: 30 }}>
+            <div className="gb-logo gb-logo-lg">
+              <div className="gb-logo-word-group">
+                <span className="gb-logo-word">Gear<span>Beat</span></span>
+                <span className="gb-logo-tagline">STUDIOS. SOUNDS. SESSIONS.</span>
+              </div>
+            </div>
           </div>
 
           <span className="badge">
