@@ -1,6 +1,7 @@
 import Link from "next/link";
 import T from "./t";
 import AddToCartButton from "./add-to-cart-button";
+import WishlistButton from "./wishlist-button";
 
 type ProductCardProps = {
   product: {
