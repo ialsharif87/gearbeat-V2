@@ -357,6 +357,46 @@ export default async function CustomerBookingsPage() {
       throw new Error(bookingUpdateError.message);
     }
 
+    // --- COMMISSION CALCULATION ---
+    // 1. Get default commission
+    const { data: globalSettings } = await supabaseAdmin
+      .from("commission_settings")
+      .select("default_percentage")
+      .limit(1)
+      .maybeSingle();
+
+    const defaultCommission = globalSettings?.default_percentage || 15;
+
+    // 2. Get custom studio commission (if any)
+    const { data: customCommission } = await supabaseAdmin
+      .from("studio_commissions")
+      .select("commission_percentage")
+      .eq("studio_id", booking.studio_id)
+      .maybeSingle();
+
+    const commissionPercentage = customCommission?.commission_percentage ?? defaultCommission;
+    
+    // 3. Calculate amounts
+    const commissionAmount = Number(((totalAmount * commissionPercentage) / 100).toFixed(2));
+    const studioNetAmount = Number((totalAmount - commissionAmount).toFixed(2));
+
+    // 4. Record the commission
+    const { error: commissionInsertError } = await supabaseAdmin
+      .from("booking_commissions")
+      .insert({
+        booking_id: booking.id,
+        studio_id: booking.studio_id,
+        booking_subtotal: totalAmount,
+        commission_percentage: commissionPercentage,
+        commission_amount: commissionAmount,
+        studio_net_amount: studioNetAmount
+      });
+
+    if (commissionInsertError) {
+      throw new Error(`Failed to record commission: ${commissionInsertError.message}`);
+    }
+    // --- END COMMISSION CALCULATION ---
+
     revalidatePath("/customer/bookings");
     revalidatePath("/owner/bookings");
     revalidatePath("/owner/finance");
