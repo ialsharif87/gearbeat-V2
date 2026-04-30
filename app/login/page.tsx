@@ -576,7 +576,7 @@ export default async function LoginPage({
                 />
               </Link>
 
-              <Link href="/vendor/register" className="btn btn-secondary" style={{ border: '1px solid var(--gb-gold)' }}>
+              <Link href="/vendor-signup" className="btn btn-secondary" style={{ border: '1px solid var(--gb-gold)' }}>
                 <T
                   en="Create Gear Vendor Account"
                   ar="إنشاء حساب تاجر معدات"

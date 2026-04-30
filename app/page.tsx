@@ -77,7 +77,7 @@ export default function HomePage() {
             <p><T en="List and manage your space." ar="اعرض وأدر مساحتك الخاصة." /></p>
           </Link>
 
-          <Link href="/vendor/onboarding" className="card home-join-card">
+          <Link href="/vendor-signup" className="card home-join-card">
             <div className="join-icon">📦</div>
             <h3><T en="Gear Vendor" ar="تاجر معدات" /></h3>
             <p><T en="Sell to a pro audience." ar="بع معداتك لجمهور محترف." /></p>

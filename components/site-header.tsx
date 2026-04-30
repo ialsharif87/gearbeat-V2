@@ -77,7 +77,7 @@ export default function SiteHeader({
                     <p><T en="List your space" ar="اعرض مساحتك" /></p>
                   </div>
                 </Link>
-                <Link href="/vendor/register" className="partner-item">
+                <Link href="/vendor-signup" className="partner-item">
                   <div className="partner-icon">📦</div>
                   <div className="partner-text">
                     <strong><T en="Gear Vendor" ar="تاجر معدات" /></strong>
