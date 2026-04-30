@@ -88,7 +88,7 @@ function getLoginMessage({
   return null;
 }
 
-async function ensureProfileForUser({
+async function getOrCreateProfileForUser({
   supabaseAdmin,
   user,
   selectedAccountType
@@ -97,46 +97,26 @@ async function ensureProfileForUser({
   user: any;
   selectedAccountType: AccountType;
 }) {
-  const { data: existingProfile } = await supabaseAdmin
+  const { data: existingProfile, error: profileLookupError } = await supabaseAdmin
     .from("profiles")
     .select("id, auth_user_id, email, full_name, phone, role, account_status")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
+  if (profileLookupError) {
+    throw new Error(profileLookupError.message);
+  }
+
   if (existingProfile) {
-    const metadataRole = user.user_metadata?.role;
-
-    if (
-      (selectedAccountType === "owner" || selectedAccountType === "vendor") &&
-      existingProfile.role !== selectedAccountType &&
-      metadataRole === selectedAccountType
-    ) {
-      const { data: updatedProfile, error: updateError } = await supabaseAdmin
-        .from("profiles")
-        .update({
-          role: selectedAccountType,
-          account_status: "active",
-          updated_at: new Date().toISOString()
-        })
-        .eq("auth_user_id", user.id)
-        .select("id, auth_user_id, email, full_name, phone, role, account_status")
-        .single();
-
-      if (updateError) {
-        throw new Error(updateError.message);
-      }
-
-      return updatedProfile;
-    }
-
     return existingProfile;
   }
 
-  const metadataRole = user.user_metadata?.role;
-  const role =
-    selectedAccountType === "owner" || selectedAccountType === "vendor" || metadataRole === "owner" || metadataRole === "vendor"
-      ? (selectedAccountType || metadataRole)
-      : "customer";
+  // Security rule:
+  // Never create owner or vendor roles from the login page.
+  // Owner/vendor roles must already exist in database tables from the correct signup/approval flows.
+  if (selectedAccountType !== "customer") {
+    return null;
+  }
 
   const fullName =
     user.user_metadata?.full_name ||
@@ -157,7 +137,7 @@ async function ensureProfileForUser({
       email: user.email,
       full_name: fullName,
       phone,
-      role,
+      role: "customer",
       account_status: "active",
       updated_at: new Date().toISOString()
     })
@@ -168,6 +148,8 @@ async function ensureProfileForUser({
     throw new Error(error.message);
   }
 
+  // Keep only harmless display/contact metadata.
+  // Do not write role or account_type into user_metadata.
   await supabaseAdmin.auth.admin.updateUserById(user.id, {
     user_metadata: {
       ...user.user_metadata,
@@ -175,9 +157,7 @@ async function ensureProfileForUser({
       name: fullName,
       phone,
       phone_number: phone,
-      mobile: phone,
-      role,
-      account_type: role
+      mobile: phone
     }
   });
 
@@ -288,11 +268,23 @@ export default async function LoginPage({
       redirect("/admin");
     }
 
-    const profile = await ensureProfileForUser({
+    const profile = await getOrCreateProfileForUser({
       supabaseAdmin,
       user,
       selectedAccountType
     });
+
+    if (!profile) {
+      await supabase.auth.signOut();
+
+      redirect(
+        loginRedirectPath({
+          error: "wrong_account_type",
+          account: selectedAccountType,
+          next
+        })
+      );
+    }
 
     if (profile.account_status === "deleted") {
       await supabase.auth.signOut();
@@ -351,16 +343,26 @@ export default async function LoginPage({
         );
       }
 
-      // Check vendor profile status
-      const { data: vendorProfile } = await supabaseAdmin
+      const { data: vendorProfile, error: vendorProfileError } = await supabaseAdmin
         .from("vendor_profiles")
         .select("id, status")
         .eq("id", user.id)
         .maybeSingle();
 
+      if (vendorProfileError) {
+        throw new Error(vendorProfileError.message);
+      }
+
       if (!vendorProfile) {
-        // No vendor profile yet — go to onboarding to complete it
-        redirect("/vendor/onboarding");
+        await supabase.auth.signOut();
+
+        redirect(
+          loginRedirectPath({
+            error: "wrong_account_type",
+            account: selectedAccountType,
+            next
+          })
+        );
       }
 
       if (vendorProfile.status === "pending" || vendorProfile.status === "rejected") {
