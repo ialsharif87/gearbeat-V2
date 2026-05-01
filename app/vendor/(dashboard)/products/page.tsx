@@ -75,9 +75,15 @@ export default async function VendorProductsPage() {
           </p>
         </div>
 
-        <Link href="/vendor/products/new" className="btn btn-primary">
-          <T en="+ Add Product" ar="+ إضافة منتج" />
-        </Link>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Link href="/vendor/products/bulk" className="btn">
+            <T en="Bulk upload" ar="رفع جماعي" />
+          </Link>
+
+          <Link href="/vendor/products/new" className="btn btn-primary">
+            <T en="+ Add Product" ar="+ إضافة منتج" />
+          </Link>
+        </div>
       </div>
 
       <div className="card" style={{ marginTop: 30, padding: 0, overflow: "hidden" }}>
