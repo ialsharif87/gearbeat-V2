@@ -40,7 +40,7 @@ function generateDisplayMembershipNumber(authUserId: string) {
 }
 
 async function safeQuery<T>(
-  queryPromise: Promise<{ data: T | null; error: any }>
+  queryPromise: PromiseLike<{ data: T | null; error: any }>
 ): Promise<T | null> {
   const { data, error } = await queryPromise;
 
