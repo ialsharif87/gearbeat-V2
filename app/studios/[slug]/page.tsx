@@ -8,6 +8,7 @@ import FavoriteButton from "@/components/favorite-button";
 import StudioPhotoGallery from "@/components/studio-photo-gallery";
 import GoogleMapsLink from "@/components/google-maps-link";
 import StudioPhotoRequirements from "@/components/studio-photo-requirements";
+import StudioOwnerTrustCard from "@/components/studio-owner-trust-card";
 
 function formatSyncDate(value: string | null | undefined) {
   if (!value) return null;
@@ -430,33 +431,21 @@ export default async function StudioDetailsPage({
             </div>
           </div>
 
-          <div className="card">
-            <h2>
-              <T en="Hosted by" ar="المضيف" />
-            </h2>
-
-            <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
-              {ownerProfile?.full_name || "Verified GearBeat studio owner"}
-            </p>
-
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
-              {ownerProfile?.email_verified ? (
-                <span className="badge badge-success">Email verified</span>
-              ) : null}
-
-              {ownerProfile?.phone_verified ? (
-                <span className="badge badge-success">Phone verified</span>
-              ) : null}
-
-              {ownerProfile?.identity_verification_status === "verified" ? (
-                <span className="badge badge-success">Identity verified</span>
-              ) : null}
-
-              {studio.verified ? (
-                <span className="badge badge-success">Studio verified</span>
-              ) : null}
-            </div>
-          </div>
+          <StudioOwnerTrustCard
+            ownerName={ownerProfile?.full_name}
+            ownerEmail={ownerProfile?.email}
+            ownerRole="Studio Owner"
+            phoneVerified={ownerProfile?.phone_verified}
+            emailVerified={ownerProfile?.email_verified}
+            identityVerificationStatus={ownerProfile?.identity_verification_status}
+            studioVerified={studio.verified}
+            locationVerified={studio.verified_location}
+            businessVerified={
+              studio.owner_compliance_status === "approved" ||
+              studio.owner_compliance_status === "verified"
+            }
+            ownerTrustSummary={studio.owner_trust_summary}
+          />
 
           {reviewCount > 0 && (
             <div className="card">
