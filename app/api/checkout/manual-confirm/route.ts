@@ -13,6 +13,163 @@ function createManualReference() {
     .toUpperCase()}`;
 }
 
+function getSafeMetadata(value: unknown) {
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  ) {
+    return value as Record<string, unknown>;
+  }
+
+  return {};
+}
+
+function buildSourcePaymentPayload({
+  session,
+  transaction,
+  manualReference,
+}: {
+  session: any;
+  transaction: any;
+  manualReference: string;
+}) {
+  return {
+    payment_status: "paid",
+    checkout_session_id: session.id,
+    payment_transaction_id: transaction.id,
+    payment_provider: "manual",
+    payment_method: session.payment_method || "manual",
+    provider_checkout_id: session.provider_checkout_id || null,
+    provider_payment_id: manualReference,
+    installment_provider: null,
+    coupon_id: session.coupon_id || null,
+    coupon_code: session.coupon_code || null,
+    coupon_discount_amount: Number(session.coupon_discount_amount || 0),
+    wallet_credit_used: Number(session.wallet_credit_used || 0),
+    loyalty_points_redeemed: Number(session.loyalty_points_redeemed || 0),
+  };
+}
+
+async function updateOwnedSourceRecord({
+  supabaseAdmin,
+  tableName,
+  sourceId,
+  authUserId,
+  payload,
+}: {
+  supabaseAdmin: ReturnType<typeof createAdminClient>;
+  tableName: string;
+  sourceId: string | null;
+  authUserId: string;
+  payload: Record<string, unknown>;
+}) {
+  if (!sourceId) {
+    return {
+      updated: false,
+      tableName,
+      reason: "Missing source_id.",
+    };
+  }
+
+  const ownerColumns = [
+    "customer_auth_user_id",
+    "auth_user_id",
+    "user_id",
+  ];
+
+  let lastError = "";
+
+  for (const ownerColumn of ownerColumns) {
+    const { data, error } = await supabaseAdmin
+      .from(tableName)
+      .update(payload)
+      .eq("id", sourceId)
+      .eq(ownerColumn, authUserId)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      lastError = error.message;
+      console.warn(
+        `Could not update ${tableName} using owner column ${ownerColumn}:`,
+        error.message
+      );
+      continue;
+    }
+
+    if (data?.id) {
+      return {
+        updated: true,
+        tableName,
+        ownerColumn,
+        sourceId: data.id,
+      };
+    }
+  }
+
+  return {
+    updated: false,
+    tableName,
+    reason:
+      "No owned source record matched, or supported owner column was not found.",
+    lastError,
+  };
+}
+
+async function linkPaymentToSource({
+  supabaseAdmin,
+  session,
+  transaction,
+  authUserId,
+  manualReference,
+}: {
+  supabaseAdmin: ReturnType<typeof createAdminClient>;
+  session: any;
+  transaction: any;
+  authUserId: string;
+  manualReference: string;
+}) {
+  const sourceType = String(session.source_type || "").trim();
+  const sourceId = session.source_id || null;
+
+  const payload = buildSourcePaymentPayload({
+    session,
+    transaction,
+    manualReference,
+  });
+
+  if (sourceType === "studio_booking" || sourceType === "booking") {
+    return updateOwnedSourceRecord({
+      supabaseAdmin,
+      tableName: "bookings",
+      sourceId,
+      authUserId,
+      payload,
+    });
+  }
+
+  if (
+    sourceType === "marketplace_order" ||
+    sourceType === "order" ||
+    sourceType === "marketplace"
+  ) {
+    return updateOwnedSourceRecord({
+      supabaseAdmin,
+      tableName: "marketplace_orders",
+      sourceId,
+      authUserId,
+      payload,
+    });
+  }
+
+  return {
+    updated: false,
+    tableName: null,
+    reason: `Source type ${sourceType || "unknown"} is not linked to a payment status update yet.`,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -115,6 +272,7 @@ export async function POST(request: Request) {
             status,
             amount,
             currency_code,
+            provider_payment_id,
             provider_reference,
             paid_at,
             captured_at
@@ -127,6 +285,22 @@ export async function POST(request: Request) {
       if (existingTransactionError) {
         throw new Error(existingTransactionError.message);
       }
+
+      const sourceUpdateResult = existingTransaction
+        ? await linkPaymentToSource({
+            supabaseAdmin,
+            session,
+            transaction: existingTransaction,
+            authUserId: user.id,
+            manualReference:
+              existingTransaction.provider_reference ||
+              session.provider_reference ||
+              "manual-confirmed",
+          })
+        : {
+            updated: false,
+            reason: "No existing transaction found for completed session.",
+          };
 
       return NextResponse.json({
         ok: true,
@@ -141,6 +315,7 @@ export async function POST(request: Request) {
           existingTransaction?.provider_reference ||
           session.provider_reference ||
           null,
+        sourceUpdate: sourceUpdateResult,
         message: "Manual checkout session was already confirmed.",
       });
     }
@@ -154,7 +329,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (session.expires_at && new Date(session.expires_at).getTime() < Date.now()) {
+    if (
+      session.expires_at &&
+      new Date(session.expires_at).getTime() < Date.now()
+    ) {
       await supabaseAdmin
         .from("checkout_payment_sessions")
         .update({
@@ -206,6 +384,8 @@ export async function POST(request: Request) {
         metadata: {
           source: "manual_testing_confirmation",
           checkout_session_id: session.id,
+          source_type: session.source_type,
+          source_id: session.source_id,
           coupon_code: session.coupon_code,
           coupon_discount_amount: session.coupon_discount_amount,
           wallet_credit_used: session.wallet_credit_used,
@@ -230,6 +410,14 @@ export async function POST(request: Request) {
       throw new Error(transactionError.message);
     }
 
+    const sourceUpdateResult = await linkPaymentToSource({
+      supabaseAdmin,
+      session,
+      transaction,
+      authUserId: user.id,
+      manualReference,
+    });
+
     const { error: sessionUpdateError } = await supabaseAdmin
       .from("checkout_payment_sessions")
       .update({
@@ -239,10 +427,11 @@ export async function POST(request: Request) {
         completed_at: nowIso,
         updated_at: nowIso,
         metadata: {
-          ...(session.metadata || {}),
+          ...getSafeMetadata(session.metadata),
           manual_confirmed: true,
           manual_confirmed_at: nowIso,
           payment_transaction_id: transaction.id,
+          source_update: sourceUpdateResult,
         },
       })
       .eq("id", session.id);
@@ -262,8 +451,9 @@ export async function POST(request: Request) {
       providerReference: transaction.provider_reference,
       paidAt: transaction.paid_at,
       capturedAt: transaction.captured_at,
+      sourceUpdate: sourceUpdateResult,
       message:
-        "Manual testing payment confirmed. Real payment provider integration is still not active.",
+        "Manual testing payment confirmed and linked to the source payment status when ownership matched.",
     });
   } catch (error) {
     console.error("Manual checkout confirmation error:", error);
