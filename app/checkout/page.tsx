@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PaymentMethodSelector from "@/components/payment-method-selector";
+import CheckoutSessionBox from "@/components/checkout-session-box";
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
@@ -127,6 +128,25 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
+      
+      <div style={{ marginTop: 60, maxWidth: 800, margin: '60px auto 0' }}>
+        <div style={{ textAlign: 'center', marginBottom: 30 }}>
+          <h2><T en="Final Step: Secure Payment Session" ar="الخطوة الأخيرة: جلسة دفع آمنة" /></h2>
+          <p style={{ color: 'var(--muted)' }}>
+            <T en="After providing your shipping details above, initialize your secure payment session below." ar="بعد إدخال تفاصيل الشحن أعلاه، قم ببدء جلسة الدفع الآمنة أدناه." />
+          </p>
+        </div>
+        
+        <CheckoutSessionBox
+          sourceType="marketplace_order"
+          subtotalAmount={totalPrice}
+          currencyCode="SAR"
+          successUrl="/order-confirmation/DEMO-ORDER-123"
+          cancelUrl="/cart"
+          buttonLabelEn="Initialize Payment Session"
+          buttonLabelAr="بدء جلسة الدفع"
+        />
+      </div>
     </div>
   );
 }
