@@ -1,3 +1,4 @@
+import Link from "next/link";
 import T from "@/components/t";
 
 type CustomerMembershipCardProps = {
@@ -9,6 +10,7 @@ type CustomerMembershipCardProps = {
   walletBalance?: number | null;
   currencyCode?: string | null;
   referralCode?: string | null;
+  showRewardsLink?: boolean;
 };
 
 function formatMoney(value: number | null | undefined, currencyCode = "SAR") {
@@ -42,6 +44,7 @@ export default function CustomerMembershipCard({
   walletBalance,
   currencyCode = "SAR",
   referralCode,
+  showRewardsLink = false,
 }: CustomerMembershipCardProps) {
   const tierName = getTierName(tierCode);
 
@@ -178,6 +181,18 @@ export default function CustomerMembershipCard({
             <strong>{referralCode}</strong>
           </div>
         ) : null}
+
+        {showRewardsLink && (
+          <div style={{ marginTop: 20, textAlign: "right" }}>
+            <Link
+              href="/customer/rewards"
+              className="btn btn-primary"
+              style={{ padding: "8px 16px", fontSize: "0.9rem" }}
+            >
+              <T en="View rewards detail" ar="عرض تفاصيل المكافآت" />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

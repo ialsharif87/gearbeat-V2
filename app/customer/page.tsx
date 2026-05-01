@@ -263,6 +263,7 @@ export default async function CustomerDashboardPage() {
           walletBalance={wallet?.wallet_balance || 0}
           currencyCode={currency}
           referralCode={referralCode}
+          showRewardsLink={true}
         />
       </section>
 
