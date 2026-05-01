@@ -170,6 +170,120 @@ async function linkPaymentToSource({
   };
 }
 
+async function redeemCouponAfterPayment({
+  supabaseAdmin,
+  session,
+  authUserId,
+}: {
+  supabaseAdmin: ReturnType<typeof createAdminClient>;
+  session: any;
+  authUserId: string;
+}) {
+  const couponCode = String(session.coupon_code || "").trim();
+
+  if (!couponCode) {
+    return {
+      redeemed: false,
+      skipped: true,
+      reason: "No coupon code on checkout session.",
+    };
+  }
+
+  const couponId = session.coupon_id || null;
+  const sourceType = String(session.source_type || "checkout_session").trim();
+  const sourceId = session.source_id || session.id;
+
+  if (couponId) {
+    const { data: existingRedemption, error: existingError } =
+      await supabaseAdmin
+        .from("coupon_redemptions")
+        .select("id, discount_amount, status")
+        .eq("coupon_id", couponId)
+        .eq("auth_user_id", authUserId)
+        .eq("source_type", sourceType)
+        .eq("source_id", sourceId)
+        .maybeSingle();
+
+    if (existingError) {
+      console.warn("Coupon existing redemption lookup failed:", existingError.message);
+    }
+
+    if (existingRedemption?.id) {
+      return {
+        redeemed: true,
+        alreadyRedeemed: true,
+        redemptionId: existingRedemption.id,
+        discountAmount: Number(existingRedemption.discount_amount || 0),
+        status: existingRedemption.status,
+        message: "Coupon was already redeemed for this source.",
+      };
+    }
+  }
+
+  const metadata =
+    session.metadata &&
+    typeof session.metadata === "object" &&
+    !Array.isArray(session.metadata)
+      ? session.metadata
+      : {};
+
+  const subtotalAmount = Number(
+    metadata.subtotal_amount ||
+      Number(session.amount || 0) +
+        Number(session.coupon_discount_amount || 0) +
+        Number(session.wallet_credit_used || 0)
+  );
+
+  const appliesTo =
+    sourceType === "marketplace_order" ||
+    sourceType === "order" ||
+    sourceType === "marketplace"
+      ? "marketplace_order"
+      : "studio_booking";
+
+  const { data, error } = await supabaseAdmin.rpc("redeem_coupon_code", {
+    p_auth_user_id: authUserId,
+    p_code: couponCode,
+    p_applies_to: appliesTo,
+    p_source_type: sourceType,
+    p_source_id: sourceId,
+    p_subtotal: subtotalAmount,
+    p_country_code: null,
+    p_city_id: null,
+    p_tier_code: null,
+  });
+
+  if (error) {
+    console.warn("Coupon redemption failed:", error.message);
+
+    return {
+      redeemed: false,
+      error: error.message,
+      message: "Coupon redemption failed after manual payment.",
+    };
+  }
+
+  const redemption = Array.isArray(data) ? data[0] : data;
+
+  if (!redemption?.ok) {
+    return {
+      redeemed: false,
+      couponId: redemption?.coupon_id || couponId,
+      discountAmount: Number(redemption?.discount_amount || 0),
+      message: redemption?.message || "Coupon was not redeemed.",
+    };
+  }
+
+  return {
+    redeemed: true,
+    alreadyRedeemed: false,
+    couponId: redemption.coupon_id || couponId,
+    redemptionId: redemption.redemption_id || null,
+    discountAmount: Number(redemption.discount_amount || 0),
+    message: redemption.message || "Coupon redeemed successfully.",
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -302,6 +416,12 @@ export async function POST(request: Request) {
             reason: "No existing transaction found for completed session.",
           };
 
+      const couponRedemptionResult = await redeemCouponAfterPayment({
+        supabaseAdmin,
+        session,
+        authUserId: user.id,
+      });
+
       return NextResponse.json({
         ok: true,
         alreadyConfirmed: true,
@@ -316,6 +436,7 @@ export async function POST(request: Request) {
           session.provider_reference ||
           null,
         sourceUpdate: sourceUpdateResult,
+        couponRedemption: couponRedemptionResult,
         message: "Manual checkout session was already confirmed.",
       });
     }
@@ -418,6 +539,12 @@ export async function POST(request: Request) {
       manualReference,
     });
 
+    const couponRedemptionResult = await redeemCouponAfterPayment({
+      supabaseAdmin,
+      session,
+      authUserId: user.id,
+    });
+
     const { error: sessionUpdateError } = await supabaseAdmin
       .from("checkout_payment_sessions")
       .update({
@@ -432,6 +559,7 @@ export async function POST(request: Request) {
           manual_confirmed_at: nowIso,
           payment_transaction_id: transaction.id,
           source_update: sourceUpdateResult,
+          coupon_redemption: couponRedemptionResult,
         },
       })
       .eq("id", session.id);
@@ -452,8 +580,9 @@ export async function POST(request: Request) {
       paidAt: transaction.paid_at,
       capturedAt: transaction.captured_at,
       sourceUpdate: sourceUpdateResult,
+      couponRedemption: couponRedemptionResult,
       message:
-        "Manual testing payment confirmed and linked to the source payment status when ownership matched.",
+        "Manual testing payment confirmed, linked to the source payment status, and coupon was redeemed when available.",
     });
   } catch (error) {
     console.error("Manual checkout confirmation error:", error);
