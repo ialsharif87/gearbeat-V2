@@ -40,6 +40,18 @@ function addReferralToUrl(url: string, referralCode?: string) {
   }
 }
 
+function canUseNativeShare() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const navigatorWithShare = navigator as Navigator & {
+    share?: (data?: ShareData) => Promise<void>;
+  };
+
+  return typeof navigatorWithShare.share === "function";
+}
+
 async function trackShare({
   shareType,
   studioId,
@@ -104,8 +116,12 @@ export default function ShareButton({
     };
 
     try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share(shareData);
+      if (canUseNativeShare()) {
+        const navigatorWithShare = navigator as Navigator & {
+          share: (data?: ShareData) => Promise<void>;
+        };
+
+        await navigatorWithShare.share(shareData);
 
         await trackShare({
           shareType,
@@ -173,7 +189,7 @@ export default function ShareButton({
         type="button"
         className={className}
         onClick={() => {
-          if (typeof navigator !== "undefined" && navigator.share) {
+          if (canUseNativeShare()) {
             handleNativeShare();
             return;
           }
