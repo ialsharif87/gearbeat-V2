@@ -47,7 +47,6 @@ type CheckoutSessionResult = {
   payableAmount?: number;
   currencyCode?: string;
   checkoutUrl?: string | null;
-  providerCode?: string;
   message?: string;
   error?: string;
 };
