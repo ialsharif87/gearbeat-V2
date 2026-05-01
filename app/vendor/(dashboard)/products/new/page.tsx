@@ -51,7 +51,16 @@ async function generateUniqueProductSlug(
   return `${baseSlug}-${Date.now()}`;
 }
 
-export default async function NewVendorProductPage() {
+export default async function NewVendorProductPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string; saved?: string }> | { error?: string; saved?: string };
+}) {
+  const resolvedSearchParams = await searchParams;
+  const errorMessage = resolvedSearchParams?.error
+    ? decodeURIComponent(String(resolvedSearchParams.error))
+    : "";
+
   const { supabaseAdmin } = await requireVendorLayoutAccess();
 
   const [categoriesResult, brandsResult] = await Promise.all([
@@ -83,144 +92,159 @@ export default async function NewVendorProductPage() {
   async function createProduct(formData: FormData) {
     "use server";
 
-    const { supabaseAdmin, user, vendorProfile } =
-      await requireVendorLayoutAccess();
+    let nextError = "";
 
-    if (!vendorProfile || vendorProfile.status !== "approved") {
-      throw new Error("Only approved vendors can create products.");
-    }
+    try {
+      const { supabaseAdmin, user, vendorProfile } =
+        await requireVendorLayoutAccess();
 
-    const nameEn = String(formData.get("name_en") || "").trim();
-    const nameAr = String(formData.get("name_ar") || "").trim();
-    const descriptionEn = String(formData.get("description_en") || "").trim();
-    const descriptionAr = String(formData.get("description_ar") || "").trim();
-    const categoryId = String(formData.get("category_id") || "").trim();
-    const brandId = String(formData.get("brand_id") || "").trim();
-    const sku = String(formData.get("sku") || "").trim();
+      if (!vendorProfile || vendorProfile.status !== "approved") {
+        throw new Error("Only approved vendors can create products.");
+      }
 
-    const basePrice = Number(
-      formData.get("base_price") || formData.get("price") || 0
-    );
+      const nameEn = String(formData.get("name_en") || "").trim();
+      const nameAr = String(formData.get("name_ar") || "").trim();
+      const descriptionEn = String(formData.get("description_en") || "").trim();
+      const descriptionAr = String(formData.get("description_ar") || "").trim();
+      const categoryId = String(formData.get("category_id") || "").trim();
+      const brandId = String(formData.get("brand_id") || "").trim();
+      const sku = String(formData.get("sku") || "").trim();
 
-    const stockQuantity = Number(
-      formData.get("stock_quantity") || formData.get("quantity") || 0
-    );
+      const basePrice = Number(
+        formData.get("base_price") || formData.get("price") || 0
+      );
 
-    if (!nameEn && !nameAr) {
-      throw new Error("Product name is required.");
-    }
+      const stockQuantity = Number(
+        formData.get("stock_quantity") || formData.get("quantity") || 0
+      );
 
-    if (!categoryId) {
-      throw new Error("Product category is required.");
-    }
+      if (!nameEn && !nameAr) {
+        throw new Error("Product name is required.");
+      }
 
-    if (!brandId) {
-      throw new Error("Product brand is required.");
-    }
+      if (!categoryId) {
+        throw new Error("Product category is required.");
+      }
 
-    if (!sku) {
-      throw new Error("Product SKU is required.");
-    }
+      if (!brandId) {
+        throw new Error("Product brand is required.");
+      }
 
-    if (!Number.isFinite(basePrice) || basePrice <= 0) {
-      throw new Error("Product price must be greater than zero.");
-    }
+      if (!sku) {
+        throw new Error("Product SKU is required.");
+      }
 
-    if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
-      throw new Error("Stock quantity cannot be negative.");
-    }
+      if (!Number.isFinite(basePrice) || basePrice <= 0) {
+        throw new Error("Product price must be greater than zero.");
+      }
 
-    if (!user?.id) {
-      throw new Error("Vendor profile was not found.");
-    }
+      if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
+        throw new Error("Stock quantity cannot be negative.");
+      }
 
-    const productSlugBase = (nameEn || nameAr || sku)
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0600-\u06FF]+/gi, "-")
-      .replace(/^-+|-+$/g, "");
+      if (!user?.id) {
+        throw new Error("Vendor profile was not found.");
+      }
 
-    const productSlug = `${productSlugBase || "product"}-${Date.now()}`;
+      const productSlugBase = (nameEn || nameAr || sku)
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/gi, "-")
+        .replace(/^-+|-+$/g, "");
 
-    const productPayload = {
-      vendor_id: user.id,
-      category_id: categoryId,
-      brand_id: brandId,
-      name_en: nameEn || nameAr,
-      name_ar: nameAr || nameEn,
-      description_en: descriptionEn || null,
-      description_ar: descriptionAr || null,
-      sku,
-      slug: productSlug,
-      base_price: basePrice,
-      stock_quantity: Math.floor(stockQuantity),
-      currency_code: "SAR",
-      status: "pending_review",
-      is_active: true,
-      updated_at: new Date().toISOString(),
-    };
+      const productSlug = `${productSlugBase || "product"}-${Date.now()}`;
 
-    const { data: createdProduct, error: productInsertError } =
-      await supabaseAdmin
-        .from("marketplace_products")
-        .insert(productPayload)
-        .select("id")
-        .single();
-
-    if (productInsertError) {
-      console.error("Create marketplace product failed:", productInsertError);
-      throw new Error(productInsertError.message || "Could not create product.");
-    }
-
-    const { data: createdVariant, error: variantInsertError } =
-      await supabaseAdmin
-        .from("marketplace_product_variants")
-        .insert({
-          product_id: createdProduct.id,
-          sku,
-          price_adjustment: 0,
-          status: stockQuantity > 0 ? "active" : "out_of_stock",
-          updated_at: new Date().toISOString(),
-        })
-        .select("id")
-        .single();
-
-    if (variantInsertError) {
-      await supabaseAdmin
-        .from("marketplace_products")
-        .delete()
-        .eq("id", createdProduct.id)
-        .eq("vendor_id", user.id);
-
-      throw new Error(variantInsertError.message);
-    }
-
-    const { error: inventoryInsertError } = await supabaseAdmin
-      .from("marketplace_inventory")
-      .insert({
-        variant_id: createdVariant.id,
-        quantity: Math.floor(stockQuantity),
-        low_stock_threshold: 5,
+      const productPayload = {
+        vendor_id: user.id,
+        category_id: categoryId,
+        brand_id: brandId,
+        name_en: nameEn || nameAr,
+        name_ar: nameAr || nameEn,
+        description_en: descriptionEn || null,
+        description_ar: descriptionAr || null,
+        sku,
+        slug: productSlug,
+        base_price: basePrice,
+        stock_quantity: Math.floor(stockQuantity),
+        currency_code: "SAR",
+        status: "pending_review",
+        is_active: true,
         updated_at: new Date().toISOString(),
-      });
+      };
 
-    if (inventoryInsertError) {
-      await supabaseAdmin
-        .from("marketplace_product_variants")
-        .delete()
-        .eq("id", createdVariant.id)
-        .eq("product_id", createdProduct.id);
+      console.log("Create marketplace product payload:", productPayload);
 
-      await supabaseAdmin
-        .from("marketplace_products")
-        .delete()
-        .eq("id", createdProduct.id)
-        .eq("vendor_id", user.id);
+      const { data: createdProduct, error: productInsertError } =
+        await supabaseAdmin
+          .from("marketplace_products")
+          .insert(productPayload)
+          .select("id")
+          .single();
 
-      throw new Error(inventoryInsertError.message);
+      if (productInsertError) {
+        console.error("Create marketplace product failed:", productInsertError);
+        throw new Error(productInsertError.message || "Could not create product.");
+      }
+
+      const { data: createdVariant, error: variantInsertError } =
+        await supabaseAdmin
+          .from("marketplace_product_variants")
+          .insert({
+            product_id: createdProduct.id,
+            sku,
+            price_adjustment: 0,
+            status: stockQuantity > 0 ? "active" : "out_of_stock",
+            updated_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+
+      if (variantInsertError) {
+        console.error("Create product variant failed:", variantInsertError);
+        await supabaseAdmin
+          .from("marketplace_products")
+          .delete()
+          .eq("id", createdProduct.id)
+          .eq("vendor_id", user.id);
+
+        throw new Error(variantInsertError.message);
+      }
+
+      const { error: inventoryInsertError } = await supabaseAdmin
+        .from("marketplace_inventory")
+        .insert({
+          variant_id: createdVariant.id,
+          quantity: Math.floor(stockQuantity),
+          low_stock_threshold: 5,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (inventoryInsertError) {
+        console.error("Create product inventory failed:", inventoryInsertError);
+        await supabaseAdmin
+          .from("marketplace_product_variants")
+          .delete()
+          .eq("id", createdVariant.id)
+          .eq("product_id", createdProduct.id);
+
+        await supabaseAdmin
+          .from("marketplace_products")
+          .delete()
+          .eq("id", createdProduct.id)
+          .eq("vendor_id", user.id);
+
+        throw new Error(inventoryInsertError.message);
+      }
+    } catch (error) {
+      console.error("Create marketplace product action failed:", error);
+      nextError = error instanceof Error ? error.message : "Could not create product.";
+    }
+
+    if (nextError) {
+      redirect(`/vendor/products/new?error=${encodeURIComponent(nextError)}`);
     }
 
     revalidatePath("/vendor/products");
-    redirect("/vendor/products");
+    redirect("/vendor/products?created=1");
   }
 
   return (
@@ -254,6 +278,24 @@ export default async function NewVendorProductPage() {
           <T en="Back to Products" ar="الرجوع للمنتجات" />
         </Link>
       </div>
+
+      {errorMessage ? (
+        <div
+          className="card"
+          style={{
+            marginTop: 30,
+            borderColor: "rgba(255,77,77,0.35)",
+            background: "rgba(255,77,77,0.08)",
+          }}
+        >
+          <strong style={{ color: "#ffb0b0", display: "block", marginBottom: 4 }}>
+            <T en="Product save failed" ar="فشل حفظ المنتج" />
+          </strong>
+          <p style={{ color: "#ffb0b0", fontSize: "0.95rem", lineHeight: 1.7 }}>
+            {errorMessage}
+          </p>
+        </div>
+      ) : null}
 
       {categories.length === 0 || brands.length === 0 ? (
         <div
