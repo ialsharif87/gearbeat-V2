@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import T from "@/components/t";
 import CouponApplyBox from "@/components/coupon-apply-box";
 import PaymentMethodSelector from "@/components/payment-method-selector";
+import ManualCheckoutConfirmButton from "@/components/manual-checkout-confirm-button";
 
 type CheckoutSourceType =
   | "studio_booking"
@@ -46,6 +47,7 @@ type CheckoutSessionResult = {
   payableAmount?: number;
   currencyCode?: string;
   checkoutUrl?: string | null;
+  providerCode?: string;
   message?: string;
   error?: string;
 };
@@ -280,6 +282,12 @@ export default function CheckoutSessionBox({
               <p style={{ marginTop: 8, marginBottom: 0 }}>
                 {result.message}
               </p>
+
+              {result.providerCode === "manual" && result.checkoutSessionId ? (
+                <ManualCheckoutConfirmButton
+                  checkoutSessionId={result.checkoutSessionId}
+                />
+              ) : null}
             </div>
           ) : (
             <div>{result.error}</div>
