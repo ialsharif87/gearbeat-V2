@@ -1,6 +1,7 @@
 import Link from "next/link";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
+import AdminManualRefundButton from "@/components/admin-manual-refund-button";
 
 export const dynamic = "force-dynamic";
 
@@ -435,6 +436,7 @@ export default async function AdminPaymentsPage() {
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Reference</th>
+                <th>Refund</th>
                 <th>Date</th>
               </tr>
             </thead>
@@ -442,7 +444,7 @@ export default async function AdminPaymentsPage() {
             <tbody>
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: 30 }}>
+                  <td colSpan={8} style={{ textAlign: "center", padding: 30 }}>
                     <T en="No transactions found." ar="لا توجد عمليات دفع." />
                   </td>
                 </tr>
@@ -499,6 +501,27 @@ export default async function AdminPaymentsPage() {
                       <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
                         Tx: {truncateId(transaction.id)}
                       </div>
+                    </td>
+
+                    <td>
+                      {transaction.provider_code === "manual" &&
+                      (transaction.status === "paid" ||
+                        transaction.status === "captured" ||
+                        transaction.status === "partially_refunded") ? (
+                        <AdminManualRefundButton
+                          paymentTransactionId={transaction.id}
+                          maxRefundAmount={Math.max(
+                            Number(transaction.captured_amount || transaction.amount || 0) -
+                              Number(transaction.refunded_amount || 0),
+                            0
+                          )}
+                          currencyCode={transaction.currency_code || "SAR"}
+                        />
+                      ) : (
+                        <span className="badge">
+                          <T en="Unavailable" ar="غير متاح" />
+                        </span>
+                      )}
                     </td>
 
                     <td>{formatDateTime(transaction.created_at)}</td>
