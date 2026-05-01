@@ -1,15 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useMemo, useState } from "react";
+
+type FavoriteType = "studio" | "product" | "vendor";
 
 type FavoriteButtonProps = {
-  type: "studio" | "product" | "vendor";
+  type: FavoriteType;
   studioId?: string;
   productId?: string;
   vendorId?: string;
   className?: string;
+  compact?: boolean;
 };
+
+function getTargetId({
+  type,
+  studioId,
+  productId,
+  vendorId,
+}: {
+  type: FavoriteType;
+  studioId?: string;
+  productId?: string;
+  vendorId?: string;
+}) {
+  if (type === "studio") {
+    return studioId || "";
+  }
+
+  if (type === "product") {
+    return productId || "";
+  }
+
+  return vendorId || "";
+}
 
 export default function FavoriteButton({
   type,
@@ -17,112 +41,92 @@ export default function FavoriteButton({
   productId,
   vendorId,
   className = "btn",
+  compact = false,
 }: FavoriteButtonProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [authUserId, setAuthUserId] = useState<string | null>(null);
+
+  const targetId = useMemo(
+    () =>
+      getTargetId({
+        type,
+        studioId,
+        productId,
+        vendorId,
+      }),
+    [type, studioId, productId, vendorId]
+  );
 
   useEffect(() => {
-    async function loadFavorite() {
-      const supabase = createClient();
+    let isMounted = true;
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
+    async function loadFavoriteStatus() {
+      if (!targetId) {
         return;
       }
 
-      setAuthUserId(user.id);
+      try {
+        const response = await fetch("/api/favorites/status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            favoriteType: type,
+            targetId,
+          }),
+        });
 
-      let query = supabase
-        .from("customer_favorites")
-        .select("id")
-        .eq("auth_user_id", user.id)
-        .eq("favorite_type", type)
-        .limit(1);
+        const result = await response.json().catch(() => null);
 
-      if (type === "studio" && studioId) {
-        query = query.eq("studio_id", studioId);
-      }
+        if (!isMounted || !result) {
+          return;
+        }
 
-      if (type === "product" && productId) {
-        query = query.eq("product_id", productId);
-      }
-
-      if (type === "vendor" && vendorId) {
-        query = query.eq("vendor_id", vendorId);
-      }
-
-      const { data, error } = await query.maybeSingle();
-
-      if (!error && data) {
-        setIsSaved(true);
+        setIsSaved(Boolean(result.saved));
+      } catch (error) {
+        console.warn("Could not load favorite status:", error);
       }
     }
 
-    loadFavorite();
-  }, [type, studioId, productId, vendorId]);
+    loadFavoriteStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [type, targetId]);
 
   async function toggleFavorite() {
-    const supabase = createClient();
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      window.location.href = "/login?account=customer";
+    if (!targetId) {
       return;
     }
 
-    setAuthUserId(user.id);
     setLoading(true);
 
     try {
-      if (isSaved) {
-        let deleteQuery = supabase
-          .from("customer_favorites")
-          .delete()
-          .eq("auth_user_id", user.id)
-          .eq("favorite_type", type);
+      const response = await fetch("/api/favorites/toggle", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          favoriteType: type,
+          targetId,
+        }),
+      });
 
-        if (type === "studio" && studioId) {
-          deleteQuery = deleteQuery.eq("studio_id", studioId);
-        }
-
-        if (type === "product" && productId) {
-          deleteQuery = deleteQuery.eq("product_id", productId);
-        }
-
-        if (type === "vendor" && vendorId) {
-          deleteQuery = deleteQuery.eq("vendor_id", vendorId);
-        }
-
-        const { error } = await deleteQuery;
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        setIsSaved(false);
+      if (response.status === 401) {
+        window.location.href = "/login?account=customer";
         return;
       }
 
-      const { error } = await supabase.from("customer_favorites").insert({
-        auth_user_id: user.id,
-        favorite_type: type,
-        studio_id: type === "studio" ? studioId : null,
-        product_id: type === "product" ? productId : null,
-        vendor_id: type === "vendor" ? vendorId : null,
-      });
+      const result = await response.json().catch(() => null);
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(result?.error || "Could not update favorite.");
       }
 
-      setIsSaved(true);
+      setIsSaved(Boolean(result?.saved));
     } catch (error) {
       console.error("Favorite toggle failed:", error);
     } finally {
@@ -135,11 +139,18 @@ export default function FavoriteButton({
       type="button"
       className={className}
       onClick={toggleFavorite}
-      disabled={loading}
+      disabled={loading || !targetId}
       aria-pressed={isSaved}
+      aria-label={isSaved ? "Remove from saved" : "Save"}
+      title={isSaved ? "Saved" : "Save"}
     >
-      <span aria-hidden="true">{isSaved ? "♥" : "♡"}</span>{" "}
-      {isSaved ? "Saved" : "Save"}
+      <span aria-hidden="true">{isSaved ? "♥" : "♡"}</span>
+      {compact ? null : (
+        <>
+          {" "}
+          {isSaved ? "Saved" : "Save"}
+        </>
+      )}
     </button>
   );
 }
