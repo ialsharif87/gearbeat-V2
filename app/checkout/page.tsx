@@ -5,6 +5,7 @@ import T from "../../components/t";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import PaymentMethodSelector from "@/components/payment-method-selector";
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
@@ -83,25 +84,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="card">
-            <h3><T en="Payment Method" ar="طريقة الدفع" /></h3>
-            <div style={{ marginTop: 20, display: 'grid', gap: 15 }}>
-              <label className="card payment-option active" style={{ display: 'flex', gap: 15, padding: 20, cursor: 'pointer', border: '2px solid var(--gb-gold)', background: 'rgba(199,164,93,0.05)' }}>
-                <input type="radio" name="payment" defaultChecked />
-                <div>
-                  <strong><T en="Credit / Mada Card" ar="بطاقة ائتمان / مدى" /></strong>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}><T en="Secure payment via GearBeat Gateway" ar="دفع آمن عبر بوابة GearBeat" /></p>
-                </div>
-              </label>
-              <label className="card payment-option" style={{ display: 'flex', gap: 15, padding: 20, opacity: 0.5, cursor: 'not-allowed' }}>
-                <input type="radio" name="payment" disabled />
-                <div>
-                  <strong><T en="Apple Pay" ar="أبل باي" /></strong>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}><T en="Coming Soon" ar="قريباً" /></p>
-                </div>
-              </label>
-            </div>
-          </div>
+          <PaymentMethodSelector
+            currencyCode="SAR"
+            defaultProviderCode="manual"
+          />
         </div>
 
         {/* ORDER SUMMARY */}
