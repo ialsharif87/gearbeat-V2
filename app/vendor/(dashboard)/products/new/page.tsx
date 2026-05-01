@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import T from "@/components/t";
@@ -89,58 +90,85 @@ export default async function NewVendorProductPage() {
       throw new Error("Only approved vendors can create products.");
     }
 
-    const nameEn = getText(formData, "name_en");
-    const nameAr = getText(formData, "name_ar");
-    const categoryId = getText(formData, "category_id");
-    const brandId = getText(formData, "brand_id");
-    const descriptionEn = getText(formData, "description_en");
-    const descriptionAr = getText(formData, "description_ar");
-    const skuInput = getText(formData, "sku");
+    const nameEn = String(formData.get("name_en") || "").trim();
+    const nameAr = String(formData.get("name_ar") || "").trim();
+    const descriptionEn = String(formData.get("description_en") || "").trim();
+    const descriptionAr = String(formData.get("description_ar") || "").trim();
+    const categoryId = String(formData.get("category_id") || "").trim();
+    const brandId = String(formData.get("brand_id") || "").trim();
+    const sku = String(formData.get("sku") || "").trim();
 
-    const basePrice = Number(formData.get("base_price"));
-    const quantity = Number(formData.get("quantity"));
+    const basePrice = Number(
+      formData.get("base_price") || formData.get("price") || 0
+    );
 
-    if (!nameEn || !nameAr) {
-      throw new Error("Product English and Arabic names are required.");
+    const stockQuantity = Number(
+      formData.get("stock_quantity") || formData.get("quantity") || 0
+    );
+
+    if (!nameEn && !nameAr) {
+      throw new Error("Product name is required.");
     }
 
     if (!categoryId) {
       throw new Error("Product category is required.");
     }
 
+    if (!brandId) {
+      throw new Error("Product brand is required.");
+    }
+
+    if (!sku) {
+      throw new Error("Product SKU is required.");
+    }
+
     if (!Number.isFinite(basePrice) || basePrice <= 0) {
       throw new Error("Product price must be greater than zero.");
     }
 
-    if (!Number.isInteger(quantity) || quantity < 0) {
-      throw new Error("Inventory quantity must be zero or greater.");
+    if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
+      throw new Error("Stock quantity cannot be negative.");
     }
 
-    const slug = await generateUniqueProductSlug(supabaseAdmin, nameEn);
-    const sku =
-      skuInput || `SKU-${slug.slice(0, 12).replace(/-/g, "").toUpperCase()}`;
+    if (!user?.id) {
+      throw new Error("Vendor profile was not found.");
+    }
+
+    const productSlugBase = (nameEn || nameAr || sku)
+      .toLowerCase()
+      .replace(/[^a-z0-9\u0600-\u06FF]+/gi, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const productSlug = `${productSlugBase || "product"}-${Date.now()}`;
+
+    const productPayload = {
+      vendor_id: user.id,
+      category_id: categoryId,
+      brand_id: brandId,
+      name_en: nameEn || nameAr,
+      name_ar: nameAr || nameEn,
+      description_en: descriptionEn || null,
+      description_ar: descriptionAr || null,
+      sku,
+      slug: productSlug,
+      base_price: basePrice,
+      stock_quantity: Math.floor(stockQuantity),
+      currency_code: "SAR",
+      status: "pending_review",
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    };
 
     const { data: createdProduct, error: productInsertError } =
       await supabaseAdmin
         .from("marketplace_products")
-        .insert({
-          vendor_id: user.id,
-          category_id: categoryId,
-          brand_id: brandId || null,
-          name_en: nameEn,
-          name_ar: nameAr,
-          slug,
-          description_en: descriptionEn || null,
-          description_ar: descriptionAr || null,
-          base_price: basePrice,
-          status: "pending_approval",
-          updated_at: new Date().toISOString(),
-        })
+        .insert(productPayload)
         .select("id")
         .single();
 
     if (productInsertError) {
-      throw new Error(productInsertError.message);
+      console.error("Create marketplace product failed:", productInsertError);
+      throw new Error(productInsertError.message || "Could not create product.");
     }
 
     const { data: createdVariant, error: variantInsertError } =
@@ -150,7 +178,7 @@ export default async function NewVendorProductPage() {
           product_id: createdProduct.id,
           sku,
           price_adjustment: 0,
-          status: quantity > 0 ? "active" : "out_of_stock",
+          status: stockQuantity > 0 ? "active" : "out_of_stock",
           updated_at: new Date().toISOString(),
         })
         .select("id")
@@ -170,7 +198,7 @@ export default async function NewVendorProductPage() {
       .from("marketplace_inventory")
       .insert({
         variant_id: createdVariant.id,
-        quantity,
+        quantity: Math.floor(stockQuantity),
         low_stock_threshold: 5,
         updated_at: new Date().toISOString(),
       });
@@ -191,6 +219,7 @@ export default async function NewVendorProductPage() {
       throw new Error(inventoryInsertError.message);
     }
 
+    revalidatePath("/vendor/products");
     redirect("/vendor/products");
   }
 
@@ -320,7 +349,8 @@ export default async function NewVendorProductPage() {
             <input
               name="sku"
               className="input"
-              placeholder="Optional. Auto-generated if empty."
+              required
+              placeholder="SKU-..."
             />
           </div>
 
@@ -329,7 +359,7 @@ export default async function NewVendorProductPage() {
               <T en="Initial Stock Quantity" ar="كمية المخزون الأولية" />
             </label>
             <input
-              name="quantity"
+              name="stock_quantity"
               type="number"
               min="0"
               step="1"
