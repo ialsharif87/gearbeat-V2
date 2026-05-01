@@ -7,6 +7,7 @@ import ShareButton from "@/components/share-button";
 import FavoriteButton from "@/components/favorite-button";
 import StudioPhotoGallery from "@/components/studio-photo-gallery";
 import GoogleMapsLink from "@/components/google-maps-link";
+import StudioPhotoRequirements from "@/components/studio-photo-requirements";
 
 function formatSyncDate(value: string | null | undefined) {
   if (!value) return null;
@@ -302,6 +303,13 @@ export default async function StudioDetailsPage({
           studioName={studioName}
           coverImageUrl={studio.cover_image_url}
         />
+
+        <div style={{ marginTop: 14 }}>
+          <StudioPhotoRequirements
+            images={studioImages || []}
+            compact
+          />
+        </div>
 
         {photoCount < minimumPhotosRequired ? (
           <div

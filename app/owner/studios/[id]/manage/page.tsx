@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../../../../../lib/supabase/server";
 import { createAdminClient } from "../../../../../lib/supabase/admin";
 import T from "../../../../../components/t";
+import StudioPhotoRequirements from "@/components/studio-photo-requirements";
 
 const featureGroups = [
   {
@@ -206,6 +207,11 @@ export default async function ManageStudioPage({
     .select("id,name,brand,model,category,quantity,notes,created_at")
     .eq("studio_id", studio.id)
     .order("created_at", { ascending: false });
+
+  const { data: studioImages } = await supabaseAdmin
+    .from("studio_images")
+    .select("id,image_url,is_cover,category")
+    .eq("studio_id", studio.id);
 
   const selectedFeatureIds = new Set(
     selectedFeatures?.map((item) => item.feature_id).filter(Boolean) || []
@@ -501,6 +507,10 @@ export default async function ManageStudioPage({
             </span>
           </div>
         </div>
+      </div>
+
+      <div style={{ marginTop: 24, marginBottom: 24 }}>
+        <StudioPhotoRequirements images={studioImages || []} />
       </div>
 
       <div style={{ height: 28 }} />

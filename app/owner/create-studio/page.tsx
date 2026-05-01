@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { createAdminClient } from "../../../lib/supabase/admin";
 import T from "../../../components/t";
+import StudioPhotoRequirements from "@/components/studio-photo-requirements";
 
 function slugify(value: string) {
   return value
@@ -167,6 +168,10 @@ export default async function CreateStudioPage() {
             ar="بعد إنشاء الاستوديو، يجب على إدارة GearBeat مراجعته واعتماده. كما يجب اعتماد بيانات النشاط التجاري قبل تفعيل الحجوزات."
           />
         </p>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <StudioPhotoRequirements images={[]} />
       </div>
 
       <form className="card form" action={createStudio}>
