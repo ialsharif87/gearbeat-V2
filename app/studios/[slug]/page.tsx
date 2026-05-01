@@ -288,6 +288,8 @@ export default async function StudioDetailsPage({
             <ShareButton
               title={studioName}
               text={`Check out ${studioName} on GearBeat`}
+              shareType="studio"
+              studioId={studio.id}
             />
 
             <FavoriteButton
