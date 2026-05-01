@@ -85,6 +85,339 @@ async function updateSourceRefundStatus({
   };
 }
 
+async function reverseLoyaltyAfterManualRefund({
+  supabaseAdmin,
+  transaction,
+  refund,
+  refundAmount,
+  capturedAmount,
+  isFullRefund,
+}: {
+  supabaseAdmin: any;
+  transaction: any;
+  refund: any;
+  refundAmount: number;
+  capturedAmount: number;
+  isFullRefund: boolean;
+}) {
+  const authUserId = transaction.auth_user_id;
+  const sourceType = String(transaction.source_type || "").trim();
+  const sourceId = transaction.source_id || null;
+
+  if (!authUserId) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Transaction has no auth_user_id.",
+    };
+  }
+
+  if (!sourceId) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Transaction has no source_id.",
+    };
+  }
+
+  let originalEventType = "";
+  let originalLoyaltySourceType = "";
+
+  if (sourceType === "studio_booking" || sourceType === "booking") {
+    originalEventType = "booking_completed";
+    originalLoyaltySourceType = "booking";
+  }
+
+  if (
+    sourceType === "marketplace_order" ||
+    sourceType === "order" ||
+    sourceType === "marketplace"
+  ) {
+    originalEventType = "marketplace_order_completed";
+    originalLoyaltySourceType = "marketplace_order";
+  }
+
+  if (!originalEventType || !originalLoyaltySourceType) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: `Source type ${sourceType || "unknown"} is not eligible for loyalty reversal.`,
+    };
+  }
+
+  const { data: existingRefundReversal, error: existingRefundReversalError } =
+    await supabaseAdmin
+      .from("loyalty_points_ledger")
+      .select("id, points, status")
+      .eq("auth_user_id", authUserId)
+      .eq("event_type", "manual_refund_reversal")
+      .eq("source_type", "payment_refund")
+      .eq("source_id", refund.id)
+      .maybeSingle();
+
+  if (existingRefundReversalError) {
+    console.warn(
+      "Existing refund loyalty reversal lookup failed:",
+      existingRefundReversalError.message
+    );
+  }
+
+  if (existingRefundReversal?.id) {
+    return {
+      reversed: true,
+      alreadyReversed: true,
+      ledgerId: existingRefundReversal.id,
+      points: Math.abs(Number(existingRefundReversal.points || 0)),
+      status: existingRefundReversal.status,
+      message: "Loyalty points were already reversed for this refund.",
+    };
+  }
+
+  const { data: originalLedgers, error: originalLedgersError } =
+    await supabaseAdmin
+      .from("loyalty_points_ledger")
+      .select("id, points, status")
+      .eq("auth_user_id", authUserId)
+      .eq("event_type", originalEventType)
+      .eq("source_type", originalLoyaltySourceType)
+      .eq("source_id", sourceId)
+      .eq("status", "posted")
+      .gt("points", 0);
+
+  if (originalLedgersError) {
+    console.warn(
+      "Original loyalty ledger lookup failed:",
+      originalLedgersError.message
+    );
+
+    return {
+      reversed: false,
+      error: originalLedgersError.message,
+      message: "Could not look up original loyalty points.",
+    };
+  }
+
+  const originalPoints = (originalLedgers || []).reduce(
+    (sum: number, row: any) => sum + Number(row.points || 0),
+    0
+  );
+
+  if (originalPoints <= 0) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "No original loyalty points found for this source.",
+    };
+  }
+
+  const { data: reversalLedgers, error: reversalLedgersError } =
+    await supabaseAdmin
+      .from("loyalty_points_ledger")
+      .select("id, points, metadata")
+      .eq("auth_user_id", authUserId)
+      .eq("event_type", "manual_refund_reversal")
+      .eq("source_type", "payment_refund")
+      .eq("status", "posted");
+
+  if (reversalLedgersError) {
+    console.warn(
+      "Prior loyalty reversal lookup failed:",
+      reversalLedgersError.message
+    );
+  }
+
+  const priorReversedPoints = (reversalLedgers || []).reduce(
+    (sum: number, row: any) => {
+      const metadata =
+        row.metadata &&
+        typeof row.metadata === "object" &&
+        !Array.isArray(row.metadata)
+          ? row.metadata
+          : {};
+
+      if (metadata.payment_transaction_id === transaction.id) {
+        return sum + Math.abs(Number(row.points || 0));
+      }
+
+      return sum;
+    },
+    0
+  );
+
+  const remainingPointsToReverse = Math.max(
+    originalPoints - priorReversedPoints,
+    0
+  );
+
+  if (remainingPointsToReverse <= 0) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "All eligible loyalty points were already reversed.",
+      originalPoints,
+      priorReversedPoints,
+    };
+  }
+
+  const safeCapturedAmount = Number(capturedAmount || 0);
+  const safeRefundAmount = Number(refundAmount || 0);
+
+  if (!Number.isFinite(safeCapturedAmount) || safeCapturedAmount <= 0) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Captured amount is invalid.",
+    };
+  }
+
+  const refundRatio = Math.min(safeRefundAmount / safeCapturedAmount, 1);
+
+  const proportionalPoints = Math.max(
+    1,
+    Math.round(originalPoints * refundRatio)
+  );
+
+  const pointsToReverse = isFullRefund
+    ? remainingPointsToReverse
+    : Math.min(proportionalPoints, remainingPointsToReverse);
+
+  if (pointsToReverse <= 0) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Calculated loyalty reversal points are zero.",
+    };
+  }
+
+  const { data: walletId, error: walletError } = await supabaseAdmin.rpc(
+    "ensure_customer_wallet",
+    {
+      p_auth_user_id: authUserId,
+    }
+  );
+
+  if (walletError) {
+    console.warn("Could not ensure wallet before loyalty reversal:", walletError.message);
+
+    return {
+      reversed: false,
+      error: walletError.message,
+      message: "Could not ensure customer wallet.",
+    };
+  }
+
+  if (!walletId) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Customer wallet was not found.",
+    };
+  }
+
+  const { data: wallet, error: walletLookupError } = await supabaseAdmin
+    .from("customer_wallets")
+    .select("id, points_balance")
+    .eq("id", walletId)
+    .maybeSingle();
+
+  if (walletLookupError) {
+    console.warn("Wallet lookup failed before loyalty reversal:", walletLookupError.message);
+
+    return {
+      reversed: false,
+      error: walletLookupError.message,
+      message: "Could not look up customer wallet.",
+    };
+  }
+
+  const currentPointsBalance = Number(wallet?.points_balance || 0);
+  const nextPointsBalance = Math.max(currentPointsBalance - pointsToReverse, 0);
+  const nowIso = new Date().toISOString();
+
+  const { data: reversalLedger, error: reversalInsertError } =
+    await supabaseAdmin
+      .from("loyalty_points_ledger")
+      .insert({
+        auth_user_id: authUserId,
+        wallet_id: walletId,
+        event_type: "manual_refund_reversal",
+        source_type: "payment_refund",
+        source_id: refund.id,
+        points: -pointsToReverse,
+        status: "posted",
+        description: "Points reversed after manual refund.",
+        amount_basis: safeRefundAmount,
+        metadata: {
+          payment_transaction_id: transaction.id,
+          payment_refund_id: refund.id,
+          original_source_type: originalLoyaltySourceType,
+          original_source_id: sourceId,
+          original_event_type: originalEventType,
+          original_points: originalPoints,
+          prior_reversed_points: priorReversedPoints,
+          reversed_points: pointsToReverse,
+          refund_amount: safeRefundAmount,
+          captured_amount: safeCapturedAmount,
+          refund_ratio: refundRatio,
+          is_full_refund: isFullRefund,
+        },
+        created_at: nowIso,
+      })
+      .select("id, points, status")
+      .single();
+
+  if (reversalInsertError) {
+    console.warn("Loyalty reversal insert failed:", reversalInsertError.message);
+
+    return {
+      reversed: false,
+      error: reversalInsertError.message,
+      message: "Could not insert loyalty reversal ledger.",
+    };
+  }
+
+  const { error: walletUpdateError } = await supabaseAdmin
+    .from("customer_wallets")
+    .update({
+      points_balance: nextPointsBalance,
+      updated_at: nowIso,
+    })
+    .eq("id", walletId);
+
+  if (walletUpdateError) {
+    console.warn("Wallet update failed after loyalty reversal:", walletUpdateError.message);
+
+    return {
+      reversed: false,
+      error: walletUpdateError.message,
+      ledgerId: reversalLedger.id,
+      message:
+        "Loyalty reversal ledger was created, but wallet balance update failed.",
+    };
+  }
+
+  await supabaseAdmin.rpc("refresh_customer_wallet_tier", {
+    p_auth_user_id: authUserId,
+  });
+
+  return {
+    reversed: true,
+    alreadyReversed: false,
+    ledgerId: reversalLedger.id,
+    points: pointsToReverse,
+    ledgerPoints: Number(reversalLedger.points || 0),
+    previousPointsBalance: currentPointsBalance,
+    nextPointsBalance,
+    originalPoints,
+    priorReversedPoints,
+    remainingPointsToReverse: Math.max(
+      remainingPointsToReverse - pointsToReverse,
+      0
+    ),
+    message: "Loyalty points reversed successfully.",
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -262,6 +595,33 @@ export async function POST(request: Request) {
       paymentStatus: isFullRefund ? "refunded" : "partially_refunded",
     });
 
+    const loyaltyReversal = await reverseLoyaltyAfterManualRefund({
+      supabaseAdmin,
+      transaction,
+      refund,
+      refundAmount: requestedAmount,
+      capturedAmount,
+      isFullRefund,
+    });
+
+    await supabaseAdmin
+      .from("payment_refunds")
+      .update({
+        metadata: {
+          source: "manual_admin_refund",
+          payment_transaction_id: transaction.id,
+          source_type: transaction.source_type,
+          source_id: transaction.source_id,
+          previous_refunded_amount: alreadyRefunded,
+          new_refunded_amount: newRefundedAmount,
+          is_full_refund: isFullRefund,
+          source_update: sourceUpdate,
+          loyalty_reversal: loyaltyReversal,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", refund.id);
+
     return NextResponse.json({
       ok: true,
       refundId: refund.id,
@@ -273,8 +633,9 @@ export async function POST(request: Request) {
       currencyCode: refund.currency_code || transaction.currency_code || "SAR",
       transactionStatus: nextTransactionStatus,
       sourceUpdate,
+      loyaltyReversal,
       message:
-        "Manual refund completed. No external payment provider was contacted.",
+        "Manual refund completed, source payment status updated when possible, and loyalty points were reversed when eligible. No external payment provider was contacted.",
     });
   } catch (error) {
     console.error("Manual refund error:", error);

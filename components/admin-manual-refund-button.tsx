@@ -20,6 +20,15 @@ type RefundResult = {
   refundableRemaining?: number;
   currencyCode?: string;
   transactionStatus?: string;
+  loyaltyReversal?: {
+    reversed?: boolean;
+    alreadyReversed?: boolean;
+    points?: number;
+    ledgerId?: string;
+    message?: string;
+    reason?: string;
+    error?: string;
+  };
   message?: string;
   error?: string;
 };
@@ -201,6 +210,17 @@ export default function AdminManualRefundButton({
                     <T en="Remaining:" ar="المتبقي:" />{" "}
                     {formatMoney(result.refundableRemaining, result.currencyCode)}
                   </div>
+
+                  {result.loyaltyReversal ? (
+                    <div>
+                      <T en="Loyalty:" ar="الولاء:" />{" "}
+                      {result.loyaltyReversal.reversed
+                        ? `${result.loyaltyReversal.points || 0} points reversed`
+                        : result.loyaltyReversal.reason ||
+                          result.loyaltyReversal.message ||
+                          "No reversal"}
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 result.error
