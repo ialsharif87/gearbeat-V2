@@ -284,6 +284,151 @@ async function redeemCouponAfterPayment({
   };
 }
 
+async function awardLoyaltyAfterPayment({
+  supabaseAdmin,
+  session,
+  transaction,
+  authUserId,
+}: {
+  supabaseAdmin: ReturnType<typeof createAdminClient>;
+  session: any;
+  transaction: any;
+  authUserId: string;
+}) {
+  const sourceType = String(session.source_type || "").trim();
+  const sourceId = session.source_id || null;
+
+  if (!sourceId) {
+    return {
+      awarded: false,
+      skipped: true,
+      reason: "No source_id on checkout session.",
+    };
+  }
+
+  let eventType = "";
+  let loyaltySourceType = "";
+
+  if (sourceType === "studio_booking" || sourceType === "booking") {
+    eventType = "booking_completed";
+    loyaltySourceType = "booking";
+  }
+
+  if (
+    sourceType === "marketplace_order" ||
+    sourceType === "order" ||
+    sourceType === "marketplace"
+  ) {
+    eventType = "marketplace_order_completed";
+    loyaltySourceType = "marketplace_order";
+  }
+
+  if (!eventType || !loyaltySourceType) {
+    return {
+      awarded: false,
+      skipped: true,
+      reason: `Source type ${sourceType || "unknown"} is not eligible for loyalty points yet.`,
+    };
+  }
+
+  const { data: existingLedger, error: existingLedgerError } =
+    await supabaseAdmin
+      .from("loyalty_points_ledger")
+      .select("id, points, status")
+      .eq("auth_user_id", authUserId)
+      .eq("event_type", eventType)
+      .eq("source_type", loyaltySourceType)
+      .eq("source_id", sourceId)
+      .maybeSingle();
+
+  if (existingLedgerError) {
+    console.warn(
+      "Existing loyalty ledger lookup failed:",
+      existingLedgerError.message
+    );
+  }
+
+  if (existingLedger?.id) {
+    return {
+      awarded: true,
+      alreadyAwarded: true,
+      ledgerId: existingLedger.id,
+      points: Number(existingLedger.points || 0),
+      status: existingLedger.status,
+      message: "Loyalty points were already awarded for this source.",
+    };
+  }
+
+  const paidAmount = Number(
+    transaction?.captured_amount ||
+      transaction?.amount ||
+      session.amount ||
+      0
+  );
+
+  if (!Number.isFinite(paidAmount) || paidAmount <= 0) {
+    return {
+      awarded: false,
+      skipped: true,
+      reason: "Paid amount is invalid for loyalty calculation.",
+    };
+  }
+
+  const { data: ledgerId, error: awardError } = await supabaseAdmin.rpc(
+    "award_loyalty_event",
+    {
+      p_auth_user_id: authUserId,
+      p_event_type: eventType,
+      p_amount: paidAmount,
+      p_source_type: loyaltySourceType,
+      p_source_id: sourceId,
+      p_description:
+        eventType === "booking_completed"
+          ? "Points earned from completed studio booking."
+          : "Points earned from completed marketplace order.",
+    }
+  );
+
+  if (awardError) {
+    console.warn("Loyalty award failed:", awardError.message);
+
+    return {
+      awarded: false,
+      error: awardError.message,
+      message: "Loyalty points could not be awarded after manual payment.",
+    };
+  }
+
+  if (!ledgerId) {
+    return {
+      awarded: false,
+      skipped: true,
+      reason: "No loyalty ledger row was created.",
+    };
+  }
+
+  const { data: ledgerRow, error: ledgerRowError } = await supabaseAdmin
+    .from("loyalty_points_ledger")
+    .select("id, points, status")
+    .eq("id", ledgerId)
+    .maybeSingle();
+
+  if (ledgerRowError) {
+    console.warn("Created loyalty ledger lookup failed:", ledgerRowError.message);
+  }
+
+  return {
+    awarded: true,
+    alreadyAwarded: false,
+    ledgerId,
+    points: Number(ledgerRow?.points || 0),
+    status: ledgerRow?.status || "posted",
+    eventType,
+    sourceType: loyaltySourceType,
+    message: "Loyalty points awarded successfully.",
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -422,6 +567,19 @@ export async function POST(request: Request) {
         authUserId: user.id,
       });
 
+      const loyaltyAwardResult = existingTransaction
+        ? await awardLoyaltyAfterPayment({
+            supabaseAdmin,
+            session,
+            transaction: existingTransaction,
+            authUserId: user.id,
+          })
+        : {
+            awarded: false,
+            skipped: true,
+            reason: "No existing transaction found for completed session.",
+          };
+
       return NextResponse.json({
         ok: true,
         alreadyConfirmed: true,
@@ -437,6 +595,7 @@ export async function POST(request: Request) {
           null,
         sourceUpdate: sourceUpdateResult,
         couponRedemption: couponRedemptionResult,
+        loyaltyAward: loyaltyAwardResult,
         message: "Manual checkout session was already confirmed.",
       });
     }
@@ -545,6 +704,13 @@ export async function POST(request: Request) {
       authUserId: user.id,
     });
 
+    const loyaltyAwardResult = await awardLoyaltyAfterPayment({
+      supabaseAdmin,
+      session,
+      transaction,
+      authUserId: user.id,
+    });
+
     const { error: sessionUpdateError } = await supabaseAdmin
       .from("checkout_payment_sessions")
       .update({
@@ -560,6 +726,7 @@ export async function POST(request: Request) {
           payment_transaction_id: transaction.id,
           source_update: sourceUpdateResult,
           coupon_redemption: couponRedemptionResult,
+          loyalty_award: loyaltyAwardResult,
         },
       })
       .eq("id", session.id);
@@ -581,8 +748,9 @@ export async function POST(request: Request) {
       capturedAt: transaction.captured_at,
       sourceUpdate: sourceUpdateResult,
       couponRedemption: couponRedemptionResult,
+      loyaltyAward: loyaltyAwardResult,
       message:
-        "Manual testing payment confirmed, linked to the source payment status, and coupon was redeemed when available.",
+        "Manual testing payment confirmed, linked to the source payment status, coupon was redeemed when available, and loyalty points were awarded when eligible.",
     });
   } catch (error) {
     console.error("Manual checkout confirmation error:", error);
