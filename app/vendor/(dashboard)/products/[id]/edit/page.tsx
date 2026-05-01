@@ -62,13 +62,14 @@ export default async function EditVendorProductPage({
 
     supabaseAdmin
       .from("marketplace_categories")
-      .select("id, name_en, name_ar")
+      .select("id, name_en, name_ar, slug, status, sort_order")
       .eq("status", "active")
+      .order("sort_order", { ascending: true })
       .order("name_en", { ascending: true }),
 
     supabaseAdmin
       .from("marketplace_brands")
-      .select("id, name_en, name_ar")
+      .select("id, name_en, name_ar, slug, status")
       .eq("status", "active")
       .order("name_en", { ascending: true }),
   ]);
@@ -84,6 +85,14 @@ export default async function EditVendorProductPage({
   const product = productResult.data;
   const categories = categoriesResult.data || [];
   const brands = brandsResult.data || [];
+
+  if (categoriesResult.error) {
+    console.warn("Failed to load marketplace categories:", categoriesResult.error.message);
+  }
+
+  if (brandsResult.error) {
+    console.warn("Failed to load marketplace brands:", brandsResult.error.message);
+  }
   const firstVariant = getFirstVariant(product);
   const inventory = getInventoryFromVariant(firstVariant);
 
@@ -106,6 +115,10 @@ export default async function EditVendorProductPage({
 
     if (!nameEn || !nameAr) {
       throw new Error("Product name is required.");
+    }
+
+    if (!categoryId) {
+      throw new Error("Product category is required.");
     }
 
     if (!Number.isFinite(basePrice) || basePrice <= 0) {
@@ -223,6 +236,27 @@ export default async function EditVendorProductPage({
         </Link>
       </div>
 
+      {categories.length === 0 || brands.length === 0 ? (
+        <div
+          className="card"
+          style={{
+            marginTop: 30,
+            borderColor: "rgba(255,176,32,0.35)",
+            background: "rgba(255,176,32,0.05)",
+          }}
+        >
+          <strong style={{ color: "#ffb020", display: "block", marginBottom: 4 }}>
+            <T en="Catalog setup required" ar="إعداد الكتالوج مطلوب" />
+          </strong>
+          <p style={{ color: "var(--muted)", fontSize: "0.95rem" }}>
+            <T
+              en="Product categories or brands are missing. Please ask admin to add categories and brands before creating products."
+              ar="التصنيفات أو العلامات التجارية غير مكتملة. يرجى من الإدارة إضافتها قبل إنشاء المنتجات."
+            />
+          </p>
+        </div>
+      ) : null}
+
       <form action={updateProduct} className="card" style={{ marginTop: 30 }}>
         <input type="hidden" name="variant_id" value={firstVariant?.id || ""} />
 
@@ -267,7 +301,7 @@ export default async function EditVendorProductPage({
               </option>
               {categories.map((category: any) => (
                 <option key={category.id} value={category.id}>
-                  {category.name_en} / {category.name_ar}
+                  {category.name_ar || category.name_en || category.slug}
                 </option>
               ))}
             </select>
@@ -287,7 +321,7 @@ export default async function EditVendorProductPage({
               </option>
               {brands.map((brand: any) => (
                 <option key={brand.id} value={brand.id}>
-                  {brand.name_en}
+                  {brand.name_ar || brand.name_en || brand.slug}
                 </option>
               ))}
             </select>
@@ -375,7 +409,11 @@ export default async function EditVendorProductPage({
             <T en="Cancel" ar="إلغاء" />
           </Link>
 
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={categories.length === 0 || brands.length === 0}
+          >
             <T en="Save Changes" ar="حفظ التعديلات" />
           </button>
         </div>

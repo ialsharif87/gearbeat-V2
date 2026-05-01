@@ -56,27 +56,28 @@ export default async function NewVendorProductPage() {
   const [categoriesResult, brandsResult] = await Promise.all([
     supabaseAdmin
       .from("marketplace_categories")
-      .select("id, name_en, name_ar")
+      .select("id, name_en, name_ar, slug, status, sort_order")
       .eq("status", "active")
+      .order("sort_order", { ascending: true })
       .order("name_en", { ascending: true }),
 
     supabaseAdmin
       .from("marketplace_brands")
-      .select("id, name_en, name_ar")
+      .select("id, name_en, name_ar, slug, status")
       .eq("status", "active")
       .order("name_en", { ascending: true }),
   ]);
 
+  const categories = categoriesResult.data || [];
+  const brands = brandsResult.data || [];
+
   if (categoriesResult.error) {
-    throw new Error(categoriesResult.error.message);
+    console.warn("Failed to load marketplace categories:", categoriesResult.error.message);
   }
 
   if (brandsResult.error) {
-    throw new Error(brandsResult.error.message);
+    console.warn("Failed to load marketplace brands:", brandsResult.error.message);
   }
-
-  const categories = categoriesResult.data || [];
-  const brands = brandsResult.data || [];
 
   async function createProduct(formData: FormData) {
     "use server";
@@ -225,6 +226,27 @@ export default async function NewVendorProductPage() {
         </Link>
       </div>
 
+      {categories.length === 0 || brands.length === 0 ? (
+        <div
+          className="card"
+          style={{
+            marginTop: 30,
+            borderColor: "rgba(255,176,32,0.35)",
+            background: "rgba(255,176,32,0.05)",
+          }}
+        >
+          <strong style={{ color: "#ffb020", display: "block", marginBottom: 4 }}>
+            <T en="Catalog setup required" ar="إعداد الكتالوج مطلوب" />
+          </strong>
+          <p style={{ color: "var(--muted)", fontSize: "0.95rem" }}>
+            <T
+              en="Product categories or brands are missing. Please ask admin to add categories and brands before creating products."
+              ar="التصنيفات أو العلامات التجارية غير مكتملة. يرجى من الإدارة إضافتها قبل إنشاء المنتجات."
+            />
+          </p>
+        </div>
+      ) : null}
+
       <form action={createProduct} className="card" style={{ marginTop: 30 }}>
         <div className="grid grid-2">
           <div>
@@ -253,7 +275,7 @@ export default async function NewVendorProductPage() {
               </option>
               {categories.map((category: any) => (
                 <option key={category.id} value={category.id}>
-                  {category.name_en} / {category.name_ar}
+                  {category.name_ar || category.name_en || category.slug}
                 </option>
               ))}
             </select>
@@ -269,7 +291,7 @@ export default async function NewVendorProductPage() {
               </option>
               {brands.map((brand: any) => (
                 <option key={brand.id} value={brand.id}>
-                  {brand.name_en} / {brand.name_ar}
+                  {brand.name_ar || brand.name_en || brand.slug}
                 </option>
               ))}
             </select>
@@ -345,7 +367,11 @@ export default async function NewVendorProductPage() {
             <T en="Cancel" ar="إلغاء" />
           </Link>
 
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={categories.length === 0 || brands.length === 0}
+          >
             <T en="Submit for Approval" ar="إرسال للموافقة" />
           </button>
         </div>
