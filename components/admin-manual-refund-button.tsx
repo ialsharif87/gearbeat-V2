@@ -29,6 +29,17 @@ type RefundResult = {
     reason?: string;
     error?: string;
   };
+  couponReversal?: {
+    reversed?: boolean;
+    alreadyReversed?: boolean;
+    redemptionId?: string;
+    couponCode?: string | null;
+    discountAmount?: number;
+    status?: string;
+    message?: string;
+    reason?: string;
+    error?: string;
+  };
   message?: string;
   error?: string;
 };
@@ -219,6 +230,19 @@ export default function AdminManualRefundButton({
                         : result.loyaltyReversal.reason ||
                           result.loyaltyReversal.message ||
                           "No reversal"}
+                    </div>
+                  ) : null}
+
+                  {result.couponReversal ? (
+                    <div>
+                      <T en="Coupon:" ar="القسيمة:" />{" "}
+                      {result.couponReversal.reversed
+                        ? result.couponReversal.couponCode
+                          ? `${result.couponReversal.couponCode} reversed`
+                          : "Coupon reversed"
+                        : result.couponReversal.reason ||
+                          result.couponReversal.message ||
+                          "No coupon reversal"}
                     </div>
                   ) : null}
                 </div>

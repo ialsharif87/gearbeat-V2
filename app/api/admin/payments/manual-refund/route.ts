@@ -418,6 +418,169 @@ async function reverseLoyaltyAfterManualRefund({
   };
 }
 
+async function reverseCouponAfterFullManualRefund({
+  supabaseAdmin,
+  transaction,
+  refund,
+  isFullRefund,
+}: {
+  supabaseAdmin: any;
+  transaction: any;
+  refund: any;
+  isFullRefund: boolean;
+}) {
+  if (!isFullRefund) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Coupon redemption is only reversed after a full refund.",
+    };
+  }
+
+  const authUserId = transaction.auth_user_id;
+  const sourceType = String(transaction.source_type || "").trim();
+  const sourceId = transaction.source_id || null;
+
+  if (!authUserId) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Transaction has no auth_user_id.",
+    };
+  }
+
+  if (!sourceType || !sourceId) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "Transaction has no source_type or source_id.",
+    };
+  }
+
+  const { data: redemption, error: redemptionError } = await supabaseAdmin
+    .from("coupon_redemptions")
+    .select(`
+      id,
+      coupon_id,
+      coupon_code,
+      auth_user_id,
+      source_type,
+      source_id,
+      discount_amount,
+      status,
+      metadata
+    `)
+    .eq("auth_user_id", authUserId)
+    .eq("source_type", sourceType)
+    .eq("source_id", sourceId)
+    .order("redeemed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (redemptionError) {
+    console.warn(
+      "Coupon redemption lookup failed:",
+      redemptionError.message
+    );
+
+    return {
+      reversed: false,
+      error: redemptionError.message,
+      message: "Could not look up coupon redemption.",
+    };
+  }
+
+  if (!redemption?.id) {
+    return {
+      reversed: false,
+      skipped: true,
+      reason: "No coupon redemption found for this transaction source.",
+    };
+  }
+
+  if (
+    redemption.status === "reversed" ||
+    redemption.status === "refunded" ||
+    redemption.status === "cancelled"
+  ) {
+    return {
+      reversed: true,
+      alreadyReversed: true,
+      redemptionId: redemption.id,
+      couponId: redemption.coupon_id,
+      couponCode: redemption.coupon_code,
+      discountAmount: Number(redemption.discount_amount || 0),
+      status: redemption.status,
+      message: "Coupon redemption was already reversed.",
+    };
+  }
+
+  const nowIso = new Date().toISOString();
+
+  const existingMetadata =
+    redemption.metadata &&
+    typeof redemption.metadata === "object" &&
+    !Array.isArray(redemption.metadata)
+      ? redemption.metadata
+      : {};
+
+  const { error: redemptionUpdateError } = await supabaseAdmin
+    .from("coupon_redemptions")
+    .update({
+      status: "refunded",
+      metadata: {
+        ...existingMetadata,
+        coupon_reversed_by_manual_refund: true,
+        coupon_reversed_at: nowIso,
+        payment_refund_id: refund.id,
+        payment_transaction_id: transaction.id,
+      },
+    })
+    .eq("id", redemption.id);
+
+  if (redemptionUpdateError) {
+    console.warn(
+      "Coupon redemption update failed:",
+      redemptionUpdateError.message
+    );
+
+    return {
+      reversed: false,
+      error: redemptionUpdateError.message,
+      message: "Could not reverse coupon redemption.",
+    };
+  }
+
+  if (redemption.coupon_id) {
+    const { data: couponRow, error: couponLookupError } = await supabaseAdmin
+      .from("coupons")
+      .select("id, used_count")
+      .eq("id", redemption.coupon_id)
+      .maybeSingle();
+
+    if (!couponLookupError && couponRow?.id) {
+      await supabaseAdmin
+        .from("coupons")
+        .update({
+          used_count: Math.max(Number(couponRow.used_count || 0) - 1, 0),
+          updated_at: nowIso,
+        })
+        .eq("id", couponRow.id);
+    }
+  }
+
+  return {
+    reversed: true,
+    alreadyReversed: false,
+    redemptionId: redemption.id,
+    couponId: redemption.coupon_id,
+    couponCode: redemption.coupon_code,
+    discountAmount: Number(redemption.discount_amount || 0),
+    status: "refunded",
+    message: "Coupon redemption reversed after full manual refund.",
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -604,6 +767,13 @@ export async function POST(request: Request) {
       isFullRefund,
     });
 
+    const couponReversal = await reverseCouponAfterFullManualRefund({
+      supabaseAdmin,
+      transaction,
+      refund,
+      isFullRefund,
+    });
+
     await supabaseAdmin
       .from("payment_refunds")
       .update({
@@ -617,6 +787,7 @@ export async function POST(request: Request) {
           is_full_refund: isFullRefund,
           source_update: sourceUpdate,
           loyalty_reversal: loyaltyReversal,
+          coupon_reversal: couponReversal,
         },
         updated_at: new Date().toISOString(),
       })
@@ -634,8 +805,9 @@ export async function POST(request: Request) {
       transactionStatus: nextTransactionStatus,
       sourceUpdate,
       loyaltyReversal,
+      couponReversal,
       message:
-        "Manual refund completed, source payment status updated when possible, and loyalty points were reversed when eligible. No external payment provider was contacted.",
+        "Manual refund completed, source payment status updated when possible, loyalty points were reversed when eligible, and coupon redemption was reversed after full refund when available. No external payment provider was contacted.",
     });
   } catch (error) {
     console.error("Manual refund error:", error);
