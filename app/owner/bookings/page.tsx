@@ -1,45 +1,128 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import T from "@/components/t";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import OwnerBookingStatusActions from "../../../components/owner-booking-status-actions";
+import { createClient } from "../../../lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-function formatDate(value: unknown) {
-  if (!value) return "—";
-  const date = new Date(String(value));
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("en-SA", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
+type DbRow = Record<string, unknown>;
+
+function readText(row: DbRow | null | undefined, keys: string[], fallback = "") {
+  if (!row) return fallback;
+
+  for (const key of keys) {
+    const value = row[key];
+
+    if (typeof value === "string" && value.trim()) {
+      return value;
+    }
+
+    if (typeof value === "number") {
+      return String(value);
+    }
+  }
+
+  return fallback;
+}
+
+function readNumber(row: DbRow | null | undefined, keys: string[]) {
+  if (!row) return 0;
+
+  for (const key of keys) {
+    const value = row[key];
+
+    if (typeof value === "number") {
+      return value;
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value);
+
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return 0;
+}
+
+function formatDateTime(value: string) {
+  if (!value) return "Not set";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 }
 
-function formatMoney(value: unknown, currency = "SAR") {
-  const numberValue = Number(value || 0);
-  if (!Number.isFinite(numberValue)) return `0.00 ${currency}`;
-  return `${numberValue.toFixed(2)} ${currency}`;
+function formatMoney(amount: number, currency: string) {
+  return `${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })} ${currency || "SAR"}`;
 }
 
-function getBadgeClass(status: string | null | undefined) {
-  switch (status) {
-    case "confirmed":
-    case "paid":
-    case "completed":
-    case "accepted":
-      return "badge badge-success";
-    case "pending":
-    case "pending_payment":
-      return "badge badge-warning";
-    case "rejected":
-    case "cancelled":
-    case "canceled":
-    case "expired":
-      return "badge badge-danger";
-    default:
-      return "badge";
+function getStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: "Pending",
+    pending_review: "Pending review",
+    pending_owner_review: "Pending owner review",
+    accepted: "Accepted",
+    confirmed: "Confirmed",
+    rejected: "Rejected",
+    declined: "Declined",
+    cancelled: "Cancelled",
+    completed: "Completed",
+    no_show: "No-show",
+  };
+
+  return labels[status] || status || "Unknown";
+}
+
+function getPaymentLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: "Pending",
+    unpaid: "Unpaid",
+    paid: "Paid",
+    manual_paid: "Manual paid",
+    failed: "Failed",
+    refunded: "Refunded",
+    cancelled: "Cancelled",
+  };
+
+  return labels[status] || status || "Pending";
+}
+
+async function fetchOwnedStudios(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+) {
+  const ownerColumnCandidates = [
+    "owner_id",
+    "user_id",
+    "created_by",
+    "profile_id",
+  ];
+
+  for (const ownerColumn of ownerColumnCandidates) {
+    const { data, error } = await supabase
+      .from("studios")
+      .select("*")
+      .eq(ownerColumn, userId);
+
+    if (!error && data) {
+      return data as DbRow[];
+    }
   }
+
+  return [];
 }
 
 export default async function OwnerBookingsPage() {
@@ -50,242 +133,266 @@ export default async function OwnerBookingsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?account=owner");
+    redirect("/login");
   }
 
-  const supabaseAdmin = createAdminClient();
+  const ownedStudios = await fetchOwnedStudios(supabase, user.id);
+  const ownedStudioIds = ownedStudios
+    .map((studio) => readText(studio, ["id"]))
+    .filter(Boolean);
 
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("role")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
+  const studiosById = new Map<string, DbRow>();
 
-  if (!profile || !["owner", "admin"].includes(profile.role)) {
-    redirect("/forbidden");
+  for (const studio of ownedStudios) {
+    const studioId = readText(studio, ["id"]);
+
+    if (studioId) {
+      studiosById.set(studioId, studio);
+    }
   }
 
-  let query = supabaseAdmin
-    .from("bookings")
-    .select(`
-      id,
-      booking_number,
-      customer_name,
-      customer_email,
-      booking_date,
-      start_time,
-      end_time,
-      duration_hours,
-      status,
-      payment_status,
-      total_amount,
-      currency_code,
-      owner_notes,
-      created_at,
-      studio:studios(
-        id,
-        name,
-        name_en,
-        name_ar
-      )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(100);
+  let bookings: DbRow[] = [];
 
-  if (profile.role !== "admin") {
-    query = query.eq("owner_auth_user_id", user.id);
+  if (ownedStudioIds.length > 0) {
+    const { data } = await supabase
+      .from("bookings")
+      .select("*")
+      .in("studio_id", ownedStudioIds)
+      .order("created_at", { ascending: false });
+
+    bookings = (data || []) as DbRow[];
   }
 
-  const { data: bookings, error } = await query;
+  const customerIds = Array.from(
+    new Set(
+      bookings
+        .map((booking) =>
+          readText(booking, ["customer_id", "user_id", "client_id"])
+        )
+        .filter(Boolean)
+    )
+  );
 
-  if (error) {
-    throw new Error(error.message);
+  const customersById = new Map<string, DbRow>();
+
+  if (customerIds.length > 0) {
+    const { data: customers } = await supabase
+      .from("profiles")
+      .select("*")
+      .in("id", customerIds);
+
+    for (const customer of (customers || []) as DbRow[]) {
+      const customerId = readText(customer, ["id", "user_id"]);
+
+      if (customerId) {
+        customersById.set(customerId, customer);
+      }
+    }
   }
 
-  const totalRevenue = (bookings || [])
-    .filter((b: any) => b.payment_status === "paid" || b.status === "completed")
-    .reduce((sum: number, b: any) => sum + Number(b.total_amount || 0), 0);
+  const bookingIds = bookings
+    .map((booking) => readText(booking, ["id"]))
+    .filter(Boolean);
+
+  const paymentSessionsByBookingId = new Map<string, DbRow>();
+
+  if (bookingIds.length > 0) {
+    const { data: paymentSessions } = await supabase
+      .from("checkout_payment_sessions")
+      .select("*")
+      .in("booking_id", bookingIds);
+
+    for (const session of (paymentSessions || []) as DbRow[]) {
+      const bookingId = readText(session, ["booking_id"]);
+
+      if (bookingId) {
+        paymentSessionsByBookingId.set(bookingId, session);
+      }
+    }
+  }
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1200, margin: "0 auto" }}>
-      <section style={{ marginTop: 24 }}>
-        <span className="badge badge-gold">
-          <T en="Bookings" ar="الحجوزات" />
-        </span>
-
-        <h1 style={{ marginTop: 10 }}>
-          <T en="Manage studio bookings" ar="إدارة حجوزات الاستوديو" />
-        </h1>
-
-        <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
-          <T
-            en="Review and update the status of studio bookings from your customers."
-            ar="راجع وحدث حالة حجوزات الاستوديو من عملائك."
-          />
-        </p>
-      </section>
-
-      <section className="stats-grid" style={{ marginTop: 26 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <label>Total Bookings</label>
-            <div className="stat-value">{bookings?.length || 0}</div>
-          </div>
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
+        <div>
+          <p className="gb-eyebrow">Owner dashboard</p>
+          <h1>Studio Bookings</h1>
+          <p className="gb-muted-text">
+            Manage incoming studio bookings, review payment status, and update
+            each booking status.
+          </p>
         </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <label>Confirmed Revenue</label>
-            <div className="stat-value">{formatMoney(totalRevenue)}</div>
-          </div>
-        </div>
+        <Link href="/owner" className="gb-button gb-button-secondary">
+          Back to owner dashboard
+        </Link>
       </section>
 
-      <section className="card" style={{ marginTop: 30 }}>
-        <h2>
-          <T en="Recent bookings" ar="الحجوزات الأخيرة" />
-        </h2>
+      {ownedStudioIds.length === 0 ? (
+        <section className="gb-empty-state">
+          <h2>No studios found</h2>
+          <p>
+            This account does not currently own any studio records. Once a
+            studio is linked to this owner account, bookings will appear here.
+          </p>
+        </section>
+      ) : null}
 
-        <div className="table-responsive" style={{ marginTop: 20 }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Booking</th>
-                <th>Studio</th>
-                <th>Customer</th>
-                <th>Date & Time</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+      {ownedStudioIds.length > 0 && bookings.length === 0 ? (
+        <section className="gb-empty-state">
+          <h2>No bookings yet</h2>
+          <p>Your studio bookings will appear here once customers book.</p>
+        </section>
+      ) : null}
 
-            <tbody>
-              {!bookings || bookings.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: 40 }}>
-                    <T en="No bookings found." ar="لا توجد حجوزات." />
-                  </td>
-                </tr>
-              ) : (
-                bookings.map((booking: any) => {
-                  const studio = Array.isArray(booking.studio)
-                    ? booking.studio[0]
-                    : booking.studio;
+      {bookings.length > 0 ? (
+        <section className="gb-card-grid">
+          {bookings.map((booking) => {
+            const bookingId = readText(booking, ["id"]);
+            const studioId = readText(booking, ["studio_id"]);
+            const customerId = readText(booking, [
+              "customer_id",
+              "user_id",
+              "client_id",
+            ]);
 
-                  return (
-                    <tr key={booking.id}>
-                      <td>
-                        <div style={{ fontWeight: 800 }}>
-                          {booking.booking_number}
-                        </div>
-                        <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                          {formatDate(booking.created_at)}
-                        </div>
-                      </td>
+            const studio = studiosById.get(studioId);
+            const customer = customersById.get(customerId);
+            const paymentSession = paymentSessionsByBookingId.get(bookingId);
 
-                      <td>
-                        {studio?.name_en || studio?.name || studio?.name_ar || "—"}
-                      </td>
+            const studioName = readText(
+              studio,
+              ["name", "title", "studio_name"],
+              "Studio"
+            );
 
-                      <td>
-                        <div style={{ fontWeight: 600 }}>
-                          {booking.customer_name || "—"}
-                        </div>
-                        <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                          {booking.customer_email || "—"}
-                        </div>
-                      </td>
+            const studioSlug = readText(studio, ["slug"]);
 
-                      <td>
-                        <div style={{ fontWeight: 600 }}>
-                          {formatDate(booking.booking_date)}
-                        </div>
-                        <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                          {booking.start_time} - {booking.end_time} ({booking.duration_hours}h)
-                        </div>
-                      </td>
+            const customerName = readText(
+              customer,
+              ["full_name", "name", "display_name"],
+              "Customer"
+            );
 
-                      <td>
-                        {formatMoney(booking.total_amount, booking.currency_code)}
-                      </td>
+            const customerEmail = readText(
+              customer,
+              ["email", "contact_email"],
+              ""
+            );
 
-                      <td>
-                        <span className={getBadgeClass(booking.status)}>
-                          {booking.status}
-                        </span>
-                        <div style={{ marginTop: 4 }}>
-                          <span className={getBadgeClass(booking.payment_status)}>
-                            {booking.payment_status}
-                          </span>
-                        </div>
-                      </td>
+            const startTime = readText(booking, [
+              "start_time",
+              "starts_at",
+              "booking_start",
+              "date",
+            ]);
 
-                      <td>
-                        <div style={{ display: "grid", gap: 6 }}>
-                          <select
-                            className="input"
-                            defaultValue={booking.status}
-                            style={{ padding: "4px 8px", fontSize: "0.85rem" }}
-                            data-booking-status-select
-                          >
-                            <option value="pending">pending</option>
-                            <option value="accepted">accepted</option>
-                            <option value="rejected">rejected</option>
-                            <option value="confirmed">confirmed</option>
-                            <option value="cancelled">cancelled</option>
-                            <option value="completed">completed</option>
-                          </select>
+            const endTime = readText(booking, [
+              "end_time",
+              "ends_at",
+              "booking_end",
+            ]);
 
-                          <button
-                            type="button"
-                            className="btn btn-small btn-primary"
-                            data-booking-update-btn
-                            data-booking-id={booking.id}
-                          >
-                            Save
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+            const status = readText(
+              booking,
+              ["status"],
+              "pending_owner_review"
+            );
 
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener("click", async function(event) {
-              const button = event.target.closest("[data-booking-update-btn]");
-              if (!button) return;
+            const bookingPaymentStatus = readText(
+              booking,
+              ["payment_status"],
+              ""
+            );
 
-              const bookingId = button.getAttribute("data-booking-id");
-              const container = button.closest("td");
-              const select = container.querySelector("[data-booking-status-select]");
-              const status = select.value;
+            const sessionPaymentStatus = readText(
+              paymentSession,
+              ["status", "payment_status"],
+              ""
+            );
 
-              const response = await fetch("/api/owner/bookings/update-status", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ bookingId, status })
-              });
+            const paymentStatus =
+              bookingPaymentStatus || sessionPaymentStatus || "pending";
 
-              if (response.ok) {
-                window.location.reload();
-              } else {
-                const data = await response.json().catch(() => null);
-                alert(data && data.error ? data.error : "Could not update status.");
-              }
-            });
-          `,
-        }}
-      />
+            const amount = readNumber(booking, [
+              "total_amount",
+              "total_price",
+              "amount",
+              "price",
+              "total_amount"
+            ]);
+
+            const currency = readText(booking, ["currency", "currency_code"], "SAR");
+            const ownerNotes = readText(booking, ["owner_notes"], "");
+
+            return (
+              <article key={bookingId} className="gb-card">
+                <div className="gb-card-header">
+                  <div>
+                    <p className="gb-eyebrow">Booking</p>
+                    <h2>{studioName}</h2>
+                  </div>
+
+                  <span className="gb-status-pill">
+                    {getStatusLabel(status)}
+                  </span>
+                </div>
+
+                <div className="gb-detail-grid">
+                  <div>
+                    <span className="gb-detail-label">Customer</span>
+                    <strong>{customerName}</strong>
+                    {customerEmail ? <p>{customerEmail}</p> : null}
+                  </div>
+
+                  <div>
+                    <span className="gb-detail-label">Start</span>
+                    <strong>{formatDateTime(startTime)}</strong>
+                  </div>
+
+                  <div>
+                    <span className="gb-detail-label">End</span>
+                    <strong>{formatDateTime(endTime)}</strong>
+                  </div>
+
+                  <div>
+                    <span className="gb-detail-label">Amount</span>
+                    <strong>{formatMoney(amount, currency)}</strong>
+                  </div>
+
+                  <div>
+                    <span className="gb-detail-label">Payment</span>
+                    <strong>{getPaymentLabel(paymentStatus)}</strong>
+                  </div>
+                </div>
+
+                {ownerNotes ? (
+                  <div className="gb-note-box">
+                    <span className="gb-detail-label">Owner note</span>
+                    <p>{ownerNotes}</p>
+                  </div>
+                ) : null}
+
+                <div className="gb-card-footer">
+                  <OwnerBookingStatusActions
+                    bookingId={bookingId}
+                    currentStatus={status}
+                  />
+
+                  {studioSlug ? (
+                    <Link
+                      href={`/studios/${studioSlug}`}
+                      className="gb-text-link"
+                    >
+                      View studio
+                    </Link>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
+        </section>
+      ) : null}
     </main>
   );
 }
