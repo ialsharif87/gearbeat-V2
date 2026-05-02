@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import T from "@/components/t";
 import StudioAvailableSlotsPicker from "./studio-available-slots-picker";
 
@@ -65,6 +66,14 @@ export default function StudioBookingBox({
   const [paying, setPaying] = useState(false);
   const [booking, setBooking] = useState<BookingResult | null>(null);
   const [payment, setPayment] = useState<PaymentResult | null>(null);
+  const router = useRouter();
+
+  const studioSlug = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    const parts = window.location.pathname.split("/");
+    // Expecting /studios/[slug] or /studios/[slug]/book
+    return parts[2] || "";
+  }, []);
 
   const estimatedTotal = useMemo(() => {
     const price = Number(hourlyPrice || 0);
@@ -152,6 +161,10 @@ export default function StudioBookingBox({
       }
 
       setPayment(data);
+
+      if (data.ok && booking?.bookingId) {
+        router.push(`/studios/${studioSlug}/booking-confirmation?bookingId=${booking.bookingId}`);
+      }
     } catch (error) {
       setPayment({
         ok: false,
