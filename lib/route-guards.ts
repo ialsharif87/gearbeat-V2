@@ -103,7 +103,7 @@ export async function requireCustomerLayoutAccess() {
   }
 
   if (profile.role === "owner") {
-    redirect("/owner");
+    redirect("/portal/studio");
   }
 
   if (profile.role !== "customer") {
@@ -117,13 +117,13 @@ export async function requireCustomerLayoutAccess() {
 }
 
 export async function requireOwnerLayoutAccess() {
-  const context = await getProtectedContext("/login?account=owner");
+  const context = await getProtectedContext("/portal/login");
 
   if (context.adminUser) {
     redirect("/admin");
   }
 
-  const profile = requireActiveProfile(context.profile, "/login?account=owner");
+  const profile = requireActiveProfile(context.profile, "/portal/login");
 
   if (profile.role === "admin") {
     redirect("/admin");
@@ -150,7 +150,7 @@ export async function requireAdminLayoutAccess(
 
   if (!context.adminUser) {
     if (context.profile?.role === "owner") {
-      redirect("/owner");
+      redirect("/portal/studio");
     }
 
     if (context.profile?.role === "customer") {
@@ -171,13 +171,13 @@ export async function requireAdminLayoutAccess(
 }
 
 export async function requireVendorLayoutAccess() {
-  const context = await getProtectedContext("/login?account=vendor");
+  const context = await getProtectedContext("/portal/login");
 
   if (context.adminUser) {
     redirect("/admin");
   }
 
-  const profile = requireActiveProfile(context.profile, "/login?account=vendor");
+  const profile = requireActiveProfile(context.profile, "/portal/login");
 
   // Vendors are tracked in vendor_profiles, not in profile.role necessarily
   const { data: vendorProfile } = await context.supabaseAdmin
@@ -187,7 +187,7 @@ export async function requireVendorLayoutAccess() {
     .maybeSingle();
 
   if (!vendorProfile) {
-    redirect("/vendor/onboarding");
+    redirect("/portal/store/onboarding");
   }
 
   if (vendorProfile.status === "pending" || vendorProfile.status === "rejected") {

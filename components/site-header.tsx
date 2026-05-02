@@ -61,7 +61,7 @@ export default function SiteHeader({
                 <T en="Notifications" ar="التنبيهات" />
               </Link>
               {isVendor && (
-                <Link href="/vendor" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
+                <Link href="/portal/store" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
                   <T en="Vendor Portal" ar="بوابة التاجر" />
                 </Link>
               )}
@@ -73,14 +73,14 @@ export default function SiteHeader({
                 <span className="chevron">▾</span>
               </button>
               <div className="partner-dropdown-menu">
-                <Link href="/owner/onboarding" className="partner-item">
+                <Link href="/join/studio" className="partner-item">
                   <span className="partner-icon">🎧</span>
                   <div className="partner-text">
                     <strong><T en="Studio Owner" ar="صاحب استديو" /></strong>
                     <p><T en="List your space" ar="اعرض مساحتك" /></p>
                   </div>
                 </Link>
-                <Link href="/vendor-signup" className="partner-item">
+                <Link href="/join/seller" className="partner-item">
                   <div className="partner-icon">📦</div>
                   <div className="partner-text">
                     <strong><T en="Gear Vendor" ar="تاجر معدات" /></strong>

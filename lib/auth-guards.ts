@@ -256,8 +256,8 @@ export async function requireCustomerOrRedirect(
 
 export function dashboardPathForRole(role: GearBeatRole) {
   if (isAdminRole(role)) return "/admin";
-  if (isOwnerRole(role)) return "/owner";
-  if (isVendorRole(role)) return "/vendor";
+  if (isOwnerRole(role)) return "/portal/studio";
+  if (isVendorRole(role)) return "/portal/store";
 
   return "/customer";
 }
