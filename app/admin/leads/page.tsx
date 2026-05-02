@@ -4,6 +4,7 @@ import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,73 @@ async function markAsContacted(formData: FormData) {
   await supabaseAdmin
     .from("provider_leads")
     .update({ status: "contacted" })
+    .eq("id", leadId);
+
+  revalidatePath("/admin/leads");
+}
+
+async function sendProviderInviteAction(formData: FormData) {
+  "use server";
+  
+  const leadId = formData.get("leadId")?.toString();
+  const email = formData.get("email")?.toString();
+  const type = formData.get("type")?.toString();
+
+  if (!leadId || !email || !type) return;
+
+  const supabaseAdmin = createAdminClient();
+  
+  // 1. Generate magic link
+  const redirectTo = type === "studio" 
+    ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gearbeat.sa'}/portal/studio/onboarding`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gearbeat.sa'}/portal/store/onboarding`;
+
+  const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    type: "magiclink",
+    email: email,
+    options: { redirectTo }
+  });
+
+  if (linkError) {
+    console.error("Link generation error:", linkError);
+    return;
+  }
+
+  const magicLink = linkData.properties.action_link;
+
+  // 2. Send email via Resend
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const subject = type === "studio" ? "Your GearBeat Studio Portal Invitation" : "Your GearBeat Seller Portal Invitation";
+
+  await resend.emails.send({
+    from: "GearBeat <noreply@gearbeat.sa>",
+    to: email,
+    subject: subject,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #111;">
+        <h1 style="color: #cfa762; font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px;">GearBeat</h1>
+        <div style="margin-top: 30px; text-align: center;">
+          <h2 style="font-size: 20px; color: #333;">تم قبول طلبك في GearBeat</h2>
+          <h2 style="font-size: 20px; color: #333;">Your application has been approved</h2>
+          <p style="color: #666; margin: 20px 0 30px;">Please use the button below to access your portal and complete your onboarding.</p>
+          <a href="${magicLink}" style="background-color: #cfa762; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+            Access Your Portal / ادخل إلى بوابتك
+          </a>
+        </div>
+        <div style="margin-top: 50px; font-size: 12px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+          &copy; ${new Date().getFullYear()} GearBeat. All rights reserved.
+        </div>
+      </div>
+    `
+  });
+
+  // 3. Update lead status
+  await supabaseAdmin
+    .from("provider_leads")
+    .update({ 
+      status: "invited",
+      invited_at: new Date().toISOString()
+    })
     .eq("id", leadId);
 
   revalidatePath("/admin/leads");
@@ -120,6 +188,7 @@ export default async function AdminLeadsPage({
                 <th>City</th>
                 <th>Message</th>
                 <th>Status</th>
+                <th>Invited At</th>
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
@@ -127,7 +196,7 @@ export default async function AdminLeadsPage({
             <tbody>
               {!leads || leads.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: "center", padding: "40px 20px", color: "var(--muted)" }}>
+                  <td colSpan={10} style={{ textAlign: "center", padding: "40px 20px", color: "var(--muted)" }}>
                     <T en="No leads found." ar="لا توجد طلبات." />
                   </td>
                 </tr>
@@ -147,20 +216,42 @@ export default async function AdminLeadsPage({
                       {lead.message || "—"}
                     </td>
                     <td>
-                      <span className={`badge badge-${lead.status === "new" ? "warning" : "success"}`}>
+                      <span className={`badge badge-${lead.status === "new" ? "warning" : lead.status === "invited" ? "success" : "info"}`}>
                         {lead.status}
                       </span>
                     </td>
+                    <td style={{ whiteSpace: "nowrap" }}>{lead.invited_at ? formatDate(lead.invited_at) : "—"}</td>
                     <td style={{ whiteSpace: "nowrap" }}>{formatDate(lead.created_at)}</td>
                     <td>
-                      {lead.status === "new" && (
-                        <form action={markAsContacted}>
-                          <input type="hidden" name="leadId" value={lead.id} />
-                          <button type="submit" className="btn btn-small" style={{ fontSize: "0.7rem", padding: "4px 8px" }}>
-                            Mark Contacted
-                          </button>
-                        </form>
-                      )}
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {(lead.status === "new" || lead.status === "contacted") && (
+                          <form action={markAsContacted}>
+                            <input type="hidden" name="leadId" value={lead.id} />
+                            <button type="submit" className="btn btn-small" style={{ fontSize: "0.7rem", padding: "4px 8px" }}>
+                              Mark Contacted
+                            </button>
+                          </form>
+                        )}
+                        
+                        {lead.status === "contacted" && (
+                          <form action={sendProviderInviteAction}>
+                            <input type="hidden" name="leadId" value={lead.id} />
+                            <input type="hidden" name="email" value={lead.email} />
+                            <input type="hidden" name="type" value={lead.type} />
+                            <button type="submit" className="btn btn-small" style={{ fontSize: "0.7rem", padding: "4px 8px", backgroundColor: "var(--gb-gold)", color: "black", borderColor: "var(--gb-gold)" }}>
+                              Send Invite
+                            </button>
+                          </form>
+                        )}
+
+                        {lead.status === "invited" && (
+                          <span style={{ color: "#00ff88", fontSize: "0.85rem", fontWeight: 600 }}>Invited ✓</span>
+                        )}
+
+                        {lead.status === "approved" && (
+                          <span style={{ color: "#3b82f6", fontSize: "0.85rem", fontWeight: 600 }}>Approved</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
