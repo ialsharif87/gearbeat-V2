@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications";
 
 function cleanText(value: unknown) {
   return String(value || "").trim();
@@ -386,6 +387,31 @@ export async function POST(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", booking.id);
+
+    // [Patch 75] Create notification
+    await createNotification(supabaseAdmin, {
+      userId: user.id,
+      audience: "customer",
+      title: "Booking request created",
+      body: `Your studio booking request ${bookingNumber} has been created.`,
+      notificationType: "booking_created",
+      entityType: "booking",
+      entityId: booking.id,
+      actionUrl: "/customer",
+    });
+
+    if (studio.owner_auth_user_id) {
+      await createNotification(supabaseAdmin, {
+        userId: studio.owner_auth_user_id,
+        audience: "owner",
+        title: "New booking request",
+        body: `You have a new booking request for ${getStudioName(studio)}.`,
+        notificationType: "booking_created",
+        entityType: "booking",
+        entityId: booking.id,
+        actionUrl: "/owner/bookings",
+      });
+    }
 
     return NextResponse.json({
       ok: true,

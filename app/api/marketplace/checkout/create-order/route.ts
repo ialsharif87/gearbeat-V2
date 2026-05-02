@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications";
 
 function createOrderNumber() {
   return `GB-MKT-${Date.now()}-${Math.random()
@@ -359,6 +360,33 @@ export async function POST() {
       })
       .eq("id", cart.id)
       .eq("auth_user_id", user.id);
+
+    // [Patch 75] Create notification
+    await createNotification(supabaseAdmin, {
+      userId: user.id,
+      audience: "customer",
+      title: "Marketplace order created",
+      body: `Your order ${orderNumber} has been created and is awaiting payment.`,
+      notificationType: "marketplace_order_created",
+      entityType: "marketplace_order",
+      entityId: order.id,
+      actionUrl: "/customer/marketplace-orders",
+    });
+
+    // Notify vendors
+    const vendorIds = Array.from(new Set(orderItemPayload.map(i => i.vendor_id).filter(Boolean)));
+    for (const vendorId of vendorIds) {
+      await createNotification(supabaseAdmin, {
+        userId: vendorId,
+        audience: "vendor",
+        title: "New marketplace order",
+        body: `You have received a new order ${orderNumber}.`,
+        notificationType: "marketplace_order_created",
+        entityType: "marketplace_order",
+        entityId: order.id,
+        actionUrl: "/vendor/orders",
+      });
+    }
 
     return NextResponse.json({
       ok: true,

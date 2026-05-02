@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
+import { createNotification } from "../../../../../lib/notifications";
 
 type DbRow = Record<string, unknown>;
 
@@ -177,6 +178,21 @@ export async function POST(request: NextRequest) {
       { error: updateError.message },
       { status: 500 }
     );
+  }
+
+  // [Patch 75] Create notification
+  const customerId = readText(bookingRow, ["customer_auth_user_id", "auth_user_id"]);
+  if (customerId) {
+    await createNotification(supabase, {
+      userId: customerId,
+      audience: "customer",
+      title: "Booking status updated",
+      body: `Your booking status has been updated to ${nextStatus}.`,
+      notificationType: "booking_status_updated",
+      entityType: "booking",
+      entityId: bookingId,
+      actionUrl: "/customer",
+    });
   }
 
   return NextResponse.json({

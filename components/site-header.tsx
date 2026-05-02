@@ -57,6 +57,9 @@ export default function SiteHeader({
               <Link href={dashboardPath} className="gb-nav-link gb-nav-link-strong">
                 <T en="Dashboard" ar="لوحة التحكم" />
               </Link>
+              <Link href="/notifications" className="gb-nav-link">
+                <T en="Notifications" ar="التنبيهات" />
+              </Link>
               {isVendor && (
                 <Link href="/vendor" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
                   <T en="Vendor Portal" ar="بوابة التاجر" />
