@@ -106,10 +106,10 @@ async function getStudioBySlugOrId(slug: string) {
 export default async function StudioBookPage({
   params,
 }: {
-  params: Promise<{ slug: string }> | { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const resolvedParams = await params;
-  const studio = await getStudioBySlugOrId(resolvedParams.slug);
+  const { slug } = await params;
+  const studio = await getStudioBySlugOrId(slug);
 
   if (!studio) {
     notFound();
