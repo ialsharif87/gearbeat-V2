@@ -133,6 +133,7 @@ export async function getCurrentUserOrRedirect(
 
   return user as {
     id: string;
+    email?: string;
     app_metadata?: Record<string, unknown>;
     user_metadata?: Record<string, unknown>;
   };
@@ -159,6 +160,7 @@ export async function getCurrentUserRole(
   supabase: SupabaseLikeClient,
   user: {
     id: string;
+    email?: string;
     app_metadata?: Record<string, unknown>;
     user_metadata?: Record<string, unknown>;
   }
