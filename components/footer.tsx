@@ -16,7 +16,7 @@ const footerColumns = [
     titleEn: "For Studios",
     titleAr: "لأصحاب الاستوديوهات",
     links: [
-      { href: "/signup", en: "List your studio", ar: "أضف استوديوك" },
+      { href: "/portal/login", en: "Partner portal", ar: "بوابة الشركاء" },
       { href: "/owner", en: "Owner dashboard", ar: "لوحة المالك" },
       { href: "/support", en: "Partner support", ar: "دعم الشركاء" },
     ],
@@ -114,10 +114,6 @@ export default function Footer() {
             <Link href="/studios" className="gb-footer-primary-button">
               <T en="Browse studios" ar="تصفح الاستوديوهات" />
             </Link>
-
-            <Link href="/signup" className="gb-footer-ghost-button">
-              <T en="List your studio" ar="أضف استوديوك" />
-            </Link>
           </div>
         </div>
 
@@ -126,6 +122,15 @@ export default function Footer() {
             © {currentYear} GearBeat.{" "}
             <T en="All rights reserved." ar="جميع الحقوق محفوظة." />
           </p>
+
+          <div style={{ marginTop: 8, display: "flex", gap: 16, justifyContent: "center", opacity: 0.8 }}>
+            <Link href="/join/studio" style={{ color: "var(--gb-muted)", fontSize: "0.75rem", textDecoration: "none" }}>
+              <T en="List your studio" ar="سجّل استوديوك" />
+            </Link>
+            <Link href="/join/seller" style={{ color: "var(--gb-muted)", fontSize: "0.75rem", textDecoration: "none" }}>
+              <T en="Sell on GearBeat" ar="بع على GearBeat" />
+            </Link>
+          </div>
 
           <div className="gb-footer-legal">
             <Link href="/support">
