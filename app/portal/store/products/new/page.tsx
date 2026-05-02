@@ -51,12 +51,12 @@ async function generateUniqueProductSlug(
   return `${baseSlug}-${Date.now()}`;
 }
 
-export default async function NewVendorProductPage({
+export default async function NewProductPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; saved?: string }> | { error?: string; saved?: string };
+  searchParams?: Promise<{ error?: string; saved?: string }>;
 }) {
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const errorMessage = resolvedSearchParams?.error
     ? decodeURIComponent(String(resolvedSearchParams.error))
     : "";

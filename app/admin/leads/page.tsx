@@ -177,10 +177,10 @@ async function createProviderAccountAction(formData: FormData) {
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; status?: string }>;
+  searchParams?: Promise<{ type?: string; status?: string }>;
 }) {
   await requireAdminLayoutAccess();
-  const params = await searchParams;
+  const params = searchParams ? await searchParams : {};
   const typeFilter = params.type || "all";
   const statusFilter = params.status || "all";
 

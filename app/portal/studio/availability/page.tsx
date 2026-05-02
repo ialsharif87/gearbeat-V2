@@ -25,15 +25,7 @@ type AvailabilityException = {
   reason: string;
 };
 
-type OwnerAvailabilityPageProps = {
-  searchParams?:
-    | Promise<{
-        studioId?: string;
-      }>
-    | {
-        studioId?: string;
-      };
-};
+
 
 function readText(row: DbRow | null | undefined, keys: string[], fallback = "") {
   if (!row) return fallback;
@@ -104,10 +96,13 @@ function normalizeException(row: DbRow): AvailabilityException {
   };
 }
 
-export default async function OwnerAvailabilityPage({
+export default async function StudioAvailabilityPage({
   searchParams,
-}: OwnerAvailabilityPageProps) {
+}: {
+  searchParams?: Promise<{ studioId?: string; slug?: string }>;
+}) {
   const supabase = await createClient();
+  const resolvedSearchParams = searchParams ? await searchParams : {};
 
   const {
     data: { user },
@@ -117,7 +112,7 @@ export default async function OwnerAvailabilityPage({
     redirect("/portal/login");
   }
 
-  const resolvedSearchParams = await Promise.resolve(searchParams || {});
+
   const requestedStudioId =
     typeof resolvedSearchParams.studioId === "string"
       ? resolvedSearchParams.studioId

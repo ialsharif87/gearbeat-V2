@@ -141,17 +141,17 @@ function getBadgeClass(status: string | null | undefined) {
   return "badge";
 }
 
-export default async function VendorProductEditPage({
+export default async function EditProductPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }> | { id: string };
-  searchParams?: Promise<{ error?: string; saved?: string }> | { error?: string; saved?: string };
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ error?: string; saved?: string }>;
 }) {
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
+  const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
 
-  const productId = resolvedParams.id;
+  const productId = id;
   const errorMessage = resolvedSearchParams?.error
     ? decodeURIComponent(String(resolvedSearchParams.error))
     : "";

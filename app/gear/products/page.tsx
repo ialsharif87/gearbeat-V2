@@ -6,15 +6,15 @@ import Link from "next/link";
 export default async function ProductListingPage({
   searchParams
 }: {
-  searchParams: Promise<{ 
-    q?: string, 
-    category?: string, 
-    brand?: string, 
-    minPrice?: string, 
-    maxPrice?: string 
+  searchParams?: Promise<{ 
+    q?: string;
+    category?: string; 
+    brand?: string; 
+    minPrice?: string; 
+    maxPrice?: string;
   }>;
 }) {
-  const params = await searchParams;
+  const params = searchParams ? await searchParams : {};
   const supabase = await createClient();
 
   // 1. Fetch Filters Data (Categories & Brands)

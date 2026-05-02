@@ -108,35 +108,25 @@ function getSortConfig(sort: string) {
 export default async function MarketplacePage({
   searchParams,
 }: {
-  searchParams?:
-    | Promise<{
-        q?: string;
-        category?: string;
-        brand?: string;
-        min_price?: string;
-        max_price?: string;
-        in_stock?: string;
-        sort?: string;
-      }>
-    | {
-        q?: string;
-        category?: string;
-        brand?: string;
-        min_price?: string;
-        max_price?: string;
-        in_stock?: string;
-        sort?: string;
-      };
+  searchParams?: Promise<{
+    q?: string;
+    category?: string;
+    brand?: string;
+    min_price?: string;
+    max_price?: string;
+    in_stock?: string;
+    sort?: string;
+  }>;
 }) {
-  const resolvedSearchParams = await searchParams;
+  const params = await searchParams || {};
 
-  const q = cleanText(resolvedSearchParams?.q);
-  const category = cleanText(resolvedSearchParams?.category);
-  const brand = cleanText(resolvedSearchParams?.brand);
-  const minPrice = cleanNumber(resolvedSearchParams?.min_price);
-  const maxPrice = cleanNumber(resolvedSearchParams?.max_price);
-  const inStock = cleanText(resolvedSearchParams?.in_stock) === "1";
-  const sort = cleanText(resolvedSearchParams?.sort) || "newest";
+  const q = cleanText(params.q);
+  const category = cleanText(params.category);
+  const brand = cleanText(params.brand);
+  const minPrice = cleanNumber(params.min_price);
+  const maxPrice = cleanNumber(params.max_price);
+  const inStock = cleanText(params.in_stock) === "1";
+  const sort = cleanText(params.sort) || "newest";
 
   const supabaseAdmin = createAdminClient();
 

@@ -15,10 +15,11 @@ function formatDate(value: unknown) {
 export default async function AdminProvidersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams?: Promise<{ tab?: string }>;
 }) {
   await requireAdminLayoutAccess();
-  const { tab = "studios" } = await searchParams;
+  const params = searchParams ? await searchParams : {};
+  const tab = params.tab || "studios";
 
   const supabaseAdmin = createAdminClient();
 
