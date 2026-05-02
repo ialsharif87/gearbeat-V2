@@ -207,6 +207,44 @@ export const vendorDashboardLinks: DashboardQuickLink[] = [
   },
 ];
 
+export const vendorPortalLinks: DashboardQuickLink[] = [
+  {
+    href: "/portal/store",
+    label: "Vendor overview",
+    description: "Main vendor dashboard.",
+  },
+  {
+    href: "/portal/store/products",
+    label: "Products",
+    description: "Create and manage marketplace products.",
+  },
+  {
+    href: "/portal/store/orders",
+    label: "Orders",
+    description: "Review marketplace sales orders.",
+  },
+  {
+    href: "/portal/store/integrations",
+    label: "Integrations",
+    description: "Manage API keys and vendor integrations.",
+  },
+  {
+    href: "/portal/store/payouts",
+    label: "Finance",
+    description: "Track sales, commission, and net payable balance.",
+  },
+  {
+    href: "/portal/store/payout-requests",
+    label: "Payout requests",
+    description: "Request payout from available balance.",
+  },
+  {
+    href: "/portal/store/boost",
+    label: "Acceleration",
+    description: "Request paid visibility boost.",
+  },
+];
+
 export const customerDashboardLinks: DashboardQuickLink[] = [
   {
     href: "/customer",
