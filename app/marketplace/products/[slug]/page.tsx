@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import T from "@/components/t";
 import { createAdminClient } from "@/lib/supabase/admin";
+import AddToCartButton from "@/components/add-to-cart-button";
 
 export const dynamic = "force-dynamic";
 
@@ -440,9 +441,11 @@ export default async function ProductDetailPage({
             ) : null}
           </div>
 
-          <button type="button" className="btn btn-primary btn-large" disabled>
-            <T en="Add to cart — coming soon" ar="أضف للسلة — قريبًا" />
-          </button>
+          <AddToCartButton
+            productId={product.id}
+            maxQuantity={Number(product.stock_quantity || 0)}
+            disabled={Number(product.stock_quantity || 0) <= 0}
+          />
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button
