@@ -215,9 +215,9 @@ export async function POST(request: NextRequest) {
     const exceptionRows = exceptions.map((exception) => ({
       studio_id: studioId,
       exception_date: exception.exceptionDate,
-      is_closed: exception.is_closed,
-      open_time: exception.is_closed ? null : exception.openTime,
-      close_time: exception.is_closed ? null : exception.closeTime,
+      is_closed: exception.isClosed,
+      open_time: exception.isClosed ? null : exception.openTime,
+      close_time: exception.isClosed ? null : exception.closeTime,
       reason: exception.reason || null,
       updated_at: now,
     }));
