@@ -4,16 +4,25 @@ import { useState } from "react";
 import T from "@/components/t";
 
 type AddToCartButtonProps = {
-  productId: string;
+  productId?: string;
+  product?: any;
   disabled?: boolean;
   maxQuantity?: number;
 };
 
 export default function AddToCartButton({
   productId,
+  product,
   disabled = false,
-  maxQuantity = 1,
+  maxQuantity,
 }: AddToCartButtonProps) {
+  const resolvedProductId = productId || product?.id || "";
+  const resolvedMaxQuantity = Number(
+    maxQuantity ?? product?.stock_quantity ?? product?.stockQuantity ?? 1
+  );
+  const resolvedDisabled =
+    disabled || !resolvedProductId || resolvedMaxQuantity <= 0;
+
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -31,7 +40,7 @@ export default function AddToCartButton({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          productId,
+          productId: resolvedProductId,
           quantity,
         }),
       });
@@ -77,17 +86,20 @@ export default function AddToCartButton({
           className="input"
           type="number"
           min="1"
-          max={Math.max(maxQuantity, 1)}
+          max={Math.max(resolvedMaxQuantity, 1)}
           value={quantity}
           onChange={(event) => {
             const nextValue = Math.max(
               1,
-              Math.min(Number(event.target.value || 1), Math.max(maxQuantity, 1))
+              Math.min(
+                Number(event.target.value || 1),
+                Math.max(resolvedMaxQuantity, 1)
+              )
             );
             setQuantity(nextValue);
           }}
           style={{ maxWidth: 110 }}
-          disabled={disabled || loading}
+          disabled={resolvedDisabled || loading}
         />
       </div>
 
@@ -95,7 +107,7 @@ export default function AddToCartButton({
         type="button"
         className="btn btn-primary btn-large"
         onClick={addToCart}
-        disabled={disabled || loading || !productId || maxQuantity <= 0}
+        disabled={resolvedDisabled || loading}
       >
         {loading ? (
           <T en="Adding..." ar="جاري الإضافة..." />
