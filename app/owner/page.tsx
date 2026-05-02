@@ -492,3 +492,5 @@ export default async function OwnerPage() {
       </div>
       </div>
     </main>
+  );
+}

@@ -35,7 +35,7 @@ export default async function VendorDashboard() {
     .eq("vendor_id", user.id)
     .order("created_at", { ascending: false })
     .limit(5);
-
+  return (
     <main className="gb-dashboard-page">
       <section className="gb-dashboard-header">
         <div>
@@ -132,3 +132,5 @@ export default async function VendorDashboard() {
       </div>
       </div>
     </main>
+  );
+}
