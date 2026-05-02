@@ -683,14 +683,9 @@
   line-height: 1.8;
 }
 
-:global(.brandPreviewRoot) ~ header,
-:global(.brandPreviewRoot) ~ footer {
-  display: none !important;
-}
 
-:global(body:has(.brandPreviewRoot)) {
-  background: #0b0f16 !important;
-}
+
+
 
 @media (max-width: 980px) {
   .navLinks {
