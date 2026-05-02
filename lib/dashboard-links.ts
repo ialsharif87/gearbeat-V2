@@ -61,6 +61,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "Refunds & adjustments",
     description: "Create internal refunds and finance adjustments.",
   },
+  {
+    href: "/admin/acceleration",
+    label: "Acceleration finance",
+    description: "Manage paid visibility boost packages and orders.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [
@@ -88,6 +93,11 @@ export const ownerDashboardLinks: DashboardQuickLink[] = [
     href: "/owner/payout-requests",
     label: "Payout requests",
     description: "Request payout from studio payable balance.",
+  },
+  {
+    href: "/owner/acceleration",
+    label: "Acceleration",
+    description: "Request paid visibility boost for studios.",
   },
 ];
 
@@ -121,6 +131,11 @@ export const vendorDashboardLinks: DashboardQuickLink[] = [
     href: "/vendor/payout-requests",
     label: "Payout requests",
     description: "Request payout from available balance.",
+  },
+  {
+    href: "/vendor/acceleration",
+    label: "Acceleration",
+    description: "Request paid visibility boost.",
   },
 ];
 

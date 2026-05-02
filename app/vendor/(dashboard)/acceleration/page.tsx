@@ -2,14 +2,14 @@ import Link from "next/link";
 import AccelerationPackagesPanel, {
   type AccelerationOrder,
   type AccelerationPackage,
-} from "../../../components/acceleration-packages-panel";
-import { createClient } from "../../../lib/supabase/server";
+} from "../../../../components/acceleration-packages-panel";
+import { createClient } from "../../../../lib/supabase/server";
 import {
-  requireAdminOrRedirect,
+  requireVendorOrRedirect,
   readNumber,
   readText,
   type DbRow,
-} from "../../../lib/auth-guards";
+} from "../../../../lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -41,34 +41,39 @@ function order(row: DbRow): AccelerationOrder {
   };
 }
 
-export default async function AdminAccelerationPage() {
+export default async function VendorAccelerationPage() {
   const supabase = await createClient();
-  await requireAdminOrRedirect(supabase);
+  const { user } = await requireVendorOrRedirect(supabase);
 
   const { data: packageRows } = await supabase
     .from("acceleration_packages")
     .select("*")
+    .in("partner_type", ["all", "vendor"])
+    .eq("is_active", true)
     .order("created_at", { ascending: false });
 
   const { data: orderRows } = await supabase
     .from("acceleration_orders")
     .select("*")
+    .eq("partner_type", "vendor")
+    .eq("partner_id", user.id)
     .order("created_at", { ascending: false });
 
   return (
     <main className="gb-dashboard-page">
       <section className="gb-dashboard-header">
         <div>
-          <p className="gb-eyebrow">Admin finance</p>
-          <h1>Acceleration Finance</h1>
+          <p className="gb-eyebrow">Vendor dashboard</p>
+          <h1>Acceleration</h1>
         </div>
-        <Link href="/admin/finance" className="gb-button gb-button-secondary">
-          Finance center
+        <Link href="/vendor" className="gb-button gb-button-secondary">
+          Back to vendor dashboard
         </Link>
       </section>
 
       <AccelerationPackagesPanel
-        mode="admin"
+        mode="vendor"
+        partnerType="vendor"
         packages={((packageRows || []) as DbRow[]).map(pkg)}
         orders={((orderRows || []) as DbRow[]).map(order)}
       />
