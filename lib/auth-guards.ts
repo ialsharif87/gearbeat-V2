@@ -13,33 +13,7 @@ export type GearBeatRole =
   | "user"
   | "";
 
-type SupabaseLikeClient = {
-  auth: {
-    getUser: () => Promise<{
-      data: {
-        user: {
-          id: string;
-          app_metadata?: Record<string, unknown>;
-          user_metadata?: Record<string, unknown>;
-        } | null;
-      };
-      error?: unknown;
-    }>;
-  };
-  from: (table: string) => {
-    select: (columns?: string) => {
-      eq: (
-        column: string,
-        value: string
-      ) => {
-        maybeSingle: () => Promise<{
-          data: unknown;
-          error: unknown;
-        }>;
-      };
-    };
-  };
-};
+type SupabaseLikeClient = any;
 
 export function readText(
   row: DbRow | null | undefined,
@@ -157,7 +131,11 @@ export async function getCurrentUserOrRedirect(
     redirect(redirectTo);
   }
 
-  return user;
+  return user as {
+    id: string;
+    app_metadata?: Record<string, unknown>;
+    user_metadata?: Record<string, unknown>;
+  };
 }
 
 export async function getProfileRole(
