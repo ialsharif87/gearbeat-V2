@@ -5,6 +5,7 @@ import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 import DashboardQuickLinks from "../../components/dashboard-quick-links";
 import { ownerDashboardLinks } from "../../lib/dashboard-links";
+import { requireOwnerOrRedirect } from "../../lib/auth-guards";
 
 type ProfileRow = {
   id: string;
@@ -59,26 +60,8 @@ function statusStyle(status: string | null | undefined) {
 
 export default async function OwnerPage() {
   const supabase = await createClient();
+  const { user } = await requireOwnerOrRedirect(supabase);
   const supabaseAdmin = createAdminClient();
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login?account=owner");
-  }
-
-  const { data: adminUser } = await supabaseAdmin
-    .from("admin_users")
-    .select("id, auth_user_id, email, admin_role, status")
-    .eq("auth_user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (adminUser) {
-    redirect("/admin");
-  }
 
   const { data: profileData, error: profileError } = await supabaseAdmin
     .from("profiles")
@@ -106,18 +89,6 @@ export default async function OwnerPage() {
 
   if (profile.account_status && profile.account_status !== "active") {
     redirect("/login?account=owner");
-  }
-
-  if (profile.role === "customer") {
-    redirect("/customer");
-  }
-
-  if (profile.role === "admin") {
-    redirect("/admin");
-  }
-
-  if (profile.role !== "owner") {
-    redirect("/forbidden");
   }
 
   const [

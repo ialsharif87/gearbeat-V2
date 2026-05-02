@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import T from "@/components/t";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireCustomerOrRedirect } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -63,13 +64,7 @@ function getProductName(snapshot: any) {
 export default async function CustomerMarketplaceOrdersPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login?account=customer");
-  }
+  const { user } = await requireCustomerOrRedirect(supabase);
 
   const supabaseAdmin = createAdminClient();
 

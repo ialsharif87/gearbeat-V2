@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import DashboardQuickLinks from "@/components/dashboard-quick-links";
 import { customerDashboardLinks } from "@/lib/dashboard-links";
+import { requireCustomerOrRedirect } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -57,13 +58,7 @@ async function safeQuery<T>(
 export default async function CustomerDashboardPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login?account=customer");
-  }
+  const { user } = await requireCustomerOrRedirect(supabase);
 
   const supabaseAdmin = createAdminClient();
 
@@ -91,10 +86,6 @@ export default async function CustomerDashboardPage() {
 
   if (!profile) {
     redirect("/login?account=customer");
-  }
-
-  if (profile.role !== "customer") {
-    redirect("/forbidden");
   }
 
   const [wallet, favorites, bookings, offers] = await Promise.all([

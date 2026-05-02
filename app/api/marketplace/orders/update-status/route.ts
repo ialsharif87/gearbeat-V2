@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  requireAdminOrRedirect,
+  requireVendorOrRedirect,
+  isAdminRole as checkIsAdmin,
+  isVendorRole as checkIsVendor,
+} from "@/lib/auth-guards";
+import {
+  jsonOk,
+  jsonError,
+  unauthorized,
+  forbidden,
+  notFound,
+  serverError,
+} from "@/lib/api-responses";
 
 const ORDER_STATUSES = [
   "draft",
@@ -33,17 +47,7 @@ const ITEM_STATUSES = [
   "failed",
 ];
 
-function cleanText(value: unknown) {
-  return String(value || "").trim();
-}
 
-function isAdminRole(role: string | null | undefined) {
-  return role === "admin";
-}
-
-function isVendorRole(role: string | null | undefined) {
-  return role === "vendor";
-}
 
 export async function POST(request: Request) {
   try {
@@ -56,16 +60,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const orderId = cleanText(body.orderId || body.order_id);
-    const itemId = cleanText(body.itemId || body.item_id);
-    const status = cleanText(body.status);
-    const scope = cleanText(body.scope || (itemId ? "item" : "order"));
+    const orderId = String(body.orderId || body.order_id || "").trim();
+    const itemId = String(body.itemId || body.item_id || "").trim();
+    const status = String(body.status || "").trim();
+    const scope = String(body.scope || (itemId ? "item" : "order")).trim();
 
     if (!status) {
-      return NextResponse.json(
-        { error: "Status is required." },
-        { status: 400 }
-      );
+      return jsonError("Status is required.");
     }
 
     const supabase = await createClient();
@@ -75,10 +76,7 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Authentication required." },
-        { status: 401 }
-      );
+      return unauthorized();
     }
 
     const supabaseAdmin = createAdminClient();
@@ -90,14 +88,11 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (profileError) {
-      throw new Error(profileError.message);
+      return serverError(profileError.message);
     }
 
     if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found." },
-        { status: 404 }
-      );
+      return notFound("Profile not found.");
     }
 
     const { data: vendorProfile } = await supabaseAdmin
@@ -113,7 +108,7 @@ export async function POST(request: Request) {
     ].filter(Boolean);
 
     if (scope === "order") {
-      if (!isAdminRole(profile.role)) {
+      if (!checkIsAdmin(profile.role as any)) {
         return NextResponse.json(
           { error: "Only admin can update full order status." },
           { status: 403 }
@@ -176,8 +171,7 @@ export async function POST(request: Request) {
         );
       }
 
-      return NextResponse.json({
-        ok: true,
+      return jsonOk({
         order: updatedOrder,
         message: "Order status updated.",
       });
@@ -203,9 +197,9 @@ export async function POST(request: Request) {
         .select("id, order_id, vendor_id, status")
         .eq("id", itemId);
 
-      if (isVendorRole(profile.role)) {
+      if (checkIsVendor(profile.role as any)) {
         itemQuery = itemQuery.in("vendor_id", vendorIdCandidates);
-      } else if (!isAdminRole(profile.role)) {
+      } else if (!checkIsAdmin(profile.role as any)) {
         return NextResponse.json(
           { error: "Only vendor or admin can update item status." },
           { status: 403 }
@@ -268,8 +262,7 @@ export async function POST(request: Request) {
           .eq("id", item.order_id);
       }
 
-      return NextResponse.json({
-        ok: true,
+      return jsonOk({
         item: updatedItem,
         nextOrderStatus: nextOrderStatus || null,
         message: "Order item status updated.",

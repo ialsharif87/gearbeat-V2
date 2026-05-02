@@ -4,10 +4,14 @@ import AdminPayoutsReport, {
   type PayoutReportRow,
 } from "../../../components/admin-payouts-report";
 import { createClient } from "../../../lib/supabase/server";
+import {
+  requireAdminOrRedirect,
+  readText,
+  readNumber,
+  type DbRow,
+} from "../../../lib/auth-guards";
 
 export const dynamic = "force-dynamic";
-
-type DbRow = Record<string, unknown>;
 
 type CommissionSetting = {
   scopeType: string;
@@ -16,73 +20,7 @@ type CommissionSetting = {
   isActive: boolean;
 };
 
-function readText(row: DbRow | null | undefined, keys: string[], fallback = "") {
-  if (!row) return fallback;
 
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "string" && value.trim()) {
-      return value;
-    }
-
-    if (typeof value === "number") {
-      return String(value);
-    }
-  }
-
-  return fallback;
-}
-
-function readNumber(row: DbRow | null | undefined, keys: string[], fallback = 0) {
-  if (!row) return fallback;
-
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "number") {
-      return value;
-    }
-
-    if (typeof value === "string" && value.trim()) {
-      const parsed = Number(value);
-
-      if (!Number.isNaN(parsed)) {
-        return parsed;
-      }
-    }
-  }
-
-  return fallback;
-}
-
-async function isAdminUser(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  appMetadataRole?: string,
-  userMetadataRole?: string
-) {
-  if (appMetadataRole === "admin" || userMetadataRole === "admin") {
-    return true;
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-
-  const profileRow = (profile || null) as DbRow | null;
-
-  const role = readText(profileRow, [
-    "role",
-    "user_role",
-    "account_type",
-    "type",
-  ]);
-
-  return role === "admin" || role === "super_admin";
-}
 
 function normalizeCommission(row: DbRow): CommissionSetting {
   return {
@@ -368,24 +306,7 @@ async function fetchMarketplaceRows(
 export default async function AdminPayoutsPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const isAdmin = await isAdminUser(
-    supabase,
-    user.id,
-    typeof user.app_metadata?.role === "string" ? user.app_metadata.role : "",
-    typeof user.user_metadata?.role === "string" ? user.user_metadata.role : ""
-  );
-
-  if (!isAdmin) {
-    redirect("/");
-  }
+  await requireAdminOrRedirect(supabase);
 
   const [settings, profilesMap, studiosMap] = await Promise.all([
     fetchCommissionSettings(supabase),

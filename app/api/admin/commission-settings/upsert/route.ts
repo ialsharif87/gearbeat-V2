@@ -1,7 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
+import {
+  requireAdminOrRedirect,
+  readText,
+  readNumber,
+  type DbRow,
+  type GearBeatRole,
+} from "../../../../../lib/auth-guards";
+import {
+  jsonOk,
+  jsonError,
+  unauthorized,
+  forbidden,
+  serverError,
+} from "../../../../../lib/api-responses";
 
-type DbRow = Record<string, unknown>;
+
 
 type CommissionScopeType =
   | "global"
@@ -18,45 +31,7 @@ const allowedScopeTypes = new Set<CommissionScopeType>([
   "service_type",
 ]);
 
-function readText(row: DbRow | null | undefined, keys: string[], fallback = "") {
-  if (!row) return fallback;
 
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "string" && value.trim()) {
-      return value;
-    }
-
-    if (typeof value === "number") {
-      return String(value);
-    }
-  }
-
-  return fallback;
-}
-
-function readNumber(row: DbRow | null | undefined, keys: string[], fallback = 0) {
-  if (!row) return fallback;
-
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "number") {
-      return value;
-    }
-
-    if (typeof value === "string" && value.trim()) {
-      const parsed = Number(value);
-
-      if (!Number.isNaN(parsed)) {
-        return parsed;
-      }
-    }
-  }
-
-  return fallback;
-}
 
 function normalizeSetting(row: DbRow) {
   return {
@@ -70,35 +45,9 @@ function normalizeSetting(row: DbRow) {
   };
 }
 
-async function isAdminUser(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  appMetadataRole?: string,
-  userMetadataRole?: string
-) {
-  if (appMetadataRole === "admin" || userMetadataRole === "admin") {
-    return true;
-  }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
 
-  const profileRow = (profile || null) as DbRow | null;
-
-  const role = readText(profileRow, [
-    "role",
-    "user_role",
-    "account_type",
-    "type",
-  ]);
-
-  return role === "admin" || role === "super_admin";
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   const supabase = await createClient();
 
   const {
@@ -106,24 +55,19 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json(
-      { error: "You must be logged in." },
-      { status: 401 }
-    );
+    return unauthorized();
   }
 
-  const isAdmin = await isAdminUser(
-    supabase,
-    user.id,
-    typeof user.app_metadata?.role === "string" ? user.app_metadata.role : "",
-    typeof user.user_metadata?.role === "string" ? user.user_metadata.role : ""
-  );
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  if (!isAdmin) {
-    return NextResponse.json(
-      { error: "Admin access required." },
-      { status: 403 }
-    );
+  const role = (profile?.role || "") as GearBeatRole;
+
+  if (role !== "admin" && role !== "super_admin") {
+    return forbidden("Admin access required.");
   }
 
   const body = await request.json().catch(() => null);
@@ -153,17 +97,11 @@ export async function POST(request: NextRequest) {
   const notes = typeof body?.notes === "string" ? body.notes.trim() : "";
 
   if (!allowedScopeTypes.has(scopeType)) {
-    return NextResponse.json(
-      { error: "Invalid commission scope." },
-      { status: 400 }
-    );
+    return jsonError("Invalid commission scope.");
   }
 
   if (scopeType !== "global" && !scopeId) {
-    return NextResponse.json(
-      { error: "Target ID is required for this commission scope." },
-      { status: 400 }
-    );
+    return jsonError("Target ID is required for this commission scope.");
   }
 
   if (
@@ -171,10 +109,7 @@ export async function POST(request: NextRequest) {
     commissionRate < 10 ||
     commissionRate > 30
   ) {
-    return NextResponse.json(
-      { error: "Commission rate must be between 10% and 30%." },
-      { status: 400 }
-    );
+    return jsonError("Commission rate must be between 10% and 30%.");
   }
 
   const now = new Date().toISOString();
@@ -227,8 +162,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
-      ok: true,
+    return jsonOk({
       setting: normalizeSetting(updatedSetting as DbRow),
     });
   }
@@ -250,8 +184,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({
-    ok: true,
+  return jsonOk({
     setting: normalizeSetting(insertedSetting as DbRow),
   });
 }

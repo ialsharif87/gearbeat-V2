@@ -31,6 +31,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "Payouts & settlements",
     description: "Review commission and net payable reports.",
   },
+  {
+    href: "/admin/system-health",
+    label: "System health",
+    description: "Check core tables and production readiness.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [

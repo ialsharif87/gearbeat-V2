@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
+import { DbRow, readText } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -71,46 +72,38 @@ function getBadgeClass(status: string | null | undefined) {
   return "badge";
 }
 
-function getProductName(product: any) {
-  return product.name_en || product.name_ar || product.name || product.sku || "Product";
+function getProductName(product: DbRow) {
+  return readText(product, ["name_en", "name_ar", "name", "sku"], "Product");
 }
 
 function getCategoryName(category: any) {
-  if (!category) {
-    return "—";
-  }
-
-  return category.name_en || category.name_ar || category.slug || "—";
+  const row = Array.isArray(category) ? category[0] : category;
+  if (!row) return "—";
+  return readText(row, ["name_en", "name_ar", "slug"], "—");
 }
 
 function getBrandName(brand: any) {
-  if (!brand) {
-    return "—";
-  }
-
-  return brand.name_en || brand.name_ar || brand.slug || "—";
+  const row = Array.isArray(brand) ? brand[0] : brand;
+  if (!row) return "—";
+  return readText(row, ["name_en", "name_ar", "slug"], "—");
 }
 
-function getVendorName(vendor: any) {
-  if (!vendor) {
-    return "—";
-  }
-
-  return (
-    vendor.business_name_en ||
-    vendor.business_name_ar ||
-    vendor.store_name ||
-    vendor.full_name ||
-    vendor.email ||
-    "Vendor"
-  );
+function getVendorName(vendor: DbRow | undefined) {
+  if (!vendor) return "—";
+  return readText(vendor, [
+    "business_name_en",
+    "business_name_ar",
+    "store_name",
+    "full_name",
+    "email",
+  ], "Vendor");
 }
 
-function getProductImages(product: any) {
+function getProductImages(product: DbRow) {
   const images = product.images;
 
   if (Array.isArray(images)) {
-    return images.filter(Boolean).slice(0, 4);
+    return images.filter(Boolean).slice(0, 4) as string[];
   }
 
   if (typeof images === "string" && images) {
@@ -371,7 +364,7 @@ export default async function AdminProductsPage() {
                   </td>
                 </tr>
               ) : (
-                products.map((product: any) => {
+                (products as any[]).map((product: any) => {
                   const vendor = vendorById.get(product.vendor_id);
                   const images = getProductImages(product);
 
