@@ -42,6 +42,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     description: "Monitor GMV, commission, payables, and financial performance.",
   },
   {
+    href: "/admin/payout-requests",
+    label: "Payout requests",
+    description: "Review vendor and owner payout requests.",
+  },
+  {
     href: "/admin/finance-ledger",
     label: "Finance ledger",
     description: "Internal ledger for payments, commissions, and payables.",
@@ -74,6 +79,11 @@ export const ownerDashboardLinks: DashboardQuickLink[] = [
     label: "Finance",
     description: "Track studio revenue, commission, and net payable balance.",
   },
+  {
+    href: "/owner/payout-requests",
+    label: "Payout requests",
+    description: "Request payout from studio payable balance.",
+  },
 ];
 
 export const vendorDashboardLinks: DashboardQuickLink[] = [
@@ -101,6 +111,11 @@ export const vendorDashboardLinks: DashboardQuickLink[] = [
     href: "/vendor/finance",
     label: "Finance",
     description: "Track sales, commission, and net payable balance.",
+  },
+  {
+    href: "/vendor/payout-requests",
+    label: "Payout requests",
+    description: "Request payout from available balance.",
   },
 ];
 
