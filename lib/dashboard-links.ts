@@ -46,6 +46,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "Finance ledger",
     description: "Internal ledger for payments, commissions, and payables.",
   },
+  {
+    href: "/admin/settlements",
+    label: "Settlement batches",
+    description: "Create and manage internal settlement batches.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [

@@ -466,6 +466,9 @@ export default async function AdminDashboardPage() {
                     <Link href="/admin/payouts" className="btn btn-secondary">
                       <T en="Open Payouts Report" ar="فتح تقرير البياوت" />
                     </Link>
+                    <Link href="/admin/settlements" className="btn btn-primary">
+                      <T en="Open Settlements" ar="فتح التسويات" />
+                    </Link>
                   </div>
                 </div>
               </>
