@@ -296,7 +296,7 @@ export default async function AdminDashboardPage() {
                   </p>
 
                   <div className="actions">
-                    <Link href="/admin/commissions" className="btn btn-secondary">
+                    <Link href="/admin/commission-settings" className="btn btn-secondary">
                       <T en="Manage Commissions" ar="إدارة العمولات" />
                     </Link>
                   </div>
