@@ -154,7 +154,7 @@ export default function StudioAvailabilityManager({
     setErrorMessage("");
 
     try {
-      const response = await fetch("/api/owner/studios/availability/update", {
+      const response = await fetch("/api/portal/studios/availability/update", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

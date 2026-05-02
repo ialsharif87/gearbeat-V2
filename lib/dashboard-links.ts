@@ -75,32 +75,32 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [
   {
-    href: "/owner",
+    href: "/portal/studio",
     label: "Owner overview",
     description: "Main studio owner dashboard.",
   },
   {
-    href: "/owner/bookings",
+    href: "/portal/studio/bookings",
     label: "Studio bookings",
     description: "Accept, confirm, reject, or cancel studio bookings.",
   },
   {
-    href: "/owner/availability",
+    href: "/portal/studio/availability",
     label: "Studio availability",
     description: "Manage working hours and date exceptions.",
   },
   {
-    href: "/owner/finance",
+    href: "/portal/studio/payouts",
     label: "Finance",
     description: "Track studio revenue, commission, and net payable balance.",
   },
   {
-    href: "/owner/payout-requests",
+    href: "/portal/studio/payout-requests",
     label: "Payout requests",
     description: "Request payout from studio payable balance.",
   },
   {
-    href: "/owner/acceleration",
+    href: "/portal/studio/boost",
     label: "Acceleration",
     description: "Request paid visibility boost for studios.",
   },
@@ -171,37 +171,37 @@ export const ownerPortalLinks: DashboardQuickLink[] = [
 
 export const vendorDashboardLinks: DashboardQuickLink[] = [
   {
-    href: "/vendor",
+    href: "/portal/store",
     label: "Vendor overview",
     description: "Main vendor dashboard.",
   },
   {
-    href: "/vendor/products",
+    href: "/portal/store/products",
     label: "Products",
     description: "Create and manage marketplace products.",
   },
   {
-    href: "/vendor/orders",
+    href: "/portal/store/orders",
     label: "Orders",
     description: "Review marketplace sales orders.",
   },
   {
-    href: "/vendor/integrations",
+    href: "/portal/store/integrations",
     label: "Integrations",
     description: "Manage API keys and vendor integrations.",
   },
   {
-    href: "/vendor/finance",
+    href: "/portal/store/payouts",
     label: "Finance",
     description: "Track sales, commission, and net payable balance.",
   },
   {
-    href: "/vendor/payout-requests",
+    href: "/portal/store/payout-requests",
     label: "Payout requests",
     description: "Request payout from available balance.",
   },
   {
-    href: "/vendor/acceleration",
+    href: "/portal/store/boost",
     label: "Acceleration",
     description: "Request paid visibility boost.",
   },
