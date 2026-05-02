@@ -36,35 +36,51 @@ export default async function VendorDashboard() {
     .order("created_at", { ascending: false })
     .limit(5);
 
-  return (
-    <div className="dashboard-page">
-      <div className="page-header" style={{ marginBottom: 40 }}>
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
         <div>
-          <span className="badge badge-gold"><T en="Vendor Hub" ar="مركز التاجر" /></span>
-          <h1 style={{ fontSize: '2.5rem', marginTop: 10 }}>
+          <p className="gb-eyebrow">
+            <T en="Vendor Hub" ar="مركز التاجر" />
+          </p>
+
+          <h1>
              <T en="Welcome back," ar="أهلاً بك مجدداً،" /> {user.email?.split('@')[0]}
           </h1>
-        </div>
-      </div>
 
-      <DashboardQuickLinks
-        eyebrow="Vendor navigation"
-        title="Vendor quick links"
-        description="Manage products, orders, and integrations."
-        links={vendorDashboardLinks}
-      />
+          <p className="gb-muted-text">
+            <T
+              en="Manage your products, orders, marketplace store, and finance."
+              ar="أدر منتجاتك، طلباتك، متجر السوق، والمالية."
+            />
+          </p>
+        </div>
+
+        <div className="gb-action-row">
+          <Link href="/vendor/products/new" className="gb-button">
+            + Add product
+          </Link>
+          <Link href="/vendor/finace" className="gb-button gb-button-secondary">
+            Finance
+          </Link>
+        </div>
+      </section>
+
+      <div className="gb-dashboard-stack">
+        <DashboardQuickLinks
+          eyebrow="Vendor navigation"
+          title="Vendor quick links"
+          description="Manage products, orders, and integrations."
+          links={vendorDashboardLinks}
+        />
       
-      <div className="stats-grid">
-        {stats.map((stat, i) => (
-          <div key={i} className="card stat-card" style={{ borderLeft: `4px solid ${stat.color}` }}>
-            <div className="stat-content">
-              <label><T en={stat.label_en} ar={stat.label_ar} /></label>
-              <div className="stat-value">{stat.value}</div>
+        <div className="gb-kpi-grid">
+          {stats.map((stat, i) => (
+            <div key={i} className="gb-kpi-card">
+              <span><T en={stat.label_en} ar={stat.label_ar} /></span>
+              <strong>{stat.value}</strong>
             </div>
-            <div className="stat-icon" style={{ opacity: 0.2, fontSize: '2.5rem' }}>{stat.icon}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
       <div className="grid grid-3" style={{ marginTop: 30, gap: 25 }}>
         {/* QUICK ACTIONS */}
@@ -114,6 +130,5 @@ export default async function VendorDashboard() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+      </div>
+    </main>

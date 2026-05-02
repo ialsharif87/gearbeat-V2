@@ -59,30 +59,42 @@ export default async function AdminDashboardPage() {
     admin.admin_role === "operations";
 
   return (
-    <section>
-      <div className="section-head">
-        <span className="badge">
-          <T en="Admin Dashboard" ar="لوحة الإدارة" />
-        </span>
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
+        <div>
+          <p className="gb-eyebrow">
+            <T en="Admin Dashboard" ar="لوحة الإدارة" />
+          </p>
 
-        <h1>
-          <T en="GearBeat Control Center" ar="مركز تحكم GearBeat" />
-        </h1>
+          <h1>
+            <T en="GearBeat Control Center" ar="مركز تحكم GearBeat" />
+          </h1>
 
-        <p>
-          <T
-            en="Manage studios, bookings, reviews, owner onboarding, finance, payouts, account deletion requests, and internal platform operations."
-            ar="إدارة الاستوديوهات، الحجوزات، التقييمات، إعداد ملاك الاستوديوهات، المالية، البياوت، طلبات حذف الحسابات، وعمليات المنصة الداخلية."
-          />
-        </p>
-      </div>
+          <p className="gb-muted-text">
+            <T
+              en="Manage studios, bookings, reviews, owner onboarding, finance, payouts, and internal operations."
+              ar="إدارة الاستوديوهات، الحجوزات، التقييمات، إعداد الملاك، المالية، وعمليات المنصة."
+            />
+          </p>
+        </div>
 
-      <DashboardQuickLinks
-        eyebrow="Admin navigation"
-        title="Admin quick links"
-        description="Access product review, catalog settings, orders, commission settings, and payout reports."
-        links={adminDashboardLinks}
-      />
+        <div className="gb-action-row">
+          <Link href="/admin/finance" className="gb-button">
+            Finance center
+          </Link>
+          <Link href="/admin/audit-log" className="gb-button gb-button-secondary">
+            Audit log
+          </Link>
+        </div>
+      </section>
+
+      <div className="gb-dashboard-stack">
+        <DashboardQuickLinks
+          eyebrow="Admin navigation"
+          title="Admin quick links"
+          description="Access core GearBeat admin tools from one clean dashboard."
+          links={adminDashboardLinks}
+        />
 
       <div className="card admin-notes-card">
         <span className="badge">
@@ -700,6 +712,5 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       </div>
-    </section>
-  );
-}
+      </div>
+    </main>

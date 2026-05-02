@@ -20,7 +20,7 @@ export default function DashboardQuickLinks({
   links,
 }: DashboardQuickLinksProps) {
   return (
-    <section className="gb-card">
+    <section className="gb-card gb-dashboard-links-section">
       <div className="gb-card-header">
         <div>
           {eyebrow ? <p className="gb-eyebrow">{eyebrow}</p> : null}
@@ -29,12 +29,18 @@ export default function DashboardQuickLinks({
         </div>
       </div>
 
-      <div className="gb-card-grid">
+      <div className="gb-dashboard-links-grid">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="gb-card">
-            <h3>{link.label}</h3>
+          <Link
+            key={link.href}
+            href={link.href}
+            className="gb-dashboard-link-card"
+          >
+            <span className="gb-dashboard-link-title">{link.label}</span>
             {link.description ? (
-              <p className="gb-muted-text">{link.description}</p>
+              <span className="gb-dashboard-link-desc">
+                {link.description}
+              </span>
             ) : null}
           </Link>
         ))}

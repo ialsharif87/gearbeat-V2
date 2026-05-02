@@ -44,9 +44,11 @@ export default async function AdminPayoutRequestsPage() {
           <p className="gb-eyebrow">Admin finance</p>
           <h1>Payout Requests</h1>
         </div>
-        <Link href="/admin/settlements" className="gb-button gb-button-secondary">
-          Settlement batches
-        </Link>
+        <div className="gb-action-row">
+          <Link href="/admin/settlements" className="gb-button gb-button-secondary">
+            Settlement batches
+          </Link>
+        </div>
       </section>
 
       <AdminPayoutRequestsManager requests={requests} />

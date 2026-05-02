@@ -62,9 +62,11 @@ export default async function AdminAccelerationPage() {
           <p className="gb-eyebrow">Admin finance</p>
           <h1>Acceleration Finance</h1>
         </div>
-        <Link href="/admin/finance" className="gb-button gb-button-secondary">
-          Finance center
-        </Link>
+        <div className="gb-action-row">
+          <Link href="/admin/finance" className="gb-button gb-button-secondary">
+            Finance center
+          </Link>
+        </div>
       </section>
 
       <AccelerationPackagesPanel

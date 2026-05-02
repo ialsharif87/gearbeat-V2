@@ -206,54 +206,46 @@ export default async function CustomerDashboardPage() {
     membershipNumber.replace("GB-", "REF-");
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="Customer Dashboard" ar="لوحة العميل" />
-          </span>
+          </p>
 
-          <h1 style={{ marginTop: 10 }}>
+          <h1>
             <T en="Welcome back" ar="أهلًا بعودتك" />,{" "}
             {profile.full_name || "Creator"}
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+          <p className="gb-muted-text">
             <T
-              en="Manage your bookings, rewards, saved studios, saved gear, and account verification from one premium dashboard."
-              ar="تابع حجوزاتك، مكافآتك، الاستوديوهات المحفوظة، المعدات المحفوظة، وحالة التحقق من حسابك من لوحة واحدة فخمة."
+              en="Manage your bookings, rewards, saved studios, saved gear, and account verification."
+              ar="تابع حجوزاتك، مكافآتك، الاستوديوهات المحفوظة، المعدات المحفوظة، وحالة التحقق."
             />
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link href="/studios/near-me" className="btn btn-primary">
+        <div className="gb-action-row">
+          <Link href="/studios/near-me" className="gb-button">
             <T en="Studios near me" ar="استوديوهات قريبة مني" />
           </Link>
 
-          <Link href="/offers" className="btn">
+          <Link href="/offers" className="gb-button gb-button-secondary">
             <T en="Offers" ar="العروض" />
           </Link>
         </div>
       </section>
 
-      <DashboardQuickLinks
-        eyebrow="Customer navigation"
-        title="Customer quick links"
-        description="Access marketplace orders, marketplace browsing, and studio booking."
-        links={customerDashboardLinks}
-      />
+      <div className="gb-dashboard-stack">
+        <DashboardQuickLinks
+          eyebrow="Customer navigation"
+          title="Customer quick links"
+          description="Access marketplace orders, marketplace browsing, and studio booking."
+          links={customerDashboardLinks}
+        />
 
-      <section style={{ marginTop: 28 }}>
+      <section>
         <CustomerMembershipCard
           fullName={profile.full_name}
           membershipNumber={membershipNumber}
@@ -267,51 +259,27 @@ export default async function CustomerDashboardPage() {
         />
       </section>
 
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">🎙️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
-            </label>
-            <div className="stat-value">{upcomingBookings.length}</div>
+        <div className="gb-kpi-grid">
+          <div className="gb-kpi-card">
+            <span><T en="Upcoming Bookings" ar="الحجوزات القادمة" /></span>
+            <strong>{upcomingBookings.length}</strong>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">❤️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Saved Items" ar="المفضلة" />
-            </label>
-            <div className="stat-value">{favoriteRows.length}</div>
+          <div className="gb-kpi-card">
+            <span><T en="Saved Items" ar="المفضلة" /></span>
+            <strong>{favoriteRows.length}</strong>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-content">
-            <label>
-              <T en="Rewards Points" ar="نقاط المكافآت" />
-            </label>
-            <div className="stat-value">
-              {Number(wallet?.points_balance || 0).toLocaleString()}
-            </div>
+          <div className="gb-kpi-card">
+            <span><T en="Rewards Points" ar="نقاط المكافآت" /></span>
+            <strong>{Number(wallet?.points_balance || 0).toLocaleString()}</strong>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🪪</div>
-          <div className="stat-content">
-            <label>
-              <T en="Verification" ar="التحقق" />
-            </label>
-            <div className="stat-value" style={{ fontSize: "1rem" }}>
-              {profile.identity_verification_status || "not_started"}
-            </div>
+          <div className="gb-kpi-card">
+            <span><T en="Verification" ar="التحقق" /></span>
+            <strong>{profile.identity_verification_status || "not_started"}</strong>
           </div>
         </div>
-      </section>
 
       <section
         style={{
@@ -626,6 +594,7 @@ export default async function CustomerDashboardPage() {
           </div>
         </aside>
       </section>
+      </div>
     </main>
   );
 }

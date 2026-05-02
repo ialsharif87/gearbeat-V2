@@ -50,9 +50,11 @@ export default async function AdminRefundsPage() {
           <h1>Refunds & Adjustments</h1>
         </div>
 
-        <Link href="/admin/finance-ledger" className="gb-button gb-button-secondary">
-          Finance ledger
-        </Link>
+        <div className="gb-action-row">
+          <Link href="/admin/finance-ledger" className="gb-button gb-button-secondary">
+            Finance ledger
+          </Link>
+        </div>
       </section>
 
       <AdminRefundsAdjustmentsManager rows={rows} />

@@ -173,30 +173,42 @@ export default async function OwnerPage() {
     );
 
   return (
-    <section>
-      <div className="section-head">
-        <span className="badge">
-          <T en="Studio Owner Area" ar="منطقة صاحب الاستوديو" />
-        </span>
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
+        <div>
+          <p className="gb-eyebrow">
+            <T en="Studio Owner Area" ar="منطقة صاحب الاستوديو" />
+          </p>
 
-        <h1>
-          <T en="Owner Dashboard" ar="لوحة تحكم صاحب الاستوديو" />
-        </h1>
+          <h1>
+            <T en="Owner Dashboard" ar="لوحة تحكم صاحب الاستوديو" />
+          </h1>
 
-        <p>
-          <T
-            en="Manage your studios, bookings, business onboarding, bank account, finance overview, and payouts."
-            ar="أدر استوديوهاتك، الحجوزات، بيانات النشاط، الحساب البنكي، النظرة المالية، والبياوت."
-          />
-        </p>
-      </div>
+          <p className="gb-muted-text">
+            <T
+              en="Manage your studios, bookings, business onboarding, bank account, finance overview, and payouts."
+              ar="أدر استوديوهاتك، الحجوزات، بيانات النشاط، الحساب البنكي، النظرة المالية، والبياوت."
+            />
+          </p>
+        </div>
 
-      <DashboardQuickLinks
-        eyebrow="Owner navigation"
-        title="Studio owner quick links"
-        description="Manage bookings, availability, and owner tools."
-        links={ownerDashboardLinks}
-      />
+        <div className="gb-action-row">
+          <Link href="/owner/create-studio" className="gb-button">
+            + Create studio
+          </Link>
+          <Link href="/owner/finance" className="gb-button gb-button-secondary">
+            Finance
+          </Link>
+        </div>
+      </section>
+
+      <div className="gb-dashboard-stack">
+        <DashboardQuickLinks
+          eyebrow="Owner navigation"
+          title="Studio owner quick links"
+          description="Manage bookings, availability, and owner tools."
+          links={ownerDashboardLinks}
+        />
 
       <div className="card">
         <span className="badge">
@@ -212,51 +224,39 @@ export default async function OwnerPage() {
           />
         </p>
 
-        <div className="stats-grid">
-          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-blue)' }}>
-            <div className="stat-content">
-              <label><T en="Total Studios" ar="إجمالي الاستوديوهات" /></label>
-              <div className="stat-value">{studiosCountResult.count || 0}</div>
-            </div>
-            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>🎹</div>
+        <div className="gb-kpi-grid">
+          <div className="gb-kpi-card">
+            <span><T en="Total Studios" ar="إجمالي الاستوديوهات" /></span>
+            <strong>{studiosCountResult.count || 0}</strong>
           </div>
 
-          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-gold)' }}>
-            <div className="stat-content">
-              <label><T en="Total Bookings" ar="إجمالي الحجوزات" /></label>
-              <div className="stat-value">{bookingsCountResult.count || 0}</div>
-            </div>
-            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>📅</div>
+          <div className="gb-kpi-card">
+            <span><T en="Total Bookings" ar="إجمالي الحجوزات" /></span>
+            <strong>{bookingsCountResult.count || 0}</strong>
           </div>
 
-          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-warning)' }}>
-            <div className="stat-content">
-              <label><T en="Pending Requests" ar="طلبات معلقة" /></label>
-              <div className="stat-value">{pendingBookingsCountResult.count || 0}</div>
-            </div>
-            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>⏳</div>
+          <div className="gb-kpi-card">
+            <span><T en="Pending Requests" ar="طلبات معلقة" /></span>
+            <strong>{pendingBookingsCountResult.count || 0}</strong>
           </div>
 
-          <div className="card stat-card" style={{ borderLeft: '4px solid var(--gb-success)' }}>
-            <div className="stat-content">
-              <label><T en="Customer Rating" ar="تقييم العملاء" /></label>
-              <div className="stat-value">4.9 ⭐</div>
-            </div>
-            <div className="stat-icon" style={{ opacity: 0.1, fontSize: '2rem' }}>🌟</div>
+          <div className="gb-kpi-card">
+            <span><T en="Customer Rating" ar="تقييم العملاء" /></span>
+            <strong>4.9 ⭐</strong>
           </div>
         </div>
 
-        <div className="actions" style={{ marginTop: 30, display: 'flex', gap: 15 }}>
-          <Link href="/owner/create-studio" className="btn btn-primary">
+        <div className="gb-action-row">
+          <Link href="/owner/create-studio" className="gb-button">
             <T en="+ Create New Studio" ar="+ إنشاء استوديو جديد" />
           </Link>
-          <Link href="/owner/bookings" className="btn btn-secondary">
+          <Link href="/owner/bookings" className="gb-button gb-button-secondary">
             <T en="View All Bookings" ar="عرض كافة الحجوزات" />
           </Link>
-          <Link href="/owner/reviews" className="btn btn-secondary">
+          <Link href="/owner/reviews" className="gb-button gb-button-secondary">
             <T en="Read Reviews" ar="قراءة المراجعات" />
           </Link>
-          <Link href="/owner/finance" className="btn btn-secondary">
+          <Link href="/owner/finance" className="gb-button gb-button-secondary">
             <T en="Finance" ar="المالية" />
           </Link>
         </div>
@@ -490,6 +490,5 @@ export default async function OwnerPage() {
           </div>
         </div>
       </div>
-    </section>
-  );
-}
+      </div>
+    </main>
