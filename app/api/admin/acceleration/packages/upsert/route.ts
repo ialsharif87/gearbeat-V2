@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "../../../../../lib/supabase/server";
-import { requireAdminOrRedirect } from "../../../../../lib/auth-guards";
+import { createClient } from "../../../../../../lib/supabase/server";
+import { requireAdminOrRedirect } from "../../../../../../lib/auth-guards";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();

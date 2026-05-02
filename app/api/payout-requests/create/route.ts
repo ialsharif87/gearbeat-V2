@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "../../../../lib/supabase/server";
 
 function makeRequestNumber() {
   return `PO-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random()

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "../../../../lib/supabase/server";
-import { readNumber, readText, type DbRow } from "../../../../lib/auth-guards";
+import { createClient } from "../../../../../lib/supabase/server";
+import { readNumber, readText, type DbRow } from "../../../../../lib/auth-guards";
 
 function orderNumber() {
   return `ACC-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random()
