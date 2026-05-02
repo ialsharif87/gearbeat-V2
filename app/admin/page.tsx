@@ -402,6 +402,25 @@ export default async function AdminDashboardPage() {
                     </Link>
                   </div>
                 </div>
+
+                <div>
+                  <strong>
+                    <T en="Payouts & Settlements" ar="التسويات والبياوت" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="View consolidated revenue reports, GearBeat commissions, and net payable amounts across all sources."
+                      ar="عرض تقارير الإيرادات المجمعة، عمولات GearBeat، والمبالغ المستحقة عبر جميع المصادر."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link href="/admin/payouts" className="btn btn-secondary">
+                      <T en="Open Payouts Report" ar="فتح تقرير البياوت" />
+                    </Link>
+                  </div>
+                </div>
               </>
             ) : (
               <div>
