@@ -101,10 +101,23 @@ function parseCsvLine(line: string) {
 
 function parseCsv(text: string) {
   const cleanTextValue = text.replace(/^\uFEFF/, "");
-  const lines = cleanTextValue
+  const allLines = cleanTextValue
     .split(/\r?\n/)
     .map((line) => line.trimEnd())
     .filter((line) => line.trim().length > 0);
+
+  if (allLines.length < 2) {
+    return [];
+  }
+
+  const productUploadIndex = allLines.findIndex((line) =>
+    line.toLowerCase().includes("product_upload")
+  );
+
+  const lines =
+    productUploadIndex >= 0
+      ? allLines.slice(productUploadIndex + 1)
+      : allLines;
 
   if (lines.length < 2) {
     return [];
@@ -113,6 +126,26 @@ function parseCsv(text: string) {
   const headers = parseCsvLine(lines[0]).map((header) =>
     header.trim().toLowerCase()
   );
+
+  const requiredHeaders = [
+    "sku",
+    "name_en",
+    "name_ar",
+    "category_slug_or_name",
+    "brand_slug_or_name",
+    "base_price",
+    "stock_quantity",
+  ];
+
+  const hasRequiredHeaders = requiredHeaders.every((header) =>
+    headers.includes(header)
+  );
+
+  if (!hasRequiredHeaders) {
+    throw new Error(
+      "Invalid template. Please download the latest GearBeat product upload template."
+    );
+  }
 
   return lines.slice(1).map((line) => {
     const values = parseCsvLine(line);
@@ -126,11 +159,7 @@ function parseCsv(text: string) {
   });
 }
 
-function findMatchingId(
-  rows: any[],
-  value: string,
-  type: "category" | "brand"
-) {
+function findMatchingId(rows: any[], value: string) {
   const target = normalizeMatch(value);
 
   if (!target) {
@@ -143,9 +172,9 @@ function findMatchingId(
       row.slug,
       row.name_en,
       row.name_ar,
-      row.name,
-      row.title,
-    ].map(normalizeMatch);
+    ]
+      .filter(Boolean)
+      .map(normalizeMatch);
 
     return values.includes(target);
   });
@@ -304,11 +333,11 @@ export async function POST(request: Request) {
     const [{ data: categories }, { data: brands }] = await Promise.all([
       supabaseAdmin
         .from("marketplace_categories")
-        .select("id, slug, name_en, name_ar, name")
+        .select("id, slug, name_en, name_ar, is_active")
         .eq("is_active", true),
       supabaseAdmin
         .from("marketplace_brands")
-        .select("id, slug, name_en, name_ar, name")
+        .select("id, slug, name_en, name_ar, is_active")
         .eq("is_active", true),
     ]);
 
@@ -353,16 +382,20 @@ export async function POST(request: Request) {
           throw new Error("Product name is required.");
         }
 
-        const categoryId = findMatchingId(categoryRows, categoryValue, "category");
+        const categoryId = findMatchingId(categoryRows, categoryValue);
 
         if (!categoryId) {
-          throw new Error(`Category not found: ${categoryValue}`);
+          throw new Error(
+            `Category not found: ${categoryValue}. Use exact category_slug from the template list.`
+          );
         }
 
-        const brandId = findMatchingId(brandRows, brandValue, "brand");
+        const brandId = findMatchingId(brandRows, brandValue);
 
         if (!brandId) {
-          throw new Error(`Brand not found: ${brandValue}`);
+          throw new Error(
+            `Brand not found: ${brandValue}. Use exact brand_slug from the template list.`
+          );
         }
 
         if (!Number.isFinite(basePrice) || basePrice <= 0) {
@@ -493,6 +526,8 @@ export async function POST(request: Request) {
       totalRows: rows.length,
       successCount,
       errorCount,
+      categoryCount: categoryRows.length,
+      brandCount: brandRows.length,
       results,
       message: `${successCount} products imported, ${errorCount} rows failed.`,
     });

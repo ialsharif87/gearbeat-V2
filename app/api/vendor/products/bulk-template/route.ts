@@ -1,12 +1,38 @@
 import { NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function csvEscape(value: unknown) {
   const text = String(value ?? "");
   return `"${text.replace(/"/g, '""')}"`;
 }
 
+function toCsvRow(values: unknown[]) {
+  return values.map(csvEscape).join(",");
+}
+
 export async function GET() {
-  const headers = [
+  const supabaseAdmin = createAdminClient();
+
+  const [{ data: categories }, { data: brands }] = await Promise.all([
+    supabaseAdmin
+      .from("marketplace_categories")
+      .select("id, slug, name_en, name_ar, is_active, sort_order")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("slug", { ascending: true }),
+
+    supabaseAdmin
+      .from("marketplace_brands")
+      .select("id, slug, name_en, name_ar, is_active, sort_order")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("slug", { ascending: true }),
+  ]);
+
+  const categoryRows = categories || [];
+  const brandRows = brands || [];
+
+  const uploadHeaders = [
     "sku",
     "name_en",
     "name_ar",
@@ -25,8 +51,53 @@ export async function GET() {
     "specifications",
   ];
 
-  const exampleRows = [
-    [
+  const rows: string[] = [];
+
+  rows.push(
+    toCsvRow([
+      "IMPORTANT",
+      "Fill product rows only under the PRODUCT_UPLOAD section. Use exact category slug and brand slug from the lists below.",
+    ])
+  );
+
+  rows.push(toCsvRow([]));
+
+  rows.push(toCsvRow(["VALID_CATEGORIES"]));
+  rows.push(toCsvRow(["category_slug", "name_en", "name_ar", "category_id"]));
+
+  for (const category of categoryRows) {
+    rows.push(
+      toCsvRow([
+        category.slug,
+        category.name_en,
+        category.name_ar,
+        category.id,
+      ])
+    );
+  }
+
+  rows.push(toCsvRow([]));
+
+  rows.push(toCsvRow(["VALID_BRANDS"]));
+  rows.push(toCsvRow(["brand_slug", "name_en", "name_ar", "brand_id"]));
+
+  for (const brand of brandRows) {
+    rows.push(
+      toCsvRow([
+        brand.slug,
+        brand.name_en,
+        brand.name_ar,
+        brand.id,
+      ])
+    );
+  }
+
+  rows.push(toCsvRow([]));
+  rows.push(toCsvRow(["PRODUCT_UPLOAD"]));
+  rows.push(uploadHeaders.map(csvEscape).join(","));
+
+  rows.push(
+    toCsvRow([
       "MIC-SHURE-SM58-001",
       "Shure SM58 Microphone",
       "ميكروفون شور SM58",
@@ -43,8 +114,11 @@ export async function GET() {
       "0",
       "",
       "Color: Black | Condition: New | Warranty: 1 year",
-    ],
-    [
+    ])
+  );
+
+  rows.push(
+    toCsvRow([
       "MIX-YAMAHA-001",
       "Yamaha Audio Mixer",
       "مكسر صوت ياماها",
@@ -61,13 +135,8 @@ export async function GET() {
       "0",
       "3",
       "Channels: 12 | Condition: New",
-    ],
-  ];
-
-  const rows = [
-    headers.map(csvEscape).join(","),
-    ...exampleRows.map((row) => row.map(csvEscape).join(",")),
-  ];
+    ])
+  );
 
   const csv = `\uFEFF${rows.join("\n")}`;
 
