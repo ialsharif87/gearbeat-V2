@@ -106,6 +106,11 @@ export const customerDashboardLinks: DashboardQuickLink[] = [
     description: "Review your marketplace purchases.",
   },
   {
+    href: "/customer/payments",
+    label: "Payments & receipts",
+    description: "View payment history and internal receipts.",
+  },
+  {
     href: "/marketplace",
     label: "Marketplace",
     description: "Browse and buy audio gear.",

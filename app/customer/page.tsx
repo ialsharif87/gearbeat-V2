@@ -611,6 +611,10 @@ export default async function CustomerDashboardPage() {
                 <T en="Shop gear" ar="تسوق المعدات" />
               </Link>
 
+              <Link href="/customer/payments" className="btn">
+                <T en="Payments & receipts" ar="المدفوعات والإيصالات" />
+              </Link>
+
               <Link href="/customer/rewards" className="btn">
                 <T en="Rewards" ar="المكافآت" />
               </Link>
