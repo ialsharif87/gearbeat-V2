@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import T from "@/components/t";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import VendorProductImageUploadBox from "@/components/vendor-product-image-upload-box";
 
 export const dynamic = "force-dynamic";
 
@@ -748,6 +749,8 @@ export default async function VendorProductEditPage({
             />
           </div>
         </div>
+
+        <VendorProductImageUploadBox productId={product.id} />
 
         <div>
           <label>
