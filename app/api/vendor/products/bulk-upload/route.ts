@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import ExcelJS from "exceljs";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+export const runtime = "nodejs";
 
 const MAX_ROWS = 200;
 
@@ -159,6 +162,122 @@ function parseCsv(text: string) {
   });
 }
 
+function excelCellToString(value: any) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value).trim();
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "object") {
+    if ("text" in value && value.text) {
+      return String(value.text).trim();
+    }
+
+    if ("result" in value && value.result) {
+      return String(value.result).trim();
+    }
+
+    if ("richText" in value && Array.isArray(value.richText)) {
+      return value.richText
+        .map((part: any) => part.text || "")
+        .join("")
+        .trim();
+    }
+
+    if ("hyperlink" in value && "text" in value) {
+      return String(value.text || value.hyperlink || "").trim();
+    }
+  }
+
+  return String(value).trim();
+}
+
+async function parseXlsx(file: File) {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+
+  await workbook.xlsx.load(arrayBuffer as any);
+
+  const worksheet =
+    workbook.getWorksheet("PRODUCT_UPLOAD") || workbook.worksheets[0];
+
+  if (!worksheet) {
+    return [];
+  }
+
+  const headerRow = worksheet.getRow(1);
+  const headers: string[] = [];
+
+  for (
+    let columnIndex = 1;
+    columnIndex <= headerRow.cellCount;
+    columnIndex += 1
+  ) {
+    headers.push(
+      excelCellToString(headerRow.getCell(columnIndex).value)
+        .toLowerCase()
+        .trim()
+    );
+  }
+
+  const requiredHeaders = [
+    "sku",
+    "name_en",
+    "name_ar",
+    "category_slug_or_name",
+    "brand_slug_or_name",
+    "base_price",
+    "stock_quantity",
+  ];
+
+  const hasRequiredHeaders = requiredHeaders.every((header) =>
+    headers.includes(header)
+  );
+
+  if (!hasRequiredHeaders) {
+    throw new Error(
+      "Invalid XLSX template. Please download the latest GearBeat product upload template."
+    );
+  }
+
+  const rows: CsvRow[] = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) {
+      return;
+    }
+
+    const item: CsvRow = {};
+    let hasValue = false;
+
+    headers.forEach((header, index) => {
+      const value = excelCellToString(row.getCell(index + 1).value);
+      item[header] = value;
+
+      if (value) {
+        hasValue = true;
+      }
+    });
+
+    if (hasValue) {
+      rows.push(item);
+    }
+  });
+
+  return rows;
+}
+
 function findMatchingId(rows: any[], value: string) {
   const target = normalizeMatch(value);
 
@@ -305,8 +424,21 @@ export async function POST(request: Request) {
     }
 
     const fileName = file.name || "bulk-products.csv";
-    const text = await file.text();
-    const rows = parseCsv(text);
+    const lowerFileName = fileName.toLowerCase();
+
+    let rows: CsvRow[] = [];
+
+    if (lowerFileName.endsWith(".xlsx")) {
+      rows = await parseXlsx(file);
+    } else if (lowerFileName.endsWith(".csv")) {
+      const text = await file.text();
+      rows = parseCsv(text);
+    } else {
+      return NextResponse.json(
+        { error: "Only .xlsx and .csv files are supported." },
+        { status: 400 }
+      );
+    }
 
     if (rows.length === 0) {
       return NextResponse.json(
@@ -386,7 +518,7 @@ export async function POST(request: Request) {
 
         if (!categoryId) {
           throw new Error(
-            `Category not found: ${categoryValue}. Use exact category_slug from the template list.`
+            `Category not found: ${categoryValue}. Use exact category_slug from the XLSX dropdown.`
           );
         }
 
@@ -394,7 +526,7 @@ export async function POST(request: Request) {
 
         if (!brandId) {
           throw new Error(
-            `Brand not found: ${brandValue}. Use exact brand_slug from the template list.`
+            `Brand not found: ${brandValue}. Use exact brand_slug from the XLSX dropdown.`
           );
         }
 

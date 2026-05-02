@@ -35,7 +35,7 @@ export default function VendorProductBulkUploadBox() {
     if (!(file instanceof File) || !file.name) {
       setResult({
         ok: false,
-        error: "Please choose a CSV file first.",
+        error: "Please choose an XLSX or CSV file first.",
       });
       return;
     }
@@ -102,7 +102,7 @@ export default function VendorProductBulkUploadBox() {
           href="/api/vendor/products/bulk-template"
           className="btn btn-primary"
         >
-          <T en="Download Excel template" ar="تنزيل قالب Excel" />
+          <T en="Download XLSX template" ar="تنزيل قالب Excel XLSX" />
         </a>
       </div>
 
@@ -119,7 +119,7 @@ export default function VendorProductBulkUploadBox() {
           <input
             type="file"
             name="file"
-            accept=".csv,text/csv"
+            accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
             style={{ display: "none" }}
             onChange={(event) => {
               const file = event.target.files?.[0];
@@ -128,11 +128,11 @@ export default function VendorProductBulkUploadBox() {
           />
 
           <strong>
-            <T en="Choose CSV file" ar="اختر ملف CSV" />
+            <T en="Choose Excel or CSV file" ar="اختر ملف Excel أو CSV" />
           </strong>
 
           <p style={{ color: "var(--muted)", marginTop: 8 }}>
-            {fileName || "gearbeat-product-upload-template.csv"}
+            {fileName || "gearbeat-product-upload-template.xlsx"}
           </p>
         </label>
 
