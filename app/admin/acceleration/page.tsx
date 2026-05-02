@@ -2,14 +2,14 @@ import Link from "next/link";
 import AccelerationPackagesPanel, {
   type AccelerationOrder,
   type AccelerationPackage,
-} from "../../../../components/acceleration-packages-panel";
-import { createClient } from "../../../../lib/supabase/server";
+} from "../../../components/acceleration-packages-panel";
+import { createClient } from "../../../lib/supabase/server";
 import {
   requireAdminOrRedirect,
   readNumber,
   readText,
   type DbRow,
-} from "../../../../lib/auth-guards";
+} from "../../../lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 

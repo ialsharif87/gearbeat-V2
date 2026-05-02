@@ -1,14 +1,14 @@
 import Link from "next/link";
 import AdminFinanceLedgerReport, {
   type FinanceLedgerRow,
-} from "../../../../components/admin-finance-ledger-report";
-import { createClient } from "../../../../lib/supabase/server";
+} from "../../../components/admin-finance-ledger-report";
+import { createClient } from "../../../lib/supabase/server";
 import {
   requireAdminOrRedirect,
   readNumber,
   readText,
   type DbRow,
-} from "../../../../lib/auth-guards";
+} from "../../../lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 

@@ -1,13 +1,13 @@
 import Link from "next/link";
-import AdminPayoutRequestsManager from "../../../../components/admin-payout-requests-manager";
-import type { PayoutRequestRow } from "../../../../components/partner-payout-requests-panel";
-import { createClient } from "../../../../lib/supabase/server";
+import AdminPayoutRequestsManager from "../../../components/admin-payout-requests-manager";
+import type { PayoutRequestRow } from "../../../components/partner-payout-requests-panel";
+import { createClient } from "../../../lib/supabase/server";
 import {
   requireAdminOrRedirect,
   readNumber,
   readText,
   type DbRow,
-} from "../../../../lib/auth-guards";
+} from "../../../lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 

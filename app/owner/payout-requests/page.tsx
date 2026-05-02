@@ -1,14 +1,14 @@
 import Link from "next/link";
 import PartnerPayoutRequestsPanel, {
   type PayoutRequestRow,
-} from "../../../../components/partner-payout-requests-panel";
-import { createClient } from "../../../../lib/supabase/server";
+} from "../../../components/partner-payout-requests-panel";
+import { createClient } from "../../../lib/supabase/server";
 import {
   requireOwnerOrRedirect,
   readNumber,
   readText,
   type DbRow,
-} from "../../../../lib/auth-guards";
+} from "../../../lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
