@@ -36,6 +36,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "System health",
     description: "Check core tables and production readiness.",
   },
+  {
+    href: "/admin/finance",
+    label: "Finance center",
+    description: "Monitor GMV, commission, payables, and financial performance.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [

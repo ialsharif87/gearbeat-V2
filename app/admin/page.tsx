@@ -414,6 +414,25 @@ export default async function AdminDashboardPage() {
 
                 <div>
                   <strong>
+                    <T en="Finance Control Center" ar="مركز التحكم المالي" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="High-level financial monitoring of GMV, commissions, and payable balances across all sources."
+                      ar="مراقبة مالية عالية المستوى لإجمالي المبيعات والعمولات والأرصدة المستحقة عبر جميع المصادر."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link href="/admin/finance" className="btn btn-primary">
+                      <T en="Open Finance Center" ar="فتح مركز المالية" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>
                     <T en="Payouts & Settlements" ar="التسويات والبياوت" />
                   </strong>
 
