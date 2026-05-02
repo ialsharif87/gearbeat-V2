@@ -102,6 +102,78 @@ async function sendProviderInviteAction(formData: FormData) {
   revalidatePath("/admin/leads");
 }
 
+async function createProviderAccountAction(formData: FormData) {
+  "use server";
+  
+  const leadId = formData.get("leadId")?.toString();
+  const email = formData.get("email")?.toString();
+  const type = formData.get("type")?.toString();
+
+  if (!leadId || !email || !type) return;
+
+  const supabaseAdmin = createAdminClient();
+
+  // 1. Create Supabase User
+  const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
+    email: email,
+    email_confirm: true,
+    user_metadata: { provider_type: type }
+  });
+
+  if (userError) {
+    console.error("User creation error:", userError);
+    return;
+  }
+
+  const userId = userData.user.id;
+
+  // 2. Insert into profiles table
+  const role = type === "studio" ? "owner" : "vendor";
+  await supabaseAdmin.from("profiles").insert({
+    auth_user_id: userId,
+    email: email,
+    role: role,
+    account_status: "active",
+    full_name: email.split("@")[0] // Basic fallback
+  });
+
+  // 3. Update lead status
+  await supabaseAdmin
+    .from("provider_leads")
+    .update({ 
+      status: "approved",
+      approved_at: new Date().toISOString()
+    })
+    .eq("id", leadId);
+
+  // 4. Send confirmation email
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const subject = type === "studio" ? "Welcome to GearBeat — Your Studio Account is Ready" : "Welcome to GearBeat — Your Seller Account is Ready";
+  
+  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gearbeat.sa'}/portal/login`;
+
+  await resend.emails.send({
+    from: "GearBeat <noreply@gearbeat.sa>",
+    to: email,
+    subject: subject,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #111;">
+        <h1 style="color: #cfa762; font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px;">GearBeat</h1>
+        <div style="margin-top: 30px; text-align: center;">
+          <h2 style="font-size: 20px; color: #333;">أهلاً بك في GearBeat</h2>
+          <h2 style="font-size: 20px; color: #333;">Welcome to GearBeat</h2>
+          <p style="color: #666; margin: 20px 0 30px;">Your account has been created successfully. You can now log in to your portal.</p>
+          <a href="${loginUrl}" style="background-color: #cfa762; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+            Login to Portal / تسجيل الدخول
+          </a>
+        </div>
+      </div>
+    `
+  });
+
+  revalidatePath("/admin/leads");
+}
+
 export default async function AdminLeadsPage({
   searchParams,
 }: {
@@ -245,11 +317,21 @@ export default async function AdminLeadsPage({
                         )}
 
                         {lead.status === "invited" && (
-                          <span style={{ color: "#00ff88", fontSize: "0.85rem", fontWeight: 600 }}>Invited ✓</span>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <span style={{ color: "#00ff88", fontSize: "0.85rem", fontWeight: 600 }}>Invited ✓</span>
+                            <form action={createProviderAccountAction}>
+                              <input type="hidden" name="leadId" value={lead.id} />
+                              <input type="hidden" name="email" value={lead.email} />
+                              <input type="hidden" name="type" value={lead.type} />
+                              <button type="submit" className="btn btn-small" style={{ fontSize: "0.7rem", padding: "4px 8px", backgroundColor: "#3b82f6", color: "white", borderColor: "#3b82f6" }}>
+                                Create Account
+                              </button>
+                            </form>
+                          </div>
                         )}
 
                         {lead.status === "approved" && (
-                          <span style={{ color: "#3b82f6", fontSize: "0.85rem", fontWeight: 600 }}>Approved</span>
+                          <span style={{ color: "#3b82f6", fontSize: "0.85rem", fontWeight: 600 }}>Approved ✓</span>
                         )}
                       </div>
                     </td>
