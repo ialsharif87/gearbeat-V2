@@ -13,15 +13,6 @@ const footerColumns = [
     ],
   },
   {
-    titleEn: "For Studios",
-    titleAr: "لأصحاب الاستوديوهات",
-    links: [
-      { href: "/portal/login", en: "Partner portal", ar: "بوابة الشركاء" },
-      { href: "/portal/login", en: "Owner dashboard", ar: "لوحة المالك" },
-      { href: "/support", en: "Partner support", ar: "دعم الشركاء" },
-    ],
-  },
-  {
     titleEn: "Account",
     titleAr: "الحساب",
     links: [
