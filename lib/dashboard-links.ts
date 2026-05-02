@@ -77,6 +77,11 @@ export const vendorDashboardLinks: DashboardQuickLink[] = [
     label: "Integrations",
     description: "Manage API keys and vendor integrations.",
   },
+  {
+    href: "/vendor/finance",
+    label: "Finance",
+    description: "Track sales, commission, and net payable balance.",
+  },
 ];
 
 export const customerDashboardLinks: DashboardQuickLink[] = [
