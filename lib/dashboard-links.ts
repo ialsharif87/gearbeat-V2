@@ -54,6 +54,11 @@ export const ownerDashboardLinks: DashboardQuickLink[] = [
     label: "Studio availability",
     description: "Manage working hours and date exceptions.",
   },
+  {
+    href: "/owner/finance",
+    label: "Finance",
+    description: "Track studio revenue, commission, and net payable balance.",
+  },
 ];
 
 export const vendorDashboardLinks: DashboardQuickLink[] = [

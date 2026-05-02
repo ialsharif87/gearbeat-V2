@@ -256,6 +256,9 @@ export default async function OwnerPage() {
           <Link href="/owner/reviews" className="btn btn-secondary">
             <T en="Read Reviews" ar="قراءة المراجعات" />
           </Link>
+          <Link href="/owner/finance" className="btn btn-secondary">
+            <T en="Finance" ar="المالية" />
+          </Link>
         </div>
       </div>
 
