@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import T from "./t";
 
 type StudioFeatureRow = {
@@ -185,13 +186,13 @@ export default function StudioFilter({
           <T en="Apply Filters" ar="تطبيق الفلاتر" />
         </button>
 
-        <a href="/studios/near-me" className="btn btn-secondary">
+        <Link href="/studios/near-me" className="btn btn-secondary">
           <T en="Near me" ar="قريب مني" />
-        </a>
+        </Link>
 
-        <a href="/studios" className="btn btn-secondary">
+        <Link href="/studios" className="btn btn-secondary">
           <T en="Reset" ar="إعادة ضبط" />
-        </a>
+        </Link>
       </div>
 
       {/* ADVANCED SECTION */}

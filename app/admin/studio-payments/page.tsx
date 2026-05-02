@@ -398,7 +398,7 @@ export default async function AdminStudioPaymentsPage() {
       throw new Error("Only paid bookings can be settled.");
     }
 
-    let paymentId = booking.platform_payment_id;
+    const paymentId = booking.platform_payment_id;
 
     if (!paymentId) {
       throw new Error("Create payment record before settlement.");

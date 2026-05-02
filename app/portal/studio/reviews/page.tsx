@@ -51,7 +51,7 @@ export default async function OwnerReviewsPage() {
                 <div style={{ fontSize: '0.8rem', color: 'var(--gb-gold)', marginBottom: 5 }}>
                   <T en="STUDIO" ar="الاستديو" />: {review.studio?.name_en}
                 </div>
-                <p style={{ margin: 0, fontSize: '1.1rem' }}>"{review.comment}"</p>
+                <p style={{ margin: 0, fontSize: '1.1rem' }}>&quot;{review.comment}&quot;</p>
               </div>
             </div>
           ))
