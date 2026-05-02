@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
+import DashboardQuickLinks from "../../components/dashboard-quick-links";
+import { ownerDashboardLinks } from "../../lib/dashboard-links";
 
 type ProfileRow = {
   id: string;
@@ -217,6 +219,13 @@ export default async function OwnerPage() {
           />
         </p>
       </div>
+
+      <DashboardQuickLinks
+        eyebrow="Owner navigation"
+        title="Studio owner quick links"
+        description="Manage bookings, availability, and owner tools."
+        links={ownerDashboardLinks}
+      />
 
       <div className="card">
         <span className="badge">

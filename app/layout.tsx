@@ -47,11 +47,14 @@ type AdminUserRow = {
 function getDashboardPath({
   profile,
   adminUser,
+  isVendor,
 }: {
   profile: ProfileRow | null;
   adminUser: AdminUserRow | null;
+  isVendor: boolean;
 }) {
   if (adminUser) return "/admin";
+  if (isVendor) return "/vendor";
   if (profile?.role === "owner") return "/owner";
   if (profile?.role === "customer") return "/customer";
   return "/login";
@@ -109,7 +112,7 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const dashboardPath = user ? getDashboardPath({ profile, adminUser }) : "/login";
+  const dashboardPath = user ? getDashboardPath({ profile, adminUser, isVendor }) : "/login";
   const isAdmin = Boolean(adminUser);
   const userRole = profile?.role || null;
 

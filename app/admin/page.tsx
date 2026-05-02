@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { requireAdminRole } from "../../lib/admin";
 import T from "../../components/t";
+import DashboardQuickLinks from "../../components/dashboard-quick-links";
+import { adminDashboardLinks } from "../../lib/dashboard-links";
 
 function roleLabel(role: string) {
   if (role === "super_admin") return "Super Admin";
@@ -74,6 +76,13 @@ export default async function AdminDashboardPage() {
           />
         </p>
       </div>
+
+      <DashboardQuickLinks
+        eyebrow="Admin navigation"
+        title="Admin quick links"
+        description="Access product review, catalog settings, orders, commission settings, and payout reports."
+        links={adminDashboardLinks}
+      />
 
       <div className="card admin-notes-card">
         <span className="badge">

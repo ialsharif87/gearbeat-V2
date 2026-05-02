@@ -1,6 +1,8 @@
 import { requireVendorLayoutAccess } from "@/lib/route-guards";
 import T from "@/components/t";
 import Link from "next/link";
+import DashboardQuickLinks from "../../../components/dashboard-quick-links";
+import { vendorDashboardLinks } from "../../../lib/dashboard-links";
 
 export default async function VendorDashboard() {
   const { supabaseAdmin, user } = await requireVendorLayoutAccess();
@@ -44,6 +46,13 @@ export default async function VendorDashboard() {
           </h1>
         </div>
       </div>
+
+      <DashboardQuickLinks
+        eyebrow="Vendor navigation"
+        title="Vendor quick links"
+        description="Manage products, orders, and integrations."
+        links={vendorDashboardLinks}
+      />
       
       <div className="stats-grid">
         {stats.map((stat, i) => (
