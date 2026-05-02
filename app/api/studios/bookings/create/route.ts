@@ -244,6 +244,56 @@ export async function POST(request: Request) {
       );
     }
 
+    // Availability validation
+    const dayOfWeek = new Date(`${bookingDate}T12:00:00`).getDay();
+
+    const { data: availabilityRule } = await supabaseAdmin
+      .from("studio_availability_rules")
+      .select("*")
+      .eq("studio_id", studio.id)
+      .eq("day_of_week", dayOfWeek)
+      .maybeSingle();
+
+    const { data: exception } = await supabaseAdmin
+      .from("studio_availability_exceptions")
+      .select("*")
+      .eq("studio_id", studio.id)
+      .eq("exception_date", bookingDate)
+      .maybeSingle();
+
+    if (exception && exception.is_closed) {
+      return NextResponse.json(
+        { error: `Studio is closed on this date: ${exception.reason || "Holiday"}` },
+        { status: 400 }
+      );
+    }
+
+    if (availabilityRule && !availabilityRule.is_open && !exception) {
+      return NextResponse.json(
+        { error: "Studio is closed on this day of the week." },
+        { status: 400 }
+      );
+    }
+
+    if (availabilityRule || exception) {
+      const openTime = exception?.is_closed === false ? exception.open_time : availabilityRule?.open_time;
+      const closeTime = exception?.is_closed === false ? exception.close_time : availabilityRule?.close_time;
+
+      if (openTime && startTime < openTime.slice(0, 5)) {
+        return NextResponse.json(
+          { error: `Studio is not open yet. Opening time: ${openTime.slice(0, 5)}` },
+          { status: 400 }
+        );
+      }
+
+      if (closeTime && endTime > closeTime.slice(0, 5)) {
+        return NextResponse.json(
+          { error: `Studio will be closed by then. Closing time: ${closeTime.slice(0, 5)}` },
+          { status: 400 }
+        );
+      }
+    }
+
     const subtotalAmount = hourlyPrice * durationHours;
     const totalAmount = subtotalAmount;
     const currencyCode = studio.currency_code || "SAR";

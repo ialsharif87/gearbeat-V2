@@ -477,6 +477,10 @@ export default async function OwnerPage() {
             <Link href="/owner/studios" className="btn btn-secondary">
               <T en="Manage Studios" ar="إدارة الاستوديوهات" />
             </Link>
+
+            <Link href="/owner/availability" className="btn btn-secondary">
+              <T en="Manage Availability" ar="إدارة التوافر" />
+            </Link>
           </div>
         </div>
 

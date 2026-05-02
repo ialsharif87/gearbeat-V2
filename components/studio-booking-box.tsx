@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import T from "@/components/t";
+import StudioAvailableSlotsPicker from "./studio-available-slots-picker";
 
 type StudioBookingBoxProps = {
   studioId: string;
@@ -209,6 +210,19 @@ export default function StudioBookingBox({
           />
         </div>
       </div>
+
+      <StudioAvailableSlotsPicker
+        studioId={studioId}
+        selectedDate={bookingDate}
+        selectedStartTime={startTime}
+        onSlotSelect={(slot) => {
+          // Extracts HH:mm from "YYYY-MM-DDTHH:mm:00"
+          const timePart = slot.startTime.split("T")[1]?.slice(0, 5);
+          if (timePart) {
+            setStartTime(timePart);
+          }
+        }}
+      />
 
       <div className="grid grid-2">
         <div>
