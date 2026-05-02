@@ -106,6 +106,69 @@ export const ownerDashboardLinks: DashboardQuickLink[] = [
   },
 ];
 
+export const ownerPortalLinks: DashboardQuickLink[] = [
+  {
+    href: "/portal/studio",
+    label: "Owner overview",
+    description: "Main studio owner dashboard.",
+  },
+  {
+    href: "/portal/studio/analytics",
+    label: "Analytics",
+    description: "Track revenue, bookings, and performance.",
+  },
+  {
+    href: "/portal/studio/studios",
+    label: "My studios",
+    description: "Manage your studio listings and details.",
+  },
+  {
+    href: "/portal/studio/bookings",
+    label: "Studio bookings",
+    description: "Accept, confirm, reject, or cancel studio bookings.",
+  },
+  {
+    href: "/portal/studio/availability",
+    label: "Studio availability",
+    description: "Manage working hours and date exceptions.",
+  },
+  {
+    href: "/portal/studio/payouts",
+    label: "Finance",
+    description: "Track studio revenue, commission, and net payable balance.",
+  },
+  {
+    href: "/portal/studio/payout-requests",
+    label: "Payout requests",
+    description: "Request payout from studio payable balance.",
+  },
+  {
+    href: "/portal/studio/bank",
+    label: "Bank accounts",
+    description: "Manage your bank accounts for payouts.",
+  },
+  {
+    href: "/portal/studio/reviews",
+    label: "Reviews",
+    description: "View and manage customer reviews.",
+  },
+  {
+    href: "/portal/studio/boost",
+    label: "Acceleration",
+    description: "Request paid visibility boost for studios.",
+  },
+  {
+    href: "/portal/studio/commission",
+    label: "Commission",
+    description: "View current commission rates and fees.",
+  },
+  {
+    href: "/portal/studio/onboarding",
+    label: "Onboarding",
+    description: "Complete your business verification profile.",
+  },
+];
+
 export const vendorDashboardLinks: DashboardQuickLink[] = [
   {
     href: "/vendor",
