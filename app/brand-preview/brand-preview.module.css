@@ -683,8 +683,8 @@
   line-height: 1.8;
 }
 
-:global(body:has(.brandPreviewRoot) header),
-:global(body:has(.brandPreviewRoot) footer) {
+:global(.brandPreviewRoot) ~ header,
+:global(.brandPreviewRoot) ~ footer {
   display: none !important;
 }
 
