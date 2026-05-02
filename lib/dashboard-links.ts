@@ -56,6 +56,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "Settlement batches",
     description: "Create and manage internal settlement batches.",
   },
+  {
+    href: "/admin/refunds",
+    label: "Refunds & adjustments",
+    description: "Create internal refunds and finance adjustments.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [

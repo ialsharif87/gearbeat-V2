@@ -447,6 +447,9 @@ export default async function AdminDashboardPage() {
                     <Link href="/admin/finance-ledger" className="btn btn-secondary">
                       <T en="Open Finance Ledger" ar="فتح سجل المالية" />
                     </Link>
+                    <Link href="/admin/refunds" className="btn btn-primary">
+                      <T en="Open Refunds" ar="فتح المرتجعات" />
+                    </Link>
                   </div>
                 </div>
 
