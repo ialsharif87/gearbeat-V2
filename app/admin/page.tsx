@@ -433,6 +433,25 @@ export default async function AdminDashboardPage() {
 
                 <div>
                   <strong>
+                    <T en="Internal Finance Ledger" ar="سجل المالية الداخلي" />
+                  </strong>
+
+                  <p>
+                    <T
+                      en="Accounting foundation for payments, commissions, and payables."
+                      ar="الأساس المحاسبي للمدفوعات والعمولات والمبالغ المستحقة."
+                    />
+                  </p>
+
+                  <div className="actions">
+                    <Link href="/admin/finance-ledger" className="btn btn-secondary">
+                      <T en="Open Finance Ledger" ar="فتح سجل المالية" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>
                     <T en="Payouts & Settlements" ar="التسويات والبياوت" />
                   </strong>
 

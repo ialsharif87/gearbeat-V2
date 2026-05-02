@@ -41,6 +41,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "Finance center",
     description: "Monitor GMV, commission, payables, and financial performance.",
   },
+  {
+    href: "/admin/finance-ledger",
+    label: "Finance ledger",
+    description: "Internal ledger for payments, commissions, and payables.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [
