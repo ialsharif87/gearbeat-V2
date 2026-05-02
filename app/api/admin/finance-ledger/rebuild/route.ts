@@ -12,6 +12,7 @@ import {
   upsertFinanceLedgerEntries,
   type FinanceLedgerEntryInput,
 } from "../../../../../lib/finance-ledger";
+import { createFinanceAuditLog } from "../../../../../lib/finance-audit";
 
 type SupabaseAny = any;
 
@@ -541,6 +542,22 @@ export async function POST() {
       }
     );
   }
+
+  await createFinanceAuditLog(supabase, {
+    actionType: "ledger_rebuilt",
+    entityType: "finance_ledger",
+    entityId: "rebuild",
+    entityLabel: "Finance ledger rebuild",
+    actorUserId: user.id,
+    actorEmail: typeof user.email === "string" ? user.email : null,
+    reason: "Admin rebuilt finance ledger from existing transactions.",
+    afterData: {
+      entryCount: count,
+      marketplaceOrders: orders.length,
+      bookings: bookings.length,
+    },
+    metadata: {},
+  });
 
   return NextResponse.json({
     ok: true,

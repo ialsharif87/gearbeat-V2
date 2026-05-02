@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireAdminOrRedirect } from "../../../../../lib/auth-guards";
+import { createFinanceAuditLog } from "../../../../../lib/finance-audit";
 
 const allowedStatuses = new Set([
   "pending",
@@ -52,6 +53,27 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await createFinanceAuditLog(supabase, {
+    actionType:
+      status === "approved"
+        ? "approved"
+        : status === "rejected"
+          ? "rejected"
+          : status === "paid"
+            ? "marked_paid"
+            : "status_changed",
+    entityType: "payout_request",
+    entityId: requestId,
+    entityLabel: "Payout request",
+    actorUserId: user.id,
+    actorEmail: typeof user.email === "string" ? user.email : null,
+    reason: adminNotes || `Payout request status changed to ${status}.`,
+    afterData: {
+      status,
+      adminNotes,
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

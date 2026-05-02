@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
 import { readNumber, readText, type DbRow } from "../../../../../lib/auth-guards";
+import { createFinanceAuditLog } from "../../../../../lib/finance-audit";
 
 function orderNumber() {
   return `ACC-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random()
@@ -60,6 +61,21 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await createFinanceAuditLog(supabase, {
+    actionType: "acceleration_order_created",
+    entityType: "acceleration_order",
+    entityId: packageId,
+    entityLabel: "Acceleration order",
+    actorUserId: user.id,
+    actorEmail: user.email || null,
+    reason: "Partner requested acceleration package.",
+    afterData: {
+      packageId,
+      partnerType,
+      amount: readNumber(pkg, ["price"]),
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -6,6 +6,7 @@ import {
   readText,
   type DbRow,
 } from "../../../../../lib/auth-guards";
+import { createFinanceAuditLog } from "../../../../../lib/finance-audit";
 
 type SupabaseAny = any;
 
@@ -105,6 +106,21 @@ export async function POST(request: NextRequest) {
   if (itemsError) {
     return NextResponse.json({ error: itemsError.message }, { status: 500 });
   }
+
+  await createFinanceAuditLog(supabase, {
+    actionType: "settlement_created",
+    entityType: "settlement_batch",
+    entityId: batchId,
+    entityLabel: title,
+    actorUserId: user.id,
+    actorEmail: typeof user.email === "string" ? user.email : null,
+    reason: "Admin created settlement batch.",
+    afterData: {
+      title,
+      itemCount: rows.length,
+      netPayable,
+    },
+  });
 
   return NextResponse.json({ ok: true, batchId });
 }

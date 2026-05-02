@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../../lib/supabase/server";
 import { requireAdminOrRedirect } from "../../../../../../lib/auth-guards";
+import { createFinanceAuditLog } from "../../../../../../lib/finance-audit";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -42,6 +43,23 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await createFinanceAuditLog(supabase, {
+    actionType: "created",
+    entityType: "acceleration_package",
+    entityId: title,
+    entityLabel: title,
+    actorUserId: user.id,
+    actorEmail: typeof user.email === "string" ? user.email : null,
+    reason: "Admin created acceleration package.",
+    afterData: {
+      title,
+      partnerType,
+      price,
+      durationDays,
+      placement,
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

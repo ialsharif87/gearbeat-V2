@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireAdminOrRedirect } from "../../../../../lib/auth-guards";
+import { createFinanceAuditLog } from "../../../../../lib/finance-audit";
 
 const allowedStatuses = new Set([
   "draft",
@@ -61,6 +62,26 @@ export async function POST(request: NextRequest) {
       .update({ status: "cancelled" })
       .eq("batch_id", batchId);
   }
+
+  await createFinanceAuditLog(supabase, {
+    actionType:
+      status === "approved"
+        ? "approved"
+        : status === "paid"
+          ? "marked_paid"
+          : status === "cancelled"
+            ? "cancelled"
+            : "status_changed",
+    entityType: "settlement_batch",
+    entityId: batchId,
+    entityLabel: "Settlement batch",
+    actorUserId: user.id,
+    actorEmail: typeof user.email === "string" ? user.email : null,
+    reason: `Settlement batch status changed to ${status}.`,
+    afterData: {
+      status,
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

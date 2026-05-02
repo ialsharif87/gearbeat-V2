@@ -66,6 +66,11 @@ export const adminDashboardLinks: DashboardQuickLink[] = [
     label: "Acceleration finance",
     description: "Manage paid visibility boost packages and orders.",
   },
+  {
+    href: "/admin/finance-audit",
+    label: "Finance audit log",
+    description: "Review finance actions and audit trail.",
+  },
 ];
 
 export const ownerDashboardLinks: DashboardQuickLink[] = [

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireAdminOrRedirect } from "../../../../../lib/auth-guards";
 import { upsertFinanceLedgerEntry } from "../../../../../lib/finance-ledger";
+import { createFinanceAuditLog } from "../../../../../lib/finance-audit";
 
 function adjustmentNumber() {
   return `ADJ-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random()
@@ -83,6 +84,25 @@ export async function POST(request: NextRequest) {
       reason,
       originalSourceType: sourceType,
       originalSourceId: sourceId,
+    },
+  });
+
+  await createFinanceAuditLog(supabase, {
+    actionType:
+      adjustmentType === "refund" ? "refund_created" : "adjustment_created",
+    entityType: "finance_adjustment",
+    entityId: number,
+    entityLabel: number,
+    actorUserId: user.id,
+    actorEmail: typeof user.email === "string" ? user.email : null,
+    reason,
+    afterData: {
+      adjustmentType,
+      sourceType,
+      sourceId,
+      partnerType,
+      partnerId,
+      amount,
     },
   });
 
