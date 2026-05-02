@@ -7,6 +7,24 @@ export const dynamic = "force-dynamic";
 
 type DbRow = Record<string, unknown>;
 
+type AvailabilityRule = {
+  dayOfWeek: number;
+  isOpen: boolean;
+  openTime: string;
+  closeTime: string;
+  slotMinutes: number;
+  bufferMinutes: number;
+};
+
+type AvailabilityException = {
+  id: string;
+  exceptionDate: string;
+  isClosed: boolean;
+  openTime: string;
+  closeTime: string;
+  reason: string;
+};
+
 type OwnerAvailabilityPageProps = {
   searchParams?:
     | Promise<{
@@ -62,7 +80,7 @@ async function fetchOwnedStudios(
   return [];
 }
 
-function normalizeRule(row: DbRow) {
+function normalizeRule(row: DbRow): AvailabilityRule {
   return {
     dayOfWeek: Number(row.day_of_week),
     isOpen: Boolean(row.is_open),
@@ -75,7 +93,7 @@ function normalizeRule(row: DbRow) {
   };
 }
 
-function normalizeException(row: DbRow) {
+function normalizeException(row: DbRow): AvailabilityException {
   return {
     id: readText(row, ["id"]),
     exceptionDate: readText(row, ["exception_date"]),
@@ -119,8 +137,8 @@ export default async function OwnerAvailabilityPage({
     "Studio"
   );
 
-  let initialRules = [];
-  let initialExceptions = [];
+  let initialRules: AvailabilityRule[] = [];
+  let initialExceptions: AvailabilityException[] = [];
 
   if (selectedStudioId) {
     const { data: rules } = await supabase
