@@ -1,747 +1,469 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-export const dynamic = "force-dynamic";
-
-type SafeResult<T> = {
-  data: T | null;
-  error: any;
+type DateRange = {
+  from: Date;
+  to: Date;
+  label: string;
 };
 
-async function safeQuery<T>(
-  queryPromise: PromiseLike<SafeResult<T>>
-): Promise<T | null> {
-  const { data, error } = await queryPromise;
+type Booking = {
+  id: string;
+  booking_date: string;
+  total_amount: number;
+  status: string;
+  payment_status: string;
+  start_time: string;
+  studio_id: string;
+  studio?: { name: string };
+};
 
-  if (error) {
-    console.warn("Owner analytics optional query failed:", error.message);
-    return null;
-  }
+type StudioPerformance = {
+  id: string;
+  name: string;
+  bookings: number;
+  revenue: number;
+  rating: number;
+  rank?: number;
+};
 
-  return data;
-}
-
-function formatMoney(value: unknown, currency = "SAR") {
-  const numberValue = Number(value || 0);
-
-  if (!Number.isFinite(numberValue)) {
-    return `0.00 ${currency}`;
-  }
-
-  return `${numberValue.toFixed(2)} ${currency}`;
-}
-
-function formatDate(value: unknown) {
-  if (!value) {
-    return "—";
-  }
-
-  const date = new Date(String(value));
-
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-
-  return date.toLocaleDateString("en-SA", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
+export default function OwnerAnalyticsPage() {
+  const [rangeType, setRangeType] = useState<"7D" | "30D" | "CM" | "YTD" | "LY" | "Custom">("CM");
+  const [customRange, setCustomRange] = useState<{ from: string; to: string }>({
+    from: "",
+    to: "",
   });
-}
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<{
+    bookings: Booking[];
+    studios: any[];
+    avgRating: number;
+    boostStatus: { total_commission_percent: number; is_boosted: boolean };
+    ranking: { rank: number; total: number };
+    performance: StudioPerformance[];
+  } | null>(null);
 
-function getStudioName(studio: any) {
-  return studio?.name_en || studio?.name || studio?.name_ar || "Studio";
-}
+  const supabase = createClient();
 
-function normalizeStatus(value: unknown) {
-  return String(value || "pending").toLowerCase();
-}
+  // Helper to get date objects for ranges
+  const rangeDates = useMemo(() => {
+    const now = new Date();
+    let from = new Date();
+    let to = new Date();
+    let label = "";
 
-function getBookingAmount(booking: any) {
-  return Number(
-    booking.total_amount ||
-      booking.total_price ||
-      booking.amount ||
-      booking.price ||
-      booking.final_amount ||
-      0
-  );
-}
-
-function getCommissionAmount(booking: any, grossAmount: number) {
-  const directCommission = Number(
-    booking.commission_amount ||
-      booking.platform_commission_amount ||
-      booking.admin_commission_amount ||
-      0
-  );
-
-  if (directCommission > 0) {
-    return directCommission;
-  }
-
-  const commissionRate = Number(
-    booking.commission_rate ||
-      booking.platform_commission_rate ||
-      0
-  );
-
-  if (commissionRate > 0) {
-    return grossAmount * (commissionRate / 100);
-  }
-
-  return 0;
-}
-
-function getNetAmount(booking: any, grossAmount: number, commissionAmount: number) {
-  const directNet = Number(
-    booking.net_amount ||
-      booking.owner_net_amount ||
-      booking.payout_amount ||
-      0
-  );
-
-  if (directNet > 0) {
-    return directNet;
-  }
-
-  return Math.max(grossAmount - commissionAmount, 0);
-}
-
-function getBookingDateValue(booking: any) {
-  return booking.booking_date || booking.date || booking.start_date || booking.created_at;
-}
-
-function isUpcomingBooking(booking: any) {
-  const status = normalizeStatus(booking.status);
-
-  if (["cancelled", "canceled", "refunded", "rejected", "completed"].includes(status)) {
-    return false;
-  }
-
-  const rawDate = getBookingDateValue(booking);
-
-  if (!rawDate) {
-    return false;
-  }
-
-  const bookingDate = new Date(String(rawDate));
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-
-  return !Number.isNaN(bookingDate.getTime()) && bookingDate >= today;
-}
-
-function isCompletedBooking(booking: any) {
-  const status = normalizeStatus(booking.status);
-
-  return ["completed", "done", "paid", "confirmed"].includes(status);
-}
-
-function isCancelledBooking(booking: any) {
-  const status = normalizeStatus(booking.status);
-
-  return ["cancelled", "canceled", "refunded", "rejected"].includes(status);
-}
-
-function StatCard({
-  icon,
-  labelEn,
-  labelAr,
-  value,
-  hint,
-}: {
-  icon: string;
-  labelEn: string;
-  labelAr: string;
-  value: string | number;
-  hint?: string;
-}) {
-  return (
-    <div className="card stat-card">
-      <div className="stat-icon">{icon}</div>
-      <div className="stat-content">
-        <label>
-          <T en={labelEn} ar={labelAr} />
-        </label>
-        <div className="stat-value">{value}</div>
-        {hint ? (
-          <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-            {hint}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function PerformanceBar({
-  label,
-  value,
-  maxValue,
-  currency,
-}: {
-  label: string;
-  value: number;
-  maxValue: number;
-  currency: string;
-}) {
-  const percent =
-    maxValue > 0 ? Math.min(100, Math.round((value / maxValue) * 100)) : 0;
-
-  return (
-    <div style={{ display: "grid", gap: 8 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <span>{label}</span>
-        <strong>{formatMoney(value, currency)}</strong>
-      </div>
-
-      <div
-        style={{
-          height: 12,
-          borderRadius: 999,
-          background: "rgba(255,255,255,0.08)",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${percent}%`,
-            height: "100%",
-            borderRadius: 999,
-            background:
-              "linear-gradient(90deg, rgba(207,167,98,0.95), rgba(255,255,255,0.6))",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-export default async function OwnerAnalyticsPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/portal/login");
-  }
-
-  const supabaseAdmin = createAdminClient();
-
-  const profile = await safeQuery<any>(
-    supabaseAdmin
-      .from("profiles")
-      .select("auth_user_id, full_name, email, role, preferred_currency")
-      .eq("auth_user_id", user.id)
-      .maybeSingle()
-  );
-
-  if (!profile) {
-    redirect("/portal/login");
-  }
-
-  const allowedRoles = ["owner", "studio_owner", "admin"];
-
-  if (!allowedRoles.includes(profile.role)) {
-    redirect("/forbidden");
-  }
-
-  const currency = profile.preferred_currency || "SAR";
-
-  const studios = await safeQuery<any[]>(
-    supabaseAdmin
-      .from("studios")
-      .select(`
-        id,
-        slug,
-        owner_auth_user_id,
-        name,
-        name_en,
-        name_ar,
-        city,
-        city_name,
-        district,
-        status,
-        verified,
-        verified_location,
-        booking_enabled,
-        price_from,
-        created_at
-      `)
-      .eq("owner_auth_user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(100)
-  );
-
-  const studioRows = studios || [];
-  const studioIds = studioRows.map((studio: any) => studio.id).filter(Boolean);
-
-  const bookings = studioIds.length
-    ? await safeQuery<any[]>(
-        supabaseAdmin
-          .from("bookings")
-          .select(`
-            id,
-            studio_id,
-            customer_auth_user_id,
-            status,
-            booking_date,
-            date,
-            start_date,
-            start_time,
-            end_time,
-            total_amount,
-            total_price,
-            amount,
-            price,
-            final_amount,
-            commission_amount,
-            platform_commission_amount,
-            admin_commission_amount,
-            commission_rate,
-            platform_commission_rate,
-            net_amount,
-            owner_net_amount,
-            payout_amount,
-            payment_status,
-            created_at,
-            studio:studios(
-              id,
-              slug,
-              name,
-              name_en,
-              name_ar,
-              city,
-              city_name,
-              district
-            )
-          `)
-          .in("studio_id", studioIds)
-          .order("created_at", { ascending: false })
-          .limit(200)
-      )
-    : [];
-
-  const bookingRows = bookings || [];
-
-  const enrichedBookings = bookingRows.map((booking: any) => {
-    const grossAmount = getBookingAmount(booking);
-    const commissionAmount = getCommissionAmount(booking, grossAmount);
-    const netAmount = getNetAmount(booking, grossAmount, commissionAmount);
-
-    return {
-      ...booking,
-      grossAmount,
-      commissionAmount,
-      netAmount,
-      normalizedStatus: normalizeStatus(booking.status),
-    };
-  });
-
-  const completedBookings = enrichedBookings.filter(isCompletedBooking);
-  const upcomingBookings = enrichedBookings.filter(isUpcomingBooking);
-  const cancelledBookings = enrichedBookings.filter(isCancelledBooking);
-  const pendingBookings = enrichedBookings.filter((booking: any) =>
-    ["pending", "created", "processing"].includes(booking.normalizedStatus)
-  );
-
-  const grossRevenue = completedBookings.reduce(
-    (sum: number, booking: any) => sum + Number(booking.grossAmount || 0),
-    0
-  );
-
-  const pendingRevenue = pendingBookings.reduce(
-    (sum: number, booking: any) => sum + Number(booking.grossAmount || 0),
-    0
-  );
-
-  const commissionTotal = completedBookings.reduce(
-    (sum: number, booking: any) => sum + Number(booking.commissionAmount || 0),
-    0
-  );
-
-  const netPayout = completedBookings.reduce(
-    (sum: number, booking: any) => sum + Number(booking.netAmount || 0),
-    0
-  );
-
-  const studioPerformanceMap = new Map<
-    string,
-    {
-      studioId: string;
-      studioName: string;
-      bookings: number;
-      grossAmount: number;
-      netAmount: number;
+    switch (rangeType) {
+      case "7D":
+        from.setDate(now.getDate() - 7);
+        label = "Last 7 Days";
+        break;
+      case "30D":
+        from.setDate(now.getDate() - 30);
+        label = "Last 30 Days";
+        break;
+      case "CM":
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+        to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        label = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+        break;
+      case "YTD":
+        from = new Date(now.getFullYear(), 0, 1);
+        label = `Year to Date ${now.getFullYear()}`;
+        break;
+      case "LY":
+        from = new Date(now.getFullYear() - 1, 0, 1);
+        to = new Date(now.getFullYear() - 1, 11, 31);
+        label = `Last Year ${now.getFullYear() - 1}`;
+        break;
+      case "Custom":
+        from = customRange.from ? new Date(customRange.from) : from;
+        to = customRange.to ? new Date(customRange.to) : to;
+        label = "Custom Range";
+        break;
     }
-  >();
 
-  for (const booking of enrichedBookings) {
-    const studio = Array.isArray(booking.studio)
-      ? booking.studio[0]
-      : booking.studio;
+    return { from, to, label };
+  }, [rangeType, customRange]);
 
-    const studioId = String(booking.studio_id || studio?.id || "unknown");
-    const studioName = getStudioName(studio);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const existing = studioPerformanceMap.get(studioId);
+      // 1. Fetch owned studios
+      const { data: studios } = await supabase
+        .from("studios")
+        .select("id, name, owner_auth_user_id")
+        .eq("owner_auth_user_id", user.id);
 
-    if (!existing) {
-      studioPerformanceMap.set(studioId, {
-        studioId,
-        studioName,
-        bookings: 1,
-        grossAmount: Number(booking.grossAmount || 0),
-        netAmount: Number(booking.netAmount || 0),
+      if (!studios || studios.length === 0) {
+        setLoading(false);
+        setData(null);
+        return;
+      }
+
+      const studioIds = studios.map(s => s.id);
+
+      // 2. Fetch bookings in range
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("*, studio:studios(name)")
+        .in("studio_id", studioIds)
+        .gte("booking_date", rangeDates.from.toISOString())
+        .lte("booking_date", rangeDates.to.toISOString())
+        .order("booking_date", { ascending: false });
+
+      // 3. Fetch Average Rating
+      const { data: reviews } = await supabase
+        .from("studio_reviews")
+        .select("rating")
+        .in("studio_id", studioIds);
+      
+      const avgRating = reviews?.length 
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+        : 0;
+
+      // 4. Fetch Boost Status (from the new table)
+      const { data: boost } = await supabase
+        .from("studio_boost_subscriptions")
+        .select("total_commission_percent, status")
+        .eq("owner_auth_user_id", user.id)
+        .eq("status", "active")
+        .gt("ends_at", new Date().toISOString())
+        .maybeSingle();
+
+      // 5. Ranking (Simplified logic: count studios with more bookings this month)
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      const { count: totalStudios } = await supabase
+        .from("studios")
+        .select("*", { count: "exact", head: true });
+
+      // Get booking counts for ALL studios to find rank
+      // In a real app this would be a specialized function or cached view
+      const { data: allBookings } = await supabase
+        .from("bookings")
+        .select("studio_id")
+        .gte("booking_date", startOfMonth);
+      
+      const counts: Record<string, number> = {};
+      allBookings?.forEach(b => {
+        counts[b.studio_id] = (counts[b.studio_id] || 0) + 1;
       });
-    } else {
-      existing.bookings += 1;
-      existing.grossAmount += Number(booking.grossAmount || 0);
-      existing.netAmount += Number(booking.netAmount || 0);
+
+      const myMaxBookings = Math.max(...studioIds.map(id => counts[id] || 0));
+      const rankedHigher = Object.values(counts).filter(c => c > myMaxBookings).length;
+
+      // 6. Performance per studio
+      const performance: StudioPerformance[] = studios.map(s => {
+        const studioBookings = bookings?.filter(b => b.studio_id === s.id) || [];
+        return {
+          id: s.id,
+          name: s.name,
+          bookings: studioBookings.length,
+          revenue: studioBookings.reduce((sum, b) => sum + (b.payment_status === 'paid' ? b.total_amount : 0), 0),
+          rating: 0, // Would need per-studio review fetch
+        };
+      });
+
+      setData({
+        bookings: (bookings || []) as Booking[],
+        studios,
+        avgRating,
+        boostStatus: {
+          total_commission_percent: boost?.total_commission_percent || 15,
+          is_boosted: !!boost
+        },
+        ranking: {
+          rank: rankedHigher + 1,
+          total: totalStudios || 0
+        },
+        performance: performance.sort((a, b) => b.revenue - a.revenue)
+      });
+      setLoading(false);
     }
+
+    fetchData();
+  }, [rangeDates, supabase]);
+
+  const chartData = useMemo(() => {
+    if (!data?.bookings) return [];
+    
+    // Group by date
+    const groups: Record<string, { date: string, revenue: number, bookings: number }> = {};
+    
+    // Fill all dates in range if 30 days or less
+    const diffDays = Math.ceil((rangeDates.to.getTime() - rangeDates.from.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 31) {
+      for (let d = new Date(rangeDates.from); d <= rangeDates.to; d.setDate(d.getDate() + 1)) {
+        const ds = d.toISOString().split('T')[0];
+        groups[ds] = { date: ds, revenue: 0, bookings: 0 };
+      }
+    }
+
+    data.bookings.forEach(b => {
+      const date = b.booking_date.split('T')[0];
+      if (!groups[date]) {
+        groups[date] = { date, revenue: 0, bookings: 0 };
+      }
+      groups[date].bookings += 1;
+      if (b.payment_status === 'paid') {
+        groups[date].revenue += Number(b.total_amount);
+      }
+    });
+
+    return Object.values(groups).sort((a, b) => a.date.localeCompare(b.date));
+  }, [data, rangeDates]);
+
+  const revenue = data?.bookings
+    .filter(b => b.payment_status === 'paid')
+    .reduce((sum, b) => sum + Number(b.total_amount), 0) || 0;
+
+  const totalBookings = data?.bookings.length || 0;
+
+  if (loading) {
+    return (
+      <main className="gb-dashboard-page">
+        <div className="gb-empty-state">
+          <p><T en="Loading analytics..." ar="جاري تحميل التحليلات..." /></p>
+        </div>
+      </main>
+    );
   }
 
-  const studioPerformance = Array.from(studioPerformanceMap.values())
-    .sort((a, b) => b.grossAmount - a.grossAmount)
-    .slice(0, 8);
-
-  const maxStudioGross = studioPerformance.reduce(
-    (max, item) => Math.max(max, item.grossAmount),
-    0
-  );
-
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-dashboard-page" style={{ background: '#0a0a0a', minHeight: '100vh' }}>
+      <section className="gb-dashboard-header" style={{ marginBottom: '32px' }}>
         <div>
-          <span className="badge badge-gold">
-            <T en="Studio Owner Analytics" ar="تحليلات صاحب الاستوديو" />
-          </span>
+          <p className="gb-eyebrow"><T en="Analytics" ar="التحليلات" /></p>
+          <h1><T en="Studio Insights" ar="رؤى الاستوديو" /></h1>
+          <p className="gb-muted-text">{rangeDates.label}</p>
+        </div>
 
-          <h1 style={{ marginTop: 10 }}>
-            <T en="Studio revenue dashboard" ar="لوحة أرباح الاستوديو" />
-          </h1>
+        <div className="gb-action-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {["7D", "30D", "CM", "YTD", "LY", "Custom"].map((type) => (
+            <button
+              key={type}
+              onClick={() => setRangeType(type as any)}
+              className={`gb-button ${rangeType === type ? "" : "gb-button-secondary"}`}
+              style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      </section>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
-            <T
-              en="Track studio bookings, revenue, estimated commission, net payout, and studio performance."
-              ar="تابع حجوزات الاستوديو، الإيرادات، العمولة المتوقعة، صافي الأرباح، وأداء الاستوديوهات."
-            />
+      {rangeType === "Custom" && (
+        <section className="gb-card" style={{ marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <input 
+            type="date" 
+            className="gb-input" 
+            value={customRange.from} 
+            onChange={e => setCustomRange(prev => ({ ...prev, from: e.target.value }))}
+          />
+          <span><T en="to" ar="إلى" /></span>
+          <input 
+            type="date" 
+            className="gb-input" 
+            value={customRange.to} 
+            onChange={e => setCustomRange(prev => ({ ...prev, to: e.target.value }))}
+          />
+        </section>
+      )}
+
+      {/* KPI Cards */}
+      <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
+        <div className="gb-card gb-dash-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="gb-dash-label"><T en="Revenue" ar="الإيراد" /></span>
+            <span>💰</span>
+          </div>
+          <div className="gb-dash-stat">{revenue} <small>SAR</small></div>
+          <p className="gb-muted-text"><T en="SAR" ar="ريال" /></p>
+        </div>
+
+        <div className="gb-card gb-dash-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="gb-dash-label"><T en="Bookings" ar="الحجوزات" /></span>
+            <span>📅</span>
+          </div>
+          <div className="gb-dash-stat">{totalBookings}</div>
+          <p className="gb-muted-text"><T en="confirmed + completed" ar="مؤكد + مكتمل" /></p>
+        </div>
+
+        <div className="gb-card gb-dash-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="gb-dash-label"><T en="Avg Rating" ar="متوسط التقييم" /></span>
+            <span>⭐</span>
+          </div>
+          <div className="gb-dash-stat">{data?.avgRating.toFixed(1)}</div>
+          <p className="gb-muted-text"><T en="out of 5" ar="من 5" /></p>
+        </div>
+
+        <div className="gb-card gb-dash-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="gb-dash-label"><T en="Commission Rate" ar="نسبة العمولة" /></span>
+            <span>🚀</span>
+          </div>
+          <div className="gb-dash-stat">{data?.boostStatus.total_commission_percent}%</div>
+          <p className={data?.boostStatus.is_boosted ? "neon-text" : "gb-muted-text"}>
+            {data?.boostStatus.is_boosted ? <T en="Boosted" ar="معزز" /> : <T en="Standard" ar="أساسي" />}
           </p>
         </div>
+      </section>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link href="/portal/studio/studios" className="btn">
-            <T en="My studios" ar="استوديوهاتي" />
-          </Link>
-
-          <Link href="/portal/studio/bookings" className="btn btn-primary">
-            <T en="Bookings" ar="الحجوزات" />
-          </Link>
+      {/* Chart */}
+      <section className="gb-card" style={{ marginBottom: '32px', padding: '32px' }}>
+        <div className="gb-card-header" style={{ marginBottom: '24px' }}>
+          <h3><T en="Growth & Revenue" ar="النمو والإيرادات" /></h3>
+        </div>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+              <XAxis dataKey="date" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis yAxisId="left" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis yAxisId="right" orientation="right" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip 
+                contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '8px' }}
+                itemStyle={{ fontSize: '12px' }}
+              />
+              <Line 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="revenue" 
+                stroke="#cfa86e" 
+                strokeWidth={3} 
+                dot={{ fill: '#cfa86e', r: 4 }} 
+                activeDot={{ r: 6 }} 
+              />
+              <Line 
+                yAxisId="right"
+                type="monotone" 
+                dataKey="bookings" 
+                stroke="#3b82f6" 
+                strokeWidth={2} 
+                dot={{ fill: '#3b82f6', r: 3 }} 
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </section>
 
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <StatCard
-          icon="💰"
-          labelEn="Gross Revenue"
-          labelAr="إجمالي الإيرادات"
-          value={formatMoney(grossRevenue, currency)}
-          hint="Completed / paid bookings"
-        />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px' }}>
+        {/* Bookings Table */}
+        <section className="gb-card">
+          <div className="gb-card-header">
+            <h3><T en="Recent Activity" ar="النشاط الأخير" /></h3>
+          </div>
+          <div className="gb-table-wrap">
+            <table className="gb-dash-table">
+              <thead>
+                <tr>
+                  <th><T en="Date" ar="التاريخ" /></th>
+                  <th><T en="Studio" ar="الاستوديو" /></th>
+                  <th><T en="Amount" ar="المبلغ" /></th>
+                  <th><T en="Status" ar="الحالة" /></th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.bookings.slice(0, 10).map((b) => (
+                  <tr key={b.id}>
+                    <td>{b.booking_date}</td>
+                    <td>{b.studio?.name}</td>
+                    <td><strong>{b.total_amount} SAR</strong></td>
+                    <td>
+                      <span className={`gb-dash-badge ${b.status === 'confirmed' ? 'gb-dash-badge-confirmed' : 'gb-dash-badge-pending'}`}>
+                        {b.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {(!data?.bookings || data.bookings.length === 0) && (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '40px' }} className="gb-muted-text">
+                      <T en="No data for this period" ar="لا توجد بيانات لهذه الفترة" />
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-        <StatCard
-          icon="🏦"
-          labelEn="Net Payout"
-          labelAr="صافي الأرباح"
-          value={formatMoney(netPayout, currency)}
-          hint="Estimated owner net"
-        />
-
-        <StatCard
-          icon="📊"
-          labelEn="Commission"
-          labelAr="العمولة"
-          value={formatMoney(commissionTotal, currency)}
-          hint="Estimated platform commission"
-        />
-
-        <StatCard
-          icon="⏳"
-          labelEn="Pending Revenue"
-          labelAr="إيرادات معلقة"
-          value={formatMoney(pendingRevenue, currency)}
-          hint={`${pendingBookings.length} pending bookings`}
-        />
-      </section>
-
-      <section className="stats-grid" style={{ marginTop: 18 }}>
-        <StatCard
-          icon="🎙️"
-          labelEn="Studios"
-          labelAr="الاستوديوهات"
-          value={studioRows.length}
-        />
-
-        <StatCard
-          icon="📅"
-          labelEn="Upcoming"
-          labelAr="قادمة"
-          value={upcomingBookings.length}
-        />
-
-        <StatCard
-          icon="✅"
-          labelEn="Completed"
-          labelAr="مكتملة"
-          value={completedBookings.length}
-        />
-
-        <StatCard
-          icon="↩️"
-          labelEn="Cancelled / Refunded"
-          labelAr="ملغاة / مستردة"
-          value={cancelledBookings.length}
-        />
-      </section>
-
-      <section
-        style={{
-          marginTop: 28,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 360px",
-          gap: 22,
-          alignItems: "start",
-        }}
-      >
-        <div style={{ display: "grid", gap: 22 }}>
-          <div className="card">
-            <h2>
-              <T en="Studio performance" ar="أداء الاستوديوهات" />
-            </h2>
-
-            <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-              <T
-                en="Simple revenue bars based on recent booking data."
-                ar="مؤشرات بسيطة حسب بيانات الحجوزات الأخيرة."
-              />
-            </p>
-
-            <div style={{ marginTop: 18, display: "grid", gap: 16 }}>
-              {studioPerformance.length === 0 ? (
-                <div
-                  style={{
-                    padding: 24,
-                    borderRadius: 16,
-                    background: "rgba(255,255,255,0.04)",
-                    textAlign: "center",
-                    color: "var(--muted)",
-                  }}
-                >
-                  <T
-                    en="No studio booking revenue data yet."
-                    ar="لا توجد بيانات إيرادات حجوزات بعد."
+        {/* Ranking */}
+        <section className="gb-dashboard-stack" style={{ gap: '24px' }}>
+          <section className="gb-card">
+            <div className="gb-card-header">
+              <h3><T en="Studio Ranking" ar="تصنيف الاستوديو" /></h3>
+            </div>
+            
+            {data?.studios.length === 1 ? (
+              <div style={{ padding: '20px 0' }}>
+                <p className="gb-muted-text" style={{ marginBottom: '16px' }}>
+                  <T en="Your studio rank among all GearBeat studios" ar="تصنيف استوديوك بين جميع استوديوهات GearBeat" />
+                </p>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
+                  #{data.ranking.rank} <small style={{ fontSize: '1rem', color: '#888' }}>/ {data.ranking.total}</small>
+                </div>
+                <div className="gb-section-divider" style={{ margin: '20px 0' }} />
+                <div style={{ height: '8px', background: '#1a1a1a', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div 
+                    style={{ 
+                      width: `${Math.max(5, 100 - (data.ranking.rank / data.ranking.total) * 100)}%`, 
+                      height: '100%', 
+                      background: 'var(--gb-gold)' 
+                    }} 
                   />
                 </div>
-              ) : (
-                studioPerformance.map((studio) => (
-                  <PerformanceBar
-                    key={studio.studioId}
-                    label={`${studio.studioName} · ${studio.bookings} bookings`}
-                    value={studio.grossAmount}
-                    maxValue={maxStudioGross}
-                    currency={currency}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Recent bookings" ar="آخر الحجوزات" />
-            </h2>
-
-            <div className="table-responsive" style={{ marginTop: 18 }}>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Studio</th>
-                    <th>Status</th>
-                    <th>Payment</th>
-                    <th>Gross</th>
-                    <th>Commission</th>
-                    <th>Net</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {enrichedBookings.length === 0 ? (
+              </div>
+            ) : (
+              <div className="gb-table-wrap">
+                <table className="gb-dash-table" style={{ fontSize: '0.85rem' }}>
+                  <thead>
                     <tr>
-                      <td colSpan={7} style={{ textAlign: "center", padding: 30 }}>
-                        <T en="No bookings found." ar="لا توجد حجوزات." />
-                      </td>
+                      <th><T en="Studio" ar="الاستوديو" /></th>
+                      <th><T en="Revenue" ar="الإيراد" /></th>
                     </tr>
-                  ) : (
-                    enrichedBookings.slice(0, 30).map((booking: any) => {
-                      const studio = Array.isArray(booking.studio)
-                        ? booking.studio[0]
-                        : booking.studio;
-
-                      return (
-                        <tr key={booking.id}>
-                          <td>
-                            <div style={{ fontWeight: 800 }}>
-                              {getStudioName(studio)}
-                            </div>
-                            <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                              {studio?.district || studio?.city_name || studio?.city || "—"}
-                            </div>
-                          </td>
-
-                          <td>
-                            <span className="badge">{booking.normalizedStatus}</span>
-                          </td>
-
-                          <td>
-                            <span className="badge">
-                              {booking.payment_status || "unpaid"}
-                            </span>
-                          </td>
-
-                          <td>{formatMoney(booking.grossAmount, currency)}</td>
-                          <td>{formatMoney(booking.commissionAmount, currency)}</td>
-                          <td>
-                            <strong>{formatMoney(booking.netAmount, currency)}</strong>
-                          </td>
-                          <td>{formatDate(getBookingDateValue(booking))}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <aside style={{ display: "grid", gap: 22 }}>
-          <div
-            className="card"
-            style={{
-              background:
-                "radial-gradient(circle at top left, rgba(207,167,98,0.20), transparent 35%), rgba(255,255,255,0.035)",
-              border: "1px solid rgba(207,167,98,0.22)",
-            }}
-          >
-            <span className="badge badge-gold">
-              <T en="Owner status" ar="حالة المالك" />
-            </span>
-
-            <h2 style={{ marginTop: 10 }}>
-              {profile.full_name || "Studio Owner"}
-            </h2>
-
-            <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Role" ar="الدور" />
-                </span>
-                <strong>{profile.role}</strong>
+                  </thead>
+                  <tbody>
+                    {data?.performance.map((p, i) => (
+                      <tr key={p.id}>
+                        <td>#{i+1} {p.name}</td>
+                        <td style={{ color: 'var(--gb-gold)' }}>{p.revenue}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            )}
+          </section>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Studios" ar="الاستوديوهات" />
-                </span>
-                <strong>{studioRows.length}</strong>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Verified studios" ar="استوديوهات موثقة" />
-                </span>
-                <strong>
-                  {studioRows.filter((studio: any) => studio.verified).length}
-                </strong>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Booking enabled" ar="الحجز مفعل" />
-                </span>
-                <strong>
-                  {studioRows.filter((studio: any) => studio.booking_enabled).length}
-                </strong>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Revenue explanation" ar="شرح الأرباح" />
-            </h2>
-
-            <ul style={{ color: "var(--muted)", lineHeight: 1.9 }}>
-              <li>
-                <T
-                  en="Gross revenue is based on completed or paid bookings."
-                  ar="إجمالي الإيرادات يعتمد على الحجوزات المكتملة أو المدفوعة."
-                />
-              </li>
-              <li>
-                <T
-                  en="Commission is estimated from booking commission fields when available."
-                  ar="العمولة تقديرية حسب حقول العمولة في الحجز عند توفرها."
-                />
-              </li>
-              <li>
-                <T
-                  en="Net payout is estimated and not a final finance settlement."
-                  ar="صافي الأرباح تقديري وليس تسوية مالية نهائية."
-                />
-              </li>
-            </ul>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Quick actions" ar="إجراءات سريعة" />
-            </h2>
-
-            <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-              <Link href="/portal/studio/studios" className="btn">
-                <T en="Manage studios" ar="إدارة الاستوديوهات" />
-              </Link>
-
-              <Link href="/portal/studio/bookings" className="btn">
-                <T en="Manage bookings" ar="إدارة الحجوزات" />
-              </Link>
-
-              <Link href="/portal/studio/profile" className="btn">
-                <T en="Owner profile" ar="ملف المالك" />
-              </Link>
-            </div>
-          </div>
-        </aside>
-      </section>
+          <section className="gb-card" style={{ background: 'linear-gradient(to bottom right, #1a1a1a, #111)' }}>
+            <h3><T en="Quick Insight" ar="رؤية سريعة" /></h3>
+            <p className="gb-muted-text" style={{ fontSize: '0.9rem', marginTop: '12px' }}>
+              <T 
+                en="Focus on increasing your studio availability during peak weekends to capture more revenue." 
+                ar="ركز على زيادة توافر الاستوديو خلال عطلات نهاية الأسبوع لاقتناص المزيد من الإيرادات." 
+              />
+            </p>
+          </section>
+        </section>
+      </div>
     </main>
   );
 }
