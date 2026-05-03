@@ -145,14 +145,14 @@ export default async function AdminDashboardPage() {
           <div className="content-card">
             <h2><T en="Recent Platform Activity" ar="أحدث نشاط للمنصة" /></h2>
             <div className="activity-feed">
-              {activityItems.map((item, idx) => (
+              {activityItems.map((item: any, idx) => (
                 <div key={idx} className="activity-item">
                   <span className={`act-badge ${item.actType}`}>
                     {item.actType}
                   </span>
                   <div className="act-info">
-                    {item.actType === 'booking' && `New studio booking #${item.id.slice(0, 8)} - ${item.total_amount} SAR`}
-                    {item.actType === 'order' && `Marketplace order #${item.id.slice(0, 8)} - ${item.total_amount} SAR`}
+                    {item.actType === 'booking' && `New studio booking #${item.id?.slice(0, 8)} - ${item.total_amount} SAR`}
+                    {item.actType === 'order' && `Marketplace order #${item.id?.slice(0, 8)} - ${item.total_amount} SAR`}
                     {item.actType === 'lead' && `New provider lead: ${item.name} (${item.type})`}
                   </div>
                   <span className="act-time">{formatTimeAgo(item.created_at)}</span>
