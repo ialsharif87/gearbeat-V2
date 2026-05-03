@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Space_Grotesk, Cairo } from "next/font/google";
 import "./globals.css";
@@ -116,22 +117,32 @@ export default async function RootLayout({
   const isAdmin = Boolean(adminUser);
   const userRole = profile?.role || null;
 
-  return (
-    <html
-      lang="ar"
-      dir="rtl"
-      className={`${spaceGrotesk.variable} ${cairo.variable}`}
-    >
-      <body>
-        <ClientProviders>
-          <SiteHeader
-            isLoggedIn={Boolean(user)}
-            isAdmin={isAdmin}
-            isVendor={Boolean(isVendor)}
-            userRole={userRole}
-            dashboardPath={dashboardPath}
-            logoutAction={logout}
-          />
+    const headersList = await headers();
+    const pathname = headersList.get("x-invoke-path") || "";
+  
+    const hideHeader = 
+      pathname.startsWith("/portal") || 
+      pathname.startsWith("/admin") ||
+      pathname === "/staff-access";
+  
+    return (
+      <html
+        lang="ar"
+        dir="rtl"
+        className={`${spaceGrotesk.variable} ${cairo.variable}`}
+      >
+        <body>
+          <ClientProviders>
+            {!hideHeader && (
+              <SiteHeader
+                isLoggedIn={Boolean(user)}
+                isAdmin={isAdmin}
+                isVendor={Boolean(isVendor)}
+                userRole={userRole}
+                dashboardPath={dashboardPath}
+                logoutAction={logout}
+              />
+            )}
 
           <main className="main">{children}</main>
 

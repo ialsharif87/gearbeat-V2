@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +13,30 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Fetch role to know where to redirect
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        const role = profile?.role;
+        if (role === "owner" || role === "studio_owner") {
+          router.replace("/portal/studio");
+        } else if (role === "vendor") {
+          router.replace("/portal/store");
+        } else {
+          router.replace("/customer");
+        }
+      }
+    }
+    checkUser();
+  }, [supabase, router]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
