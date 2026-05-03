@@ -7,6 +7,7 @@ const footerColumns = [
     titleAr: "استكشف",
     links: [
       { href: "/studios", en: "Browse studios", ar: "تصفح الاستوديوهات" },
+      { href: "/services", en: "Book Services", ar: "احجز خدمة" },
       { href: "/marketplace", en: "Marketplace", ar: "السوق" },
       { href: "/about", en: "About GearBeat", ar: "من نحن" },
       { href: "/support", en: "Support", ar: "الدعم" },
