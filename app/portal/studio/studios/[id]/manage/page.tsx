@@ -734,12 +734,12 @@ export default async function ManageStudioPage({
           <button 
             type="submit" 
             className="btn" 
-            disabled={studioImages && studioImages.length >= 10}
+            disabled={!!studioImages && studioImages.length >= 10}
           >
             <T en="Upload Images" ar="رفع صور" />
           </button>
           
-          {studioImages && studioImages.length >= 10 && (
+          {!!studioImages && studioImages.length >= 10 && (
             <p style={{ color: "var(--gb-gold)", fontSize: "0.85rem", marginTop: 8 }}>
               <T en="You have reached the maximum limit of 10 photos." ar="لقد وصلت للحد الأقصى وهو 10 صور." />
             </p>
