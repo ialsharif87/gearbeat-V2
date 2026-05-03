@@ -15,6 +15,15 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
   const router = useRouter();
   const supabase = createClient();
 
+  const toggleLanguage = (lang: string) => {
+    document.cookie = `gb_lang=${lang}; path=/; max-age=31536000`;
+    window.location.reload();
+  };
+
+  const currentLang = typeof document !== "undefined" 
+    ? document.cookie.split('; ').find(row => row.startsWith('gb_lang='))?.split('=')[1] || 'ar'
+    : 'ar';
+
   const isOwner = role === "owner" || role === "studio_owner";
 
   const ownerItems = [
@@ -47,7 +56,7 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
   }
 
   return (
-    <aside className="portal-sidebar">
+    <aside className="portal-sidebar" style={{ background: "#0d0d0d", borderRight: "1px solid #1a1a1a" }}>
       <div className="portal-sidebar-head">
         <Link href="/" className="portal-logo">
           GearBeat{" "}
@@ -81,6 +90,40 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
       </nav>
 
       <div className="portal-sidebar-footer">
+        <div className="portal-lang-toggle" style={{ 
+          display: "flex", 
+          gap: 10, 
+          padding: "0 16px 16px",
+          fontSize: "0.85rem",
+          fontWeight: 700
+        }}>
+          <button 
+            onClick={() => toggleLanguage("ar")}
+            style={{ 
+              background: "none", 
+              border: "none", 
+              cursor: "pointer", 
+              color: currentLang === "ar" ? "var(--gb-gold)" : "var(--gb-muted)",
+              padding: 0
+            }}
+          >
+            AR
+          </button>
+          <span style={{ color: "var(--gb-border)" }}>|</span>
+          <button 
+            onClick={() => toggleLanguage("en")}
+            style={{ 
+              background: "none", 
+              border: "none", 
+              cursor: "pointer", 
+              color: currentLang === "en" ? "var(--gb-gold)" : "var(--gb-muted)",
+              padding: 0
+            }}
+          >
+            EN
+          </button>
+        </div>
+
         <PortalNotificationBell />
         <Link href="/help" className="portal-nav-link">
           <span className="icon">❓</span>
