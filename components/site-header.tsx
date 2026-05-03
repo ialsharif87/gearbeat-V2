@@ -49,6 +49,7 @@ export default function SiteHeader({
 
         <nav className="gb-header-nav" aria-label="Main navigation">
           <NavLink href="/studios" en="Studios" ar="الاستوديوهات" />
+          <NavLink href="/services" en="Services" ar="الخدمات" />
           <NavLink href="/gear" en="Gear" ar="المعدات" />
           <NavLink href="/how-it-works" en="How it Works" ar="كيف يعمل" />
 
