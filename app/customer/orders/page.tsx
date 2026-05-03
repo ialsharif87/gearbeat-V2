@@ -85,27 +85,18 @@ export default async function CustomerOrdersPage() {
   const orderRows = orders || [];
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="My Orders" ar="طلباتي" />
-          </span>
+          </p>
 
           <h1 style={{ marginTop: 10 }}>
             <T en="Gear order history" ar="سجل طلبات المعدات" />
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+          <p className="gb-muted-text" style={{ maxWidth: 760 }}>
             <T
               en="Track your gear purchases, status updates, and marketplace orders."
               ar="تابع مشترياتك من المعدات، تحديثات الحالة، وطلبات السوق الخاصة بك."
@@ -124,7 +115,8 @@ export default async function CustomerOrdersPage() {
         </div>
       </section>
 
-      <div style={{ marginTop: 28, display: "grid", gap: 20 }}>
+      <div className="gb-customer-shell">
+        <div style={{ display: "grid", gap: 20 }}>
         {orderRows.length === 0 ? (
           <div
             className="card"
@@ -267,6 +259,8 @@ export default async function CustomerOrdersPage() {
             </article>
           ))
         )}
+      </div>
+        </div>
       </div>
     </main>
   );
