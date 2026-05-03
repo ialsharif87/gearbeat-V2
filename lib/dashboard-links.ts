@@ -129,75 +129,51 @@ export const ownerDashboardLinks: DashboardQuickLink[] = [
 export const ownerPortalLinks: DashboardQuickLink[] = [
   {
     href: "/portal/studio",
-    label: "Owner overview",
-    label_ar: "نظرة عامة على المالك",
-    description: "Main studio owner dashboard.",
-  },
-  {
-    href: "/portal/studio/analytics",
-    label: "Analytics",
-    label_ar: "التحليلات",
-    description: "Track revenue, bookings, and performance.",
+    label: "Dashboard",
+    label_ar: "لوحة التحكم",
+    icon: "📊"
   },
   {
     href: "/portal/studio/studios",
-    label: "My studios",
+    label: "My Studios",
     label_ar: "استوديوهاتي",
-    description: "Manage your studio listings and details.",
+    icon: "🎙️"
   },
   {
     href: "/portal/studio/bookings",
-    label: "Studio bookings",
-    label_ar: "حجوزات الاستوديو",
-    description: "Accept, confirm, reject, or cancel studio bookings.",
+    label: "Bookings",
+    label_ar: "الحجوزات",
+    icon: "📅"
   },
   {
     href: "/portal/studio/availability",
-    label: "Studio availability",
-    label_ar: "توافر الاستوديو",
-    description: "Manage working hours and date exceptions.",
-  },
-  {
-    href: "/portal/studio/payouts",
-    label: "Finance",
-    label_ar: "المالية",
-    description: "Track studio revenue, commission, and net payable balance.",
-  },
-  {
-    href: "/portal/studio/payout-requests",
-    label: "Payout requests",
-    label_ar: "طلبات التحويل",
-    description: "Request payout from studio payable balance.",
-  },
-  {
-    href: "/portal/studio/bank",
-    label: "Bank accounts",
-    label_ar: "الحسابات البنكية",
-    description: "Manage your bank accounts for payouts.",
+    label: "Availability",
+    label_ar: "الأوقات المتاحة",
+    icon: "🕐"
   },
   {
     href: "/portal/studio/reviews",
     label: "Reviews",
     label_ar: "التقييمات",
-    description: "View and manage customer reviews.",
+    icon: "⭐"
+  },
+  {
+    href: "/portal/studio/payouts",
+    label: "Payouts",
+    label_ar: "المستحقات",
+    icon: "💰"
   },
   {
     href: "/portal/studio/boost",
-    label: "Acceleration",
-    label_ar: "التسريع",
-    description: "Request paid visibility boost for studios.",
+    label: "Boost & Visibility",
+    label_ar: "تعزيز الظهور",
+    icon: "🚀"
   },
   {
-    href: "/portal/studio/commission",
-    label: "Commission",
-    label_ar: "العمولة",
-    description: "View current commission rates and fees.",
-  },
-  {
-    href: "/portal/studio/onboarding",
-    label: "Onboarding",
-    label_ar: "الإعداد",
-    description: "Complete your business verification profile.",
+    href: "/portal/studio/settings",
+    label: "Settings",
+    label_ar: "الإعدادات",
+    icon: "⚙️"
   },
 ];
 
@@ -249,45 +225,45 @@ export const vendorDashboardLinks: DashboardQuickLink[] = [
 export const vendorPortalLinks: DashboardQuickLink[] = [
   {
     href: "/portal/store",
-    label: "Vendor overview",
-    label_ar: "نظرة عامة على التاجر",
-    description: "Main vendor dashboard.",
+    label: "Dashboard",
+    label_ar: "لوحة التحكم",
+    icon: "📊"
   },
   {
     href: "/portal/store/products",
     label: "Products",
     label_ar: "المنتجات",
-    description: "Create and manage marketplace products.",
+    icon: "📦"
   },
   {
     href: "/portal/store/orders",
     label: "Orders",
     label_ar: "الطلبات",
-    description: "Review marketplace sales orders.",
+    icon: "🧾"
   },
   {
-    href: "/portal/store/integrations",
-    label: "Integrations",
-    label_ar: "التكاملات",
-    description: "Manage API keys and vendor integrations.",
+    href: "/portal/store/inventory",
+    label: "Inventory",
+    label_ar: "المخزون",
+    icon: "🏭"
+  },
+  {
+    href: "/portal/store/returns",
+    label: "Returns",
+    label_ar: "الإرجاعات",
+    icon: "↩️"
   },
   {
     href: "/portal/store/payouts",
-    label: "Finance",
-    label_ar: "المالية",
-    description: "Track sales, commission, and net payable balance.",
+    label: "Payouts",
+    label_ar: "المستحقات",
+    icon: "💰"
   },
   {
-    href: "/portal/store/payout-requests",
-    label: "Payout requests",
-    label_ar: "طلبات التحويل",
-    description: "Request payout from available balance.",
-  },
-  {
-    href: "/portal/store/boost",
-    label: "Acceleration",
-    label_ar: "التسريع",
-    description: "Request paid visibility boost.",
+    href: "/portal/store/settings",
+    label: "Settings",
+    label_ar: "الإعدادات",
+    icon: "⚙️"
   },
 ];
 
