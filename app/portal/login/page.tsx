@@ -36,7 +36,7 @@ export default function PortalLoginPage() {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role, account_status")
-        .eq("auth_user_id", user.id)
+        .eq("id", user.id)
         .maybeSingle();
 
       if (profileError) {
