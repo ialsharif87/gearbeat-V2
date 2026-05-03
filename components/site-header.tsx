@@ -2,6 +2,7 @@ import Link from "next/link";
 import LanguageSwitcher from "./language-switcher";
 import T from "./t";
 import CartBadge from "./cart-badge";
+import NotificationBell from "./notification-bell";
 
 type SiteHeaderProps = {
   isLoggedIn: boolean;
@@ -58,9 +59,7 @@ export default function SiteHeader({
               <Link href={dashboardPath} className="gb-nav-link gb-nav-link-strong">
                 <T en="Dashboard" ar="لوحة التحكم" />
               </Link>
-              <Link href="/notifications" className="gb-nav-link">
-                <T en="Notifications" ar="التنبيهات" />
-              </Link>
+              <NotificationBell />
               {isVendor && (
                 <Link href="/portal/store" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
                   <T en="Vendor Portal" ar="بوابة التاجر" />
