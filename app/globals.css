@@ -6629,3 +6629,100 @@ body:has(.home-page) {
   .gb-dash-grid-3 { grid-template-columns: repeat(2, 1fr); }
   .gb-dash-grid-2 { grid-template-columns: 1fr; }
 }
+/* Patch 86G — Customer account layout safety */
+
+.gb-account-page,
+.gb-customer-page,
+.gb-dashboard-page {
+  width: min(100%, 1180px);
+  min-height: calc(100vh - 220px);
+  margin: 0 auto;
+  padding: 48px 20px 72px;
+}
+
+.gb-account-shell,
+.gb-customer-shell,
+.gb-dashboard-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.gb-account-header,
+.gb-customer-header,
+.gb-dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.gb-account-header > div,
+.gb-customer-header > div,
+.gb-dashboard-header > div {
+  min-width: 0;
+}
+
+.gb-account-header h1,
+.gb-customer-header h1,
+.gb-dashboard-header h1 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+.gb-account-empty,
+.gb-customer-empty,
+.gb-empty-state {
+  padding: 28px;
+  border-radius: 22px;
+  border: 1px dashed rgba(214, 179, 92, 0.28);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(245, 241, 232, 0.72);
+}
+
+.gb-account-grid,
+.gb-customer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.gb-account-card,
+.gb-customer-card {
+  display: grid;
+  gap: 10px;
+  min-height: 120px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+  color: inherit;
+  text-decoration: none;
+}
+
+.gb-account-card:hover,
+.gb-customer-card:hover {
+  border-color: rgba(214, 179, 92, 0.38);
+  background: rgba(214, 179, 92, 0.08);
+}
+
+@media (max-width: 760px) {
+  .gb-account-page,
+  .gb-customer-page,
+  .gb-dashboard-page {
+    min-height: calc(100vh - 180px);
+    padding: 32px 14px 56px;
+  }
+
+  .gb-account-header,
+  .gb-customer-header,
+  .gb-dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gb-account-grid,
+  .gb-customer-grid {
+    grid-template-columns: 1fr;
+  }
+}

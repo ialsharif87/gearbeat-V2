@@ -204,28 +204,19 @@ export default async function CustomerDashboardPage() {
     membershipNumber.replace("GB-", "REF-");
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="Customer Dashboard" ar="لوحة العميل" />
-          </span>
+          </p>
 
           <h1 style={{ marginTop: 10 }}>
             <T en="Welcome back" ar="أهلًا بعودتك" />,{" "}
             {profile.full_name || "Creator"}
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+          <p className="gb-muted-text" style={{ maxWidth: 760 }}>
             <T
               en="Manage your bookings, rewards, saved studios, saved gear, and account verification from one premium dashboard."
               ar="تابع حجوزاتك، مكافآتك، الاستوديوهات المحفوظة، المعدات المحفوظة، وحالة التحقق من حسابك من لوحة واحدة فخمة."
@@ -244,380 +235,383 @@ export default async function CustomerDashboardPage() {
         </div>
       </section>
 
+      <div className="gb-customer-shell">
+        <section style={{ marginTop: 28 }}>
+          <CustomerMembershipCard
+            fullName={profile.full_name}
+            membershipNumber={membershipNumber}
+            tierCode={wallet?.tier_code || "listener"}
+            pointsBalance={wallet?.points_balance || 0}
+            pendingPoints={wallet?.pending_points || 0}
+            walletBalance={wallet?.wallet_balance || 0}
+            currencyCode={currency}
+            referralCode={referralCode}
+            showRewardsLink={true}
+          />
+        </section>
 
-      <section style={{ marginTop: 28 }}>
-        <CustomerMembershipCard
-          fullName={profile.full_name}
-          membershipNumber={membershipNumber}
-          tierCode={wallet?.tier_code || "listener"}
-          pointsBalance={wallet?.points_balance || 0}
-          pendingPoints={wallet?.pending_points || 0}
-          walletBalance={wallet?.wallet_balance || 0}
-          currencyCode={currency}
-          referralCode={referralCode}
-          showRewardsLink={true}
-        />
-      </section>
-
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">🎙️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
-            </label>
-            <div className="stat-value">{upcomingBookings.length}</div>
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-icon">❤️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Saved Items" ar="المفضلة" />
-            </label>
-            <div className="stat-value">{favoriteRows.length}</div>
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-content">
-            <label>
-              <T en="Rewards Points" ar="نقاط المكافآت" />
-            </label>
-            <div className="stat-value">
-              {Number(wallet?.points_balance || 0).toLocaleString()}
+        <section className="gb-customer-grid" style={{ marginTop: 28 }}>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🎙️</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{upcomingBookings.length}</div>
             </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🪪</div>
-          <div className="stat-content">
-            <label>
-              <T en="Verification" ar="التحقق" />
-            </label>
-            <div className="stat-value" style={{ fontSize: "1rem" }}>
-              {profile.identity_verification_status || "not_started"}
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>❤️</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Saved Items" ar="المفضلة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{favoriteRows.length}</div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section
-        style={{
-          marginTop: 28,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.35fr) minmax(320px, 0.65fr)",
-          gap: 22,
-          alignItems: "start",
-        }}
-      >
-        <div style={{ display: "grid", gap: 22 }}>
-          <div className="card">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <div>
-                <h2>
-                  <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
-                </h2>
-                <p style={{ color: "var(--muted)" }}>
-                  <T
-                    en="Your current and upcoming studio sessions."
-                    ar="جلسات الاستوديو الحالية والقادمة."
-                  />
-                </p>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>⭐</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Rewards Points" ar="نقاط المكافآت" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {Number(wallet?.points_balance || 0).toLocaleString()}
               </div>
-
-              <Link href="/customer/bookings" className="btn">
-                <T en="View all" ar="عرض الكل" />
-              </Link>
             </div>
+          </div>
 
-            <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
-              {upcomingBookings.length === 0 ? (
-                <div
-                  style={{
-                    padding: 24,
-                    borderRadius: 16,
-                    background: "rgba(255,255,255,0.04)",
-                    textAlign: "center",
-                  }}
-                >
-                  <h3>
-                    <T en="No upcoming bookings" ar="لا توجد حجوزات قادمة" />
-                  </h3>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🪪</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Verification" ar="التحقق" />
+              </label>
+              <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {profile.identity_verification_status || "not_started"}
+              </div>
+            </div>
+          </div>
+        </section>
 
+        <section
+          style={{
+            marginTop: 28,
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.35fr) minmax(320px, 0.65fr)",
+            gap: 22,
+            alignItems: "start",
+          }}
+          className="gb-dashboard-stack"
+        >
+          <div style={{ display: "grid", gap: 22 }}>
+            <div className="card">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <h2>
+                    <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
+                  </h2>
                   <p style={{ color: "var(--muted)" }}>
                     <T
-                      en="Find your next creative space and start booking."
-                      ar="اكتشف مساحتك الإبداعية القادمة وابدأ الحجز."
+                      en="Your current and upcoming studio sessions."
+                      ar="جلسات الاستوديو الحالية والقادمة."
                     />
                   </p>
-
-                  <Link
-                    href="/studios"
-                    className="btn btn-primary"
-                    style={{ marginTop: 12 }}
-                  >
-                    <T en="Explore studios" ar="استكشف الاستوديوهات" />
-                  </Link>
                 </div>
-              ) : (
-                upcomingBookings.slice(0, 3).map((booking: any) => {
-                  const studio = Array.isArray(booking.studio)
-                    ? booking.studio[0]
-                    : booking.studio;
 
-                  const studioName =
-                    studio?.name_en ||
-                    studio?.name ||
-                    studio?.name_ar ||
-                    "Studio";
+                <Link href="/customer/bookings" className="btn">
+                  <T en="View all" ar="عرض الكل" />
+                </Link>
+              </div>
 
-                  const location = [studio?.district, studio?.city_name || studio?.city]
-                    .filter(Boolean)
-                    .join(", ");
+              <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
+                {upcomingBookings.length === 0 ? (
+                  <div className="gb-empty-state" style={{ textAlign: "center" }}>
+                    <h3>
+                      <T en="No upcoming bookings" ar="لا توجد حجوزات قادمة" />
+                    </h3>
 
-                  return (
+                    <p style={{ color: "var(--muted)" }}>
+                      <T
+                        en="Find your next creative space and start booking."
+                        ar="اكتشف مساحتك الإبداعية القادمة وابدأ الحجز."
+                      />
+                    </p>
+
+                    <Link
+                      href="/studios"
+                      className="btn btn-primary"
+                      style={{ marginTop: 12 }}
+                    >
+                      <T en="Explore studios" ar="استكشف الاستوديوهات" />
+                    </Link>
+                  </div>
+                ) : (
+                  upcomingBookings.slice(0, 3).map((booking: any) => {
+                    const studio = Array.isArray(booking.studio)
+                      ? booking.studio[0]
+                      : booking.studio;
+
+                    const studioName =
+                      studio?.name_en ||
+                      studio?.name ||
+                      studio?.name_ar ||
+                      "Studio";
+
+                    const location = [studio?.district, studio?.city_name || studio?.city]
+                      .filter(Boolean)
+                      .join(", ");
+
+                    return (
+                      <div
+                        key={booking.id}
+                        style={{
+                          padding: 16,
+                          borderRadius: 16,
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          background: "rgba(255,255,255,0.04)",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 14,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <div>
+                          <h3>{studioName}</h3>
+                          <p style={{ color: "var(--muted)", marginTop: 4 }}>
+                            {formatDate(booking.booking_date || booking.created_at)}
+                            {booking.start_time ? ` · ${booking.start_time}` : ""}
+                            {booking.end_time ? ` - ${booking.end_time}` : ""}
+                          </p>
+                          {location ? (
+                            <p style={{ color: "var(--muted)", marginTop: 4 }}>
+                              {location}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div style={{ textAlign: "right" }}>
+                          <span className="badge">{booking.status || "pending"}</span>
+                          <div style={{ marginTop: 8, fontWeight: 700 }}>
+                            {formatMoney(booking.total_amount, currency)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div className="card">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <h2>
+                    <T en="Offers for you" ar="عروض لك" />
+                  </h2>
+                  <p style={{ color: "var(--muted)" }}>
+                    <T
+                      en="Featured offers, coupons, and rewards."
+                      ar="عروض مميزة، قسائم، ومكافآت."
+                    />
+                  </p>
+                </div>
+
+                <Link href="/offers" className="btn">
+                  <T en="All offers" ar="كل العروض" />
+                </Link>
+              </div>
+
+              <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
+                {offerRows.length === 0 ? (
+                  <p style={{ color: "var(--muted)" }}>
+                    <T
+                      en="Offers will appear here soon."
+                      ar="ستظهر العروض هنا قريبًا."
+                    />
+                  </p>
+                ) : (
+                  offerRows.map((offer: any) => (
                     <div
-                      key={booking.id}
+                      key={offer.id}
                       style={{
                         padding: 16,
                         borderRadius: 16,
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        background: "rgba(255,255,255,0.04)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: 14,
-                        flexWrap: "wrap",
+                        border: "1px solid rgba(207,167,98,0.18)",
+                        background: "rgba(207,167,98,0.08)",
                       }}
                     >
-                      <div>
-                        <h3>{studioName}</h3>
-                        <p style={{ color: "var(--muted)", marginTop: 4 }}>
-                          {formatDate(booking.booking_date || booking.created_at)}
-                          {booking.start_time ? ` · ${booking.start_time}` : ""}
-                          {booking.end_time ? ` - ${booking.end_time}` : ""}
-                        </p>
-                        {location ? (
-                          <p style={{ color: "var(--muted)", marginTop: 4 }}>
-                            {location}
-                          </p>
-                        ) : null}
-                      </div>
+                      <span className="badge badge-gold">
+                        {offer.offer_type || "offer"}
+                      </span>
 
-                      <div style={{ textAlign: "right" }}>
-                        <span className="badge">{booking.status || "pending"}</span>
-                        <div style={{ marginTop: 8, fontWeight: 700 }}>
-                          {formatMoney(booking.total_amount, currency)}
-                        </div>
-                      </div>
+                      <h3 style={{ marginTop: 10 }}>
+                        {offer.title_en || offer.title_ar}
+                      </h3>
+
+                      <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
+                        {offer.description_en ||
+                          offer.description_ar ||
+                          "Special GearBeat offer."}
+                      </p>
                     </div>
-                  );
-                })
-              )}
+                  ))
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="card">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <div>
-                <h2>
-                  <T en="Offers for you" ar="عروض لك" />
-                </h2>
-                <p style={{ color: "var(--muted)" }}>
-                  <T
-                    en="Featured offers, coupons, and rewards."
-                    ar="عروض مميزة، قسائم، ومكافآت."
-                  />
-                </p>
+          <aside style={{ display: "grid", gap: 22 }}>
+            <section className="card">
+              <div className="gb-card-header">
+                <div>
+                  <p className="gb-eyebrow">Quick access</p>
+                  <h2>
+                    <T en="Account Links" ar="روابط الحساب" />
+                  </h2>
+                  <p className="gb-muted-text">
+                    <T en="Open your most important account pages quickly." ar="افتح أهم صفحات حسابك بسرعة." />
+                  </p>
+                </div>
               </div>
 
-              <Link href="/offers" className="btn">
-                <T en="All offers" ar="كل العروض" />
-              </Link>
-            </div>
+              <div className="gb-customer-grid" style={{ marginTop: 16 }}>
+                <Link href="/customer/bookings" className="gb-customer-card">
+                  <strong><T en="My Bookings" ar="حجوزاتي" /></strong>
+                  <span className="gb-muted-text"><T en="View studio bookings." ar="عرض حجوزات الاستوديو." /></span>
+                </Link>
 
-            <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
-              {offerRows.length === 0 ? (
-                <p style={{ color: "var(--muted)" }}>
-                  <T
-                    en="Offers will appear here soon."
-                    ar="ستظهر العروض هنا قريبًا."
-                  />
-                </p>
-              ) : (
-                offerRows.map((offer: any) => (
-                  <div
-                    key={offer.id}
-                    style={{
-                      padding: 16,
-                      borderRadius: 16,
-                      border: "1px solid rgba(207,167,98,0.18)",
-                      background: "rgba(207,167,98,0.08)",
-                    }}
-                  >
-                    <span className="badge badge-gold">
-                      {offer.offer_type || "offer"}
-                    </span>
+                <Link href="/customer/marketplace-orders" className="gb-customer-card">
+                  <strong><T en="My Orders" ar="طلباتي" /></strong>
+                  <span className="gb-muted-text"><T en="View marketplace orders." ar="عرض طلبات السوق." /></span>
+                </Link>
 
-                    <h3 style={{ marginTop: 10 }}>
-                      {offer.title_en || offer.title_ar}
-                    </h3>
+                <Link href="/customer/payments" className="gb-customer-card">
+                  <strong><T en="Payments" ar="المدفوعات والإيصالات" /></strong>
+                  <span className="gb-muted-text"><T en="View payment history." ar="عرض سجل المدفوعات." /></span>
+                </Link>
 
-                    <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-                      {offer.description_en ||
-                        offer.description_ar ||
-                        "Special GearBeat offer."}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+                <Link href="/customer/rewards" className="gb-customer-card">
+                  <strong><T en="Rewards" ar="المكافآت" /></strong>
+                  <span className="gb-muted-text"><T en="View points and benefits." ar="عرض نقاطك ومزاياك." /></span>
+                </Link>
+              </div>
+            </section>
 
-        <aside style={{ display: "grid", gap: 22 }}>
-          <div className="card">
-            <h2>
-              <T en="Account Verification" ar="توثيق الحساب" />
-            </h2>
+            <div className="card">
+              <h2>
+                <T en="Account Verification" ar="توثيق الحساب" />
+              </h2>
 
-            <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-              <T
-                en="Verified customers may unlock better trust, faster bookings, and future loyalty benefits."
-                ar="توثيق الحساب قد يفتح مزايا ثقة أعلى، حجوزات أسرع، ومزايا ولاء مستقبلية."
-              />
-            </p>
+              <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
+                <T
+                  en="Verified customers may unlock better trust, faster bookings, and future loyalty benefits."
+                  ar="توثيق الحساب قد يفتح مزايا ثقة أعلى، حجوزات أسرع، ومزايا ولاء مستقبلية."
+                />
+              </p>
 
-            <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-              <span className={profile.email_verified ? "badge badge-success" : "badge"}>
-                {profile.email_verified ? "✓" : "○"} Email verified
-              </span>
+              <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
+                <span className={profile.email_verified ? "badge badge-success" : "badge"}>
+                  {profile.email_verified ? "✓" : "○"} Email verified
+                </span>
 
-              <span className={profile.phone_verified ? "badge badge-success" : "badge"}>
-                {profile.phone_verified ? "✓" : "○"} Phone verified
-              </span>
+                <span className={profile.phone_verified ? "badge badge-success" : "badge"}>
+                  {profile.phone_verified ? "✓" : "○"} Phone verified
+                </span>
 
-              <span
-                className={
-                  profile.identity_verification_status === "verified"
-                    ? "badge badge-success"
-                    : "badge"
-                }
+                <span
+                  className={
+                    profile.identity_verification_status === "verified"
+                      ? "badge badge-success"
+                      : "badge"
+                  }
+                >
+                  {profile.identity_verification_status === "verified" ? "✓" : "○"}{" "}
+                  Identity {profile.identity_verification_status || "not_started"}
+                </span>
+              </div>
+
+              <Link
+                href="/customer/verification"
+                className="btn btn-primary"
+                style={{ marginTop: 18 }}
               >
-                {profile.identity_verification_status === "verified" ? "✓" : "○"}{" "}
-                Identity {profile.identity_verification_status || "not_started"}
-              </span>
-            </div>
-
-            <Link
-              href="/customer/verification"
-              className="btn btn-primary"
-              style={{ marginTop: 18 }}
-            >
-              <T en="Manage verification" ar="إدارة التحقق" />
-            </Link>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Saved" ar="المفضلة" />
-            </h2>
-
-            <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-              <T
-                en="Your saved studios, gear, and vendors will appear here."
-                ar="ستظهر هنا الاستوديوهات والمعدات والتجار المحفوظة."
-              />
-            </p>
-
-            <div style={{ marginTop: 16, display: "grid", gap: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Studios</span>
-                <strong>
-                  {
-                    favoriteRows.filter(
-                      (item: any) => item.favorite_type === "studio"
-                    ).length
-                  }
-                </strong>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Gear</span>
-                <strong>
-                  {
-                    favoriteRows.filter(
-                      (item: any) => item.favorite_type === "product"
-                    ).length
-                  }
-                </strong>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Vendors</span>
-                <strong>
-                  {
-                    favoriteRows.filter(
-                      (item: any) => item.favorite_type === "vendor"
-                    ).length
-                  }
-                </strong>
-              </div>
-            </div>
-
-            <Link href="/customer/saved" className="btn" style={{ marginTop: 18 }}>
-              <T en="Open saved" ar="فتح المفضلة" />
-            </Link>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Quick Actions" ar="إجراءات سريعة" />
-            </h2>
-
-            <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-              <Link href="/studios" className="btn">
-                <T en="Book a studio" ar="احجز استوديو" />
-              </Link>
-
-              <Link href="/marketplace" className="btn">
-                <T en="Shop gear" ar="تسوق المعدات" />
-              </Link>
-
-              <Link href="/customer/payments" className="btn">
-                <T en="Payments & receipts" ar="المدفوعات والإيصالات" />
-              </Link>
-
-              <Link href="/customer/rewards" className="btn">
-                <T en="Rewards" ar="المكافآت" />
-              </Link>
-
-              <Link href="/help" className="btn">
-                <T en="Help & Support" ar="المساعدة والدعم" />
+                <T en="Manage verification" ar="إدارة التحقق" />
               </Link>
             </div>
-          </div>
-        </aside>
-      </section>
+
+            <div className="card">
+              <h2>
+                <T en="Saved" ar="المفضلة" />
+              </h2>
+
+              <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
+                <T
+                  en="Your saved studios, gear, and vendors will appear here."
+                  ar="ستظهر هنا الاستوديوهات والمعدات والتجار المحفوظة."
+                />
+              </p>
+
+              <div style={{ marginTop: 16, display: "grid", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Studios</span>
+                  <strong>
+                    {
+                      favoriteRows.filter(
+                        (item: any) => item.favorite_type === "studio"
+                      ).length
+                    }
+                  </strong>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Gear</span>
+                  <strong>
+                    {
+                      favoriteRows.filter(
+                        (item: any) => item.favorite_type === "product"
+                      ).length
+                    }
+                  </strong>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Vendors</span>
+                  <strong>
+                    {
+                      favoriteRows.filter(
+                        (item: any) => item.favorite_type === "vendor"
+                      ).length
+                    }
+                  </strong>
+                </div>
+              </div>
+
+              <Link href="/customer/saved" className="btn" style={{ marginTop: 18 }}>
+                <T en="Open saved" ar="فتح المفضلة" />
+              </Link>
+            </div>
+          </aside>
+        </section>
+      </div>
     </main>
   );
 }

@@ -361,27 +361,18 @@ export default async function CustomerBookingsPage() {
   const cancelledBookings = bookingRows.filter(isCancelledBooking);
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="My Bookings" ar="حجوزاتي" />
-          </span>
+          </p>
 
           <h1 style={{ marginTop: 10 }}>
             <T en="Studio booking history" ar="سجل حجوزات الاستوديو" />
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+          <p className="gb-muted-text" style={{ maxWidth: 760 }}>
             <T
               en="Track your active, upcoming, past, and cancelled studio bookings."
               ar="تابع حجوزاتك الحالية والقادمة والسابقة والملغاة."
@@ -400,92 +391,94 @@ export default async function CustomerBookingsPage() {
         </div>
       </section>
 
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">🟢</div>
-          <div className="stat-content">
-            <label>
-              <T en="Active" ar="حالية" />
-            </label>
-            <div className="stat-value">{activeBookings.length}</div>
+      <div className="gb-customer-shell">
+        <section className="gb-customer-grid">
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🟢</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Active" ar="حالية" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{activeBookings.length}</div>
+            </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <label>
-              <T en="Upcoming" ar="قادمة" />
-            </label>
-            <div className="stat-value">{upcomingBookings.length}</div>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>📅</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Upcoming" ar="قادمة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{upcomingBookings.length}</div>
+            </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🎧</div>
-          <div className="stat-content">
-            <label>
-              <T en="Past" ar="سابقة" />
-            </label>
-            <div className="stat-value">{pastBookings.length}</div>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🎧</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Past" ar="سابقة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{pastBookings.length}</div>
+            </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">✕</div>
-          <div className="stat-content">
-            <label>
-              <T en="Cancelled" ar="ملغاة" />
-            </label>
-            <div className="stat-value">{cancelledBookings.length}</div>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>✕</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Cancelled" ar="ملغاة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{cancelledBookings.length}</div>
+            </div>
           </div>
+        </section>
+
+        <div style={{ display: "grid", gap: 24 }}>
+          <BookingSection
+            titleEn="Active bookings"
+            titleAr="الحجوزات الحالية"
+            descriptionEn="Bookings currently in progress or checked in."
+            descriptionAr="الحجوزات النشطة حاليًا أو التي تم تسجيل الدخول لها."
+            bookings={activeBookings}
+            currency={currency}
+            emptyEn="No active bookings right now."
+            emptyAr="لا توجد حجوزات حالية الآن."
+          />
+
+          <BookingSection
+            titleEn="Upcoming bookings"
+            titleAr="الحجوزات القادمة"
+            descriptionEn="Your confirmed and pending future studio sessions."
+            descriptionAr="جلسات الاستوديو القادمة المؤكدة أو المعلقة."
+            bookings={upcomingBookings}
+            currency={currency}
+            emptyEn="No upcoming bookings yet."
+            emptyAr="لا توجد حجوزات قادمة بعد."
+          />
+
+          <BookingSection
+            titleEn="Past bookings"
+            titleAr="الحجوزات السابقة"
+            descriptionEn="Your completed studio sessions."
+            descriptionAr="جلسات الاستوديو المكتملة."
+            bookings={pastBookings}
+            currency={currency}
+            emptyEn="No past bookings yet."
+            emptyAr="لا توجد حجوزات سابقة بعد."
+          />
+
+          <BookingSection
+            titleEn="Cancelled bookings"
+            titleAr="الحجوزات الملغاة"
+            descriptionEn="Cancelled or refunded bookings."
+            descriptionAr="الحجوزات الملغاة أو المستردة."
+            bookings={cancelledBookings}
+            currency={currency}
+            emptyEn="No cancelled bookings."
+            emptyAr="لا توجد حجوزات ملغاة."
+          />
         </div>
-      </section>
-
-      <div style={{ marginTop: 28, display: "grid", gap: 24 }}>
-        <BookingSection
-          titleEn="Active bookings"
-          titleAr="الحجوزات الحالية"
-          descriptionEn="Bookings currently in progress or checked in."
-          descriptionAr="الحجوزات النشطة حاليًا أو التي تم تسجيل الدخول لها."
-          bookings={activeBookings}
-          currency={currency}
-          emptyEn="No active bookings right now."
-          emptyAr="لا توجد حجوزات حالية الآن."
-        />
-
-        <BookingSection
-          titleEn="Upcoming bookings"
-          titleAr="الحجوزات القادمة"
-          descriptionEn="Your confirmed and pending future studio sessions."
-          descriptionAr="جلسات الاستوديو القادمة المؤكدة أو المعلقة."
-          bookings={upcomingBookings}
-          currency={currency}
-          emptyEn="No upcoming bookings yet."
-          emptyAr="لا توجد حجوزات قادمة بعد."
-        />
-
-        <BookingSection
-          titleEn="Past bookings"
-          titleAr="الحجوزات السابقة"
-          descriptionEn="Your completed studio sessions."
-          descriptionAr="جلسات الاستوديو المكتملة."
-          bookings={pastBookings}
-          currency={currency}
-          emptyEn="No past bookings yet."
-          emptyAr="لا توجد حجوزات سابقة بعد."
-        />
-
-        <BookingSection
-          titleEn="Cancelled bookings"
-          titleAr="الحجوزات الملغاة"
-          descriptionEn="Cancelled or refunded bookings."
-          descriptionAr="الحجوزات الملغاة أو المستردة."
-          bookings={cancelledBookings}
-          currency={currency}
-          emptyEn="No cancelled bookings."
-          emptyAr="لا توجد حجوزات ملغاة."
-        />
       </div>
     </main>
   );

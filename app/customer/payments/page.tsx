@@ -322,8 +322,8 @@ export default async function CustomerPaymentsPage() {
   );
 
   return (
-    <main className="gb-dashboard-page">
-      <section className="gb-dashboard-header">
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
           <p className="gb-eyebrow">Customer dashboard</p>
           <h1>Payments & Receipts</h1>
@@ -333,12 +333,14 @@ export default async function CustomerPaymentsPage() {
           </p>
         </div>
 
-        <Link href="/customer" className="gb-button gb-button-secondary">
+        <Link href="/customer" className="btn">
           Back to customer dashboard
         </Link>
       </section>
 
-      <CustomerPaymentsReport rows={rows} />
+      <div className="gb-customer-shell">
+        <CustomerPaymentsReport rows={rows} />
+      </div>
     </main>
   );
 }

@@ -99,27 +99,18 @@ export default async function CustomerMarketplaceOrdersPage() {
   }
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1160, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="Marketplace Orders" ar="طلبات المتجر" />
-          </span>
+          </p>
 
           <h1 style={{ marginTop: 10 }}>
             <T en="My marketplace orders" ar="طلباتي من المتجر" />
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+          <p className="gb-muted-text">
             <T
               en="Track your marketplace equipment orders."
               ar="تابع طلبات معدات المتجر الخاصة بك."
@@ -132,94 +123,96 @@ export default async function CustomerMarketplaceOrdersPage() {
         </Link>
       </section>
 
-      <section style={{ marginTop: 26, display: "grid", gap: 18 }}>
-        {!orders || orders.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", padding: 34 }}>
-            <h2>
-              <T en="No marketplace orders yet" ar="لا توجد طلبات متجر بعد" />
-            </h2>
-            <p style={{ color: "var(--muted)" }}>
-              <T
-                en="Your marketplace orders will appear here after checkout."
-                ar="ستظهر طلبات المتجر هنا بعد إتمام الطلب."
-              />
-            </p>
-          </div>
-        ) : (
-          orders.map((order: any) => (
-            <article key={order.id} className="card" style={{ display: "grid", gap: 16 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 14,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div>
-                  <h2 style={{ margin: 0 }}>{order.order_number || order.id}</h2>
-                  <p style={{ color: "var(--muted)", margin: "6px 0 0" }}>
-                    {formatDate(order.created_at)}
-                  </p>
-                </div>
-
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span className={getBadgeClass(order.status)}>
-                    {order.status}
-                  </span>
-                  <span className={getBadgeClass(order.payment_status)}>
-                    {order.payment_status}
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display: "grid", gap: 10 }}>
-                {(order.items || []).map((item: any) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      padding: 12,
-                      borderRadius: 14,
-                      background: "rgba(255,255,255,0.035)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div>
-                      <strong>{getProductName(item.product_snapshot)}</strong>
-                      <p style={{ color: "var(--muted)", margin: "4px 0 0" }}>
-                        Qty: {item.quantity} · {item.status}
-                      </p>
-                    </div>
-
-                    <strong>
-                      {formatMoney(item.total_amount, order.currency_code || "SAR")}
-                    </strong>
+      <div className="gb-customer-shell">
+        <section style={{ display: "grid", gap: 18 }}>
+          {!orders || orders.length === 0 ? (
+            <div className="gb-empty-state" style={{ textAlign: "center", padding: 34 }}>
+              <h2>
+                <T en="No marketplace orders yet" ar="لا توجد طلبات متجر بعد" />
+              </h2>
+              <p style={{ color: "var(--muted)" }}>
+                <T
+                  en="Your marketplace orders will appear here after checkout."
+                  ar="ستظهر طلبات المتجر هنا بعد إتمام الطلب."
+                />
+              </p>
+            </div>
+          ) : (
+            orders.map((order: any) => (
+              <article key={order.id} className="card" style={{ display: "grid", gap: 16 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 14,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <h2 style={{ margin: 0 }}>{order.order_number || order.id}</h2>
+                    <p style={{ color: "var(--muted)", margin: "6px 0 0" }}>
+                      {formatDate(order.created_at)}
+                    </p>
                   </div>
-                ))}
-              </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  flexWrap: "wrap",
-                  borderTop: "1px solid rgba(255,255,255,0.08)",
-                  paddingTop: 14,
-                }}
-              >
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Total" ar="الإجمالي" />
-                </span>
-                <strong>{formatMoney(order.total_amount, order.currency_code)}</strong>
-              </div>
-            </article>
-          ))
-        )}
-      </section>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <span className={getBadgeClass(order.status)}>
+                      {order.status}
+                    </span>
+                    <span className={getBadgeClass(order.payment_status)}>
+                      {order.payment_status}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  {(order.items || []).map((item: any) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        padding: 12,
+                        borderRadius: 14,
+                        background: "rgba(255,255,255,0.035)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <div>
+                        <strong>{getProductName(item.product_snapshot)}</strong>
+                        <p style={{ color: "var(--muted)", margin: "4px 0 0" }}>
+                          Qty: {item.quantity} · {item.status}
+                        </p>
+                      </div>
+
+                      <strong>
+                        {formatMoney(item.total_amount, order.currency_code || "SAR")}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    flexWrap: "wrap",
+                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                    paddingTop: 14,
+                  }}
+                >
+                  <span style={{ color: "var(--muted)" }}>
+                    <T en="Total" ar="الإجمالي" />
+                  </span>
+                  <strong>{formatMoney(order.total_amount, order.currency_code)}</strong>
+                </div>
+              </article>
+            ))
+          )}
+        </section>
+      </div>
     </main>
   );
 }
