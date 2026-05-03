@@ -128,9 +128,9 @@ export default async function VendorFinancePage() {
       grossAmount,
       commissionAmount,
       netPayable,
-      status: order.status,
-      paymentStatus: order.payment_status,
-      createdAt: order.created_at
+      status: readText(order, ["status"]),
+      paymentStatus: readText(order, ["payment_status"]),
+      createdAt: readText(order, ["created_at"])
     };
   });
 
