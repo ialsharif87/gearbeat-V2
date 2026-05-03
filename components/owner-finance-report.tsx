@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import T from "./t";
 
 export type OwnerFinanceRow = {
   id: string;
@@ -243,11 +244,17 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
       <section className="gb-card">
         <div className="gb-card-header">
           <div>
-            <p className="gb-eyebrow">Owner finance</p>
-            <h2>Studio booking finance summary</h2>
+            <p className="gb-eyebrow">
+              <T en="Finance" ar="المالية" />
+            </p>
+            <h2>
+              <T en="Finance Summary" ar="ملخص مالي" />
+            </h2>
             <p className="gb-muted-text">
-              Review your studio booking revenue, GearBeat commission, and
-              estimated net payable balance.
+              <T
+                en="Track your studio booking revenue, GearBeat commission, and estimated net payable balance."
+                ar="تابع إيرادات حجوزات استوديوك وعمولة GearBeat والرصيد الصافي المستحق."
+              />
             </p>
           </div>
 
@@ -257,43 +264,57 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
             onClick={() => downloadCsv(filteredRows)}
             disabled={filteredRows.length === 0}
           >
-            Export CSV
+            <T en="Export CSV" ar="تصدير CSV" />
           </button>
         </div>
 
         <div className="gb-kpi-grid">
           <div className="gb-kpi-card">
-            <span>Gross booking revenue</span>
+            <span>
+              <T en="Gross Revenue" ar="الإيراد الإجمالي" />
+            </span>
             <strong>{formatMoney(summary.grossAmount, "SAR")}</strong>
           </div>
 
           <div className="gb-kpi-card">
-            <span>GearBeat commission</span>
+            <span>
+              <T en="GearBeat Commission" ar="عمولة GearBeat" />
+            </span>
             <strong>{formatMoney(summary.commissionAmount, "SAR")}</strong>
           </div>
 
           <div className="gb-kpi-card">
-            <span>Net payable</span>
+            <span>
+              <T en="Net Payable" ar="الصافي المستحق" />
+            </span>
             <strong>{formatMoney(summary.netPayable, "SAR")}</strong>
           </div>
 
           <div className="gb-kpi-card">
-            <span>Total bookings</span>
+            <span>
+              <T en="Total Bookings" ar="إجمالي الحجوزات" />
+            </span>
             <strong>{summary.bookingCount}</strong>
           </div>
 
           <div className="gb-kpi-card">
-            <span>Paid bookings</span>
+            <span>
+              <T en="Paid Bookings" ar="حجوزات مدفوعة" />
+            </span>
             <strong>{summary.paidBookings}</strong>
           </div>
 
           <div className="gb-kpi-card">
-            <span>Pending bookings</span>
+            <span>
+              <T en="Pending Bookings" ar="حجوزات معلقة" />
+            </span>
             <strong>{summary.pendingBookings}</strong>
           </div>
 
           <div className="gb-kpi-card">
-            <span>Cancelled/refunded</span>
+            <span>
+              <T en="Cancelled/Refunded" ar="ملغية/مستردة" />
+            </span>
             <strong>{summary.cancelledBookings}</strong>
           </div>
         </div>
@@ -302,20 +323,28 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
       <section className="gb-card">
         <div className="gb-card-header">
           <div>
-            <p className="gb-eyebrow">Filters</p>
-            <h2>Finance filters</h2>
+            <p className="gb-eyebrow">
+              <T en="Filters" ar="الفلاتر" />
+            </p>
+            <h2>
+              <T en="Filters" ar="الفلاتر" />
+            </h2>
           </div>
         </div>
 
         <div className="gb-form-grid">
           <label>
-            <span>Studio</span>
+            <span>
+              <T en="Studio" ar="الاستوديو" />
+            </span>
             <select
               className="gb-input"
               value={studioFilter}
               onChange={(event) => setStudioFilter(event.target.value)}
             >
-              <option value="all">All studios</option>
+              <option value="all">
+                <T en="All studios" ar="كل الاستوديوهات" />
+              </option>
               {studios.map((studio) => (
                 <option key={studio.id} value={studio.id}>
                   {studio.name}
@@ -325,13 +354,17 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
           </label>
 
           <label>
-            <span>Payment status</span>
+            <span>
+              <T en="Payment status" ar="حالة الدفع" />
+            </span>
             <select
               className="gb-input"
               value={paymentFilter}
               onChange={(event) => setPaymentFilter(event.target.value)}
             >
-              <option value="all">All payment statuses</option>
+              <option value="all">
+                <T en="All statuses" ar="كل الحالات" />
+              </option>
               {paymentStatuses.map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -345,26 +378,47 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
       <section className="gb-card">
         <div className="gb-card-header">
           <div>
-            <p className="gb-eyebrow">Studio summary</p>
-            <h2>Finance by studio</h2>
+            <p className="gb-eyebrow">
+              <T en="Studio Summary" ar="ملخص الاستوديو" />
+            </p>
+            <h2>
+              <T en="By Studio" ar="حسب الاستوديو" />
+            </h2>
           </div>
         </div>
 
         {studioSummary.length === 0 ? (
           <div className="gb-empty-state">
-            <h3>No studio finance records found</h3>
-            <p>Your studio booking finance records will appear here.</p>
+            <h3>
+              <T en="No records yet" ar="لا توجد سجلات بعد" />
+            </h3>
+            <p>
+              <T
+                en="Your studio booking finance records will appear here."
+                ar="ستظهر سجلات مالية حجوزات استوديوك هنا."
+              />
+            </p>
           </div>
         ) : (
           <div className="gb-table-wrap">
             <table className="gb-table">
               <thead>
                 <tr>
-                  <th>Studio</th>
-                  <th>Bookings</th>
-                  <th>Gross</th>
-                  <th>Commission</th>
-                  <th>Net payable</th>
+                  <th>
+                    <T en="Studio" ar="الاستوديو" />
+                  </th>
+                  <th>
+                    <T en="Bookings" ar="الحجوزات" />
+                  </th>
+                  <th>
+                    <T en="Gross" ar="الإجمالي" />
+                  </th>
+                  <th>
+                    <T en="Commission" ar="العمولة" />
+                  </th>
+                  <th>
+                    <T en="Net payable" ar="الصافي المستحق" />
+                  </th>
                 </tr>
               </thead>
 
@@ -389,8 +443,12 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
       <section className="gb-card">
         <div className="gb-card-header">
           <div>
-            <p className="gb-eyebrow">Booking finance</p>
-            <h2>Booking-level breakdown</h2>
+            <p className="gb-eyebrow">
+              <T en="Booking Finance" ar="مالية الحجوزات" />
+            </p>
+            <h2>
+              <T en="Booking Breakdown" ar="تفاصيل الحجوزات" />
+            </h2>
             <p className="gb-muted-text">
               This report is estimated from bookings and commission settings.
               Actual payout processing will be handled in a later settlement
@@ -401,22 +459,45 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
 
         {filteredRows.length === 0 ? (
           <div className="gb-empty-state">
-            <h3>No booking finance records found</h3>
-            <p>Your studio booking finance records will appear here.</p>
+            <h3>
+              <T en="No records yet" ar="لا توجد سجلات بعد" />
+            </h3>
+            <p>
+              <T
+                en="Your studio booking finance records will appear here."
+                ar="ستظهر سجلات مالية حجوزات استوديوك هنا."
+              />
+            </p>
           </div>
         ) : (
           <div className="gb-table-wrap">
             <table className="gb-table">
               <thead>
                 <tr>
-                  <th>Booking</th>
-                  <th>Studio</th>
-                  <th>Gross</th>
-                  <th>Commission</th>
-                  <th>Net payable</th>
-                  <th>Payment</th>
-                  <th>Status</th>
-                  <th>Start</th>
+                  <th>
+                    <T en="Booking" ar="الحجز" />
+                  </th>
+                  <th>
+                    <T en="Studio" ar="الاستوديو" />
+                  </th>
+                  <th>
+                    <T en="Gross" ar="الإجمالي" />
+                  </th>
+                  <th>
+                    <T en="Commission" ar="العمولة" />
+                  </th>
+                  <th>
+                    <T en="Net payable" ar="الصافي المستحق" />
+                  </th>
+                  <th>
+                    <T en="Payment" ar="الدفع" />
+                  </th>
+                  <th>
+                    <T en="Status" ar="الحالة" />
+                  </th>
+                  <th>
+                    <T en="Start" ar="البداية" />
+                  </th>
                 </tr>
               </thead>
 

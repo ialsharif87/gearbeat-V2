@@ -9,6 +9,7 @@ import {
   readText,
   type DbRow,
 } from "@/lib/auth-guards";
+import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
@@ -269,16 +270,22 @@ export default async function OwnerFinancePage() {
     <main className="gb-dashboard-page">
       <section className="gb-dashboard-header">
         <div>
-          <p className="gb-eyebrow">Owner dashboard</p>
-          <h1>Finance</h1>
+          <p className="gb-eyebrow">
+            <T en="Owner Portal" ar="بوابة المالك" />
+          </p>
+          <h1>
+            <T en="Finance" ar="المالية" />
+          </h1>
           <p className="gb-muted-text">
-            Track your studio booking revenue, GearBeat commission, and
-            estimated net payable balance.
+            <T
+              en="Track your studio booking revenue, GearBeat commission, and estimated net payable balance."
+              ar="تابع إيرادات حجوزات استوديوك وعمولة GearBeat والرصيد الصافي المستحق."
+            />
           </p>
         </div>
 
         <Link href="/portal/studio" className="gb-button gb-button-secondary">
-          Back to owner dashboard
+          <T en="Back" ar="رجوع" />
         </Link>
       </section>
 
