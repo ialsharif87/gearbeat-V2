@@ -729,7 +729,7 @@ export default async function ManageStudioPage({
             multiple 
             className="input" 
             style={{ marginBottom: 16 }}
-            disabled={studioImages && studioImages.length >= 10}
+            disabled={!!studioImages && studioImages.length >= 10}
           />
           <button 
             type="submit" 
