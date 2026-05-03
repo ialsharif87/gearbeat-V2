@@ -72,3 +72,41 @@ BEGIN
 
     RAISE NOTICE 'Seed completed: Test studio created with ID %', v_studio_id;
 END $$;
+
+-- BOOST SYSTEM V2
+CREATE TABLE IF NOT EXISTS studio_boost_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  studio_id UUID NOT NULL REFERENCES studios(id) ON DELETE CASCADE,
+  owner_auth_user_id UUID NOT NULL,
+  base_commission_percent DECIMAL(5,2) NOT NULL DEFAULT 15.00,
+  boost_commission_percent DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  total_commission_percent DECIMAL(5,2) GENERATED ALWAYS AS 
+    (base_commission_percent + boost_commission_percent) STORED,
+  duration_days INTEGER NOT NULL CHECK (duration_days IN (7, 14, 30)),
+  starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ends_at TIMESTAMPTZ GENERATED ALWAYS AS 
+    (starts_at + (duration_days || ' days')::INTERVAL) STORED,
+  status TEXT DEFAULT 'active' 
+    CHECK (status IN ('active', 'expired', 'cancelled')),
+  terms_accepted BOOLEAN DEFAULT false,
+  terms_accepted_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE studio_boost_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Note: In a real migration these would be separate, but adding here for dev parity
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Owner can manage own boosts') THEN
+    CREATE POLICY "Owner can manage own boosts" 
+    ON studio_boost_subscriptions FOR ALL 
+    USING (owner_auth_user_id = auth.uid());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public can read active boosts') THEN
+    CREATE POLICY "Public can read active boosts"
+    ON studio_boost_subscriptions FOR SELECT
+    USING (status = 'active' AND ends_at > NOW());
+  END IF;
+END $$;

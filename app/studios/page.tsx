@@ -98,7 +98,8 @@ type StudioCardRow = {
   description?: string | null;
   is_featured?: boolean | null;
   completion_score?: number | null;
-  is_accelerated?: boolean;
+  is_boosted?: boolean;
+  total_boost_commission?: number;
   // Global / Location Standard fields
   country_code?: string | null;
   city_id?: string | null;
@@ -432,48 +433,46 @@ export default async function StudiosPage({
   let studiosList = (studios || []) as StudioCardRow[];
 
   if (!error) {
-    const { data: activeAccelerations } = await supabase
-      .from("studio_accelerations")
-      .select("studio_id, priority_score")
+    const { data: activeBoosts } = await supabase
+      .from("studio_boost_subscriptions")
+      .select("studio_id, total_commission_percent")
       .eq("status", "active")
-      .gte("end_date", new Date().toISOString());
+      .gt("ends_at", new Date().toISOString());
 
-    const accelerationMap = new Map<string, number>();
-    if (activeAccelerations) {
-      for (const acc of activeAccelerations) {
-        accelerationMap.set(acc.studio_id, acc.priority_score || 0);
+    const boostMap = new Map<string, number>();
+    if (activeBoosts) {
+      for (const boost of activeBoosts) {
+        boostMap.set(boost.studio_id, Number(boost.total_commission_percent || 0));
       }
     }
 
     if (sort === "newest") {
       studiosList.sort((a, b) => {
-        const aBoost = accelerationMap.has(a.id);
-        const bBoost = accelerationMap.has(b.id);
+        const aBoostScore = boostMap.get(a.id) || 0;
+        const bBoostScore = boostMap.get(b.id) || 0;
         
-        if (aBoost && !bBoost) return -1;
-        if (!aBoost && bBoost) return 1;
+        // Priority 1: Boosted studios (higher commission first)
+        if (aBoostScore !== bBoostScore) return bBoostScore - aBoostScore;
 
-        if (aBoost && bBoost) {
-          const aScore = accelerationMap.get(a.id)!;
-          const bScore = accelerationMap.get(b.id)!;
-          if (aScore !== bScore) return bScore - aScore;
-        }
-
+        // Priority 2: Featured studios (manual admin flag)
         if (a.is_featured && !b.is_featured) return -1;
         if (!a.is_featured && b.is_featured) return 1;
 
+        // Priority 3: Completion score
         const aComp = a.completion_score || 0;
         const bComp = b.completion_score || 0;
         if (aComp !== bComp) return bComp - aComp;
 
+        // Priority 4: Date
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
       });
     }
     
-    // Add is_accelerated flag to the objects for rendering badges
+    // Add flags for rendering badges
     studiosList = studiosList.map((studio) => ({
       ...studio,
-      is_accelerated: accelerationMap.has(studio.id)
+      is_boosted: boostMap.has(studio.id),
+      total_boost_commission: boostMap.get(studio.id)
     }));
   }
 
@@ -609,7 +608,7 @@ export default async function StudiosPage({
                   )}
 
                   <div className="studio-card-floating-badges">
-                    {studio.is_accelerated ? (
+                    {studio.is_boosted ? (
                       <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
                         <T en="Featured" ar="مميز" />
                       </span>
