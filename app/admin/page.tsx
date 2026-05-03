@@ -214,7 +214,7 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/settlements" className="nav-btn"><T en="Settlements" ar="التسويات" /></Link>
         </div>
         <div className="nav-row">
-          <Link href="/admin/leads" className="nav-btn"><T en="Leads" ar="الطلبات" /></Link>
+          <Link href="/admin/leads" className="nav-btn"><T en="Leads" ar="طلبات الانضمام" /></Link>
           <Link href="/admin/reviews" className="nav-btn"><T en="Reviews" ar="التقييمات" /></Link>
           <Link href="/admin/reports" className="nav-btn"><T en="Reports" ar="التقارير" /></Link>
         </div>
