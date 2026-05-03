@@ -4,8 +4,6 @@ import T from "@/components/t";
 import CustomerMembershipCard from "@/components/customer-membership-card";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import DashboardQuickLinks from "@/components/dashboard-quick-links";
-import { customerDashboardLinks } from "@/lib/dashboard-links";
 import { requireCustomerOrRedirect } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
@@ -246,12 +244,6 @@ export default async function CustomerDashboardPage() {
         </div>
       </section>
 
-      <DashboardQuickLinks
-        eyebrow="Customer navigation"
-        title="Customer quick links"
-        description="Access marketplace orders, marketplace browsing, and studio booking."
-        links={customerDashboardLinks}
-      />
 
       <section style={{ marginTop: 28 }}>
         <CustomerMembershipCard
