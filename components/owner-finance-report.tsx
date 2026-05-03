@@ -269,49 +269,49 @@ export default function OwnerFinanceReport({ rows }: OwnerFinanceReportProps) {
         </div>
 
         <div className="gb-kpi-grid">
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="Gross Revenue" ar="الإيراد الإجمالي" />
             </span>
             <strong>{formatMoney(summary.grossAmount, "SAR")}</strong>
           </div>
 
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="GearBeat Commission" ar="عمولة GearBeat" />
             </span>
             <strong>{formatMoney(summary.commissionAmount, "SAR")}</strong>
           </div>
 
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="Net Payable" ar="الصافي المستحق" />
             </span>
             <strong>{formatMoney(summary.netPayable, "SAR")}</strong>
           </div>
 
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="Total Bookings" ar="إجمالي الحجوزات" />
             </span>
             <strong>{summary.bookingCount}</strong>
           </div>
 
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="Paid Bookings" ar="حجوزات مدفوعة" />
             </span>
             <strong>{summary.paidBookings}</strong>
           </div>
 
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="Pending Bookings" ar="حجوزات معلقة" />
             </span>
             <strong>{summary.pendingBookings}</strong>
           </div>
 
-          <div className="gb-kpi-card">
+          <div className="gb-kpi-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <T en="Cancelled/Refunded" ar="ملغية/مستردة" />
             </span>
