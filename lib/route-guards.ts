@@ -52,7 +52,7 @@ async function getProtectedContext(loginPath: string) {
     supabaseAdmin
       .from("profiles")
       .select("id, auth_user_id, email, full_name, phone, role, account_status")
-      .eq("auth_user_id", user.id)
+      .eq("id", user.id)
       .maybeSingle()
   ]);
 
