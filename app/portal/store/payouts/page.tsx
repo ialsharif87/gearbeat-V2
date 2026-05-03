@@ -119,9 +119,12 @@ export default async function VendorFinancePage() {
     const commissionAmount = grossAmount * (commissionRate / 100);
     const netPayable = grossAmount - commissionAmount;
 
+    const id = readText(order, ["id"]);
+    const orderNumber = readText(order, ["order_number"]);
+
     return {
-      id: order.id,
-      orderLabel: order.order_number || order.id.slice(0, 8),
+      id,
+      orderLabel: orderNumber || id.slice(0, 8),
       grossAmount,
       commissionAmount,
       netPayable,
