@@ -195,7 +195,13 @@ export default async function OwnerStudiosPage() {
 
                 <div className="studio-card-body">
                   <div className="actions" style={{ marginTop: 0 }}>
-                    <span className="badge">{studio.status}</span>
+                    <span className="badge">
+                      {studio.status === "approved" ? (
+                        <T en="Approved" ar="موافق عليه" />
+                      ) : (
+                        studio.status
+                      )}
+                    </span>
 
                     {studio.verified ? (
                       <span className="badge">
@@ -209,7 +215,11 @@ export default async function OwnerStudiosPage() {
 
                     <span className="badge">
                       <T en="Booking:" ar="الحجز:" />{" "}
-                      {studio.booking_enabled ? "On" : "Off"}
+                      {studio.booking_enabled ? (
+                        <T en="On" ar="مفعّل" />
+                      ) : (
+                        <T en="Off" ar="معطّل" />
+                      )}
                     </span>
                   </div>
 
@@ -244,12 +254,20 @@ export default async function OwnerStudiosPage() {
                     <div className="admin-badge-stack">
                       <span className="badge">
                         <T en="Owner compliance:" ar="امتثال المالك:" />{" "}
-                        {studio.owner_compliance_status || "incomplete"}
+                        {studio.owner_compliance_status === "approved" ? (
+                          <T en="Approved" ar="موافق عليه" />
+                        ) : (
+                          studio.owner_compliance_status || "incomplete"
+                        )}
                       </span>
 
                       <span className="badge">
                         <T en="Public status:" ar="حالة النشر:" />{" "}
-                        {studio.status}
+                        {studio.status === "approved" ? (
+                          <T en="Approved" ar="موافق عليه" />
+                        ) : (
+                          studio.status
+                        )}
                       </span>
                     </div>
                   </div>
