@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase/client";
 import T from "./t";
+import PortalNotificationBell from "./portal-notification-bell";
 
 type PortalSidebarProps = {
   role: "owner" | "studio_owner" | "vendor";
@@ -80,6 +81,7 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
       </nav>
 
       <div className="portal-sidebar-footer">
+        <PortalNotificationBell />
         <Link href="/help" className="portal-nav-link">
           <span className="icon">❓</span>
           <span className="label">
