@@ -144,6 +144,25 @@ export default function StudioBookingBox({
     setPayment(null);
 
     try {
+      // 1. Try Tap Payment first
+      const tapResponse = await fetch("/api/tap/create-charge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: booking.bookingId,
+          amount: booking.amount,
+          studioId,
+        }),
+      });
+
+      const tapData = await tapResponse.json().catch(() => ({}));
+
+      if (tapData.chargeUrl) {
+        window.location.href = tapData.chargeUrl;
+        return;
+      }
+
+      // 2. Fallback to manual payment if Tap is not configured or fails to provide a URL
       const response = await fetch("/api/checkout/manual-confirm", {
         method: "POST",
         headers: {
@@ -163,7 +182,9 @@ export default function StudioBookingBox({
       setPayment(data);
 
       if (data.ok && booking?.bookingId) {
-        router.push(`/studios/${studioSlug}/booking-confirmation?bookingId=${booking.bookingId}`);
+        router.push(
+          `/studios/${studioSlug}/booking-confirmation?bookingId=${booking.bookingId}`
+        );
       }
     } catch (error) {
       setPayment({
@@ -171,7 +192,7 @@ export default function StudioBookingBox({
         error:
           error instanceof Error
             ? error.message
-            : "Could not confirm manual payment.",
+            : "Could not confirm payment.",
       });
     } finally {
       setPaying(false);
