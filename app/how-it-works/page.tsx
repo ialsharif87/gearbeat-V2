@@ -23,7 +23,7 @@ export default function HowItWorksPage() {
       {/* For Customers */}
       <section style={{ marginBottom: 80 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--gb-gold)", color: "var(--gb-dark)", display: "flex", alignItems: "center", justifyCenter: "center", fontWeight: "bold", fontSize: "1.2rem", justifyContent: "center" }}>1</div>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--gb-gold)", color: "var(--gb-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.2rem" }}>1</div>
           <h2 style={{ fontSize: "2rem", margin: 0 }}>
             <T en="For Customers" ar="للعملاء" />
           </h2>
@@ -57,7 +57,7 @@ export default function HowItWorksPage() {
       {/* For Studios & Sellers */}
       <section style={{ marginBottom: 80 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--gb-blue, #209cff)", color: "white", display: "flex", alignItems: "center", justifyCenter: "center", fontWeight: "bold", fontSize: "1.2rem", justifyContent: "center" }}>2</div>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--gb-blue, #209cff)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.2rem" }}>2</div>
           <h2 style={{ fontSize: "2rem", margin: 0 }}>
             <T en="For Studios & Sellers" ar="للاستوديوهات والتجار" />
           </h2>
