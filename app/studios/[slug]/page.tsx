@@ -117,36 +117,39 @@ export default async function StudioDetailsPage({
     .from("studios")
     .select(`
       id,
-      slug,
+      owner_auth_user_id,
       name,
-      description,
+      slug,
       city,
       district,
       address,
-      address_line,
+      description,
+      price_from,
+      status,
+      verified,
+      cover_image_url,
+      created_at,
+      updated_at,
       google_maps_url,
       google_reviews_url,
       google_place_id,
       google_rating,
       google_user_ratings_total,
-      google_rating_last_synced_at,
-      tripadvisor_url,
-      tripadvisor_rating,
-      tripadvisor_reviews_total,
-      tripadvisor_rating_last_synced_at,
+      booking_enabled,
+      owner_compliance_required,
+      owner_compliance_status,
+      is_featured,
+      completion_score,
+      country_code,
+      city_id,
+      city_name,
+      address_line,
       latitude,
       longitude,
-      price_from,
-      cover_image_url,
-      verified,
-      verified_location,
-      instant_booking_enabled,
-      booking_enabled,
-      owner_compliance_status,
-      owner_auth_user_id,
-      owner_trust_summary,
       minimum_photos_required,
-      created_at
+      owner_trust_summary,
+      instant_booking_enabled,
+      verified_location
     `)
     .eq("slug", slug)
     .eq("status", "approved")
@@ -230,7 +233,7 @@ export default async function StudioDetailsPage({
   const timeWeightedAverage = weightedAverageByTime(reviewList);
 
   const studioName = studio.name || "Studio";
-  const displayCity = studio.city || "";
+  const displayCity = studio.city_name || studio.city || "";
   const displayLocation = [studio.district, displayCity].filter(Boolean).join(", ");
   const minimumPhotosRequired = Number(studio.minimum_photos_required || 6);
   const photoCount = studioImages?.length || 0;
@@ -354,16 +357,7 @@ export default async function StudioDetailsPage({
                   <T en="Capacity" ar="السعة" />
                 </span>
                 <strong style={{ display: "block", marginTop: 6 }}>
-                  {"—"}
-                </strong>
-              </div>
-
-              <div>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Size" ar="المساحة" />
-                </span>
-                <strong style={{ display: "block", marginTop: 6 }}>
-                  {"—"}
+                  {null}
                 </strong>
               </div>
 
@@ -464,7 +458,7 @@ export default async function StudioDetailsPage({
             </h2>
 
             <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
-              {[studio.address_line, studio.district, studio.city]
+              {[studio.address_line, studio.district, studio.city_name || studio.city]
                 .filter(Boolean)
                 .join(", ") || "Location details coming soon."}
             </p>
@@ -474,7 +468,7 @@ export default async function StudioDetailsPage({
                 googleMapsUrl={studio.google_maps_url}
                 latitude={studio.latitude}
                 longitude={studio.longitude}
-                cityName={studio.city}
+                cityName={studio.city_name || studio.city}
                 district={studio.district}
                 addressLine={studio.address_line}
                 mode="directions"
@@ -574,7 +568,7 @@ export default async function StudioDetailsPage({
               googleMapsUrl={studio.google_maps_url}
               latitude={studio.latitude}
               longitude={studio.longitude}
-              cityName={studio.city}
+              cityName={studio.city_name || studio.city}
               district={studio.district}
               addressLine={studio.address_line}
               mode="directions"
