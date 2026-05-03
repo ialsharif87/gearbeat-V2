@@ -210,8 +210,9 @@ export default async function ManageStudioPage({
 
   const { data: studioImages } = await supabaseAdmin
     .from("studio_images")
-    .select("id,image_url,is_cover,category")
-    .eq("studio_id", studio.id);
+    .select("id,image_url,is_cover,sort_order,category")
+    .eq("studio_id", studio.id)
+    .order("sort_order", { ascending: true });
 
   const selectedFeatureIds = new Set(
     selectedFeatures?.map((item) => item.feature_id).filter(Boolean) || []
@@ -439,6 +440,128 @@ export default async function ManageStudioPage({
     revalidatePath(`/portal/studio/studios/${studioId}/manage`);
   }
 
+  async function uploadStudioImages(formData: FormData) {
+    "use server";
+
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
+
+    const studioId = String(formData.get("studio_id") || "");
+    const files = formData.getAll("images") as File[];
+
+    if (!studioId || !files.length) return;
+
+    await verifyStudioOwnership(studioId, user.id);
+
+    // Check current image count
+    const { count } = await supabaseAdmin
+      .from("studio_images")
+      .select("id", { count: "exact", head: true })
+      .eq("studio_id", studioId);
+
+    let currentCount = count || 0;
+    let hasCover = currentCount > 0;
+
+    for (const file of files) {
+      if (currentCount >= 10) break;
+      if (!file.size || !file.type.startsWith("image/")) continue;
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const filePath = `studios/${studioId}/${fileName}`;
+
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from("studio-images")
+        .upload(filePath, file);
+
+      if (uploadError) continue;
+
+      const { data: { publicUrl } } = supabaseAdmin.storage
+        .from("studio-images")
+        .getPublicUrl(filePath);
+
+      await supabaseAdmin.from("studio_images").insert({
+        studio_id: studioId,
+        image_url: publicUrl,
+        is_cover: !hasCover,
+        sort_order: currentCount
+      });
+
+      hasCover = true;
+      currentCount++;
+    }
+
+    revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+  }
+
+  async function deleteStudioImage(formData: FormData) {
+    "use server";
+
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
+
+    const imageId = String(formData.get("image_id") || "");
+    const studioId = String(formData.get("studio_id") || "");
+    const imageUrl = String(formData.get("image_url") || "");
+
+    if (!imageId || !studioId) return;
+
+    await verifyStudioOwnership(studioId, user.id);
+
+    // Extract storage path from URL if possible
+    const pathParts = imageUrl.split("/studio-images/");
+    if (pathParts.length > 1) {
+      const storagePath = pathParts[1];
+      await supabaseAdmin.storage.from("studio-images").remove([storagePath]);
+    }
+
+    await supabaseAdmin.from("studio_images").delete().eq("id", imageId);
+
+    revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+  }
+
+  async function setCoverImage(formData: FormData) {
+    "use server";
+
+    const { user } = await requireOwnerOnly();
+    const supabaseAdmin = createAdminClient();
+
+    const imageId = String(formData.get("image_id") || "");
+    const studioId = String(formData.get("studio_id") || "");
+
+    if (!imageId || !studioId) return;
+
+    await verifyStudioOwnership(studioId, user.id);
+
+    // Reset all covers for this studio
+    await supabaseAdmin
+      .from("studio_images")
+      .update({ is_cover: false })
+      .eq("studio_id", studioId);
+
+    // Set new cover
+    await supabaseAdmin
+      .from("studio_images")
+      .update({ is_cover: true })
+      .eq("id", imageId);
+    
+    // Also update studio cover_image_url for convenience
+    const { data: img } = await supabaseAdmin
+      .from("studio_images")
+      .select("image_url")
+      .eq("id", imageId)
+      .single();
+    
+    if (img) {
+      await supabaseAdmin
+        .from("studios")
+        .update({ cover_image_url: img.image_url })
+        .eq("id", studioId);
+    }
+
+    revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+  }
+
   return (
     <section>
       <div className="section-head">
@@ -511,6 +634,117 @@ export default async function ManageStudioPage({
 
       <div style={{ marginTop: 24, marginBottom: 24 }}>
         <StudioPhotoRequirements images={studioImages || []} />
+      </div>
+
+      <div className="card" style={{ marginBottom: 24 }}>
+        <span className="badge">
+          <T en="Gallery" ar="معرض الصور" />
+        </span>
+        <h2>
+          <T en="Studio Images" ar="صور الاستوديو" />
+        </h2>
+        <p style={{ marginBottom: 24 }}>
+          <T 
+            en="Upload up to 10 high-quality photos. The cover image will be shown in search results." 
+            ar="ارفع حتى 10 صور عالية الجودة. سيتم عرض صورة الغلاف في نتائج البحث." 
+          />
+        </p>
+
+        {studioImages && studioImages.length > 0 ? (
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+            gap: 16, 
+            marginBottom: 32 
+          }}>
+            {studioImages.map((img) => (
+              <div 
+                key={img.id} 
+                className="card" 
+                style={{ 
+                  padding: 8, 
+                  position: "relative",
+                  border: img.is_cover ? "2px solid var(--gb-gold)" : "1px solid rgba(255,255,255,0.06)",
+                  background: "rgba(255,255,255,0.02)"
+                }}
+              >
+                <div style={{ aspectRatio: "4/3", overflow: "hidden", borderRadius: 8, marginBottom: 8 }}>
+                  <img 
+                    src={img.image_url} 
+                    alt="Studio" 
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                  />
+                </div>
+                
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {!img.is_cover && (
+                    <form action={setCoverImage}>
+                      <input type="hidden" name="image_id" value={img.id} />
+                      <input type="hidden" name="studio_id" value={studio.id} />
+                      <button type="submit" className="btn btn-small" style={{ fontSize: "0.75rem" }}>
+                        <T en="Set Cover" ar="اجعلها غلاف" />
+                      </button>
+                    </form>
+                  )}
+                  
+                  <form action={deleteStudioImage}>
+                    <input type="hidden" name="image_id" value={img.id} />
+                    <input type="hidden" name="studio_id" value={studio.id} />
+                    <input type="hidden" name="image_url" value={img.image_url} />
+                    <button type="submit" className="mini-danger">
+                      <T en="Delete" ar="حذف" />
+                    </button>
+                  </form>
+                </div>
+
+                {img.is_cover && (
+                  <div style={{ 
+                    position: "absolute", 
+                    top: 12, 
+                    right: 12, 
+                    background: "var(--gb-gold)", 
+                    color: "var(--gb-dark)",
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                    fontSize: "0.7rem",
+                    fontWeight: "bold"
+                  }}>
+                    <T en="COVER" ar="الغلاف" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <form action={uploadStudioImages} className="form" style={{ maxWidth: 400 }}>
+          <input type="hidden" name="studio_id" value={studio.id} />
+          <label style={{ display: "block", marginBottom: 12 }}>
+            <T en="Upload New Images (Max 10 total)" ar="رفع صور جديدة (10 بحد أقصى)" />
+          </label>
+          <input 
+            type="file" 
+            name="images" 
+            accept="image/*" 
+            multiple 
+            className="input" 
+            style={{ marginBottom: 16 }}
+            disabled={studioImages && studioImages.length >= 10}
+          />
+          <button 
+            type="submit" 
+            className="btn" 
+            disabled={studioImages && studioImages.length >= 10}
+          >
+            <T en="Upload Images" ar="رفع صور" />
+          </button>
+          
+          {studioImages && studioImages.length >= 10 && (
+            <p style={{ color: "var(--gb-gold)", fontSize: "0.85rem", marginTop: 8 }}>
+              <T en="You have reached the maximum limit of 10 photos." ar="لقد وصلت للحد الأقصى وهو 10 صور." />
+            </p>
+          )}
+        </form>
       </div>
 
       <div style={{ height: 28 }} />
