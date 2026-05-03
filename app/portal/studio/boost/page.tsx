@@ -16,6 +16,17 @@ function formatDateTime(value: string) {
   });
 }
 
+function formatDateTimeFull(value: string) {
+  if (!value) return "-";
+  const date = new Date(value);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${day}/${month}/${year} - ${hours}:${minutes}`;
+}
+
 export default async function OwnerBoostPage() {
   const supabase = await createClient();
 
@@ -88,28 +99,197 @@ export default async function OwnerBoostPage() {
         </div>
         
         {activeBoost ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '20px', background: 'rgba(34, 197, 94, 0.05)', borderRadius: '16px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-            <div style={{ fontSize: '2.5rem' }}>🚀</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                <strong style={{ fontSize: '1.2rem' }}><T en="Active Boost" ar="تعزيز نشط" /></strong>
-                <span className="gb-dash-badge gb-dash-badge-confirmed">
-                  <T en="Active" ar="نشط" />
+          <div
+            style={{
+              background: "#111",
+              border: "1px solid rgba(207, 168, 110, 0.3)",
+              borderRadius: "16px",
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "24px",
+            }}
+          >
+            {/* ROW 1: Status Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span
+                className="gb-dash-badge"
+                style={{
+                  background: "rgba(207, 168, 110, 0.1)",
+                  color: "var(--gb-gold)",
+                  border: "1px solid var(--gb-gold)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    background: "#22c55e",
+                  }}
+                ></span>
+                <T en="Active Boost" ar="تعزيز نشط" />
+              </span>
+            </div>
+
+            {/* ROW 2: Commission Info */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "20px",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                paddingBottom: "24px",
+              }}
+            >
+              <div
+                style={{
+                  borderInlineEnd: "1px solid rgba(255,255,255,0.05)",
+                  paddingInlineEnd: "20px",
+                }}
+              >
+                <span className="gb-detail-label">
+                  <T en="Base Commission" ar="العمولة الأساسية" />
+                </span>
+                <strong
+                  style={{ display: "block", fontSize: "1.2rem", color: "white" }}
+                >
+                  {activeBoost.base_commission_percent}%
+                </strong>
+              </div>
+              <div
+                style={{
+                  borderInlineEnd: "1px solid rgba(255,255,255,0.05)",
+                  paddingInlineEnd: "20px",
+                }}
+              >
+                <span className="gb-detail-label">
+                  <T en="Your Boost" ar="إضافتك" />
+                </span>
+                <strong
+                  style={{
+                    display: "block",
+                    fontSize: "1.2rem",
+                    color: "#cfa86e",
+                  }}
+                >
+                  +{activeBoost.boost_commission_percent}%
+                </strong>
+              </div>
+              <div>
+                <span className="gb-detail-label">
+                  <T en="Total Now" ar="الإجمالي الآن" />
+                </span>
+                <strong
+                  style={{
+                    display: "block",
+                    fontSize: "1.5rem",
+                    color: "#cfa86e",
+                  }}
+                >
+                  {activeBoost.total_commission_percent}%
+                </strong>
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--gb-gold)",
+                    opacity: 0.8,
+                  }}
+                >
+                  <T en="Applied to all bookings" ar="مطبق على كل الحجوزات" />
                 </span>
               </div>
-              <p className="gb-muted-text" style={{ margin: 0 }}>
-                <T en="Total Commission" ar="إجمالي العمولة" />: <strong>{activeBoost.total_commission_percent}%</strong>
-                <span style={{ margin: '0 10px', opacity: 0.3 }}>|</span>
-                <T en="Ends at" ar="ينتهي في" />: <strong>{formatDateTime(activeBoost.ends_at)}</strong>
-              </p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gb-gold)', fontWeight: 700, textTransform: 'uppercase' }}>
-                <T en="Days Remaining" ar="الأيام المتبقية" />
-              </span>
-              <strong style={{ fontSize: '1.8rem' }}>
-                {Math.ceil((new Date(activeBoost.ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
-              </strong>
+
+            {/* ROW 3: Time Info */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "15px",
+              }}
+            >
+              <div>
+                <span className="gb-detail-label">
+                  <T en="Started" ar="بدأ في" />
+                </span>
+                <strong style={{ display: "block", fontSize: "0.9rem" }}>
+                  {formatDateTimeFull(activeBoost.starts_at)}
+                </strong>
+              </div>
+              <div>
+                <span className="gb-detail-label">
+                  <T en="Ends" ar="ينتهي في" />
+                </span>
+                <strong style={{ display: "block", fontSize: "0.9rem" }}>
+                  {formatDateTimeFull(activeBoost.ends_at)}
+                </strong>
+              </div>
+              <div>
+                <span className="gb-detail-label">
+                  <T en="Duration" ar="المدة" />
+                </span>
+                <strong style={{ display: "block", fontSize: "0.9rem" }}>
+                  {activeBoost.duration_days} <T en="days" ar="يوم" />
+                </strong>
+              </div>
+              <div>
+                <span className="gb-detail-label">
+                  <T en="Days Remaining" ar="الأيام المتبقية" />
+                </span>
+                {(() => {
+                  const daysLeft = Math.ceil(
+                    (new Date(activeBoost.ends_at).getTime() - Date.now()) /
+                      (1000 * 60 * 60 * 24)
+                  );
+                  let color = "#22c55e";
+                  if (daysLeft <= 1) color = "#ef4444";
+                  else if (daysLeft <= 7) color = "#f59e0b";
+                  return (
+                    <strong
+                      style={{ display: "block", fontSize: "1.2rem", color }}
+                    >
+                      {daysLeft}
+                    </strong>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* ROW 4: Info Note */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                padding: "12px 16px",
+                borderRadius: "8px",
+                borderInlineStart: "3px solid var(--gb-gold)",
+              }}
+            >
+              <p
+                style={{ margin: 0, fontSize: "0.85rem", color: "var(--gb-muted)" }}
+              >
+                <T
+                  en={`This boost will expire automatically on ${formatDateTime(
+                    activeBoost.ends_at
+                  )}. Commission will return to ${
+                    activeBoost.base_commission_percent
+                  }% automatically.`}
+                  ar={`سينتهي هذا التعزيز تلقائياً في ${formatDateTime(
+                    activeBoost.ends_at
+                  )}. ستعود العمولة تلقائياً إلى ${
+                    activeBoost.base_commission_percent
+                  }% .`}
+                />
+              </p>
             </div>
           </div>
         ) : (
