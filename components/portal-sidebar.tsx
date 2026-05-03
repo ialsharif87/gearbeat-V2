@@ -42,6 +42,7 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
     { href: "/portal/store", icon: "📊", label: "Dashboard", label_ar: "لوحة التحكم" },
     { href: "/portal/store/products", icon: "📦", label: "Products", label_ar: "المنتجات" },
     { href: "/portal/store/orders", icon: "🧾", label: "Orders", label_ar: "الطلبات" },
+    { href: "/portal/store/analytics", icon: "📊", label: "Analytics", label_ar: "التحليلات" },
     { href: "/portal/store/inventory", icon: "🏭", label: "Inventory", label_ar: "المخزون" },
     { href: "/portal/store/returns", icon: "↩️", label: "Returns", label_ar: "الإرجاعات" },
     { href: "/portal/store/payouts", icon: "💰", label: "Payouts", label_ar: "المستحقات" },

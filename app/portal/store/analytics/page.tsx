@@ -1,725 +1,330 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import T from "@/components/t";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+"use client"
 
-export const dynamic = "force-dynamic";
+import React, { useState, useEffect, useMemo } from "react"
+import { createClient } from "@/lib/supabase/client"
+import T from "@/components/t"
+import { Line } from "react-chartjs-2"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from "chart.js"
 
-type SafeResult<T> = {
-  data: T | null;
-  error: any;
-};
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
-async function safeQuery<T>(
-  queryPromise: PromiseLike<SafeResult<T>>
-): Promise<T | null> {
-  const { data, error } = await queryPromise;
+export default function VendorAnalyticsPage() {
+  const [range, setRange] = useState("CM")
+  const [customDates, setCustomDates] = useState({ from: "", to: "" })
+  const [orders, setOrders] = useState<any[]>([])
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
-  if (error) {
-    console.warn("Vendor analytics optional query failed:", error.message);
-    return null;
-  }
+  useEffect(() => {
+    fetchData()
+  }, [range, customDates])
 
-  return data;
-}
+  async function fetchData() {
+    setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
-function formatMoney(value: unknown, currency = "SAR") {
-  const numberValue = Number(value || 0);
+    let start: Date, end: Date = new Date()
+    const now = new Date()
 
-  if (!Number.isFinite(numberValue)) {
-    return `0.00 ${currency}`;
-  }
+    switch (range) {
+      case "7D":
+        start = new Date(now.setDate(now.getDate() - 7))
+        break
+      case "30D":
+        start = new Date(now.setDate(now.getDate() - 30))
+        break
+      case "CM":
+        start = new Date(now.getFullYear(), now.getMonth(), 1)
+        break
+      case "YTD":
+        start = new Date(now.getFullYear(), 0, 1)
+        break
+      case "LY":
+        start = new Date(now.getFullYear() - 1, 0, 1)
+        end = new Date(now.getFullYear() - 1, 11, 31)
+        break
+      case "Custom":
+        start = customDates.from ? new Date(customDates.from) : new Date()
+        end = customDates.to ? new Date(customDates.to) : new Date()
+        break
+      default:
+        start = new Date(now.getFullYear(), now.getMonth(), 1)
+    }
 
-  return `${numberValue.toFixed(2)} ${currency}`;
-}
-
-function formatDate(value: unknown) {
-  if (!value) {
-    return "—";
-  }
-
-  const date = new Date(String(value));
-
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-
-  return date.toLocaleDateString("en-SA", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  });
-}
-
-function getProductName(product: any) {
-  return (
-    product?.name_en ||
-    product?.name_ar ||
-    product?.name ||
-    product?.title ||
-    "Product"
-  );
-}
-
-function getOrderItemAmount(item: any) {
-  return Number(
-    item.total_price ||
-      item.line_total ||
-      item.total_amount ||
-      item.amount ||
-      Number(item.quantity || 1) * Number(item.unit_price || item.price || 0) ||
-      0
-  );
-}
-
-function getCommissionAmount(item: any, grossAmount: number) {
-  const directCommission = Number(
-    item.commission_amount ||
-      item.platform_commission_amount ||
-      item.admin_commission_amount ||
-      0
-  );
-
-  if (directCommission > 0) {
-    return directCommission;
-  }
-
-  const commissionRate = Number(
-    item.commission_rate ||
-      item.platform_commission_rate ||
-      0
-  );
-
-  if (commissionRate > 0) {
-    return grossAmount * (commissionRate / 100);
-  }
-
-  return 0;
-}
-
-function getNetAmount(item: any, grossAmount: number, commissionAmount: number) {
-  const directNet = Number(
-    item.net_amount ||
-      item.vendor_net_amount ||
-      item.payout_amount ||
-      0
-  );
-
-  if (directNet > 0) {
-    return directNet;
-  }
-
-  return Math.max(grossAmount - commissionAmount, 0);
-}
-
-function normalizeStatus(value: unknown) {
-  return String(value || "pending").toLowerCase();
-}
-
-function StatCard({
-  icon,
-  labelEn,
-  labelAr,
-  value,
-  hint,
-}: {
-  icon: string;
-  labelEn: string;
-  labelAr: string;
-  value: string | number;
-  hint?: string;
-}) {
-  return (
-    <div className="card stat-card">
-      <div className="stat-icon">{icon}</div>
-      <div className="stat-content">
-        <label>
-          <T en={labelEn} ar={labelAr} />
-        </label>
-        <div className="stat-value">{value}</div>
-        {hint ? (
-          <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-            {hint}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function RevenueBar({
-  label,
-  value,
-  maxValue,
-  currency,
-}: {
-  label: string;
-  value: number;
-  maxValue: number;
-  currency: string;
-}) {
-  const percent =
-    maxValue > 0 ? Math.min(100, Math.round((value / maxValue) * 100)) : 0;
-
-  return (
-    <div style={{ display: "grid", gap: 8 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <span>{label}</span>
-        <strong>{formatMoney(value, currency)}</strong>
-      </div>
-
-      <div
-        style={{
-          height: 12,
-          borderRadius: 999,
-          background: "rgba(255,255,255,0.08)",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${percent}%`,
-            height: "100%",
-            borderRadius: 999,
-            background:
-              "linear-gradient(90deg, rgba(207,167,98,0.95), rgba(255,255,255,0.6))",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-export default async function VendorAnalyticsPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/portal/login");
-  }
-
-  const supabaseAdmin = createAdminClient();
-
-  const profile = await safeQuery<any>(
-    supabaseAdmin
-      .from("profiles")
-      .select("auth_user_id, full_name, email, role, preferred_currency")
-      .eq("auth_user_id", user.id)
-      .maybeSingle()
-  );
-
-  if (!profile) {
-    redirect("/portal/login");
-  }
-
-  if (profile.role !== "vendor" && profile.role !== "admin") {
-    redirect("/forbidden");
-  }
-
-  const vendorProfile = await safeQuery<any>(
-    supabaseAdmin
-      .from("vendor_profiles")
+    const { data: orderData } = await supabase
+      .from("marketplace_orders")
       .select(`
-        id,
-        auth_user_id,
-        business_name_en,
-        business_name_ar,
-        store_name,
-        status,
-        business_verification_status,
-        country_code,
-        city_name
-      `)
-      .eq("auth_user_id", user.id)
-      .maybeSingle()
-  );
-
-  const vendorIdCandidates = [
-    user.id,
-    vendorProfile?.id,
-    vendorProfile?.auth_user_id,
-  ].filter(Boolean);
-
-  const vendorPrimaryId = vendorProfile?.id || user.id;
-  const currency = profile.preferred_currency || "SAR";
-
-  const products = await safeQuery<any[]>(
-    supabaseAdmin
-      .from("marketplace_products")
-      .select(`
-        id,
-        vendor_id,
-        name_en,
-        name_ar,
-        name,
-        slug,
-        status,
-        base_price,
-        created_at
-      `)
-      .in("vendor_id", vendorIdCandidates)
-      .order("created_at", { ascending: false })
-      .limit(100)
-  );
-
-  const orderItems = await safeQuery<any[]>(
-    supabaseAdmin
-      .from("marketplace_order_items")
-      .select(`
-        id,
-        order_id,
-        product_id,
-        vendor_id,
-        quantity,
-        unit_price,
-        price,
-        total_price,
-        line_total,
-        total_amount,
-        amount,
-        commission_amount,
-        platform_commission_amount,
-        admin_commission_amount,
-        commission_rate,
-        platform_commission_rate,
-        net_amount,
-        vendor_net_amount,
-        payout_amount,
-        status,
-        created_at,
-        product:marketplace_products(
-          id,
-          name_en,
-          name_ar,
-          name,
-          slug,
-          base_price
+        *,
+        items:marketplace_order_items(
+          quantity,
+          product:marketplace_products(name_en, name_ar)
         )
       `)
-      .in("vendor_id", vendorIdCandidates)
+      .eq("vendor_auth_user_id", user.id)
+      .gte("created_at", start.toISOString())
+      .lte("created_at", end.toISOString())
       .order("created_at", { ascending: false })
-      .limit(200)
-  );
 
-  const productRows = products || [];
-  const itemRows = orderItems || [];
+    const { data: productData } = await supabase
+      .from("marketplace_products")
+      .select("*")
+      .eq("vendor_auth_user_id", user.id)
 
-  const enrichedItems = itemRows.map((item: any) => {
-    const grossAmount = getOrderItemAmount(item);
-    const commissionAmount = getCommissionAmount(item, grossAmount);
-    const netAmount = getNetAmount(item, grossAmount, commissionAmount);
-    const status = normalizeStatus(item.status);
-
-    return {
-      ...item,
-      grossAmount,
-      commissionAmount,
-      netAmount,
-      normalizedStatus: status,
-    };
-  });
-
-  const paidItems = enrichedItems.filter((item) =>
-    ["paid", "completed", "fulfilled", "delivered", "shipped"].includes(
-      item.normalizedStatus
-    )
-  );
-
-  const pendingItems = enrichedItems.filter((item) =>
-    ["pending", "created", "processing", "confirmed"].includes(
-      item.normalizedStatus
-    )
-  );
-
-  const cancelledItems = enrichedItems.filter((item) =>
-    ["cancelled", "canceled", "refunded", "rejected"].includes(
-      item.normalizedStatus
-    )
-  );
-
-  const grossSales = paidItems.reduce(
-    (sum, item) => sum + Number(item.grossAmount || 0),
-    0
-  );
-
-  const pendingSales = pendingItems.reduce(
-    (sum, item) => sum + Number(item.grossAmount || 0),
-    0
-  );
-
-  const commissionTotal = paidItems.reduce(
-    (sum, item) => sum + Number(item.commissionAmount || 0),
-    0
-  );
-
-  const netPayout = paidItems.reduce(
-    (sum, item) => sum + Number(item.netAmount || 0),
-    0
-  );
-
-  const productPerformanceMap = new Map<
-    string,
-    {
-      productId: string;
-      productName: string;
-      quantity: number;
-      grossAmount: number;
-      netAmount: number;
-    }
-  >();
-
-  for (const item of enrichedItems) {
-    const productId = String(item.product_id || item.product?.id || "unknown");
-    const existing = productPerformanceMap.get(productId);
-
-    const quantity = Number(item.quantity || 1);
-    const productName = getProductName(item.product);
-
-    if (!existing) {
-      productPerformanceMap.set(productId, {
-        productId,
-        productName,
-        quantity,
-        grossAmount: Number(item.grossAmount || 0),
-        netAmount: Number(item.netAmount || 0),
-      });
-    } else {
-      existing.quantity += quantity;
-      existing.grossAmount += Number(item.grossAmount || 0);
-      existing.netAmount += Number(item.netAmount || 0);
-    }
+    setOrders(orderData || [])
+    setProducts(productData || [])
+    setLoading(false)
   }
 
-  const productPerformance = Array.from(productPerformanceMap.values())
-    .sort((a, b) => b.grossAmount - a.grossAmount)
-    .slice(0, 8);
+  const stats = useMemo(() => {
+    const validOrders = orders.filter(o => o.status !== 'cancelled')
+    const revenue = validOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+    const orderCount = validOrders.length
+    const avgOrderValue = orderCount > 0 ? revenue / orderCount : 0
+    
+    // Top Product
+    const productCounts: any = {}
+    validOrders.forEach(o => {
+      o.items?.forEach((item: any) => {
+        const name = item.product?.name_en || "Product"
+        productCounts[name] = (productCounts[name] || 0) + item.quantity
+      })
+    })
+    const topProduct = Object.entries(productCounts).sort((a: any, b: any) => b[1] - a[1])[0]?.[0] || "—"
 
-  const maxProductGross = productPerformance.reduce(
-    (max, item) => Math.max(max, item.grossAmount),
-    0
-  );
+    // Summary Strip
+    const delivered = validOrders.filter(o => o.status === 'delivered').length
+    const completionRate = orderCount > 0 ? (delivered / orderCount) * 100 : 0
+    const totalItemsSold = validOrders.reduce((sum, o) => sum + (o.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0), 0)
 
-  const vendorName =
-    vendorProfile?.business_name_en ||
-    vendorProfile?.business_name_ar ||
-    vendorProfile?.store_name ||
-    profile.full_name ||
-    "Vendor";
+    return { revenue, orderCount, avgOrderValue, topProduct, completionRate, totalItemsSold }
+  }, [orders])
+
+  const chartData = useMemo(() => {
+    const daily: any = {}
+    orders.filter(o => o.status !== 'cancelled').forEach(o => {
+      const date = new Date(o.created_at).toLocaleDateString("en-US", { month: 'short', day: 'numeric' })
+      daily[date] = (daily[date] || 0) + Number(o.total_amount)
+    })
+
+    const labels = Object.keys(daily)
+    const data = Object.values(daily)
+
+    return {
+      labels,
+      datasets: [{
+        label: "Revenue (SAR)",
+        data,
+        borderColor: "#cfa86e",
+        backgroundColor: "rgba(207, 168, 110, 0.1)",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: "#cfa86e"
+      }]
+    }
+  }, [orders])
+
+  const exportCSV = () => {
+    const headers = ["Order #", "Date", "Customer", "Amount", "Status"]
+    const rows = orders.map(o => [
+      o.order_number,
+      new Date(o.created_at).toLocaleDateString(),
+      o.customer_name,
+      o.total_amount,
+      o.status
+    ])
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n")
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.setAttribute("download", `vendor_analytics_${new Date().toISOString().slice(0,10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main 
+      style={{ 
+        background: 'linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%)', 
+        minHeight: '100vh', 
+        padding: '32px',
+        color: '#fff'
+      }}
+    >
+      {/* Header */}
+      <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
-          <span className="badge badge-gold">
-            <T en="Vendor Analytics" ar="تحليلات التاجر" />
-          </span>
-
-          <h1 style={{ marginTop: 10 }}>
-            <T en="Revenue dashboard" ar="لوحة الأرباح" />
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0 }}>
+            <T en="Sales Analytics" ar="تحليلات المبيعات" />
           </h1>
-
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
-            <T
-              en="Track sales, estimated commission, net payout, order item status, and product performance."
-              ar="تابع المبيعات، العمولة المتوقعة، صافي الأرباح، حالة الطلبات، وأداء المنتجات."
-            />{" "}
-            — {vendorName}
+          <p style={{ color: '#cfa86e', fontSize: '0.9rem', marginTop: '4px' }}>
+            {range === 'CM' ? "Current Month" : range} Analysis
           </p>
         </div>
-
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link href="/portal/store/products" className="btn">
-            <T en="Products" ar="المنتجات" />
-          </Link>
-
-          <Link href="/portal/store/orders" className="btn btn-primary">
-            <T en="Orders" ar="الطلبات" />
-          </Link>
-        </div>
+        <button 
+          onClick={exportCSV}
+          style={{ 
+            background: 'linear-gradient(135deg, #cfa86e, #b8923a)', 
+            color: '#000', 
+            border: 'none', 
+            borderRadius: '10px', 
+            padding: '10px 20px', 
+            fontWeight: 700, 
+            cursor: 'pointer' 
+          }}
+        >
+          📥 <T en="Export CSV" ar="تصدير CSV" />
+        </button>
       </section>
 
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <StatCard
-          icon="💰"
-          labelEn="Gross Sales"
-          labelAr="إجمالي المبيعات"
-          value={formatMoney(grossSales, currency)}
-          hint="Paid/completed items"
-        />
-
-        <StatCard
-          icon="🏦"
-          labelEn="Net Payout"
-          labelAr="صافي الأرباح"
-          value={formatMoney(netPayout, currency)}
-          hint="Estimated vendor net"
-        />
-
-        <StatCard
-          icon="📊"
-          labelEn="Commission"
-          labelAr="العمولة"
-          value={formatMoney(commissionTotal, currency)}
-          hint="Estimated platform commission"
-        />
-
-        <StatCard
-          icon="⏳"
-          labelEn="Pending Sales"
-          labelAr="مبيعات معلقة"
-          value={formatMoney(pendingSales, currency)}
-          hint={`${pendingItems.length} pending items`}
-        />
-      </section>
-
-      <section className="stats-grid" style={{ marginTop: 18 }}>
-        <StatCard
-          icon="🎛️"
-          labelEn="Products"
-          labelAr="المنتجات"
-          value={productRows.length}
-        />
-
-        <StatCard
-          icon="✅"
-          labelEn="Paid Items"
-          labelAr="عناصر مدفوعة"
-          value={paidItems.length}
-        />
-
-        <StatCard
-          icon="📝"
-          labelEn="Pending Items"
-          labelAr="عناصر معلقة"
-          value={pendingItems.length}
-        />
-
-        <StatCard
-          icon="↩️"
-          labelEn="Cancelled / Refunded"
-          labelAr="ملغاة / مستردة"
-          value={cancelledItems.length}
-        />
-      </section>
-
-      <section
-        style={{
-          marginTop: 28,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 360px",
-          gap: 22,
-          alignItems: "start",
-        }}
-      >
-        <div style={{ display: "grid", gap: 22 }}>
-          <div className="card">
-            <h2>
-              <T en="Top product performance" ar="أفضل أداء للمنتجات" />
-            </h2>
-
-            <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-              <T
-                en="Simple revenue bars based on recent order item data."
-                ar="مؤشرات بسيطة حسب بيانات عناصر الطلبات الأخيرة."
-              />
-            </p>
-
-            <div style={{ marginTop: 18, display: "grid", gap: 16 }}>
-              {productPerformance.length === 0 ? (
-                <div
-                  style={{
-                    padding: 24,
-                    borderRadius: 16,
-                    background: "rgba(255,255,255,0.04)",
-                    textAlign: "center",
-                    color: "var(--muted)",
-                  }}
-                >
-                  <T
-                    en="No product sales data yet."
-                    ar="لا توجد بيانات مبيعات للمنتجات بعد."
-                  />
-                </div>
-              ) : (
-                productPerformance.map((product) => (
-                  <RevenueBar
-                    key={product.productId}
-                    label={`${product.productName} · Qty ${product.quantity}`}
-                    value={product.grossAmount}
-                    maxValue={maxProductGross}
-                    currency={currency}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Recent order items" ar="آخر عناصر الطلبات" />
-            </h2>
-
-            <div className="table-responsive" style={{ marginTop: 18 }}>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Status</th>
-                    <th>Gross</th>
-                    <th>Commission</th>
-                    <th>Net</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {enrichedItems.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: "center", padding: 30 }}>
-                        <T
-                          en="No order items found."
-                          ar="لا توجد عناصر طلبات."
-                        />
-                      </td>
-                    </tr>
-                  ) : (
-                    enrichedItems.slice(0, 30).map((item: any) => (
-                      <tr key={item.id}>
-                        <td>
-                          <div style={{ fontWeight: 800 }}>
-                            {getProductName(item.product)}
-                          </div>
-                          <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                            Qty: {item.quantity || 1}
-                          </div>
-                        </td>
-
-                        <td>
-                          <span className="badge">{item.normalizedStatus}</span>
-                        </td>
-
-                        <td>{formatMoney(item.grossAmount, currency)}</td>
-                        <td>{formatMoney(item.commissionAmount, currency)}</td>
-                        <td>
-                          <strong>{formatMoney(item.netAmount, currency)}</strong>
-                        </td>
-                        <td>{formatDate(item.created_at)}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <aside style={{ display: "grid", gap: 22 }}>
-          <div
-            className="card"
+      {/* Range Selectors */}
+      <div style={{ display: 'flex', gap: '8px', background: '#111', border: '1px solid #222', borderRadius: '99px', padding: '6px', width: 'fit-content', marginBottom: '32px' }}>
+        {["7D", "30D", "CM", "YTD", "LY", "Custom"].map(r => (
+          <button
+            key={r}
+            onClick={() => setRange(r)}
             style={{
-              background:
-                "radial-gradient(circle at top left, rgba(207,167,98,0.20), transparent 35%), rgba(255,255,255,0.035)",
-              border: "1px solid rgba(207,167,98,0.22)",
+              padding: '8px 16px',
+              borderRadius: '99px',
+              border: 'none',
+              background: range === r ? '#cfa86e' : 'transparent',
+              color: range === r ? '#000' : '#888',
+              fontWeight: range === r ? 700 : 400,
+              cursor: 'pointer',
+              transition: '0.2s'
             }}
           >
-            <span className="badge badge-gold">
-              <T en="Vendor status" ar="حالة التاجر" />
-            </span>
+            {r}
+          </button>
+        ))}
+      </div>
 
-            <h2 style={{ marginTop: 10 }}>{vendorName}</h2>
+      {range === "Custom" && (
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', background: '#111', padding: '16px', borderRadius: '16px', border: '1px solid #222', width: 'fit-content' }}>
+          <input type="date" value={customDates.from} onChange={e => setCustomDates({...customDates, from: e.target.value})} style={{ background: '#000', border: '1px solid #333', color: '#fff', padding: '8px', borderRadius: '8px' }} />
+          <input type="date" value={customDates.to} onChange={e => setCustomDates({...customDates, to: e.target.value})} style={{ background: '#000', border: '1px solid #333', color: '#fff', padding: '8px', borderRadius: '8px' }} />
+        </div>
+      )}
 
-            <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Profile status" ar="حالة الملف" />
-                </span>
-                <strong>{vendorProfile?.status || "—"}</strong>
-              </div>
+      {/* KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
+        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #cfa86e', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Revenue" ar="الإيراد" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.revenue.toLocaleString()} <small style={{ fontSize: '0.9rem', color: '#666' }}>SAR</small></div>
+          <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>💰</span>
+        </div>
+        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #3b82f6', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Orders" ar="الطلبات" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.orderCount}</div>
+          <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>🧾</span>
+        </div>
+        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #22c55e', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Top Product" ar="أفضل منتج" /></div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{stats.topProduct}</div>
+          <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>🏆</span>
+        </div>
+        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #a855f7', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Avg Order Value" ar="متوسط قيمة الطلب" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{Math.round(stats.avgOrderValue)} <small style={{ fontSize: '0.9rem', color: '#666' }}>SAR</small></div>
+          <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>📊</span>
+        </div>
+      </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Verification" ar="التوثيق" />
-                </span>
-                <strong>{vendorProfile?.business_verification_status || "—"}</strong>
-              </div>
+      {/* Chart Section */}
+      <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '32px', marginBottom: '32px' }}>
+        <h3 style={{ marginBottom: '24px' }}><T en="Revenue Trend" ar="اتجاه الإيرادات" /></h3>
+        <div style={{ height: '350px' }}>
+          <Line 
+            data={chartData} 
+            options={{ 
+              responsive: true, 
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
+                x: { grid: { display: false }, ticks: { color: '#666' } }
+              }
+            }} 
+          />
+        </div>
+      </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="Country" ar="الدولة" />
-                </span>
-                <strong>{vendorProfile?.country_code || "—"}</strong>
-              </div>
+      {/* Summary Strip */}
+      <div style={{ background: '#111', borderRadius: '16px', border: '1px solid #1e1e1e', padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px', marginBottom: '32px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}><T en="Completion Rate" ar="معدل الإكمال" /></div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#cfa86e' }}>{Math.round(stats.completionRate)}%</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}><T en="Avg Order Value" ar="متوسط قيمة الطلب" /></div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#cfa86e' }}>{Math.round(stats.avgOrderValue)} <small style={{ fontSize: '0.9rem' }}>SAR</small></div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}><T en="Total Products Sold" ar="إجمالي المنتجات المباعة" /></div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#cfa86e' }}>{stats.totalItemsSold}</div>
+        </div>
+      </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--muted)" }}>
-                  <T en="City" ar="المدينة" />
-                </span>
-                <strong>{vendorProfile?.city_name || "—"}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Revenue explanation" ar="شرح الأرباح" />
-            </h2>
-
-            <ul style={{ color: "var(--muted)", lineHeight: 1.9 }}>
-              <li>
-                <T
-                  en="Gross sales are based on paid or completed order items."
-                  ar="إجمالي المبيعات يعتمد على عناصر الطلبات المدفوعة أو المكتملة."
-                />
-              </li>
-              <li>
-                <T
-                  en="Commission is estimated from item commission fields when available."
-                  ar="العمولة تقديرية حسب حقول العمولة في عناصر الطلب عند توفرها."
-                />
-              </li>
-              <li>
-                <T
-                  en="Net payout is estimated and not a final finance settlement."
-                  ar="صافي الأرباح تقديري وليس تسوية مالية نهائية."
-                />
-              </li>
-            </ul>
-          </div>
-
-          <div className="card">
-            <h2>
-              <T en="Quick actions" ar="إجراءات سريعة" />
-            </h2>
-
-            <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-              <Link href="/portal/store/products" className="btn">
-                <T en="Manage products" ar="إدارة المنتجات" />
-              </Link>
-
-              <Link href="/portal/store/orders" className="btn">
-                <T en="Manage orders" ar="إدارة الطلبات" />
-              </Link>
-
-              <Link href="/portal/store/profile" className="btn">
-                <T en="Vendor profile" ar="ملف التاجر" />
-              </Link>
-            </div>
-          </div>
-        </aside>
-      </section>
+      {/* Recent Orders */}
+      <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+        <h3 style={{ marginBottom: '24px' }}><T en="Recent Orders" ar="آخر الطلبات" /></h3>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ color: '#666', fontSize: '0.8rem', borderBottom: '1px solid #222', textAlign: 'start' }}>
+                <th style={{ padding: '12px' }}>Order #</th>
+                <th style={{ padding: '12px' }}>Customer</th>
+                <th style={{ padding: '12px' }}>Amount</th>
+                <th style={{ padding: '12px' }}>Status</th>
+                <th style={{ padding: '12px' }}>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.slice(0, 10).map(o => (
+                <tr key={o.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
+                  <td style={{ padding: '16px' }}>#{o.order_number}</td>
+                  <td style={{ padding: '16px' }}>{o.customer_name}</td>
+                  <td style={{ padding: '16px', fontWeight: 700 }}>{o.total_amount} SAR</td>
+                  <td style={{ padding: '16px' }}>
+                    <span style={{ 
+                      padding: '4px 12px', 
+                      borderRadius: '99px', 
+                      fontSize: '0.75rem', 
+                      background: o.status === 'delivered' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)',
+                      color: o.status === 'delivered' ? '#22c55e' : '#3b82f6'
+                    }}>
+                      {o.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '16px', color: '#666' }}>{new Date(o.created_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </main>
-  );
+  )
 }
