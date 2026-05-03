@@ -180,7 +180,12 @@ export default function VendorAnalyticsPage() {
             <T en="Sales Analytics" ar="تحليلات المبيعات" />
           </h1>
           <p style={{ color: '#cfa86e', fontSize: '0.9rem', marginTop: '4px' }}>
-            {range === 'CM' ? "Current Month" : range} Analysis
+            {range === '7D' && <T en="Last 7 Days" ar="آخر 7 أيام" />}
+            {range === '30D' && <T en="Last 30 Days" ar="آخر 30 يوم" />}
+            {range === 'CM' && <T en="Current Month Analysis" ar="تحليل الشهر الحالي" />}
+            {range === 'YTD' && <T en="Year to Date" ar="منذ بداية السنة" />}
+            {range === 'LY' && <T en="Last Year" ar="السنة الماضية" />}
+            {range === 'Custom' && <T en="Custom Period" ar="فترة مخصصة" />}
           </p>
         </div>
         <button 
@@ -255,19 +260,25 @@ export default function VendorAnalyticsPage() {
       {/* Chart Section */}
       <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '32px', marginBottom: '32px' }}>
         <h3 style={{ marginBottom: '24px' }}><T en="Revenue Trend" ar="اتجاه الإيرادات" /></h3>
-        <div style={{ height: '350px' }}>
-          <Line 
-            data={chartData} 
-            options={{ 
-              responsive: true, 
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
-                x: { grid: { display: false }, ticks: { color: '#666' } }
-              }
-            }} 
-          />
+        <div style={{ height: '350px', position: 'relative' }}>
+          {(!chartData.labels || chartData.labels.length === 0 || chartData.datasets[0].data.every((v: any) => v === 0)) ? (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', background: 'rgba(255,255,255,0.01)', borderRadius: '12px' }}>
+              <T en="No orders in this period" ar="لا توجد طلبات في هذه الفترة" />
+            </div>
+          ) : (
+            <Line 
+              data={chartData} 
+              options={{ 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: { min: 0, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
+                  x: { grid: { display: false }, ticks: { color: '#666' } }
+                }
+              }} 
+            />
+          )}
         </div>
       </div>
 
@@ -294,11 +305,11 @@ export default function VendorAnalyticsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ color: '#666', fontSize: '0.8rem', borderBottom: '1px solid #222', textAlign: 'start' }}>
-                <th style={{ padding: '12px' }}>Order #</th>
-                <th style={{ padding: '12px' }}>Customer</th>
-                <th style={{ padding: '12px' }}>Amount</th>
-                <th style={{ padding: '12px' }}>Status</th>
-                <th style={{ padding: '12px' }}>Date</th>
+                <th style={{ padding: '12px' }}><T en="Order #" ar="رقم الطلب" /></th>
+                <th style={{ padding: '12px' }}><T en="Customer" ar="العميل" /></th>
+                <th style={{ padding: '12px' }}><T en="Amount" ar="المبلغ" /></th>
+                <th style={{ padding: '12px' }}><T en="Status" ar="الحالة" /></th>
+                <th style={{ padding: '12px' }}><T en="Date" ar="التاريخ" /></th>
               </tr>
             </thead>
             <tbody>

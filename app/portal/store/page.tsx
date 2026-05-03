@@ -15,12 +15,21 @@ export default async function VendorDashboardPage() {
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-  // 1. Fetch Vendor Profile
+  // 1. Fetch Vendor Profile & User Profile for naming
   const { data: vendorProfile } = await supabase
     .from("vendor_profiles")
-    .select("*")
+    .select("business_name_en, business_name_ar, store_name")
     .or(`id.eq.${user.id},auth_user_id.eq.${user.id}`)
     .maybeSingle();
+
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  const businessNameEn = vendorProfile?.business_name_en || vendorProfile?.store_name || userProfile?.full_name || "Vendor";
+  const businessNameAr = vendorProfile?.business_name_ar || vendorProfile?.store_name || userProfile?.full_name || "التاجر";
 
   // 2. Fetch Orders Stats for current month
   const { data: monthlyOrders } = await supabase
@@ -77,7 +86,6 @@ export default async function VendorDashboardPage() {
     .order("created_at", { ascending: false })
     .limit(5);
 
-  const vendorName = vendorProfile?.store_name || user.email?.split("@")[0] || "Vendor";
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -112,7 +120,7 @@ export default async function VendorDashboardPage() {
             <T en="Seller Portal" ar="بوابة التاجر" />
           </span>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '8px 0 0', color: 'white' }}>
-            <T en={`Welcome, ${vendorName}`} ar={`مرحباً، ${vendorName}`} />
+            <T en={`Welcome, ${businessNameEn}`} ar={`مرحباً، ${businessNameAr}`} />
           </h1>
           <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '4px' }}>
             {new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
