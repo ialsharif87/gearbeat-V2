@@ -255,16 +255,20 @@ export default async function OwnerStudiosPage() {
                   </div>
 
                   <div className="actions">
-                    <Link
-                      href={`/studios/${studio.slug}`}
-                      className="btn btn-small"
-                    >
-                      <T en="View Public Page" ar="عرض الصفحة العامة" />
-                    </Link>
+                    {studio.slug && (
+                      <Link
+                        href={`/studios/${studio.slug}`}
+                        className="btn btn-secondary btn-small"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        👁️ <T en="Preview as customer" ar="معاينة كعميل" />
+                      </Link>
+                    )}
 
                     <Link
                       href={`/portal/studio/studios/${studio.id}/manage`}
-                      className="btn btn-secondary btn-small"
+                      className="btn btn-primary btn-small"
                     >
                       <T en="Manage" ar="إدارة" />
                     </Link>
