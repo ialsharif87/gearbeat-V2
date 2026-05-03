@@ -6529,3 +6529,103 @@ body:has(.home-page) {
     border-radius: 22px;
   }
 }
+
+/* Unified dashboard card style */
+.gb-dash-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 16px;
+  padding: 20px 24px;
+  transition: border-color 0.2s;
+}
+.gb-dash-card:hover {
+  border-color: rgba(207, 168, 110, 0.3);
+}
+.gb-dash-stat {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #cfa86e;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.gb-dash-label {
+  font-size: 0.85rem;
+  color: #888;
+}
+.gb-dash-icon {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+.gb-dash-section {
+  margin-bottom: 32px;
+}
+.gb-dash-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.gb-dash-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.gb-dash-grid-2 {
+  display: grid;
+  grid-template-columns: 70fr 30fr;
+  gap: 20px;
+}
+.gb-dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.gb-dash-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #222;
+  color: #888;
+  font-weight: 500;
+}
+.gb-dash-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #1a1a1a;
+  color: #f5f1e8;
+}
+.gb-dash-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.gb-dash-badge-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+.gb-dash-badge-confirmed { background: rgba(34,197,94,0.15); color: #22c55e; }
+.gb-dash-badge-cancelled { background: rgba(239,68,68,0.15); color: #ef4444; }
+.gb-dash-badge-shipped { background: rgba(168,85,247,0.15); color: #a855f7; }
+.gb-dash-badge-delivered { background: rgba(34,197,94,0.15); color: #22c55e; }
+.gb-dash-badge-new { background: rgba(207,168,110,0.15); color: #cfa86e; }
+.gb-dash-badge-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.gb-dash-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #f5f1e8;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+.gb-dash-quick-btn:hover {
+  border-color: #cfa86e;
+  background: rgba(207,168,110,0.05);
+}
+
+@media (max-width: 768px) {
+  .gb-dash-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .gb-dash-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .gb-dash-grid-2 { grid-template-columns: 1fr; }
+}

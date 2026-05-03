@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export type DashboardQuickLink = {
   href: string;
   label: string;
+  label_ar?: string;
   icon?: string;
   description?: string;
 };
@@ -17,6 +21,18 @@ type DashboardQuickLinksProps = {
 export default function DashboardQuickLinks({
   links,
 }: DashboardQuickLinksProps) {
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    // Detect language from cookie or document dir
+    const getLang = () => {
+      const match = document.cookie.match(new RegExp('(^| )gb_lang=([^;]+)'));
+      if (match) return match[2];
+      return document.documentElement.dir === "rtl" ? "ar" : "en";
+    };
+    setLang(getLang());
+  }, []);
+
   return (
     <div className="dashboard-quick-links-grid">
       {links.map((link) => (
@@ -28,7 +44,9 @@ export default function DashboardQuickLinks({
           {link.icon && (
             <span className="quick-link-icon">{link.icon}</span>
           )}
-          <span className="quick-link-label">{link.label}</span>
+          <span className="quick-link-label">
+            {lang === "ar" && link.label_ar ? link.label_ar : link.label}
+          </span>
         </Link>
       ))}
 
