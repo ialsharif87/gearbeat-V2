@@ -133,6 +133,12 @@ export default function JoinSellerPage() {
               </div>
               <div style={{ display: "grid", gap: 8 }}>
                 <label style={{ fontSize: "0.85rem", fontWeight: 600, color: '#888' }}>
+                  <T en="Certified IBAN Letter" ar="خطاب الحساب البنكي (الآيبان) المعتمد" /> *
+                </label>
+                <input name="iban_file" type="file" className="input" accept=".pdf,.jpg,.png" required />
+              </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: '#888' }}>
                   <T en="Signed Contract / Declaration" ar="نسخة من العقد أو الإقرار" /> *
                 </label>
                 <input name="contract_file" type="file" className="input" accept=".pdf,.jpg,.png" required />

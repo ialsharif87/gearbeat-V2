@@ -88,6 +88,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               { label: "Commercial Registration", label_ar: "السجل التجاري", key: "cr_file" },
               { label: "VAT Certificate", label_ar: "شهادة الضريبة", key: "vat_file" },
               { label: "National Address", label_ar: "العنوان الوطني", key: "address_file" },
+              { label: "Certified IBAN Letter", label_ar: "خطاب الآيبان المعتمد", key: "iban_file" },
               { label: "Contract / Declaration", label_ar: "العقد / الإقرار", key: "contract_file" },
             ].map(doc => (
               <div key={doc.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
