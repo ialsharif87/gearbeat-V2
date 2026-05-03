@@ -1,553 +1,239 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "../../lib/supabase/server";
-import { createAdminClient } from "../../lib/supabase/admin";
-import T from "../../components/t";
+import { createClient } from "@/lib/supabase/client";
+import T from "@/components/t";
 
-type AccountType = "customer" | "owner" | "vendor";
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
-type LoginSearchParams = {
-  next?: string;
-  account?: string;
-  created?: string;
-  error?: string;
-};
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-function safeNextPath(value: string | null | undefined) {
-  if (!value) return "";
-  if (!value.startsWith("/")) return "";
-  if (value.startsWith("//")) return "";
-  return value;
-}
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-function cleanText(value: FormDataEntryValue | null) {
-  return String(value || "").trim();
-}
-
-function normalizeAccountType(value: string): AccountType {
-  if (value === "owner") return "owner";
-  if (value === "vendor") return "vendor";
-  return "customer";
-}
-
-function loginRedirectPath({
-  error,
-  account,
-  next
-}: {
-  error?: string;
-  account?: AccountType;
-  next?: string;
-}) {
-  const params = new URLSearchParams();
-
-  if (error) {
-    params.set("error", error);
-  }
-
-  if (account) {
-    params.set("account", account);
-  }
-
-  const safeNext = safeNextPath(next);
-
-  if (safeNext) {
-    params.set("next", safeNext);
-  }
-
-  const query = params.toString();
-
-  return query ? `/login?${query}` : "/login";
-}
-
-function getLoginMessage({
-  error,
-  created,
-  isStaffAccess
-}: {
-  error?: string;
-  created?: string;
-  isStaffAccess: boolean;
-}) {
-  if (created && !isStaffAccess) {
-    return {
-      type: "success" as const,
-      en: "Account created. Please login to continue.",
-      ar: "تم إنشاء الحساب. الرجاء تسجيل الدخول للمتابعة."
-    };
-  }
-
-  if (error && error !== "none") {
-    return {
-      type: "error" as const,
-      en: "Email or password is incorrect.",
-      ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة."
-    };
-  }
-
-  return null;
-}
-
-async function getOrCreateProfileForUser({
-  supabaseAdmin,
-  user,
-  selectedAccountType
-}: {
-  supabaseAdmin: any;
-  user: any;
-  selectedAccountType: AccountType;
-}) {
-  const { data: existingProfile, error: profileLookupError } = await supabaseAdmin
-    .from("profiles")
-    .select("id, auth_user_id, email, full_name, phone, role, account_status")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-
-  if (profileLookupError) {
-    throw new Error(profileLookupError.message);
-  }
-
-  if (existingProfile) {
-    return existingProfile;
-  }
-
-  // Security rule:
-  // Never create owner or vendor roles from the login page.
-  // Owner/vendor roles must already exist in database tables from the correct signup/approval flows.
-  if (selectedAccountType !== "customer") {
-    return null;
-  }
-
-  const fullName =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    user.email?.split("@")[0] ||
-    "User";
-
-  const phone =
-    user.user_metadata?.phone ||
-    user.user_metadata?.phone_number ||
-    user.user_metadata?.mobile ||
-    "";
-
-  const { data: newProfile, error } = await supabaseAdmin
-    .from("profiles")
-    .insert({
-      auth_user_id: user.id,
-      email: user.email,
-      full_name: fullName,
-      phone,
-      role: "customer",
-      account_status: "active",
-      updated_at: new Date().toISOString()
-    })
-    .select("id, auth_user_id, email, full_name, phone, role, account_status")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  // Keep only harmless display/contact metadata.
-  // Do not write role or account_type into user_metadata.
-  await supabaseAdmin.auth.admin.updateUserById(user.id, {
-    user_metadata: {
-      ...user.user_metadata,
-      full_name: fullName,
-      name: fullName,
-      phone,
-      phone_number: phone,
-      mobile: phone
-    }
-  });
-
-  return newProfile;
-}
-
-export default async function LoginPage({
-  searchParams
-}: {
-  searchParams?: Promise<LoginSearchParams>;
-}) {
-  const params = searchParams ? await searchParams : {};
-  const nextPath = safeNextPath(params?.next);
-
-  const isStaffAccess = nextPath === "/admin";
-  const defaultAccount: AccountType = params?.account === "owner" ? "owner" : (params?.account === "vendor" ? "vendor" : "customer");
-
-  const loginMessage = getLoginMessage({
-    error: params?.error,
-    created: params?.created,
-    isStaffAccess
-  });
-
-  async function login(formData: FormData) {
-    "use server";
-
-    const supabase = await createClient();
-    const supabaseAdmin = createAdminClient();
-
-    const email = cleanText(formData.get("email")).toLowerCase();
-    const password = String(formData.get("password") || "");
-    const next = safeNextPath(String(formData.get("next") || ""));
-    const selectedAccountType = normalizeAccountType(
-      cleanText(formData.get("account_type"))
-    );
-
-    if (!email) {
-      redirect(
-        loginRedirectPath({
-          error: "missing_email",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-    if (!password) {
-      redirect(
-        loginRedirectPath({
-          error: "missing_password",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      redirect(
-        loginRedirectPath({
-          error: "invalid_login",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-    const user = data.user;
-
-    if (!user) {
-      redirect(
-        loginRedirectPath({
-          error: "login_failed",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-    const { data: adminUser } = await supabaseAdmin
-      .from("admin_users")
-      .select("id, auth_user_id, email, admin_role, status")
-      .eq("auth_user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (next === "/admin") {
-      if (adminUser) {
-        redirect("/admin");
+      if (authError) {
+        throw new Error("Invalid email or password");
       }
 
-      await supabase.auth.signOut();
+      const user = data.user;
+      if (!user) throw new Error("Login failed");
 
-      redirect(
-        loginRedirectPath({
-          error: "not_staff",
-          next
-        })
-      );
-    }
-
-    if (adminUser) {
-      redirect("/admin");
-    }
-
-    const profile = await getOrCreateProfileForUser({
-      supabaseAdmin,
-      user,
-      selectedAccountType
-    });
-
-    if (!profile) {
-      await supabase.auth.signOut();
-
-      redirect(
-        loginRedirectPath({
-          error: "wrong_account_type",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-    if (profile.account_status === "deleted") {
-      await supabase.auth.signOut();
-
-      redirect(
-        loginRedirectPath({
-          error: "inactive_account",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-    if (profile.account_status === "pending_deletion") {
-      redirect("/account/delete");
-    }
-
-    if (profile.account_status && profile.account_status !== "active") {
-      await supabase.auth.signOut();
-
-      redirect(
-        loginRedirectPath({
-          error: "inactive_account",
-          account: selectedAccountType,
-          next
-        })
-      );
-    }
-
-    if (selectedAccountType === "owner") {
-      if (profile.role !== "owner") {
-        await supabase.auth.signOut();
-
-        redirect(
-          loginRedirectPath({
-            error: "wrong_account_type",
-            account: selectedAccountType,
-            next
-          })
-        );
-      }
-
-      redirect("/owner/onboarding");
-    }
-
-    if (selectedAccountType === "vendor") {
-      if (profile.role !== "vendor") {
-        await supabase.auth.signOut();
-
-        redirect(
-          loginRedirectPath({
-            error: "wrong_account_type",
-            account: selectedAccountType,
-            next
-          })
-        );
-      }
-
-      const { data: vendorProfile, error: vendorProfileError } = await supabaseAdmin
-        .from("vendor_profiles")
-        .select("id, status")
-        .eq("id", user.id)
+      // Check profiles table for user role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("auth_user_id", user.id)
         .maybeSingle();
 
-      if (vendorProfileError) {
-        throw new Error(vendorProfileError.message);
+      const role = profile?.role;
+
+      if (role === "owner" || role === "studio_owner") {
+        router.push("/portal/studio");
+      } else if (role === "vendor") {
+        router.push("/portal/store");
+      } else {
+        router.push("/customer");
       }
-
-      if (!vendorProfile) {
-        await supabase.auth.signOut();
-
-        redirect(
-          loginRedirectPath({
-            error: "wrong_account_type",
-            account: selectedAccountType,
-            next
-          })
-        );
-      }
-
-      if (vendorProfile.status === "pending" || vendorProfile.status === "rejected") {
-        redirect("/vendor-pending");
-      }
-
-      redirect("/vendor");
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
-
-    if (selectedAccountType === "customer") {
-      if (profile.role !== "customer") {
-        await supabase.auth.signOut();
-
-        redirect(
-          loginRedirectPath({
-            error: "wrong_account_type",
-            account: selectedAccountType,
-            next
-          })
-        );
-      }
-
-      redirect("/customer");
-    }
-
-    redirect("/customer");
   }
 
   return (
-    <section className={isStaffAccess ? "staff-login-clean-page" : ""}>
-      <div className={isStaffAccess ? "staff-login-shell" : "auth-shell"}>
-        <div className={isStaffAccess ? "card staff-login-card" : "card auth-card"}>
-          <span className="badge">
-            {isStaffAccess ? (
-              <T en="Secure Team Access" ar="دخول الفريق الآمن" />
-            ) : (
-              <T en="Login" ar="تسجيل الدخول" />
-            )}
-          </span>
-
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-header">
           <h1>
-            {isStaffAccess ? (
-              <T en="Admin / Staff Login" ar="دخول الأدمن / الموظفين" />
-            ) : (
-              <T en="Welcome back" ar="مرحبًا بعودتك" />
-            )}
+            <T en="Welcome back" ar="مرحباً بعودتك" />
           </h1>
-
           <p>
-            {isStaffAccess ? (
-              <T
-                en="This page is restricted to approved GearBeat team members only."
-                ar="هذه الصفحة مخصصة فقط لأعضاء فريق GearBeat المعتمدين."
-              />
-            ) : (
-              <T
-                en="Login as a customer, studio owner, or gear vendor."
-                ar="سجّل الدخول كمستخدم، صاحب استوديو، أو تاجر معدات."
-              />
-            )}
+            <T en="Sign in to your GearBeat account" ar="سجّل دخولك إلى حسابك" />
           </p>
+        </div>
 
-          {loginMessage ? (
-            <div
-              className={loginMessage.type === "success" ? "success" : ""}
-              style={
-                loginMessage.type === "error"
-                  ? {
-                      marginBottom: 18,
-                      padding: 14,
-                      borderRadius: 16,
-                      background: "rgba(226, 109, 90, 0.14)",
-                      border: "1px solid rgba(226, 109, 90, 0.35)",
-                      color: "var(--gb-danger)"
-                    }
-                  : { marginBottom: 18 }
-              }
-            >
-              <T en={loginMessage.en} ar={loginMessage.ar} />
-            </div>
-          ) : null}
+        {error && <div className="auth-error">{error}</div>}
 
-          <form className="form" action={login}>
-            <input type="hidden" name="next" value={nextPath} />
-
-            {isStaffAccess ? (
-              <input type="hidden" name="account_type" value="customer" />
-            ) : (
-              <>
-                <label>
-                  <T en="Login as" ar="الدخول كـ" />
-                </label>
-
-                <select
-                  className="input"
-                  name="account_type"
-                  defaultValue={defaultAccount}
-                  required
-                >
-                  <option value="customer">Customer / مستخدم</option>
-                  <option value="owner">Studio Owner / مالك استوديو</option>
-                  <option value="vendor">Gear Vendor / تاجر معدات</option>
-                </select>
-              </>
-            )}
-
+        <form onSubmit={handleLogin} className="auth-form">
+          <div className="field">
             <label>
-              <T en="Email address" ar="البريد الإلكتروني" />
+              <T en="Email" ar="البريد الإلكتروني" />
             </label>
             <input
-              className="input"
-              name="email"
               type="email"
-              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="email@example.com"
               required
+              className="gb-input"
             />
-
+          </div>
+          <div className="field">
             <label>
               <T en="Password" ar="كلمة المرور" />
             </label>
             <input
-              className="input"
-              name="password"
               type="password"
-              placeholder="Your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               required
+              className="gb-input"
             />
+          </div>
+          <button type="submit" disabled={loading} className="gb-button">
+            {loading ? (
+              <T en="Signing in..." ar="جاري الدخول..." />
+            ) : (
+              <T en="Sign In" ar="تسجيل الدخول" />
+            )}
+          </button>
+        </form>
 
-            <button className="btn" type="submit">
-              {isStaffAccess ? (
-                <T en="Enter Dashboard" ar="دخول لوحة الإدارة" />
-              ) : (
-                <T en="Login" ar="تسجيل الدخول" />
-              )}
-            </button>
-          </form>
+        <div className="auth-footer">
+          <Link href="/forgot-password">
+            <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
+          </Link>
+          <Link href="/signup">
+            <T en="New to GearBeat? Create account" ar="جديد؟ أنشئ حساباً" />
+          </Link>
+        </div>
 
-          {!isStaffAccess ? (
-            <div className="actions" style={{ marginTop: 18 }}>
-              <Link
-                href="/signup?account=customer"
-                className="btn btn-secondary"
-              >
-                <T en="Create Customer Account" ar="إنشاء حساب مستخدم" />
-              </Link>
-
-              <Link href="/signup?account=owner" className="btn btn-secondary">
-                <T
-                  en="Create Studio Owner Account"
-                  ar="إنشاء حساب مالك استوديو"
-                />
-              </Link>
-
-              <Link href="/vendor-signup" className="btn btn-secondary" style={{ border: '1px solid var(--gb-gold)' }}>
-                <T
-                  en="Create Gear Vendor Account"
-                  ar="إنشاء حساب تاجر معدات"
-                />
-              </Link>
-
-              <Link href="/" className="btn btn-secondary">
-                <T en="Back to Home" ar="العودة للرئيسية" />
-              </Link>
-            </div>
-          ) : (
-            <>
-              <div
-                className="actions"
-                style={{ marginTop: 18, justifyContent: "center" }}
-              >
-                <Link href="/" className="btn btn-secondary">
-                  <T en="Back to Home" ar="العودة للصفحة الرئيسية" />
-                </Link>
-              </div>
-
-              <p className="staff-login-note">
-                <T
-                  en="If you are not part of the GearBeat team, please use the public login page."
-                  ar="إذا لم تكن من فريق GearBeat، الرجاء استخدام صفحة الدخول العامة."
-                />
-              </p>
-            </>
-          )}
+        <div className="auth-switcher">
+          <Link href="/portal/login" className="muted-link">
+            <T en="Are you a studio or seller?" ar="هل أنت استوديو أو تاجر؟" />
+          </Link>
         </div>
       </div>
-    </section>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        .auth-page {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--gb-bg, #0a0a0a);
+          padding: 20px;
+        }
+        .auth-card {
+          width: 100%;
+          max-width: 400px;
+          padding: 40px;
+          background: var(--gb-surface, #111);
+          border: 1px solid var(--gb-border, #222);
+          border-radius: 24px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .auth-header {
+          text-align: center;
+          margin-bottom: 32px;
+        }
+        .auth-header h1 {
+          font-size: 2rem;
+          margin: 0 0 8px;
+          color: var(--gb-text, #fff);
+        }
+        .auth-header p {
+          color: var(--gb-muted, #888);
+          font-size: 0.95rem;
+        }
+        .auth-form {
+          display: grid;
+          gap: 20px;
+        }
+        .field {
+          display: grid;
+          gap: 8px;
+        }
+        .field label {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--gb-muted, #888);
+        }
+        .gb-input {
+          padding: 12px 16px;
+          background: #000;
+          border: 1px solid #333;
+          border-radius: 12px;
+          color: #fff;
+          font-size: 1rem;
+          transition: border-color 0.2s;
+        }
+        .gb-input:focus {
+          outline: none;
+          border-color: var(--gb-gold, #cfa86e);
+        }
+        .gb-button {
+          padding: 14px;
+          background: var(--gb-gold, #cfa86e);
+          color: #000;
+          border: none;
+          border-radius: 12px;
+          font-size: 1rem;
+          font-weight: 900;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+        .gb-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .auth-error {
+          padding: 12px;
+          background: rgba(255, 77, 77, 0.1);
+          border: 1px solid var(--gb-danger, #ff4d4d);
+          border-radius: 12px;
+          color: var(--gb-danger, #ff4d4d);
+          font-size: 0.85rem;
+          margin-bottom: 24px;
+          text-align: center;
+        }
+        .auth-footer {
+          margin-top: 24px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          font-size: 0.9rem;
+        }
+        .auth-footer a {
+          color: var(--gb-gold, #cfa86e);
+          text-decoration: none;
+        }
+        .auth-switcher {
+          margin-top: 32px;
+          padding-top: 24px;
+          border-top: 1px solid #222;
+          text-align: center;
+        }
+        .muted-link {
+          color: var(--gb-muted, #888);
+          text-decoration: none;
+          font-size: 0.85rem;
+        }
+        .muted-link:hover {
+          color: var(--gb-text, #fff);
+        }
+      `,
+        }}
+      />
+    </div>
   );
 }
