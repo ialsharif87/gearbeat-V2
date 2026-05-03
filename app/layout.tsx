@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Space_Grotesk, Cairo } from "next/font/google";
 import "./globals.css";
 import "./brand-system.css";
-import { createClient } from "../lib/supabase/server";
-import { createAdminClient } from "../lib/supabase/admin";
-import Footer from "../components/footer";
-import SiteHeader from "../components/site-header";
-import { ClientProviders } from "../components/client-providers";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { ClientProviders } from "@/components/client-providers";
+import ConditionalLayout from "@/components/conditional-layout";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -55,8 +53,8 @@ function getDashboardPath({
   isVendor: boolean;
 }) {
   if (adminUser) return "/admin";
-  if (isVendor) return "/vendor";
-  if (profile?.role === "owner") return "/owner";
+  if (isVendor) return "/portal/store";
+  if (profile?.role === "owner" || profile?.role === "studio_owner") return "/portal/studio";
   if (profile?.role === "customer") return "/customer";
   return "/login";
 }
@@ -90,7 +88,7 @@ export default async function RootLayout({
       supabaseAdmin
         .from("profiles")
         .select("id, auth_user_id, email, full_name, phone, role, account_status")
-        .eq("auth_user_id", user.id)
+        .eq("id", user.id)
         .maybeSingle(),
 
       supabaseAdmin
@@ -117,36 +115,24 @@ export default async function RootLayout({
   const isAdmin = Boolean(adminUser);
   const userRole = profile?.role || null;
 
-    const headersList = await headers();
-    const pathname = headersList.get("x-invoke-path") || "";
-  
-    const hideHeader = 
-      pathname.startsWith("/portal") || 
-      pathname.startsWith("/admin") ||
-      pathname === "/staff-access";
-  
-    return (
-      <html
-        lang="ar"
-        dir="rtl"
-        className={`${spaceGrotesk.variable} ${cairo.variable}`}
-      >
-        <body>
-          <ClientProviders>
-            {!hideHeader && (
-              <SiteHeader
-                isLoggedIn={Boolean(user)}
-                isAdmin={isAdmin}
-                isVendor={Boolean(isVendor)}
-                userRole={userRole}
-                dashboardPath={dashboardPath}
-                logoutAction={logout}
-              />
-            )}
-
-          <main className="main">{children}</main>
-
-          <Footer />
+  return (
+    <html
+      lang="ar"
+      dir="rtl"
+      className={`${spaceGrotesk.variable} ${cairo.variable}`}
+    >
+      <body>
+        <ClientProviders>
+          <ConditionalLayout
+            isLoggedIn={Boolean(user)}
+            isAdmin={isAdmin}
+            isVendor={isVendor}
+            userRole={userRole}
+            dashboardPath={dashboardPath}
+            logoutAction={logout}
+          >
+            <main className="main">{children}</main>
+          </ConditionalLayout>
         </ClientProviders>
       </body>
     </html>
