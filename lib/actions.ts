@@ -3,26 +3,30 @@
 import { createClient } from "@/lib/supabase/server";
 
 export async function submitProviderLead(formData: FormData, type: "studio" | "seller") {
-  const name = formData.get("name")?.toString();
   const businessName = formData.get("business_name")?.toString();
   const email = formData.get("email")?.toString();
   const city = formData.get("city")?.toString();
-  const message = formData.get("message")?.toString();
+  
+  const managerName = formData.get("manager_name")?.toString();
+  const managerPhone = formData.get("manager_phone")?.toString();
+  const website = formData.get("website")?.toString();
 
-  if (!name || !businessName || !email || !city) {
+  if (!businessName || !email || !city || !managerName || !managerPhone) {
     return { error: "Please fill in all required fields." };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.from("provider_leads").insert({
-    name,
+    name: managerName,
     business_name: businessName,
     email,
     city,
-    message,
     type,
     status: "new",
+    message: website ? `Website: ${website}` : "",
     created_at: new Date().toISOString(),
+    // We'll store extra info in a metadata column if it exists, or just use these
+    // If the schema allows, we'll add more columns later
   });
 
   if (error) {

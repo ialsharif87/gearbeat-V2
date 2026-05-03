@@ -298,7 +298,11 @@ export default async function AdminLeadsPage({
                         {lead.type}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 600 }}>{lead.business_name}</td>
+                    <td style={{ fontWeight: 600 }}>
+                      <Link href={`/admin/leads/${lead.id}`} style={{ color: '#cfa86e', textDecoration: 'none' }}>
+                        {lead.business_name}
+                      </Link>
+                    </td>
                     <td>{lead.name}</td>
                     <td>{lead.email}</td>
                     <td>{lead.city}</td>
