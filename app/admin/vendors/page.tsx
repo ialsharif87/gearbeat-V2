@@ -101,6 +101,49 @@ export default async function AdminVendorsPage() {
     throw new Error(profilesError.message);
   }
 
+  async function createVendorAction(formData: FormData) {
+    "use server";
+    const { supabaseAdmin } = await requireAdminLayoutAccess();
+    
+    const email = getText(formData, "email");
+    const nameEn = getText(formData, "name_en");
+    const nameAr = getText(formData, "name_ar");
+    const slug = getText(formData, "slug") || `${nameEn.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`;
+
+    if (!email || !nameEn) throw new Error("Missing required fields.");
+
+    // 1. Create User
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { role: 'vendor' }
+    });
+
+    if (userError) throw userError;
+    const userId = userData.user.id;
+
+    // 2. Create Profile
+    await supabaseAdmin.from("profiles").insert({
+      auth_user_id: userId,
+      email,
+      role: "vendor",
+      full_name: nameEn,
+      account_status: "active"
+    });
+
+    // 3. Create Vendor Profile
+    await supabaseAdmin.from("vendor_profiles").insert({
+      id: userId,
+      business_name_en: nameEn,
+      business_name_ar: nameAr,
+      slug,
+      contact_email: email,
+      status: "approved"
+    });
+
+    revalidatePath("/admin/vendors");
+  }
+
   async function updateVendorStatus(formData: FormData) {
     "use server";
 
@@ -180,6 +223,7 @@ export default async function AdminVendorsPage() {
     revalidatePath("/admin/vendors");
     revalidatePath("/vendor");
     revalidatePath("/vendor-pending");
+    revalidatePath("/portal/store");
   }
 
   const pendingCount = vendorRows.filter(
@@ -259,6 +303,32 @@ export default async function AdminVendorsPage() {
             <div className="stat-value">{suspendedCount}</div>
           </div>
         </div>
+      </div>
+
+      {/* Manual Creation Form */}
+      <div className="card" style={{ marginTop: 32, background: 'rgba(207, 168, 110, 0.05)', border: '1px solid rgba(207, 168, 110, 0.2)' }}>
+        <h2 style={{ marginBottom: 16 }}>
+          <T en="Create New Vendor Account" ar="إنشاء حساب تاجر جديد" />
+        </h2>
+        <form action={createVendorAction} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, alignItems: 'end' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: 4 }}><T en="Vendor Email" ar="بريد التاجر" /></label>
+            <input name="email" type="email" className="input" placeholder="vendor@example.com" required />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: 4 }}><T en="Business Name (EN)" ar="اسم المنشأة (EN)" /></label>
+            <input name="name_en" className="input" placeholder="Music Store" required />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: 4 }}><T en="Business Name (AR)" ar="اسم المنشأة (AR)" /></label>
+            <input name="name_ar" className="input" placeholder="متجر الموسيقى" />
+          </div>
+          <div>
+            <button type="submit" className="btn btn-primary" style={{ height: 44, width: '100%' }}>
+              <T en="Create Vendor" ar="إنشاء التاجر" />
+            </button>
+          </div>
+        </form>
       </div>
 
       <div style={{ marginTop: 24, color: "var(--muted)" }}>

@@ -30,7 +30,30 @@ export default function StoreOnboardingPage() {
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUserId(data.user.id);
+      if (data.user) {
+        setUserId(data.user.id);
+        // Fetch existing data to pre-fill
+        supabase.from("vendor_profiles").select("*").eq("id", data.user.id).maybeSingle().then(({ data: profile }) => {
+          if (profile) {
+            setFormData(prev => ({
+              ...prev,
+              nameEn: profile.business_name_en || "",
+              nameAr: profile.business_name_ar || "",
+              phone: profile.contact_phone || "",
+              website: profile.website_url || "",
+              crNumber: profile.cr_number || "",
+              vatNumber: profile.vat_number || "",
+              iban: profile.metadata?.iban || "",
+              bankName: profile.metadata?.bank_name || "",
+              categories: profile.metadata?.categories || [],
+              warrantyPolicy: profile.metadata?.warranty_policy || "",
+              returnPolicy: profile.metadata?.return_policy || "",
+              shippingPolicy: profile.metadata?.shipping_policy || "",
+              agreed: profile.agreement_status === "signed"
+            }));
+          }
+        });
+      }
     });
   }, []);
 
@@ -64,12 +87,12 @@ export default function StoreOnboardingPage() {
     const supabase = createClient();
 
     try {
-      const { error } = await supabase.from("vendor_profiles").insert({
+      const { error } = await supabase.from("vendor_profiles").upsert({
         id: userId,
         business_name_en: formData.nameEn,
         business_name_ar: formData.nameAr,
-        slug: `${formData.nameEn.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
-        contact_email: "", // Will be updated by profile if needed
+        slug: formData.nameEn ? `${formData.nameEn.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}` : `vendor-${Date.now()}`,
+        contact_email: "", 
         contact_phone: formData.phone,
         website_url: formData.website,
         vat_number: formData.vatNumber,

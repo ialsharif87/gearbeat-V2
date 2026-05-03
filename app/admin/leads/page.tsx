@@ -137,7 +137,25 @@ async function createProviderAccountAction(formData: FormData) {
     full_name: email.split("@")[0] // Basic fallback
   });
 
-  // 3. Update lead status
+  // 3. Create Vendor/Studio Profile
+  if (type === "seller") {
+    // Fetch lead data to pre-fill vendor profile
+    const { data: leadData } = await supabaseAdmin.from("provider_leads").select("*").eq("id", leadId).single();
+    
+    if (leadData) {
+      await supabaseAdmin.from("vendor_profiles").insert({
+        id: userId,
+        business_name_en: leadData.business_name || "",
+        business_name_ar: leadData.business_name || "", // Fallback
+        contact_email: leadData.email,
+        contact_phone: "", // Lead might not have phone in schema, check it
+        status: "pending",
+        slug: leadData.business_name ? `${leadData.business_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}` : `vendor-${Date.now()}`
+      });
+    }
+  }
+
+  // 4. Update lead status
   await supabaseAdmin
     .from("provider_leads")
     .update({ 
