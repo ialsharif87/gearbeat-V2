@@ -119,13 +119,8 @@ export default async function StudioDetailsPage({
       id,
       slug,
       name,
-      name_en,
-      name_ar,
       description,
-      description_en,
-      description_ar,
       city,
-      city_name,
       district,
       address,
       address_line,
@@ -151,8 +146,6 @@ export default async function StudioDetailsPage({
       owner_auth_user_id,
       owner_trust_summary,
       minimum_photos_required,
-      capacity,
-      size_sqm,
       created_at
     `)
     .eq("slug", slug)
@@ -236,8 +229,8 @@ export default async function StudioDetailsPage({
   const allTimeAverage = average(reviewScores);
   const timeWeightedAverage = weightedAverageByTime(reviewList);
 
-  const studioName = studio.name_en || studio.name || studio.name_ar || "Studio";
-  const displayCity = studio.city_name || studio.city || "";
+  const studioName = studio.name || "Studio";
+  const displayCity = studio.city || "";
   const displayLocation = [studio.district, displayCity].filter(Boolean).join(", ");
   const minimumPhotosRequired = Number(studio.minimum_photos_required || 6);
   const photoCount = studioImages?.length || 0;
@@ -346,7 +339,7 @@ export default async function StudioDetailsPage({
               <T en="About this studio" ar="عن هذا الاستوديو" />
             </h2>
             <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
-              {studio.description_en || studio.description || studio.description_ar || "A premium creative space listed on GearBeat."}
+              {studio.description || "A premium creative space listed on GearBeat."}
             </p>
           </div>
 
@@ -361,7 +354,7 @@ export default async function StudioDetailsPage({
                   <T en="Capacity" ar="السعة" />
                 </span>
                 <strong style={{ display: "block", marginTop: 6 }}>
-                  {studio.capacity || "—"}
+                  {null || "—"}
                 </strong>
               </div>
 
@@ -370,7 +363,7 @@ export default async function StudioDetailsPage({
                   <T en="Size" ar="المساحة" />
                 </span>
                 <strong style={{ display: "block", marginTop: 6 }}>
-                  {studio.size_sqm ? `${studio.size_sqm} sqm` : "—"}
+                  {null ? `${null} sqm` : "—"}
                 </strong>
               </div>
 
@@ -471,7 +464,7 @@ export default async function StudioDetailsPage({
             </h2>
 
             <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
-              {[studio.address_line, studio.district, studio.city_name || studio.city]
+              {[studio.address_line, studio.district, studio.city]
                 .filter(Boolean)
                 .join(", ") || "Location details coming soon."}
             </p>
@@ -481,7 +474,7 @@ export default async function StudioDetailsPage({
                 googleMapsUrl={studio.google_maps_url}
                 latitude={studio.latitude}
                 longitude={studio.longitude}
-                cityName={studio.city_name || studio.city}
+                cityName={studio.city}
                 district={studio.district}
                 addressLine={studio.address_line}
                 mode="directions"
@@ -581,7 +574,7 @@ export default async function StudioDetailsPage({
               googleMapsUrl={studio.google_maps_url}
               latitude={studio.latitude}
               longitude={studio.longitude}
-              cityName={studio.city_name || studio.city}
+              cityName={studio.city}
               district={studio.district}
               addressLine={studio.address_line}
               mode="directions"
