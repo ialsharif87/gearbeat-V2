@@ -4,15 +4,27 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { Line } from "react-chartjs-2";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
   Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 type DateRange = {
   from: Date;
@@ -332,35 +344,54 @@ export default function OwnerAnalyticsPage() {
           <h3><T en="Growth & Revenue" ar="النمو والإيرادات" /></h3>
         </div>
         <div style={{ width: '100%', height: 300 }}>
-          <ResponsiveContainer>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-              <XAxis dataKey="date" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis yAxisId="left" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis yAxisId="right" orientation="right" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip 
-                contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '8px' }}
-                itemStyle={{ fontSize: '12px' }}
-              />
-              <Line 
-                yAxisId="left"
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#cfa86e" 
-                strokeWidth={3} 
-                dot={{ fill: '#cfa86e', r: 4 }} 
-                activeDot={{ r: 6 }} 
-              />
-              <Line 
-                yAxisId="right"
-                type="monotone" 
-                dataKey="bookings" 
-                stroke="#3b82f6" 
-                strokeWidth={2} 
-                dot={{ fill: '#3b82f6', r: 3 }} 
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <Line
+            data={{
+              labels: chartData.map(d => d.date),
+              datasets: [
+                {
+                  label: "Revenue (SAR)",
+                  data: chartData.map(d => d.revenue),
+                  borderColor: "#cfa86e",
+                  backgroundColor: "rgba(207,168,110,0.1)",
+                  tension: 0.4,
+                },
+                {
+                  label: "Bookings",
+                  data: chartData.map(d => d.bookings),
+                  borderColor: "#3b82f6",
+                  backgroundColor: "rgba(59,130,246,0.1)",
+                  tension: 0.4,
+                  yAxisID: "y1",
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: "index", intersect: false },
+              plugins: {
+                legend: { 
+                  labels: { color: "#888" }
+                },
+              },
+              scales: {
+                x: { 
+                  ticks: { color: "#888" },
+                  grid: { color: "#1a1a1a" }
+                },
+                y: { 
+                  ticks: { color: "#cfa86e" },
+                  grid: { color: "#1a1a1a" },
+                  position: "left"
+                },
+                y1: {
+                  ticks: { color: "#3b82f6" },
+                  grid: { drawOnChartArea: false },
+                  position: "right"
+                },
+              },
+            }}
+          />
         </div>
       </section>
 
