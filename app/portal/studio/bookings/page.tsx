@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import OwnerBookingStatusActions from "@/components/owner-booking-status-actions";
 import { createClient } from "@/lib/supabase/server";
+import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
@@ -70,34 +71,41 @@ function formatMoney(amount: number, currency: string) {
 }
 
 function getStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    pending: "Pending",
-    pending_review: "Pending review",
-    pending_owner_review: "Pending owner review",
-    accepted: "Accepted",
-    confirmed: "Confirmed",
-    rejected: "Rejected",
-    declined: "Declined",
-    cancelled: "Cancelled",
-    completed: "Completed",
-    no_show: "No-show",
-  };
-
-  return labels[status] || status || "Unknown";
+  switch (status) {
+    case "pending":
+    case "pending_review":
+    case "pending_owner_review":
+      return <T en="Pending" ar="معلق" />;
+    case "confirmed":
+    case "accepted":
+      return <T en="Confirmed" ar="مؤكد" />;
+    case "cancelled":
+    case "declined":
+    case "rejected":
+      return <T en="Cancelled" ar="ملغي" />;
+    case "completed":
+      return <T en="Completed" ar="مكتمل" />;
+    default:
+      return status || <T en="Unknown" ar="غير معروف" />;
+  }
 }
 
 function getPaymentLabel(status: string) {
-  const labels: Record<string, string> = {
-    pending: "Pending",
-    unpaid: "Unpaid",
-    paid: "Paid",
-    manual_paid: "Manual paid",
-    failed: "Failed",
-    refunded: "Refunded",
-    cancelled: "Cancelled",
-  };
-
-  return labels[status] || status || "Pending";
+  switch (status) {
+    case "pending":
+    case "unpaid":
+      return <T en="Pending" ar="معلق" />;
+    case "paid":
+    case "manual_paid":
+      return <T en="Paid" ar="مدفوع" />;
+    case "refunded":
+      return <T en="Refunded" ar="مسترد" />;
+    case "cancelled":
+    case "failed":
+      return <T en="Cancelled" ar="ملغي" />;
+    default:
+      return status || <T en="Pending" ar="معلق" />;
+  }
 }
 
 async function fetchOwnedStudios(
@@ -206,33 +214,50 @@ export default async function OwnerBookingsPage() {
     <main className="gb-dashboard-page">
       <section className="gb-dashboard-header">
         <div>
-          <p className="gb-eyebrow">Owner dashboard</p>
-          <h1>Studio Bookings</h1>
+          <p className="gb-eyebrow">
+            <T en="Owner Portal" ar="بوابة المالك" />
+          </p>
+          <h1>
+            <T en="Studio Bookings" ar="حجوزات الاستوديو" />
+          </h1>
           <p className="gb-muted-text">
-            Manage incoming studio bookings, review payment status, and update
-            each booking status.
+            <T
+              en="Manage incoming studio bookings, review payment status, and update each booking status."
+              ar="أدر الحجوزات الواردة وراجع حالة الدفع وحدّث حالة كل حجز."
+            />
           </p>
         </div>
 
         <Link href="/portal/studio" className="gb-button gb-button-secondary">
-          Back to owner dashboard
+          <T en="Back" ar="رجوع" />
         </Link>
       </section>
 
       {ownedStudioIds.length === 0 ? (
         <section className="gb-empty-state">
-          <h2>No studios found</h2>
+          <h2>
+            <T en="No studios found" ar="لا توجد استوديوهات" />
+          </h2>
           <p>
-            This account does not currently own any studio records. Once a
-            studio is linked to this owner account, bookings will appear here.
+            <T
+              en="No studios linked to this account yet."
+              ar="لا توجد استوديوهات مرتبطة بهذا الحساب بعد."
+            />
           </p>
         </section>
       ) : null}
 
       {ownedStudioIds.length > 0 && bookings.length === 0 ? (
         <section className="gb-empty-state">
-          <h2>No bookings yet</h2>
-          <p>Your studio bookings will appear here once customers book.</p>
+          <h2>
+            <T en="No bookings found" ar="لا توجد حجوزات" />
+          </h2>
+          <p>
+            <T
+              en="Your studio bookings will appear here once customers book."
+              ar="ستظهر حجوزات استوديوك هنا بمجرد قيام العملاء بالحجز."
+            />
+          </p>
         </section>
       ) : null}
 

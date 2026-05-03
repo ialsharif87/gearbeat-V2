@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import T from "./t";
 
 type AvailabilityRule = {
   dayOfWeek: number;
@@ -29,13 +30,13 @@ type StudioAvailabilityManagerProps = {
 };
 
 const days = [
-  { value: 0, label: "Sunday" },
-  { value: 1, label: "Monday" },
-  { value: 2, label: "Tuesday" },
-  { value: 3, label: "Wednesday" },
-  { value: 4, label: "Thursday" },
-  { value: 5, label: "Friday" },
-  { value: 6, label: "Saturday" },
+  { value: 0, label: <T en="Sunday" ar="الأحد" /> },
+  { value: 1, label: <T en="Monday" ar="الاثنين" /> },
+  { value: 2, label: <T en="Tuesday" ar="الثلاثاء" /> },
+  { value: 3, label: <T en="Wednesday" ar="الأربعاء" /> },
+  { value: 4, label: <T en="Thursday" ar="الخميس" /> },
+  { value: 5, label: <T en="Friday" ar="الجمعة" /> },
+  { value: 6, label: <T en="Saturday" ar="السبت" /> },
 ];
 
 function createDefaultRules() {
@@ -186,11 +187,15 @@ export default function StudioAvailabilityManager({
     <section className="gb-card">
       <div className="gb-card-header">
         <div>
-          <p className="gb-eyebrow">Studio availability</p>
+          <p className="gb-eyebrow">
+            <T en="Availability" ar="التوافر" />
+          </p>
           <h2>{studioName}</h2>
           <p className="gb-muted-text">
-            Set weekly working hours, closed days, slot length, buffer time, and
-            special date exceptions.
+            <T
+              en="Manage working hours, closed days, booking slots, and special date exceptions for your studios."
+              ar="أدر ساعات العمل والأيام المغلقة وفترات الحجز والاستثناءات الخاصة."
+            />
           </p>
         </div>
 
@@ -200,7 +205,11 @@ export default function StudioAvailabilityManager({
           onClick={saveAvailability}
           disabled={isSaving}
         >
-          {isSaving ? "Saving..." : "Save availability"}
+          {isSaving ? (
+            <T en="Saving..." ar="جاري الحفظ..." />
+          ) : (
+            <T en="Save availability" ar="حفظ التوافر" />
+          )}
         </button>
       </div>
 
@@ -211,12 +220,24 @@ export default function StudioAvailabilityManager({
         <table className="gb-table">
           <thead>
             <tr>
-              <th>Day</th>
-              <th>Open</th>
-              <th>Open time</th>
-              <th>Close time</th>
-              <th>Slot minutes</th>
-              <th>Buffer minutes</th>
+              <th>
+                <T en="Day" ar="اليوم" />
+              </th>
+              <th>
+                <T en="Open" ar="مفتوح" />
+              </th>
+              <th>
+                <T en="Open time" ar="وقت الفتح" />
+              </th>
+              <th>
+                <T en="Close time" ar="وقت الإغلاق" />
+              </th>
+              <th>
+                <T en="Slot minutes" ar="مدة الفترة" />
+              </th>
+              <th>
+                <T en="Buffer minutes" ar="وقت الفاصل" />
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -314,11 +335,17 @@ export default function StudioAvailabilityManager({
 
       <div className="gb-card-header">
         <div>
-          <p className="gb-eyebrow">Date exceptions</p>
-          <h3>Closed dates or special hours</h3>
+          <p className="gb-eyebrow">
+            <T en="Date exceptions" ar="استثناءات التواريخ" />
+          </p>
+          <h3>
+            <T en="Closed dates or special hours" ar="تواريخ مغلقة أو ساعات خاصة" />
+          </h3>
           <p className="gb-muted-text">
-            Use this for holidays, private events, maintenance, or special
-            working hours.
+            <T
+              en="Use this for holidays, private events, maintenance, or special working hours."
+              ar="استخدم هذا للأجازات أو الفعاليات الخاصة أو الصيانة أو ساعات العمل الخاصة."
+            />
           </p>
         </div>
       </div>
@@ -366,19 +393,21 @@ export default function StudioAvailabilityManager({
         </label>
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span>Reason</span>
+          <span>
+            <T en="Reason" ar="السبب" />
+          </span>
           <input
             type="text"
             value={newExceptionReason}
             onChange={(event) => setNewExceptionReason(event.target.value)}
-            placeholder="Maintenance, private event, holiday..."
+            placeholder="..."
             className="gb-input"
           />
         </label>
 
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
           <button type="button" className="gb-button" onClick={addException}>
-            Add exception
+            <T en="Add exception" ar="إضافة استثناء" />
           </button>
         </div>
       </div>
@@ -399,11 +428,19 @@ export default function StudioAvailabilityManager({
               {sortedExceptions.map((exception) => (
                 <tr key={exception.exceptionDate}>
                   <td>{exception.exceptionDate}</td>
-                  <td>{exception.isClosed ? "Closed" : "Special hours"}</td>
                   <td>
-                    {exception.isClosed
-                      ? "Closed all day"
-                      : `${exception.openTime} - ${exception.closeTime}`}
+                    {exception.isClosed ? (
+                      <T en="Closed" ar="مغلق" />
+                    ) : (
+                      <T en="Special hours" ar="ساعات خاصة" />
+                    )}
+                  </td>
+                  <td>
+                    {exception.isClosed ? (
+                      <T en="Closed all day" ar="مغلق طوال اليوم" />
+                    ) : (
+                      `${exception.openTime} - ${exception.closeTime}`
+                    )}
                   </td>
                   <td>{exception.reason || "-"}</td>
                   <td>
@@ -421,7 +458,9 @@ export default function StudioAvailabilityManager({
           </table>
         </div>
       ) : (
-        <p className="gb-muted-text">No exceptions added yet.</p>
+        <p className="gb-muted-text">
+          <T en="No exceptions added yet" ar="لا توجد استثناءات بعد" />
+        </p>
       )}
     </section>
   );

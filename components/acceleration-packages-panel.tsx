@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import T from "./t";
 
 export type AccelerationPackage = {
   id: string;
@@ -183,18 +184,32 @@ export default function AccelerationPackagesPanel({
       <section className="gb-card">
         <div className="gb-card-header">
           <div>
-            <p className="gb-eyebrow">Acceleration packages</p>
-            <h2>Available packages</h2>
+            <p className="gb-eyebrow">
+              <T en="Acceleration packages" ar="باقات التعزيز" />
+            </p>
+            <h2>
+              <T en="Available packages" ar="الباقات المتاحة" />
+            </h2>
             <p className="gb-muted-text">
-              Acceleration increases visibility. Payment is manual/pending in this phase.
+              <T
+                en="Acceleration increases your studio visibility on GearBeat."
+                ar="تعزيز الظهور يزيد من ظهور استوديوك على GearBeat."
+              />
             </p>
           </div>
         </div>
 
         {packages.length === 0 ? (
           <div className="gb-empty-state">
-            <h3>No packages</h3>
-            <p>Packages will appear here once admin creates them.</p>
+            <h3>
+              <T en="No packages" ar="لا توجد باقات" />
+            </h3>
+            <p>
+              <T
+                en="Packages will appear once admin creates them."
+                ar="ستظهر الباقات بعد إنشائها من قبل الإدارة."
+              />
+            </p>
           </div>
         ) : (
           <div className="gb-card-grid">
@@ -218,15 +233,23 @@ export default function AccelerationPackagesPanel({
       <section className="gb-card">
         <div className="gb-card-header">
           <div>
-            <p className="gb-eyebrow">Orders</p>
-            <h2>Acceleration orders</h2>
+            <p className="gb-eyebrow">
+              <T en="Orders" ar="الطلبات" />
+            </p>
+            <h2>
+              <T en="Acceleration orders" ar="طلبات التعزيز" />
+            </h2>
           </div>
         </div>
 
         {orders.length === 0 ? (
           <div className="gb-empty-state">
-            <h3>No acceleration orders</h3>
-            <p>Orders will appear here.</p>
+            <h3>
+              <T en="No orders yet" ar="لا توجد طلبات بعد" />
+            </h3>
+            <p>
+              <T en="Orders will appear here." ar="ستظهر الطلبات هنا." />
+            </p>
           </div>
         ) : (
           <div className="gb-table-wrap">

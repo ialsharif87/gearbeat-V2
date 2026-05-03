@@ -10,6 +10,7 @@ import {
   readText,
   type DbRow,
 } from "@/lib/auth-guards";
+import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
@@ -63,11 +64,15 @@ export default async function OwnerAccelerationPage() {
     <main className="gb-dashboard-page">
       <section className="gb-dashboard-header">
         <div>
-          <p className="gb-eyebrow">Owner dashboard</p>
-          <h1>Acceleration</h1>
+          <p className="gb-eyebrow">
+            <T en="Owner Portal" ar="بوابة المالك" />
+          </p>
+          <h1>
+            <T en="Acceleration" ar="تعزيز الظهور" />
+          </h1>
         </div>
         <Link href="/portal/studio" className="gb-button gb-button-secondary">
-          Back to owner dashboard
+          <T en="Back" ar="رجوع" />
         </Link>
       </section>
 

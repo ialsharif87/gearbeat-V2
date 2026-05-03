@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioAvailabilityManager from "@/components/studio-availability-manager";
 import { createClient } from "@/lib/supabase/server";
+import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
@@ -156,26 +157,35 @@ export default async function StudioAvailabilityPage({
     <main className="gb-dashboard-page">
       <section className="gb-dashboard-header">
         <div>
-          <p className="gb-eyebrow">Owner dashboard</p>
-          <h1>Studio Availability</h1>
+          <p className="gb-eyebrow">
+            <T en="Owner Portal" ar="بوابة المالك" />
+          </p>
+          <h1>
+            <T en="Studio Availability" ar="أوقات الاستوديو" />
+          </h1>
           <p className="gb-muted-text">
-            Manage working hours, closed days, booking slots, and special date
-            exceptions for your studios.
+            <T
+              en="Manage working hours, closed days, booking slots, and special date exceptions for your studios."
+              ar="أدر ساعات العمل والأيام المغلقة وفترات الحجز والاستثناءات الخاصة."
+            />
           </p>
         </div>
 
         <Link href="/portal/studio" className="gb-button gb-button-secondary">
-          Back to owner dashboard
+          <T en="Back" ar="رجوع" />
         </Link>
       </section>
 
       {ownedStudios.length === 0 ? (
         <section className="gb-empty-state">
-          <h2>No studios found</h2>
+          <h2>
+            <T en="No studios found" ar="لا توجد استوديوهات" />
+          </h2>
           <p>
-            This account does not currently own any studio records. Once a
-            studio is linked to this owner account, availability settings will
-            appear here.
+            <T
+              en="No studios linked to this account yet."
+              ar="لا توجد استوديوهات مرتبطة بهذا الحساب بعد."
+            />
           </p>
         </section>
       ) : null}
@@ -183,7 +193,9 @@ export default async function StudioAvailabilityPage({
       {ownedStudios.length > 0 ? (
         <>
           <section className="gb-card" style={{ marginBottom: '24px' }}>
-            <p className="gb-eyebrow">Select studio</p>
+            <p className="gb-eyebrow">
+              <T en="Select studio" ar="اختر استوديو" />
+            </p>
             <div className="gb-action-row" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
               {ownedStudios.map((studio) => {
                 const studioId = readText(studio, ["id"]);
