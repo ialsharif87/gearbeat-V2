@@ -743,7 +743,7 @@ export default function OwnerAnalyticsPage() {
             <h3 style={{ color: '#cfa86e', margin: '0 0 12px 0', fontSize: '1.1rem' }}>
               <T en="Quick Insight" ar="رؤية سريعة" />
             </h3>
-            <p style={{ color: '#888', lineScale: 1.7, margin: 0, fontSize: '0.9rem' }}>
+            <p style={{ color: '#888', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
               <T 
                 en="Focus on increasing your studio availability during peak weekends to capture more revenue." 
                 ar="ركز على زيادة توافر الاستوديو خلال عطلات نهاية الأسبوع لاقتناص المزيد من الإيرادات." 
