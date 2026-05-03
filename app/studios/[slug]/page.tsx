@@ -408,6 +408,63 @@ export default async function StudioDetailsPage({
             )}
           </div>
 
+          {featureGroups.service && featureGroups.service.length > 0 && (
+            <div className="card">
+              <h2>
+                <T en="Services Offered" ar="الخدمات المتاحة" />
+              </h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                  gap: 12,
+                  marginTop: 16,
+                }}
+              >
+                {featureGroups.service.map((item) => (
+                  <div
+                    key={item.id}
+                    className="card"
+                    style={{
+                      padding: 16,
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "1.25rem",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 8,
+                        background: "rgba(255,255,255,0.04)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {item.feature?.slug === "mixing" ? "🎚️" : 
+                       item.feature?.slug === "mastering" ? "📀" :
+                       item.feature?.slug === "recording" ? "🎙️" : "🧑‍💻"}
+                    </div>
+                    <div>
+                      <strong style={{ display: "block", fontSize: "0.95rem" }}>
+                        <T
+                          en={item.feature?.name_en || item.custom_name}
+                          ar={item.feature?.name_ar || item.custom_name}
+                        />
+                      </strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="card">
             <h2>
               <T en="Location" ar="الموقع" />
