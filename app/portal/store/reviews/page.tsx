@@ -142,51 +142,49 @@ export default async function VendorReviewsPage() {
       : 0;
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <span className="badge">
+    <main 
+      className="dashboard-page" 
+      style={{ 
+        background: '#0a0a0a', 
+        minHeight: '100vh', 
+        padding: '32px' 
+      }}
+    >
+      <section style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
           <T en="Reviews" ar="التقييمات" />
-        </span>
-        <h1>
-          <T en="Customer Reviews" ar="تقييمات العملاء" />
         </h1>
-        <p>
+        <p style={{ color: "#888", fontSize: '0.9rem', marginTop: '8px' }}>
           <T
             en="Monitor customer feedback for products that belong to your vendor account."
             ar="تابع آراء العملاء على المنتجات التابعة لحساب التاجر الخاص بك."
           />
         </p>
-      </div>
+      </section>
 
-      <div className="stats-grid" style={{ marginTop: 30 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-content">
-            <label>
-              <T en="Average Rating" ar="متوسط التقييم" />
-            </label>
-            <div className="stat-value">{averageRating.toFixed(1)}</div>
+      <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '32px', maxWidth: '600px' }}>
+        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+            <T en="Average Rating" ar="متوسط التقييم" />
           </div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#cfa86e' }}>{averageRating.toFixed(1)}</div>
         </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">💬</div>
-          <div className="stat-content">
-            <label>
-              <T en="Total Reviews" ar="إجمالي التقييمات" />
-            </label>
-            <div className="stat-value">{totalReviews}</div>
+        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+            <T en="Total Reviews" ar="إجمالي التقييمات" />
           </div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white' }}>{totalReviews}</div>
         </div>
-      </div>
+      </section>
 
-      <div style={{ marginTop: 30, display: "grid", gap: 16 }}>
+      <div style={{ display: "grid", gap: 20 }}>
         {reviewRows.length === 0 ? (
-          <div className="card" style={{ textAlign: "center" }}>
-            <h2>
+          <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '48px', textAlign: 'center' }}>
+            <h2 style={{ color: 'white', marginBottom: '8px' }}>
               <T en="No reviews yet" ar="لا توجد تقييمات بعد" />
             </h2>
-            <p>
+            <p style={{ color: '#666' }}>
               <T
                 en="Reviews will appear here after customers submit feedback for your products."
                 ar="ستظهر التقييمات هنا بعد أن يرسل العملاء آراءهم حول منتجاتك."
@@ -206,70 +204,65 @@ export default async function VendorReviewsPage() {
             );
 
             return (
-              <div key={review.id} className="card">
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 16,
-                    flexWrap: "wrap",
-                  }}
-                >
+              <div 
+                key={review.id} 
+                className="gb-card" 
+                style={{ 
+                  background: '#111', 
+                  borderRadius: '20px', 
+                  border: '1px solid #1e1e1e', 
+                  padding: '24px' 
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                   <div>
-                    <div
-                      style={{
-                        color: "var(--gb-gold)",
-                        fontSize: "1.1rem",
-                        letterSpacing: 2,
-                      }}
-                    >
+                    <div style={{ color: "#cfa86e", fontSize: "1.1rem", letterSpacing: 2 }}>
                       {renderStars(review.rating)}
                     </div>
 
-                    <h3 style={{ marginTop: 8 }}>
-                      <T en="Customer Review" ar="تقييم العميل" />
+                    <h3 style={{ marginTop: 12, fontSize: '1.2rem', color: 'white' }}>
+                      <T en="Rating" ar="التقييم" />: {review.rating}/5
                     </h3>
 
-                    <p style={{ color: "var(--muted)", marginTop: 4 }}>
-                      {productName} · {customerName}
+                    <p style={{ color: "#666", marginTop: 4, fontSize: '0.9rem' }}>
+                      <T en="Product" ar="المنتج" />: {productName} · <T en="Customer" ar="العميل" />: {customerName}
                     </p>
                   </div>
 
-                  <div
-                    style={{
-                      color: "var(--muted)",
-                      fontSize: "0.85rem",
-                      textAlign: "right",
-                    }}
-                  >
-                    {formatDate(review.created_at)}
+                  <div style={{ color: "#666", fontSize: "0.85rem", textAlign: "right" }}>
+                    <T en="Date" ar="التاريخ" />: {formatDate(review.created_at)}
                   </div>
                 </div>
 
-                {review.comment ? (
-                  <p style={{ marginTop: 18, lineHeight: 1.7 }}>
-                    {review.comment}
-                  </p>
-                ) : (
-                  <p style={{ marginTop: 18, color: "var(--muted)" }}>
-                    <T en="No written comment." ar="لا يوجد تعليق مكتوب." />
-                  </p>
-                )}
+                <div style={{ marginTop: 20 }}>
+                  <span style={{ fontSize: '0.8rem', color: '#666', textTransform: 'uppercase' }}>
+                    <T en="Comment" ar="التعليق" />
+                  </span>
+                  {review.comment ? (
+                    <p style={{ marginTop: 8, lineHeight: 1.7, color: '#ccc' }}>
+                      {review.comment}
+                    </p>
+                  ) : (
+                    <p style={{ marginTop: 8, color: "#444", fontStyle: 'italic' }}>
+                      <T en="No written comment." ar="لا يوجد تعليق مكتوب." />
+                    </p>
+                  )}
+                </div>
 
                 {review.vendor_reply ? (
                   <div
                     style={{
-                      marginTop: 18,
-                      padding: 14,
+                      marginTop: 20,
+                      padding: 16,
                       borderRadius: 12,
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(207, 168, 110, 0.2)",
+                      background: "rgba(207, 168, 110, 0.03)",
                     }}
                   >
-                    <strong>
+                    <strong style={{ color: '#cfa86e', fontSize: '0.9rem' }}>
                       <T en="Vendor Reply" ar="رد التاجر" />
                     </strong>
-                    <p style={{ marginTop: 8 }}>{review.vendor_reply}</p>
+                    <p style={{ marginTop: 8, color: '#ccc' }}>{review.vendor_reply}</p>
                   </div>
                 ) : null}
               </div>
@@ -277,6 +270,6 @@ export default async function VendorReviewsPage() {
           })
         )}
       </div>
-    </div>
+    </main>
   );
 }

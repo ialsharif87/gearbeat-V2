@@ -139,82 +139,84 @@ export default async function VendorOrdersPage() {
   );
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1160, margin: "0 auto" }}>
-      <section style={{ marginTop: 24 }}>
-        <span className="badge badge-gold">
+    <main 
+      className="dashboard-page" 
+      style={{ 
+        background: '#0a0a0a', 
+        minHeight: '100vh', 
+        padding: '32px' 
+      }}
+    >
+      <section style={{ marginBottom: '32px' }}>
+        <span className="gb-dash-badge" style={{ background: 'rgba(207, 168, 110, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)', marginBottom: '12px' }}>
           <T en="Orders" ar="الطلبات" />
         </span>
 
-        <h1 style={{ marginTop: 10 }}>
-          <T en="Vendor marketplace orders" ar="طلبات متجر التاجر" />
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '8px 0 0', color: 'white' }}>
+          <T en="Orders" ar="الطلبات" />
         </h1>
 
-        <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+        <p style={{ color: "#888", fontSize: '0.9rem', marginTop: '8px' }}>
           <T
-            en="Manage marketplace order items assigned to your vendor account."
-            ar="إدارة عناصر طلبات المتجر المرتبطة بحساب التاجر."
+            en="Manage your marketplace orders and update their status."
+            ar="أدر طلبات متجرك وحدّث حالتها."
           />
         </p>
       </section>
 
-      <section className="stats-grid" style={{ marginTop: 26 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">📦</div>
-          <div className="stat-content">
-            <label>Total items</label>
-            <div className="stat-value">{items?.length || 0}</div>
-          </div>
+      <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
+        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Total items" ar="إجمالي العناصر" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{items?.length || 0}</div>
         </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <label>Paid/active</label>
-            <div className="stat-value">{paidItems.length}</div>
-          </div>
+        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Paid/active" ar="مدفوع/نشط" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{paidItems.length}</div>
         </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <label>Pending</label>
-            <div className="stat-value">{pendingItems.length}</div>
-          </div>
+        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Pending" ar="معلق" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{pendingItems.length}</div>
         </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <label>Revenue</label>
-            <div className="stat-value">{formatMoney(totalRevenue)}</div>
-          </div>
+        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Revenue" ar="الإيراد" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#cfa86e' }}>{formatMoney(totalRevenue)}</div>
         </div>
       </section>
 
-      <section className="card" style={{ marginTop: 26 }}>
-        <h2>
+      <section 
+        className="gb-card" 
+        style={{ 
+          background: '#111', 
+          borderRadius: '20px', 
+          border: '1px solid #1e1e1e', 
+          padding: '24px' 
+        }}
+      >
+        <div style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '24px' }}>
           <T en="Order items" ar="عناصر الطلبات" />
-        </h2>
+        </div>
 
-        <div className="table-responsive" style={{ marginTop: 18 }}>
-          <table className="admin-table">
+        <div className="gb-table-wrap">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr>
-                <th>Order</th>
-                <th>Customer</th>
-                <th>Product</th>
-                <th>Qty</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Update</th>
+              <tr style={{ color: '#666', fontSize: '0.8rem', borderBottom: '1px solid #1a1a1a', textAlign: 'start' }}>
+                <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Order ID" ar="رقم الطلب" /></th>
+                <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Customer" ar="العميل" /></th>
+                <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Product" ar="المنتج" /></th>
+                <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Amount" ar="المبلغ" /></th>
+                <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Status" ar="الحالة" /></th>
+                <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Date" ar="التاريخ" /></th>
               </tr>
             </thead>
 
             <tbody>
               {!items || items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: 30 }}>
-                    <T en="No order items found." ar="لا توجد عناصر طلبات." />
+                  <td colSpan={6} style={{ textAlign: "center", padding: 48, color: '#666' }}>
+                    <T en="No orders yet" ar="لا توجد طلبات بعد" />
                   </td>
                 </tr>
               ) : (
@@ -222,57 +224,58 @@ export default async function VendorOrdersPage() {
                   const order = Array.isArray(item.order) ? item.order[0] : item.order;
                   const product = Array.isArray(item.product) ? item.product[0] : item.product;
 
+                  const statusLabels: any = {
+                    pending: <T en="Pending" ar="معلق" />,
+                    paid: <T en="Paid" ar="مدفوع" />,
+                    processing: <T en="Processing" ar="قيد المعالجة" />,
+                    shipped: <T en="Shipped" ar="تم الشحن" />,
+                    delivered: <T en="Delivered" ar="تم التسليم" />,
+                    returned: <T en="Returned" ar="مُرجع" />,
+                    cancelled: <T en="Cancelled" ar="ملغي" />,
+                    refunded: <T en="Refunded" ar="مسترد" />
+                  };
+
                   return (
-                    <tr key={item.id}>
-                      <td>
+                    <tr 
+                      key={item.id} 
+                      style={{ borderBottom: '1px solid #111', transition: 'background 0.2s' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <td style={{ padding: '16px' }}>
                         <div style={{ fontWeight: 800 }}>
                           {order?.order_number || item.order_id}
                         </div>
-                        <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                          {formatDate(order?.created_at || item.created_at)}
-                        </div>
                       </td>
 
-                      <td>
+                      <td style={{ padding: '16px' }}>
                         <div>{order?.customer_name || "—"}</div>
-                        <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                        <div style={{ color: "#666", fontSize: "0.85rem" }}>
                           {order?.customer_email || "—"}
                         </div>
                       </td>
 
-                      <td>{getProductName(item.product_snapshot, product)}</td>
+                      <td style={{ padding: '16px' }}>{getProductName(item.product_snapshot, product)}</td>
 
-                      <td>{item.quantity}</td>
+                      <td style={{ padding: '16px', fontWeight: 700 }}>{formatMoney(item.total_amount, item.currency_code)}</td>
 
-                      <td>{formatMoney(item.total_amount, item.currency_code)}</td>
-
-                      <td>
-                        <span className="badge">{item.status}</span>
+                      <td style={{ padding: '16px' }}>
+                        <span 
+                          style={{ 
+                            padding: '4px 12px', 
+                            borderRadius: '99px', 
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            color: '#3b82f6'
+                          }}
+                        >
+                          {statusLabels[item.status] || item.status}
+                        </span>
                       </td>
 
-                      <td>
-                        <form
-                          action="/api/marketplace/orders/update-status"
-                          method="post"
-                          style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
-                        >
-                          <select className="input" name="status" defaultValue={item.status}>
-                            <option value="processing">processing</option>
-                            <option value="shipped">shipped</option>
-                            <option value="delivered">delivered</option>
-                            <option value="completed">completed</option>
-                            <option value="cancelled">cancelled</option>
-                          </select>
-
-                          <button
-                            type="button"
-                            className="btn btn-small"
-                            data-order-item-status
-                            data-item-id={item.id}
-                          >
-                            Save
-                          </button>
-                        </form>
+                      <td style={{ padding: '16px', color: '#666', fontSize: '0.85rem' }}>
+                        {formatDate(order?.created_at || item.created_at)}
                       </td>
                     </tr>
                   );
