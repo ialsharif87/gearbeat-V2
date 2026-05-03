@@ -104,22 +104,13 @@ async function fetchOwnedStudios(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string
 ) {
-  const ownerColumnCandidates = [
-    "owner_id",
-    "user_id",
-    "created_by",
-    "profile_id",
-  ];
+  const { data, error } = await supabase
+    .from("studios")
+    .select("*")
+    .eq("owner_auth_user_id", userId);
 
-  for (const ownerColumn of ownerColumnCandidates) {
-    const { data, error } = await supabase
-      .from("studios")
-      .select("*")
-      .eq(ownerColumn, userId);
-
-    if (!error && data) {
-      return data as DbRow[];
-    }
+  if (!error && data) {
+    return data as DbRow[];
   }
 
   return [];

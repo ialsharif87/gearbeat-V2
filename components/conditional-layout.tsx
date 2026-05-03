@@ -26,7 +26,8 @@ export default function ConditionalLayout({
   const hideChrome =
     pathname.startsWith("/portal") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/staff-access");
+    pathname.startsWith("/staff-access") ||
+    pathname.startsWith("/notifications");
 
   return (
     <>
