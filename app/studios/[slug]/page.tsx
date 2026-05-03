@@ -354,7 +354,7 @@ export default async function StudioDetailsPage({
                   <T en="Capacity" ar="السعة" />
                 </span>
                 <strong style={{ display: "block", marginTop: 6 }}>
-                  {null || "—"}
+                  {"—"}
                 </strong>
               </div>
 
@@ -363,7 +363,7 @@ export default async function StudioDetailsPage({
                   <T en="Size" ar="المساحة" />
                 </span>
                 <strong style={{ display: "block", marginTop: 6 }}>
-                  {null ? `${null} sqm` : "—"}
+                  {"—"}
                 </strong>
               </div>
 
