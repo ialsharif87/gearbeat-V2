@@ -221,6 +221,12 @@ export default async function AdminLeadsPage({
 
   return (
     <section>
+      <div style={{ marginBottom: '24px' }}>
+        <Link href="/admin" style={{ color: '#cfa86e', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+          ← <T en="Back to Dashboard" ar="العودة للرئيسية" />
+        </Link>
+      </div>
+
       <div className="section-head">
         <span className="badge">
           <T en="Admin" ar="الإدارة" />
