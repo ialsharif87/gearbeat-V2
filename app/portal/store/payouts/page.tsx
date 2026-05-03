@@ -138,8 +138,8 @@ export default async function VendorFinancePage() {
   const totalCommission = rows.filter(r => r.status !== 'cancelled').reduce((sum, r) => sum + r.commissionAmount, 0);
   const totalNet = rows.filter(r => r.status !== 'cancelled').reduce((sum, r) => sum + r.netPayable, 0);
   const totalOrders = rows.length;
-  const paidOrdersCount = rows.filter(r => r.payment_status === 'paid').length;
-  const pendingOrdersCount = rows.filter(r => ['pending', 'unpaid'].includes(r.payment_status)).length;
+  const paidOrdersCount = rows.filter(r => r.paymentStatus === 'paid').length;
+  const pendingOrdersCount = rows.filter(r => ['pending', 'unpaid'].includes(r.paymentStatus as string)).length;
 
   return (
     <main 
