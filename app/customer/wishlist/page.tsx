@@ -26,30 +26,63 @@ export default async function WishlistPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="section-padding">
-      <div className="section-head">
-        <h1><T en="My Wishlist" ar="قائمة أمنياتي" /></h1>
-        <p><T en="Save the gear you love and buy it later." ar="احفظ المعدات التي تحبها واشترها لاحقاً." /></p>
-      </div>
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
+        <div>
+          <p className="gb-eyebrow">
+            <T en="Saved" ar="المفضلة" />
+          </p>
 
-      <div style={{ marginTop: 40 }}>
-        {!wishlist || wishlist.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: 80 }}>
-            <div style={{ fontSize: '4rem', marginBottom: 20 }}>❤️</div>
-            <h3><T en="Your wishlist is empty" ar="قائمة أمنياتك فارغة" /></h3>
-            <p><T en="Start adding gear to your favorites!" ar="ابدأ بإضافة المعدات إلى مفضلاتك!" /></p>
-            <Link href="/gear" className="btn btn-primary" style={{ marginTop: 30 }}>
-              <T en="Explore Marketplace" ar="استكشف السوق" />
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-4">
-            {wishlist.map((item: any) => (
-              <ProductCard key={item.id} product={item.product} />
-            ))}
-          </div>
-        )}
+          <h1 style={{ marginTop: 10 }}>
+            <T en="My Wishlist" ar="قائمة أمنياتي" />
+          </h1>
+
+          <p className="gb-muted-text">
+            <T
+              en="Save the gear you love and buy it later."
+              ar="احفظ المعدات التي تحبها واشترها لاحقاً."
+            />
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <Link href="/marketplace" className="btn btn-primary">
+            <T en="Explore Marketplace" ar="استكشف السوق" />
+          </Link>
+
+          <Link href="/customer" className="btn">
+            <T en="Dashboard" ar="لوحة العميل" />
+          </Link>
+        </div>
+      </section>
+
+      <div className="gb-customer-shell">
+        <div style={{ marginTop: 28 }}>
+          {!wishlist || wishlist.length === 0 ? (
+            <div className="gb-empty-state" style={{ textAlign: "center", padding: 80 }}>
+              <div style={{ fontSize: "4rem", marginBottom: 20 }}>❤️</div>
+              <h3>
+                <T en="Your wishlist is empty" ar="قائمة أمنياتك فارغة" />
+              </h3>
+              <p style={{ color: "var(--muted)" }}>
+                <T
+                  en="Start adding gear to your favorites!"
+                  ar="ابدأ بإضافة المعدات إلى مفضلاتك!"
+                />
+              </p>
+              <Link href="/gear" className="btn btn-primary" style={{ marginTop: 30 }}>
+                <T en="Explore Marketplace" ar="استكشف السوق" />
+              </Link>
+            </div>
+          ) : (
+            <div className="gb-customer-grid">
+              {wishlist.map((item: any) => (
+                <ProductCard key={item.id} product={item.product} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
