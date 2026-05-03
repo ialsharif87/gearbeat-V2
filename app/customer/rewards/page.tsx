@@ -261,27 +261,18 @@ export default async function CustomerRewardsPage() {
   const referralLink = buildReferralLink(referralCode);
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="GearBeat Rewards" ar="مكافآت GearBeat" />
-          </span>
+          </p>
 
           <h1 style={{ marginTop: 10 }}>
             <T en="Membership & Rewards" ar="العضوية والمكافآت" />
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+          <p className="gb-muted-text" style={{ maxWidth: 760 }}>
             <T
               en="Track your membership level, points, wallet balance, referral code, and rewards activity."
               ar="تابع مستوى عضويتك، نقاطك، رصيد المحفظة، كود الإحالة، ونشاط المكافآت."
@@ -300,68 +291,69 @@ export default async function CustomerRewardsPage() {
         </div>
       </section>
 
-      <section style={{ marginTop: 28 }}>
-        <CustomerMembershipCard
-          fullName={profile.full_name}
-          membershipNumber={membershipNumber}
-          tierCode={currentTierCode}
-          pointsBalance={wallet?.points_balance || 0}
-          pendingPoints={wallet?.pending_points || 0}
-          walletBalance={wallet?.wallet_balance || 0}
-          currencyCode={currency}
-          referralCode={referralCode}
-        />
-      </section>
+      <div className="gb-customer-shell">
+        <section style={{ marginTop: 28 }}>
+          <CustomerMembershipCard
+            fullName={profile.full_name}
+            membershipNumber={membershipNumber}
+            tierCode={currentTierCode}
+            pointsBalance={wallet?.points_balance || 0}
+            pendingPoints={wallet?.pending_points || 0}
+            walletBalance={wallet?.wallet_balance || 0}
+            currencyCode={currency}
+            referralCode={referralCode}
+          />
+        </section>
 
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-content">
-            <label>
-              <T en="Available Points" ar="النقاط المتاحة" />
-            </label>
-            <div className="stat-value">
-              {formatPoints(wallet?.points_balance)}
+        <section className="gb-customer-grid" style={{ marginTop: 28 }}>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>⭐</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Available Points" ar="النقاط المتاحة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {formatPoints(wallet?.points_balance)}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <label>
-              <T en="Pending Points" ar="النقاط المعلقة" />
-            </label>
-            <div className="stat-value">
-              {formatPoints(wallet?.pending_points)}
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>⏳</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Pending Points" ar="النقاط المعلقة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {formatPoints(wallet?.pending_points)}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🏦</div>
-          <div className="stat-content">
-            <label>
-              <T en="Wallet Balance" ar="رصيد المحفظة" />
-            </label>
-            <div className="stat-value">
-              {formatMoney(wallet?.wallet_balance, currency)}
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🏦</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Wallet Balance" ar="رصيد المحفظة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {formatMoney(wallet?.wallet_balance, currency)}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🎖️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Current Level" ar="المستوى الحالي" />
-            </label>
-            <div className="stat-value" style={{ fontSize: "1.2rem" }}>
-              {currentTierName}
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🎖️</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Current Level" ar="المستوى الحالي" />
+              </label>
+              <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {currentTierName}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       <section
         style={{
@@ -693,6 +685,7 @@ export default async function CustomerRewardsPage() {
           </div>
         </aside>
       </section>
+      </div>
     </main>
   );
 }

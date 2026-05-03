@@ -261,27 +261,18 @@ export default async function CustomerSavedPage() {
   );
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
+    <main className="gb-customer-page">
+      <section className="gb-customer-header">
         <div>
-          <span className="badge badge-gold">
+          <p className="gb-eyebrow">
             <T en="Saved" ar="المفضلة" />
-          </span>
+          </p>
 
           <h1 style={{ marginTop: 10 }}>
             <T en="Your saved places and gear" ar="الأماكن والمعدات المحفوظة" />
           </h1>
 
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+          <p className="gb-muted-text" style={{ maxWidth: 760 }}>
             <T
               en="Keep your favorite studios, gear, and vendors in one place."
               ar="احتفظ بالاستوديوهات والمعدات والتجار المفضلين لديك في مكان واحد."
@@ -304,37 +295,38 @@ export default async function CustomerSavedPage() {
         </div>
       </section>
 
-      <section className="stats-grid" style={{ marginTop: 28 }}>
-        <div className="card stat-card">
-          <div className="stat-icon">🎙️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Saved Studios" ar="استوديوهات محفوظة" />
-            </label>
-            <div className="stat-value">{savedStudios.length}</div>
+      <div className="gb-customer-shell">
+        <section className="gb-customer-grid" style={{ marginTop: 28 }}>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🎙️</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Saved Studios" ar="استوديوهات محفوظة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{savedStudios.length}</div>
+            </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🎛️</div>
-          <div className="stat-content">
-            <label>
-              <T en="Saved Gear" ar="معدات محفوظة" />
-            </label>
-            <div className="stat-value">{savedProducts.length}</div>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🎛️</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Saved Gear" ar="معدات محفوظة" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{savedProducts.length}</div>
+            </div>
           </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-icon">🏪</div>
-          <div className="stat-content">
-            <label>
-              <T en="Saved Vendors" ar="تجار محفوظون" />
-            </label>
-            <div className="stat-value">{savedVendors.length}</div>
+          <div className="gb-customer-card">
+            <div style={{ fontSize: "1.5rem" }}>🏪</div>
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Saved Vendors" ar="تجار محفوظون" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{savedVendors.length}</div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       <section className="card" style={{ marginTop: 28 }}>
         <div
@@ -652,6 +644,7 @@ export default async function CustomerSavedPage() {
           )}
         </div>
       </section>
+      </div>
     </main>
   );
 }
