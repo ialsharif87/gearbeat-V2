@@ -21,39 +21,41 @@ export async function POST(request: NextRequest) {
       .eq("email", user.email)
       .maybeSingle();
 
-    if (leadError) {
-      console.error("[CONTRACT_GEN] DB Error:", leadError);
+    // 3. Fetch profile as fallback for name/role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!lead && !profile) {
+      return NextResponse.json({ error: "User profile or lead not found" }, { status: 404 });
     }
 
-    if (!lead) {
-      console.warn("[CONTRACT_GEN] Lead not found for:", user.email);
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
-
-    const type = lead.type;
+    const type = lead?.type || (profile?.role === "owner" ? "studio" : "seller");
     const contractDate = new Date().toLocaleDateString('ar-SA');
     
     const html = type === "studio"
       ? generateStudioContract({
-          sellerNameAr: lead.name, // Using lead.name as sellerNameAr
-          sellerNameEn: lead.name,
-          companyNameAr: lead.business_name_ar || lead.business_name,
-          companyNameEn: lead.business_name,
-          email: lead.email,
-          phone: lead.phone,
-          city: lead.city,
-          commissionPercent: lead.commission_percent || 15,
+          sellerNameAr: lead?.name || profile?.full_name || "Owner",
+          sellerNameEn: lead?.name || profile?.full_name || "Owner",
+          companyNameAr: lead?.business_name_ar || lead?.business_name || "Studio Name",
+          companyNameEn: lead?.business_name || "Studio Name",
+          email: lead?.email || user.email!,
+          phone: lead?.phone || profile?.phone || "000",
+          city: lead?.city || "Saudi Arabia",
+          commissionPercent: lead?.commission_percent || 15,
           contractDate,
         })
       : generateSellerContract({
-          sellerNameAr: lead.name,
-          sellerNameEn: lead.name,
-          companyNameAr: lead.business_name_ar || lead.business_name,
-          companyNameEn: lead.business_name,
-          email: lead.email,
-          phone: lead.phone,
-          city: lead.city,
-          commissionPercent: lead.commission_percent || 15,
+          sellerNameAr: lead?.name || profile?.full_name || "Seller",
+          sellerNameEn: lead?.name || profile?.full_name || "Seller",
+          companyNameAr: lead?.business_name_ar || lead?.business_name || "Company Name",
+          companyNameEn: lead?.business_name || "Company Name",
+          email: lead?.email || user.email!,
+          phone: lead?.phone || profile?.phone || "000",
+          city: lead?.city || "Saudi Arabia",
+          commissionPercent: lead?.commission_percent || 15,
           contractDate,
         });
 

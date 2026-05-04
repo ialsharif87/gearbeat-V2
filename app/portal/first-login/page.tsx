@@ -174,7 +174,10 @@ export default function FirstLoginPage() {
                 onClick={async () => {
                   try {
                     const res = await fetch("/api/contracts/generate", { method: "POST" });
-                    if (!res.ok) throw new Error("Failed to generate contract");
+                    if (!res.ok) {
+                      const errData = await res.json();
+                      throw new Error(errData.error || "Failed to generate contract");
+                    }
                     const blob = await res.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement("a");
