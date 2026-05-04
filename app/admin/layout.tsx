@@ -1,14 +1,13 @@
 import type { ReactNode } from "react";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { AdminSidebar } from "./AdminSidebar"; // I will create this as a client component in the same file or nearby
+import { AdminSidebar } from "./AdminSidebar";
 
 export default async function AdminLayout({
   children
 }: {
   children: ReactNode;
 }) {
-  const { supabaseAdmin, user } = await requireAdminLayoutAccess();
+  const { supabaseAdmin } = await requireAdminLayoutAccess();
 
   // Fetch lead counts for badges
   const [sellerLeads, studioLeads] = await Promise.all([

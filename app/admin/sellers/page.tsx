@@ -1,18 +1,22 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+interface SellersPageParams {
+  q?: string;
+}
 
 export default async function AdminSellersPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<SellersPageParams>;
 }) {
   const { supabaseAdmin, user: adminUserAuth } = await requireAdminLayoutAccess();
-  const params = await (searchParams || {});
+  const params = (await searchParams) || {};
   const query = params.q?.toLowerCase() || "";
 
   // Fetch admin info for permissions
@@ -24,11 +28,6 @@ export default async function AdminSellersPage({
 
   const isSuperAdmin = adminData?.admin_role === "super_admin";
 
-  // Fetch Sellers with aggregated data
-  // Since we can't do complex GROUP BY in a single Supabase query easily without RPC, 
-  // we fetch profiles and then related counts, or use a view if available.
-  // For simplicity in this "One File" task, we fetch and merge or use .select('*, count')
-  
   const { data: sellersData } = await supabaseAdmin
     .from("profiles")
     .select(`
@@ -161,11 +160,9 @@ export default async function AdminSellersPage({
   );
 }
 
-// Styles
 const thStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.8rem', color: '#666', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' };
 const tdStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.9rem' };
 
-// Server Actions
 async function updateStatusAction(formData: FormData) {
   "use server";
   const id = formData.get("id")?.toString();
@@ -174,5 +171,3 @@ async function updateStatusAction(formData: FormData) {
   await supabaseAdmin.from("profiles").update({ account_status: status }).eq("id", id);
   revalidatePath("/admin/sellers");
 }
-
-import Link from "next/link";

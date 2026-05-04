@@ -1,5 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
 
@@ -17,9 +15,9 @@ export default async function AdminSellerPaymentsPage() {
     `)
     .eq("status", "delivered");
 
-  const sellerGroups: Record<string, any> = {};
+  const sellerGroups: Record<string, { name: string, email: string, orderCount: number, gross: number, commission: number, net: number }> = {};
 
-  (paymentsData || []).forEach(order => {
+  (paymentsData || []).forEach((order: any) => {
     const email = order.profiles?.email;
     if (!email) return;
     if (!sellerGroups[email]) {
@@ -97,7 +95,7 @@ export default async function AdminSellerPaymentsPage() {
   );
 }
 
-function SummaryCard({ labelEn, labelAr, value, color }: any) {
+function SummaryCard({ labelEn, labelAr, value, color }: { labelEn: string, labelAr: string, value: number, color?: string }) {
   return (
     <div style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
       <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en={labelEn} ar={labelAr} /></div>

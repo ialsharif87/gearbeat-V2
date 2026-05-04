@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
@@ -7,13 +6,17 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+interface ReviewPageParams {
+  tab?: string;
+}
+
 export default async function AdminReviewsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ tab?: string }>;
+  searchParams?: Promise<ReviewPageParams>;
 }) {
   const { supabaseAdmin, user: adminUserAuth } = await requireAdminLayoutAccess();
-  const params = await (searchParams || {});
+  const params = (await searchParams) || {};
   const activeTab = params.tab || "studios";
 
   // Fetch admin role
@@ -140,7 +143,7 @@ export default async function AdminReviewsPage({
   );
 }
 
-function ReviewRow({ id, reviewer, target, rating, comment, date, isSuperAdmin, type }: any) {
+function ReviewRow({ id, reviewer, target, rating, comment, date, isSuperAdmin, type }: { id: string, reviewer: string, target: string, rating: number, comment: string, date: string, isSuperAdmin: boolean, type: string }) {
   return (
     <tr style={{ borderBottom: '1px solid #111' }}>
       <td style={tdStyle}>{reviewer || "Guest"}</td>

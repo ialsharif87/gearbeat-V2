@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
@@ -7,13 +6,17 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+interface StudiosPageParams {
+  q?: string;
+}
+
 export default async function AdminStudiosPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<StudiosPageParams>;
 }) {
   const { supabaseAdmin, user: adminUserAuth } = await requireAdminLayoutAccess();
-  const params = await (searchParams || {});
+  const params = (await searchParams) || {};
   const query = params.q?.toLowerCase() || "";
 
   // Fetch admin info for permissions
@@ -149,7 +152,7 @@ export default async function AdminStudiosPage({
   );
 }
 
-function StatCard({ labelEn, labelAr, value, color }: any) {
+function StatCard({ labelEn, labelAr, value, color }: { labelEn: string, labelAr: string, value: string | number, color?: string }) {
   return (
     <div style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
       <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en={labelEn} ar={labelAr} /></div>
@@ -158,7 +161,7 @@ function StatCard({ labelEn, labelAr, value, color }: any) {
   );
 }
 
-function StatusBadge({ status, verified }: any) {
+function StatusBadge({ status, verified }: { status: string, verified: boolean }) {
   let color = '#888';
   let bg = 'rgba(255,255,255,0.05)';
   let text = status;

@@ -1,8 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
-import { revalidatePath } from "next/cache";
+import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +103,7 @@ export default async function AdminSettingsPage() {
           <section style={{ ...sectionStyle, border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.02)' }}>
             <h2 style={{ ...h2Style, color: '#ef4444' }}><T en="Danger Zone" ar="منطقة الخطر" /></h2>
             <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 20 }}><T en="Actions here are irreversible. Please proceed with caution." ar="الإجراءات هنا لا يمكن التراجع عنها. يرجى الحذر." /></p>
-            <button className="btn btn-danger" style={{ height: 44, padding: '0 24px', fontSize: '0.9rem' }} onClick={() => alert("This feature is disabled for safety.")}>
+            <button className="btn btn-danger" style={{ height: 44, padding: '0 24px', fontSize: '0.9rem' }}>
               <T en="Clear All Test Data" ar="مسح جميع بيانات الاختبار" />
             </button>
           </section>

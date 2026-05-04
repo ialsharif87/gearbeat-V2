@@ -1,7 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
+import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
@@ -38,12 +36,12 @@ export default async function AdminReportsPage() {
       id, name,
       bookings (id, total_amount)
     `)
-    .limit(10); // We'll manually aggregate and sort for simplicity in one file
+    .limit(10);
     
   const aggregatedStudios = (topStudios || []).map(s => ({
     name: s.name,
     count: s.bookings?.length || 0,
-    rev: s.bookings?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0
+    rev: (s.bookings as any[])?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0
   })).sort((a, b) => b.rev - a.rev).slice(0, 5);
 
   // Top Performers (Sellers by revenue)
@@ -59,7 +57,7 @@ export default async function AdminReportsPage() {
   const aggregatedSellers = (topSellers || []).map(s => ({
     name: s.full_name,
     count: s.marketplace_orders?.length || 0,
-    rev: s.marketplace_orders?.reduce((acc: number, o: any) => acc + (o.total_amount || 0), 0) || 0
+    rev: (s.marketplace_orders as any[])?.reduce((acc: number, o: any) => acc + (o.total_amount || 0), 0) || 0
   })).sort((a, b) => b.rev - a.rev).slice(0, 5);
 
   return (
@@ -126,7 +124,7 @@ export default async function AdminReportsPage() {
   );
 }
 
-function ReportCard({ labelEn, labelAr, value, color }: any) {
+function ReportCard({ labelEn, labelAr, value, color }: { labelEn: string, labelAr: string, value: number, color?: string }) {
   return (
     <div style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
       <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en={labelEn} ar={labelAr} /></div>
@@ -135,7 +133,7 @@ function ReportCard({ labelEn, labelAr, value, color }: any) {
   );
 }
 
-function GrowthCard({ labelEn, labelAr, value }: any) {
+function GrowthCard({ labelEn, labelAr, value }: { labelEn: string, labelAr: string, value: number }) {
   return (
     <div style={{ background: '#111', padding: '16px 20px', borderRadius: 12, border: '1px solid #1e1e1e', textAlign: 'center' }}>
       <div style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: 4 }}>{value}</div>
@@ -144,9 +142,9 @@ function GrowthCard({ labelEn, labelAr, value }: any) {
   );
 }
 
-function ExportButton({ labelEn, labelAr }: any) {
+function ExportButton({ labelEn, labelAr }: { labelEn: string, labelAr: string }) {
   return (
-    <button onClick={() => alert("CSV Export coming soon...")} style={{ background: '#111', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 10, fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>
+    <button style={{ background: '#111', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 10, fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>
       📥 <T en={labelEn} ar={labelAr} />
     </button>
   );

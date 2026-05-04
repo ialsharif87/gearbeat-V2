@@ -1,5 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
 
@@ -21,16 +19,16 @@ export default async function AdminStudioPaymentsPage() {
     .eq("status", "completed")
     .eq("payment_status", "paid");
 
-  const studioGroups: Record<string, any> = {};
+  const studioGroups: Record<string, { name: string, owner: string, email: string, bookingCount: number, gross: number, commission: number, net: number }> = {};
 
-  (paymentsData || []).forEach(booking => {
+  (paymentsData || []).forEach((booking: any) => {
     const studioId = booking.studios?.id;
     if (!studioId) return;
     if (!studioGroups[studioId]) {
       studioGroups[studioId] = {
         name: booking.studios.name,
-        owner: booking.studios.profiles?.full_name,
-        email: booking.studios.profiles?.email,
+        owner: booking.studios.profiles?.full_name || "Unknown",
+        email: booking.studios.profiles?.email || "—",
         bookingCount: 0,
         gross: 0,
         commission: 0,
@@ -106,7 +104,7 @@ export default async function AdminStudioPaymentsPage() {
   );
 }
 
-function SummaryCard({ labelEn, labelAr, value, color }: any) {
+function SummaryCard({ labelEn, labelAr, value, color }: { labelEn: string, labelAr: string, value: number, color?: string }) {
   return (
     <div style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
       <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en={labelEn} ar={labelAr} /></div>
