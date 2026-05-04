@@ -50,6 +50,18 @@ export default function PortalLoginPage() {
         return;
       }
 
+      // Check if this is first login (no signed contract)
+      const { data: lead } = await supabase
+        .from('provider_leads')
+        .select('signed_contract_url, status')
+        .eq('email', user.email)
+        .maybeSingle();
+
+      if (!lead?.signed_contract_url) {
+        router.push('/portal/first-login');
+        return;
+      }
+
       if (role === "owner" || role === "studio_owner") {
         router.push("/portal/studio");
       } else if (role === "vendor") {

@@ -110,3 +110,7 @@ BEGIN
     USING (status = 'active' AND ends_at > NOW());
   END IF;
 END $$;
+
+-- Ensure provider_leads has the contract column
+ALTER TABLE provider_leads 
+ADD COLUMN IF NOT EXISTS signed_contract_url TEXT;
