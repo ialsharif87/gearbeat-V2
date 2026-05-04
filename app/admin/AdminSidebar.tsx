@@ -79,6 +79,7 @@ export function AdminSidebar({
           <T en="General" ar="عام" />
         </div>
         <NavItem href="/admin/reviews" icon="⭐" labelEn="Reviews" labelAr="التقييمات" active={isActive('/admin/reviews')} />
+        <NavItem href="/admin/onboarding-setup" icon="🧪" labelEn="Test Onboarding" labelAr="اختبار الربط" active={isActive('/admin/onboarding-setup')} />
         <NavItem href="/admin/reports" icon="📈" labelEn="Reports" labelAr="التقارير" active={isActive('/admin/reports')} />
         <NavItem href="/admin/settings" icon="⚙️" labelEn="Settings" labelAr="الإعدادات" active={isActive('/admin/settings')} />
       </div>
