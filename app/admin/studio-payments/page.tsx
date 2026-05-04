@@ -22,13 +22,17 @@ export default async function AdminStudioPaymentsPage() {
   const studioGroups: Record<string, { name: string, owner: string, email: string, bookingCount: number, gross: number, commission: number, net: number }> = {};
 
   (paymentsData || []).forEach((booking: any) => {
-    const studioId = booking.studios?.id;
+    const studio = Array.isArray(booking.studios) ? booking.studios[0] : booking.studios;
+    const studioId = studio?.id;
     if (!studioId) return;
+    
+    const profile = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
+
     if (!studioGroups[studioId]) {
       studioGroups[studioId] = {
-        name: booking.studios.name,
-        owner: booking.studios.profiles?.full_name || "Unknown",
-        email: booking.studios.profiles?.email || "—",
+        name: studio.name,
+        owner: profile?.full_name || "Unknown",
+        email: profile?.email || "—",
         bookingCount: 0,
         gross: 0,
         commission: 0,

@@ -39,10 +39,11 @@ export default async function AdminStudiosPage({
     .order("created_at", { ascending: false });
 
   const studios = (studiosData || []).map(s => {
-    const ownerName = s.profiles?.full_name || "Unknown";
-    const ownerEmail = s.profiles?.email || "—";
+    const profile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
+    const ownerName = profile?.full_name || "Unknown";
+    const ownerEmail = profile?.email || "—";
     const bookingsCount = s.bookings?.length || 0;
-    const totalRevenue = s.bookings?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0;
+    const totalRevenue = (s.bookings as any[])?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0;
     return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue };
   }).filter(s => 
     s.name?.toLowerCase().includes(query) || 

@@ -18,11 +18,12 @@ export default async function AdminSellerPaymentsPage() {
   const sellerGroups: Record<string, { name: string, email: string, orderCount: number, gross: number, commission: number, net: number }> = {};
 
   (paymentsData || []).forEach((order: any) => {
-    const email = order.profiles?.email;
+    const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles;
+    const email = profile?.email;
     if (!email) return;
     if (!sellerGroups[email]) {
       sellerGroups[email] = {
-        name: order.profiles.full_name,
+        name: profile.full_name,
         email: email,
         orderCount: 0,
         gross: 0,

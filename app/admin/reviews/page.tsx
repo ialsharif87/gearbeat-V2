@@ -103,33 +103,41 @@ export default async function AdminReviewsPage({
           </thead>
           <tbody>
             {activeTab === 'studios' ? (
-              studioReviewsData.data?.map((rev: any) => (
-                <ReviewRow 
-                  key={rev.id} 
-                  id={rev.id} 
-                  reviewer={rev.profiles?.full_name} 
-                  target={rev.studios?.name} 
-                  rating={rev.rating} 
-                  comment={rev.comment} 
-                  date={rev.created_at} 
-                  isSuperAdmin={isSuperAdmin}
-                  type="studio"
-                />
-              ))
+              studioReviewsData.data?.map((rev: any) => {
+                const studio = Array.isArray(rev.studios) ? rev.studios[0] : rev.studios;
+                const profile = Array.isArray(rev.profiles) ? rev.profiles[0] : rev.profiles;
+                return (
+                  <ReviewRow 
+                    key={rev.id} 
+                    id={rev.id} 
+                    reviewer={profile?.full_name} 
+                    target={studio?.name} 
+                    rating={rev.rating} 
+                    comment={rev.comment} 
+                    date={rev.created_at} 
+                    isSuperAdmin={isSuperAdmin}
+                    type="studio"
+                  />
+                );
+              })
             ) : (
-              productReviewsData.data?.map((rev: any) => (
-                <ReviewRow 
-                  key={rev.id} 
-                  id={rev.id} 
-                  reviewer={rev.profiles?.full_name} 
-                  target={rev.marketplace_products?.name} 
-                  rating={rev.rating} 
-                  comment={rev.comment} 
-                  date={rev.created_at} 
-                  isSuperAdmin={isSuperAdmin}
-                  type="product"
-                />
-              ))
+              productReviewsData.data?.map((rev: any) => {
+                const product = Array.isArray(rev.marketplace_products) ? rev.marketplace_products[0] : rev.marketplace_products;
+                const profile = Array.isArray(rev.profiles) ? rev.profiles[0] : rev.profiles;
+                return (
+                  <ReviewRow 
+                    key={rev.id} 
+                    id={rev.id} 
+                    reviewer={profile?.full_name} 
+                    target={product?.name} 
+                    rating={rev.rating} 
+                    comment={rev.comment} 
+                    date={rev.created_at} 
+                    isSuperAdmin={isSuperAdmin}
+                    type="product"
+                  />
+                );
+              })
             )}
           </tbody>
         </table>
