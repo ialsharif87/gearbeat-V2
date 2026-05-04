@@ -4,10 +4,6 @@ import Link from "next/link";
 import T from "@/components/t";
 import { requireVendorLayoutAccess } from "@/lib/route-guards";
 
-function getText(formData: FormData, key: string) {
-  return String(formData.get(key) || "").trim();
-}
-
 function slugify(value: string) {
   const slug = value
     .toLowerCase()
@@ -19,37 +15,6 @@ function slugify(value: string) {
   return slug || "product";
 }
 
-async function generateUniqueProductSlug(
-  supabaseAdmin: any,
-  baseName: string
-) {
-  const baseSlug = slugify(baseName);
-
-  for (let index = 0; index < 10; index += 1) {
-    const suffix =
-      index === 0
-        ? Math.random().toString(36).slice(2, 7)
-        : `${index + 1}-${Math.random().toString(36).slice(2, 6)}`;
-
-    const candidate = `${baseSlug}-${suffix}`;
-
-    const { data: existingProduct, error } = await supabaseAdmin
-      .from("marketplace_products")
-      .select("id")
-      .eq("slug", candidate)
-      .maybeSingle();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (!existingProduct) {
-      return candidate;
-    }
-  }
-
-  return `${baseSlug}-${Date.now()}`;
-}
 
 export default async function NewProductPage({
   searchParams,
@@ -167,6 +132,13 @@ export default async function NewProductPage({
           }
         }
       }
+
+      const productSlugBase = (nameEn || nameAr || sku)
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/gi, "-")
+        .replace(/^-+|-+$/g, "");
+
+      const productSlug = `${productSlugBase || "product"}-${Date.now()}`;
 
       const productPayload = {
         vendor_id: user.id,
