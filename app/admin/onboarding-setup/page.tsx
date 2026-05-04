@@ -2,9 +2,20 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import T from "@/components/t";
 import { revalidatePath } from "next/cache";
+import SetupButton from "./SetupButton";
+
+export const dynamic = "force-dynamic";
 
 export default async function OnboardingSetupPage() {
-  await requireAdminLayoutAccess();
+  const { supabaseAdmin } = await requireAdminLayoutAccess();
+
+  // Fetch recently created profiles with role vendor/owner to show as results
+  const { data: recentProfiles } = await supabaseAdmin
+    .from("profiles")
+    .select("*")
+    .in("role", ["vendor", "owner"])
+    .order("created_at", { ascending: false })
+    .limit(5);
 
   return (
     <main style={{ padding: 40, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
@@ -19,27 +30,64 @@ export default async function OnboardingSetupPage() {
         />
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
-        <SetupCard type="seller" />
-        <SetupCard type="studio" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 60 }}>
+        <div style={cardStyle}>
+          <h2 style={cardTitleStyle}>🏪 Seller Test Account</h2>
+          <p style={cardDescStyle}><T en="Creates a vendor account for the last approved seller lead." ar="ينشئ حساب تاجر لآخر طلب تاجر معتمد." /></p>
+          <SetupButton type="seller" createAction={createTestAction} />
+        </div>
+        
+        <div style={cardStyle}>
+          <h2 style={cardTitleStyle}>🎙️ Studio Test Account</h2>
+          <p style={cardDescStyle}><T en="Creates an owner account for the last approved studio lead." ar="ينشئ حساب صاحب استوديو لآخر طلب استوديو معتمد." /></p>
+          <SetupButton type="studio" createAction={createTestAction} />
+        </div>
+      </div>
+
+      {/* Results Section */}
+      <h2 style={{ fontSize: '1.2rem', marginBottom: 20, color: '#cfa86e' }}>
+        <T en="Recent Test Accounts" ar="الحسابات التجريبية المنشأة حديثاً" />
+      </h2>
+      <div style={{ background: '#111', borderRadius: 20, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid #1e1e1e', background: 'rgba(255,255,255,0.02)' }}>
+              <th style={thStyle}>Email</th>
+              <th style={thStyle}>Role</th>
+              <th style={thStyle}>Password</th>
+              <th style={thStyle}>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentProfiles?.map((p: any) => (
+              <tr key={p.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
+                <td style={tdStyle}>{p.email}</td>
+                <td style={tdStyle}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: p.role === 'vendor' ? '#cfa86e' : '#3b82f6' }}>
+                    {p.role?.toUpperCase()}
+                  </span>
+                </td>
+                <td style={tdStyle}><code>GearBeat2026!</code></td>
+                <td style={tdStyle}>{new Date(p.created_at).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {(!recentProfiles || recentProfiles.length === 0) && (
+          <div style={{ padding: 40, textAlign: 'center', color: '#444' }}>
+            <T en="No accounts created yet." ar="لم يتم إنشاء حسابات بعد." />
+          </div>
+        )}
       </div>
     </main>
   );
 }
 
-async function SetupCard({ type }: { type: 'seller' | 'studio' }) {
-  return (
-    <div style={{ background: '#111', padding: 32, borderRadius: 24, border: '1px solid #1e1e1e' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: 16, textTransform: 'capitalize' }}>{type} Test Account</h2>
-      <form action={createTestAction}>
-        <input type="hidden" name="type" value={type} />
-        <button className="btn btn-primary" style={{ width: '100%', height: 48, fontWeight: 700 }}>
-          <T en={`Create ${type} account`} ar={`إنشاء حساب ${type === 'seller' ? 'تاجر' : 'استوديو'}`} />
-        </button>
-      </form>
-    </div>
-  );
-}
+const cardStyle = { background: '#111', padding: 32, borderRadius: 24, border: '1px solid #1e1e1e' };
+const cardTitleStyle = { fontSize: '1.2rem', marginBottom: 12 };
+const cardDescStyle = { color: '#666', fontSize: '0.9rem', marginBottom: 24 };
+const thStyle = { padding: '16px 24px', fontSize: '0.8rem', color: '#555' };
+const tdStyle = { padding: '16px 24px', fontSize: '0.9rem' };
 
 // Server Action
 async function createTestAction(formData: FormData) {
@@ -47,7 +95,6 @@ async function createTestAction(formData: FormData) {
   const type = formData.get("type")?.toString();
   const supabase = createAdminClient();
   
-  // 1. Find lead
   const { data: lead } = await supabase
     .from("provider_leads")
     .select("*")
@@ -57,15 +104,13 @@ async function createTestAction(formData: FormData) {
     .limit(1)
     .maybeSingle();
 
-  if (!lead) {
-    console.error("No approved lead found for type:", type);
-    return;
-  }
+  if (!lead) return { error: "No approved lead found." };
 
   const testPassword = "GearBeat2026!";
   const role = type === 'seller' ? 'vendor' : 'owner';
 
-  // 2. Create Auth User
+  // 2. Create Auth User or get existing
+  let userId: string | undefined;
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email: lead.email,
     password: testPassword,
@@ -73,16 +118,21 @@ async function createTestAction(formData: FormData) {
     user_metadata: { full_name: lead.full_name }
   });
 
-  if (authError && !authError.message.includes("already registered")) {
-    console.error("Auth error:", authError.message);
-    return;
+  if (authError) {
+    if (authError.message.includes("already registered")) {
+      // Find existing user ID
+      const { data: listUsers } = await supabase.auth.admin.listUsers();
+      userId = listUsers?.users?.find(u => u.email === lead.email)?.id;
+    } else {
+      return { error: authError.message };
+    }
+  } else {
+    userId = authData?.user?.id;
   }
-
-  const userId = authData?.user?.id;
 
   // 3. Create/Update Profile
   if (userId) {
-    await supabase.from("profiles").upsert({
+    const { error: profileError } = await supabase.from("profiles").upsert({
       id: userId,
       full_name: lead.full_name,
       email: lead.email,
@@ -90,8 +140,11 @@ async function createTestAction(formData: FormData) {
       account_status: 'active',
       phone: lead.phone
     });
+    if (profileError) return { error: `Profile error: ${profileError.message}` };
+  } else {
+    return { error: "Could not determine User ID." };
   }
 
-  console.log(`[SETUP] Account created for ${lead.email} with password ${testPassword}`);
   revalidatePath("/admin/onboarding-setup");
+  return { success: true };
 }
