@@ -120,9 +120,14 @@ async function createTestAction(formData: FormData) {
 
   if (authError) {
     if (authError.message.includes("already registered")) {
-      // Find existing user ID
+      // Find existing user ID and RESET password
       const { data: listUsers } = await supabase.auth.admin.listUsers();
-      userId = listUsers?.users?.find(u => u.email === lead.email)?.id;
+      const existingUser = listUsers?.users?.find(u => u.email === lead.email);
+      if (existingUser) {
+        userId = existingUser.id;
+        // Update password to the test password
+        await supabase.auth.admin.updateUserById(userId, { password: testPassword });
+      }
     } else {
       return { error: authError.message };
     }
