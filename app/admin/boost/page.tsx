@@ -1,10 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import T from "@/components/t";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-type DbRow = Record<string, any>;
 
 function formatDateTime(value: string) {
   if (!value) return "-";
