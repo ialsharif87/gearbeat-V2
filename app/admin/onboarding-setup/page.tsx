@@ -44,6 +44,14 @@ export default async function OnboardingSetupPage() {
         </div>
       </div>
 
+      <div style={{ background: '#1a1100', padding: 32, borderRadius: 24, border: '1px solid #cfa86e', marginBottom: 60, textAlign: 'center' }}>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: 12, color: '#cfa86e' }}>🚀 Super Test Account</h2>
+        <p style={{ color: '#888', marginBottom: 24 }}>
+          This creates a vendor account: <b>supertest@gearbeat.com</b> / <b>gearbeat123</b>
+        </p>
+        <SetupButton type="super" createAction={createTestAction} />
+      </div>
+
       {/* Results Section */}
       <h2 style={{ fontSize: '1.2rem', marginBottom: 20, color: '#cfa86e' }}>
         <T en="Recent Test Accounts" ar="الحسابات التجريبية المنشأة حديثاً" />
@@ -95,34 +103,49 @@ async function createTestAction(formData: FormData) {
   const type = formData.get("type")?.toString();
   const supabase = createAdminClient();
   
-  const { data: lead } = await supabase
-    .from("provider_leads")
-    .select("*")
-    .eq("status", "approved")
-    .eq("type", type)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  let email = "";
+  let fullName = "";
+  let role = "";
+  let testPassword = "GearBeat2026!";
+  let leadId = null;
 
-  if (!lead) return { error: "No approved lead found." };
+  if (type === 'super') {
+    email = "supertest@gearbeat.com";
+    fullName = "Super Test User";
+    role = "vendor";
+    testPassword = "gearbeat123";
+  } else {
+    const { data: lead } = await supabase
+      .from("provider_leads")
+      .select("*")
+      .eq("status", "approved")
+      .eq("type", type)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  const testPassword = "GearBeat2026!";
-  const role = type === 'seller' ? 'vendor' : 'owner';
+    if (!lead) return { error: "No approved lead found." };
+    
+    email = lead.email;
+    fullName = lead.full_name;
+    role = type === 'seller' ? 'vendor' : 'owner';
+    leadId = lead.id;
+  }
 
   // 2. Create Auth User or get existing
   let userId: string | undefined;
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email: lead.email,
+    email: email,
     password: testPassword,
     email_confirm: true,
-    user_metadata: { full_name: lead.full_name }
+    user_metadata: { full_name: fullName }
   });
 
   if (authError) {
     if (authError.message.includes("already registered")) {
       // Find existing user ID and RESET password
       const { data: listUsers } = await supabase.auth.admin.listUsers();
-      const existingUser = listUsers?.users?.find(u => u.email === lead.email);
+      const existingUser = listUsers?.users?.find(u => u.email === email);
       if (existingUser) {
         userId = existingUser.id;
         // Update password to the test password
@@ -139,13 +162,14 @@ async function createTestAction(formData: FormData) {
   if (userId) {
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: userId,
-      full_name: lead.full_name,
-      email: lead.email,
+      full_name: fullName,
+      email: email,
       role: role,
       account_status: 'active',
-      phone: lead.phone
     });
     if (profileError) return { error: `Profile error: ${profileError.message}` };
+    
+    // If it's a lead, we might want to link it (optional)
   } else {
     return { error: "Could not determine User ID." };
   }
