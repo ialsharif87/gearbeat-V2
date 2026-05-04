@@ -318,7 +318,7 @@ export default async function SignupPage({
                 en="Want to sell gear instead?"
                 ar="تريد بيع المعدات بدلًا من ذلك؟"
               />{" "}
-              <Link href="/vendor-signup">
+              <Link href="/join/seller">
                 <T en="Apply as a vendor" ar="سجل كتاجر" />
               </Link>
             </p>
