@@ -12,13 +12,15 @@ export const dynamic = "force-dynamic";
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ type?: string; status?: string; modal?: string }>;
+  searchParams?: Promise<{ type?: string; status?: string; modal?: string; confirmDelete?: string; confirmCancel?: string }>;
 }) {
   const { supabaseAdmin, user } = await requireAdminLayoutAccess();
   const params = searchParams ? await searchParams : {};
   const typeFilter = params.type || "all";
   const statusFilter = params.status || "all";
   const showModal = params.modal === "manual";
+  const confirmDeleteId = params.confirmDelete;
+  const confirmCancelId = params.confirmCancel;
 
   // Fetch Admin Role
   const { data: adminUser } = await supabaseAdmin
@@ -57,7 +59,7 @@ export default async function AdminLeadsPage({
 
   return (
     <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
-      {/* FIX 1: Back Button */}
+      {/* Navigation */}
       <div style={{ marginBottom: 16 }}>
         <Link href="/admin" style={{ color: '#888', fontSize: '0.85rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }} className="back-link">
           ← <T en="Back to Admin" ar="رجوع للإدارة" />
@@ -69,16 +71,9 @@ export default async function AdminLeadsPage({
           <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>
             <T en="Provider Applications" ar="طلبات المزودين" />
           </h1>
-          <p style={{ color: '#888', marginTop: 8 }}>
-            <T en="Manage and review seller and studio onboarding requests." ar="إدارة ومراجعة طلبات انضمام التجار والاستوديوهات." />
-          </p>
         </div>
         {isSalesStaff && (
-          <Link 
-            href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&modal=manual`}
-            className="btn btn-primary" 
-            style={{ height: 44, padding: '0 24px', fontSize: '0.9rem', borderRadius: 10, display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-          >
+          <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&modal=manual`} className="btn btn-primary" style={{ height: 44, padding: '0 24px', fontSize: '0.9rem', borderRadius: 10, display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <T en="+ Add Seller Manually" ar="+ إضافة تاجر يدوياً" />
           </Link>
         )}
@@ -110,31 +105,24 @@ export default async function AdminLeadsPage({
       {/* Leads List */}
       <div style={{ display: 'grid', gap: 12 }}>
         {leads?.map(lead => (
-          <details key={lead.id} className="lead-details" style={{ background: '#111', borderRadius: 16, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
+          <details key={lead.id} className="lead-details" style={{ background: '#111', borderRadius: 16, border: '1px solid #1e1e1e', overflow: 'hidden' }} open={confirmDeleteId === lead.id || confirmCancelId === lead.id}>
             <summary style={{ padding: '20px 24px', listStyle: 'none', cursor: 'pointer', outline: 'none' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '80px 2fr 1.5fr 1fr 1.2fr 120px 40px', alignItems: 'center', gap: 16 }}>
-                <div>
-                  <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: lead.type === 'seller' ? 'rgba(207, 168, 110, 0.15)' : 'rgba(59, 130, 246, 0.15)', color: lead.type === 'seller' ? '#cfa86e' : '#3b82f6' }}>{lead.type?.toUpperCase()}</span>
-                </div>
+                <div><span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: lead.type === 'seller' ? 'rgba(207, 168, 110, 0.15)' : 'rgba(59, 130, 246, 0.15)', color: lead.type === 'seller' ? '#cfa86e' : '#3b82f6' }}>{lead.type?.toUpperCase()}</span></div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '1rem' }}>{lead.business_name}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666', marginTop: 2 }}>{lead.business_name_ar || '—'}</div>
                 </div>
-                <div style={{ fontSize: '0.85rem' }}>
-                  <div style={{ fontWeight: 600 }}>{lead.name}</div>
-                  <div style={{ color: '#555' }}>{lead.email}</div>
-                </div>
+                <div style={{ fontSize: '0.85rem' }}><div style={{ fontWeight: 600 }}>{lead.name}</div><div style={{ color: '#555' }}>{lead.email}</div></div>
                 <div style={{ fontSize: '0.85rem', color: '#888' }}>{lead.city}</div>
                 <div style={{ fontSize: '0.85rem', color: '#555' }}>{new Date(lead.created_at).toLocaleDateString()}</div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: lead.status === 'new' ? '#eab308' : lead.status === 'approved' ? '#22c55e' : lead.status === 'invited' ? '#cfa86e' : '#666' }}>{lead.status?.toUpperCase()}</span>
-                </div>
+                <div><span style={{ fontSize: '0.75rem', fontWeight: 700, color: lead.status === 'new' ? '#eab308' : lead.status === 'approved' ? '#22c55e' : lead.status === 'invited' ? '#cfa86e' : '#666' }}>{lead.status?.toUpperCase()}</span></div>
                 <div style={{ textAlign: 'right', opacity: 0.3 }}>▼</div>
               </div>
             </summary>
 
             <div style={{ background: '#0d0d0d', borderTop: '1px solid #1e1e1e', padding: 32, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
-              {/* Info Panel */}
+              {/* Info */}
               <div>
                 <h4 style={{ color: '#cfa86e', marginBottom: 20, fontSize: '1rem' }}><T en="Application Details" ar="تفاصيل الطلب" /></h4>
                 <div style={{ display: 'grid', gap: 16 }}>
@@ -143,19 +131,27 @@ export default async function AdminLeadsPage({
                   <InfoRow labelEn="Contact Person" labelAr="اسم المسؤول" value={lead.name} />
                   <InfoRow labelEn="Email" labelAr="البريد الإلكتروني" value={lead.email} />
                   <InfoRow labelEn="Phone" labelAr="رقم الجوال" value={lead.phone} />
-                  <InfoRow labelEn="City" labelAr="المدينة" value={lead.city} />
                 </div>
                 {isSuperAdmin && (
-                   <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
-                      <form action={deleteLeadAction}>
-                         <input type="hidden" name="id" value={lead.id} />
-                         <ConfirmButton labelEn="Delete Lead" labelAr="حذف الطلب" />
-                      </form>
+                   <div style={{ marginTop: 24 }}>
+                      {confirmDeleteId === lead.id ? (
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: 16, borderRadius: 12, border: '1px solid #ef4444' }}>
+                           <p style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: '#ef4444' }}><T en="Are you sure you want to delete this lead?" ar="هل أنت متأكد من حذف هذا الطلب نهائياً؟" /></p>
+                           <div style={{ display: 'flex', gap: 12 }}>
+                              <form action={deleteLeadAction}><input type="hidden" name="id" value={lead.id} /><button className="btn btn-danger" style={{ height: 36, padding: '0 16px', fontSize: '0.8rem' }}><T en="Confirm Delete" ar="تأكيد الحذف" /></button></form>
+                              <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}`} style={{ color: '#888', fontSize: '0.85rem', textDecoration: 'none', display: 'flex', alignItems: 'center' }}><T en="Cancel" ar="إلغاء" /></Link>
+                           </div>
+                        </div>
+                      ) : (
+                        <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&confirmDelete=${lead.id}`} style={{ color: '#ef4444', fontSize: '0.8rem', textDecoration: 'none' }}>
+                          <T en="Delete Lead" ar="حذف الطلب" />
+                        </Link>
+                      )}
                    </div>
                 )}
               </div>
 
-              {/* Documents & Actions Panel */}
+              {/* Actions */}
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
                   <h4 style={{ color: '#cfa86e', marginBottom: 20, fontSize: '1rem' }}><T en="Review Documents" ar="مراجعة الوثائق" /></h4>
@@ -167,64 +163,43 @@ export default async function AdminLeadsPage({
                   </div>
                 </div>
 
-                <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid #222', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid #222', display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                   {lead.status === 'new' && (
-                    <form action={markContactedAction}>
-                      <input type="hidden" name="id" value={lead.id} />
-                      <button className="btn" style={{ background: '#eab308', color: '#000', fontWeight: 700, padding: '0 24px', height: 44, borderRadius: 10 }}>
-                        <T en="Mark Contacted" ar="تم التواصل" />
-                      </button>
-                    </form>
+                    <form action={markContactedAction}><input type="hidden" name="id" value={lead.id} /><button className="btn" style={{ background: '#eab308', color: '#000', fontWeight: 700, padding: '0 24px', height: 44, borderRadius: 10 }}><T en="Mark Contacted" ar="تم التواصل" /></button></form>
                   )}
 
                   {lead.status === 'contacted' && (
                     <>
                       {isSalesStaff && (
                         <form action={createAccountAction} style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
-                          <input type="hidden" name="id" value={lead.id} />
-                          <input type="hidden" name="email" value={lead.email} />
-                          <input type="hidden" name="type" value={lead.type} />
-                          <input type="hidden" name="name" value={lead.name} />
-                          <div style={{ display: 'grid', gap: 4 }}>
-                            <label style={{ fontSize: '0.7rem', color: '#666' }}><T en="Commission %" ar="العمولة %" /></label>
-                            <input name="commission" type="number" defaultValue={lead.commission_percent || 15} min={5} max={30} className="input" style={{ width: 80, height: 44, textAlign: 'center' }} />
-                          </div>
-                          <button className="btn" style={{ background: '#cfa86e', color: '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}>
-                            <T en="Approve & Send Invite" ar="اعتماد وإرسال الدعوة" />
-                          </button>
+                          <input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><input type="hidden" name="type" value={lead.type} /><input type="hidden" name="name" value={lead.name} />
+                          <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.7rem', color: '#666' }}><T en="Commission %" ar="العمولة %" /></label><input name="commission" type="number" defaultValue={lead.commission_percent || 15} min={5} max={30} className="input" style={{ width: 80, height: 44, textAlign: 'center' }} /></div>
+                          <button className="btn" style={{ background: '#cfa86e', color: '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}><T en="Approve & Send Invite" ar="اعتماد وإرسال الدعوة" /></button>
                         </form>
                       )}
                       {isSuperAdmin && (
-                        <form action={rejectAction}>
-                          <input type="hidden" name="id" value={lead.id} />
-                          <button className="btn btn-danger" style={{ height: 44, padding: '0 20px', borderRadius: 10 }}>
-                            <T en="Reject" ar="رفض" />
-                          </button>
-                        </form>
+                        <form action={rejectAction}><input type="hidden" name="id" value={lead.id} /><button className="btn btn-danger" style={{ height: 44, padding: '0 20px', borderRadius: 10 }}><T en="Reject" ar="رفض" /></button></form>
                       )}
                     </>
                   )}
 
                   {lead.status === 'invited' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
                       <span style={{ color: '#cfa86e', fontWeight: 700 }}>Invited ✓</span>
                       {isSalesStaff && (
-                        <form action={resendInviteAction}>
-                          <input type="hidden" name="id" value={lead.id} />
-                          <input type="hidden" name="email" value={lead.email} />
-                          <input type="hidden" name="name" value={lead.name} />
-                          <input type="hidden" name="type" value={lead.type} />
-                          <button className="btn" style={{ background: 'transparent', border: '1px solid #cfa86e', color: '#cfa86e', height: 40, padding: '0 16px', borderRadius: 8, fontSize: '0.8rem' }}>
-                            <T en="Resend Invite" ar="إعادة إرسال الدعوة" />
-                          </button>
-                        </form>
+                        <form action={resendInviteAction}><input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><input type="hidden" name="name" value={lead.name} /><input type="hidden" name="type" value={lead.type} /><button className="btn" style={{ background: 'transparent', border: '1px solid #cfa86e', color: '#cfa86e', height: 40, padding: '0 16px', borderRadius: 8, fontSize: '0.8rem' }}><T en="Resend Invite" ar="إعادة إرسال الدعوة" /></button></form>
                       )}
                       {isSuperAdmin && (
-                        <form action={cancelInviteAction}>
-                          <input type="hidden" name="id" value={lead.id} />
-                          <input type="hidden" name="email" value={lead.email} />
-                          <ConfirmButton labelEn="Cancel Invite" labelAr="إلغاء الدعوة" variant="danger" outline />
-                        </form>
+                        <div>
+                          {confirmCancelId === lead.id ? (
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                               <form action={cancelInviteAction}><input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><button className="btn btn-danger" style={{ height: 32, padding: '0 12px', fontSize: '0.7rem' }}><T en="Confirm Cancel" ar="تأكيد الإلغاء" /></button></form>
+                               <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}`} style={{ fontSize: '0.7rem', color: '#888' }}><T en="Back" ar="تراجع" /></Link>
+                            </div>
+                          ) : (
+                            <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&confirmCancel=${lead.id}`} style={{ color: '#ef4444', fontSize: '0.75rem', textDecoration: 'none' }}><T en="Cancel Invite" ar="إلغاء الدعوة" /></Link>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -237,7 +212,7 @@ export default async function AdminLeadsPage({
         ))}
       </div>
 
-      {/* Modal & Styles */}
+      {/* Manual Entry */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
           <div style={{ background: '#111', width: '100%', maxWidth: 700, borderRadius: 24, border: '1px solid #1e1e1e', padding: 40 }}>
@@ -250,36 +225,21 @@ export default async function AdminLeadsPage({
                 <Input labelEn="Full Name" labelAr="الاسم الكامل" name="full_name" required />
                 <Input labelEn="Email" labelAr="البريد الإلكتروني" name="email" type="email" required />
                 <Input labelEn="Phone" labelAr="رقم الجوال" name="phone" required />
-                <div style={{ display: 'grid', gap: 4 }}>
-                  <label style={{ fontSize: '0.8rem', color: '#666' }}><T en="City" ar="المدينة" /></label>
-                  <select className="input" name="city">
-                    <option value="Riyadh">Riyadh</option>
-                    <option value="Jeddah">Jeddah</option>
-                    <option value="Dammam">Dammam</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.8rem', color: '#666' }}><T en="City" ar="المدينة" /></label><select className="input" name="city"><option value="Riyadh">Riyadh</option><option value="Jeddah">Jeddah</option><option value="Dammam">Dammam</option><option value="Other">Other</option></select></div>
                 <Input labelEn="Business (EN)" labelAr="اسم المنشأة (EN)" name="name_en" required />
                 <Input labelEn="Business (AR)" labelAr="اسم المنشأة (AR)" name="name_ar" required />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ height: 54, borderRadius: 12 }}>
-                <T en="Create Lead & Invite" ar="إنشاء الطلب والدعوة" />
-              </button>
+              <button type="submit" className="btn btn-primary" style={{ height: 54, borderRadius: 12 }}><T en="Create Lead & Invite" ar="إنشاء الطلب والدعوة" /></button>
             </form>
           </div>
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .back-link:hover { color: #cfa86e !important; }
-        .lead-details[open] summary { border-bottom: 1px solid #1e1e1e; }
-        .lead-details summary::-webkit-details-marker { display: none; }
-      `}} />
+      <style dangerouslySetInnerHTML={{ __html: `.back-link:hover { color: #cfa86e !important; } .lead-details[open] summary { border-bottom: 1px solid #1e1e1e; } .lead-details summary::-webkit-details-marker { display: none; }`}} />
     </main>
   );
 }
 
-// UI Helpers
 function StatCard({ labelEn, labelAr, value, color }: any) {
   return (
     <div style={{ background: '#111', padding: '16px 24px', borderRadius: 12, border: '1px solid #1e1e1e' }}>
@@ -302,55 +262,20 @@ function DocRow({ labelEn, labelAr, url, optional }: any) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.02)', borderRadius: 10, border: '1px solid #1e1e1e' }}>
       <div style={{ fontSize: '0.85rem', fontWeight: 600 }}><T en={labelEn} ar={labelAr} /></div>
-      {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#22c55e', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700 }}>✓ VIEW</a>
-      ) : (
-        <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700 }}>{optional ? 'OPTIONAL' : '✗ MISSING'}</span>
-      )}
+      {url ? (<a href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#22c55e', textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700 }}>✓ VIEW</a>) : (<span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700 }}>{optional ? 'OPTIONAL' : '✗ MISSING'}</span>)}
     </div>
   );
 }
 
 function Input({ labelEn, labelAr, name, type = "text", required }: any) {
   return (
-    <div style={{ display: 'grid', gap: 4 }}>
-      <label style={{ fontSize: '0.8rem', color: '#666' }}><T en={labelEn} ar={labelAr} /></label>
-      <input className="input" name={name} type={type} required={required} />
-    </div>
-  );
-}
-
-// Client Helper for confirmation
-"use client";
-function ConfirmButton({ labelEn, labelAr, variant, outline }: any) {
-  const handleClick = (e: any) => {
-    const msg = labelEn === "Cancel Invite" ? "هل أنت متأكد من إلغاء الدعوة؟ سيتم حذف حساب التاجر." : "هل أنت متأكد من حذف هذا الطلب نهائياً؟";
-    if (!window.confirm(msg)) {
-      e.preventDefault();
-    }
-  };
-  return (
-    <button 
-      type="submit" 
-      onClick={handleClick}
-      className={`btn ${variant === 'danger' ? 'btn-danger' : ''}`}
-      style={{ 
-        height: 36, padding: '0 16px', borderRadius: 8, fontSize: '0.75rem', fontWeight: 700,
-        background: outline ? 'transparent' : undefined,
-        border: outline ? `1px solid ${variant === 'danger' ? '#ff4d4d' : '#333'}` : undefined,
-        color: outline ? (variant === 'danger' ? '#ff4d4d' : '#fff') : undefined
-      }}
-    >
-      <T en={labelEn} ar={labelAr} />
-    </button>
+    <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.8rem', color: '#666' }}><T en={labelEn} ar={labelAr} /></label><input className="input" name={name} type={type} required={required} /></div>
   );
 }
 
 // Server Actions
-// ---------------------------------------------------------
-"use server";
-
 async function markContactedAction(formData: FormData) {
+  "use server";
   const id = formData.get("id")?.toString();
   const { supabaseAdmin } = await requireAdminLayoutAccess();
   await supabaseAdmin.from("provider_leads").update({ status: 'contacted' }).eq('id', id);
@@ -358,6 +283,7 @@ async function markContactedAction(formData: FormData) {
 }
 
 async function rejectAction(formData: FormData) {
+  "use server";
   const id = formData.get("id")?.toString();
   const { supabaseAdmin } = await requireAdminLayoutAccess();
   await supabaseAdmin.from("provider_leads").update({ status: 'rejected' }).eq('id', id);
@@ -365,6 +291,7 @@ async function rejectAction(formData: FormData) {
 }
 
 async function createAccountAction(formData: FormData) {
+  "use server";
   const id = formData.get("id")?.toString();
   const email = formData.get("email")?.toString();
   const type = formData.get("type")?.toString();
@@ -399,7 +326,6 @@ async function createAccountAction(formData: FormData) {
         <p>البريد: ${email}<br/>كلمة المرور: ${tempPassword}</p>
         <p style="color: #cfa86e;">نسبة العمولة المتفق عليها: ${commission}%</p>
       </div>
-      <p>يمكنك عرض العقد الرسمي الخاص بك عبر الرابط التالي:</p>
       <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة وتوقيع العقد</a>
     </div>`
   });
@@ -409,6 +335,7 @@ async function createAccountAction(formData: FormData) {
 }
 
 async function resendInviteAction(formData: FormData) {
+  "use server";
   const id = formData.get("id")?.toString();
   const email = formData.get("email")?.toString();
   const name = formData.get("name")?.toString();
@@ -416,21 +343,16 @@ async function resendInviteAction(formData: FormData) {
   if (!id || !email) return;
 
   const { supabaseAdmin } = await requireAdminLayoutAccess();
-  
-  // 1. Get commission
   const { data: lead } = await supabaseAdmin.from("provider_leads").select("commission_percent").eq("id", id).single();
   const commission = lead?.commission_percent || 15;
 
-  // 2. Find user
   const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
   const user = users.find(u => u.email === email);
   if (!user) return;
 
-  // 3. Update password
   const newTempPassword = Math.random().toString(36).slice(-10) + 'A1!';
   await supabaseAdmin.auth.admin.updateUserById(user.id, { password: newTempPassword });
 
-  // 4. Send email
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
     from: "GearBeat <noreply@gearbeat.sa>",
@@ -438,7 +360,7 @@ async function resendInviteAction(formData: FormData) {
     subject: "إعادة إرسال بيانات الدخول — GearBeat",
     html: `<div dir="rtl" style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #fff;">
       <h2 style="color: #cfa86e;">مرحباً ${name}</h2>
-      <p>تم تحديث بيانات دخولك بناءً على طلبك. إليك البيانات الجديدة:</p>
+      <p>تم تحديث بيانات دخولك. البيانات الجديدة:</p>
       <div style="background: #111; padding: 15px; border-radius: 8px; margin: 15px 0;">
         <p>البريد: ${email}<br/>كلمة المرور الجديدة: ${newTempPassword}</p>
         <p style="color: #cfa86e;">نسبة العمولة: ${commission}%</p>
@@ -452,12 +374,12 @@ async function resendInviteAction(formData: FormData) {
 }
 
 async function cancelInviteAction(formData: FormData) {
+  "use server";
   const id = formData.get("id")?.toString();
   const email = formData.get("email")?.toString();
   if (!id || !email) return;
 
   const { supabaseAdmin } = await requireAdminLayoutAccess();
-  
   const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
   const user = users.find(u => u.email === email);
   if (user) {
@@ -470,6 +392,7 @@ async function cancelInviteAction(formData: FormData) {
 }
 
 async function deleteLeadAction(formData: FormData) {
+  "use server";
   const id = formData.get("id")?.toString();
   const { supabaseAdmin } = await requireAdminLayoutAccess();
   await supabaseAdmin.from("provider_leads").delete().eq('id', id);
@@ -477,6 +400,7 @@ async function deleteLeadAction(formData: FormData) {
 }
 
 async function manualCreateAction(formData: FormData) {
+  "use server";
   const { supabaseAdmin } = await requireAdminLayoutAccess();
   const { data: lead } = await supabaseAdmin.from("provider_leads").insert({
     name: formData.get("full_name"), business_name: formData.get("name_en"), business_name_ar: formData.get("name_ar"),
