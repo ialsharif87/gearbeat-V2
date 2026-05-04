@@ -33,7 +33,7 @@ export default function FirstLoginPage() {
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
-        .eq("auth_user_id", user.id)
+        .eq("id", user.id)
         .single();
       
       setRole(profile?.role || "vendor");

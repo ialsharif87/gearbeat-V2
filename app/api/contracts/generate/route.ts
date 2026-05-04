@@ -6,17 +6,29 @@ import { generateStudioContract } from "@/lib/contracts/studio-template";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("[CONTRACT_GEN] Auth Error:", userError);
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("[CONTRACT_GEN] Generating for:", user.email);
 
     // 2. Fetch lead data
-    const { data: lead } = await supabase
+    const { data: lead, error: leadError } = await supabase
       .from("provider_leads")
       .select("*")
       .eq("email", user.email)
       .maybeSingle();
 
-    if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    if (leadError) {
+      console.error("[CONTRACT_GEN] DB Error:", leadError);
+    }
+
+    if (!lead) {
+      console.warn("[CONTRACT_GEN] Lead not found for:", user.email);
+      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    }
 
     const type = lead.type;
     const contractDate = new Date().toLocaleDateString('ar-SA');
