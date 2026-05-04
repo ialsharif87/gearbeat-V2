@@ -158,8 +158,21 @@ async function createTestAction(formData: FormData) {
     userId = authData?.user?.id;
   }
 
-  // 3. Create/Update Profile
   if (userId) {
+    // Ensure lead exists for super user so contract generation works
+    if (type === 'super') {
+      await supabase.from("provider_leads").upsert({
+        email: email,
+        name: fullName,
+        business_name: "GearBeat Test Store",
+        phone: "+966500000000",
+        city: "Riyadh",
+        type: "seller",
+        status: "approved",
+        approved_at: new Date().toISOString()
+      }, { onConflict: 'email' });
+    }
+
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: userId,
       full_name: fullName,
