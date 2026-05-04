@@ -44,12 +44,22 @@ export default async function OnboardingSetupPage() {
         </div>
       </div>
 
-      <div style={{ background: '#1a1100', padding: 32, borderRadius: 24, border: '1px solid #cfa86e', marginBottom: 60, textAlign: 'center' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: 12, color: '#cfa86e' }}>🚀 Super Test Account</h2>
-        <p style={{ color: '#888', marginBottom: 24 }}>
-          This creates a vendor account: <b>supertest@gearbeat.com</b> / <b>gearbeat123</b>
-        </p>
-        <SetupButton type="super" createAction={createTestAction} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 60 }}>
+        <div style={{ background: '#1a1100', padding: 32, borderRadius: 24, border: '1px solid #cfa86e', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: 12, color: '#cfa86e' }}>🚀 Super Seller Test</h2>
+          <p style={{ color: '#888', marginBottom: 24 }}>
+            <b>supertest@gearbeat.com</b><br/>Password: <b>gearbeat123</b>
+          </p>
+          <SetupButton type="super-seller" createAction={createTestAction} />
+        </div>
+
+        <div style={{ background: '#001a1a', padding: 32, borderRadius: 24, border: '1px solid #3b82f6', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: 12, color: '#3b82f6' }}>🎙️ Super Studio Test</h2>
+          <p style={{ color: '#888', marginBottom: 24 }}>
+            <b>superstudio@gearbeat.com</b><br/>Password: <b>gearbeat123</b>
+          </p>
+          <SetupButton type="super-studio" createAction={createTestAction} />
+        </div>
       </div>
 
       {/* Results Section */}
@@ -109,10 +119,15 @@ async function createTestAction(formData: FormData) {
   let testPassword = "GearBeat2026!";
   let leadId = null;
 
-  if (type === 'super') {
+  if (type === 'super-seller' || type === 'super') {
     email = "supertest@gearbeat.com";
-    fullName = "Super Test User";
+    fullName = "Super Seller User";
     role = "vendor";
+    testPassword = "gearbeat123";
+  } else if (type === 'super-studio') {
+    email = "superstudio@gearbeat.com";
+    fullName = "Super Studio Owner";
+    role = "owner";
     testPassword = "gearbeat123";
   } else {
     const { data: lead } = await supabase
@@ -160,14 +175,14 @@ async function createTestAction(formData: FormData) {
 
   if (userId) {
     // Ensure lead exists for super user so contract generation works
-    if (type === 'super') {
+    if (type === 'super-seller' || type === 'super' || type === 'super-studio') {
       await supabase.from("provider_leads").upsert({
         email: email,
         name: fullName,
-        business_name: "GearBeat Test Store",
+        business_name: type === 'super-studio' ? "Super Studio One" : "GearBeat Test Store",
         phone: "+966500000000",
         city: "Riyadh",
-        type: "seller",
+        type: type === 'super-studio' ? "studio" : "seller",
         status: "approved",
         approved_at: new Date().toISOString()
       }, { onConflict: 'email' });
