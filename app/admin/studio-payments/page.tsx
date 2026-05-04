@@ -90,8 +90,8 @@ export default async function AdminStudioPaymentsPage() {
                 </td>
                 <td style={tdStyle}>{s.bookingCount}</td>
                 <td style={tdStyle}>{s.gross.toLocaleString()} SAR</td>
-                <td style={tdStyle} style={{ color: '#3b82f6' }}>{s.commission.toLocaleString()} SAR</td>
-                <td style={tdStyle} style={{ color: '#22c55e', fontWeight: 700 }}>{s.net.toLocaleString()} SAR</td>
+                <td style={{ ...tdStyle, color: '#3b82f6' }}>{s.commission.toLocaleString()} SAR</td>
+                <td style={{ ...tdStyle, color: '#22c55e', fontWeight: 700 }}>{s.net.toLocaleString()} SAR</td>
                 <td style={tdStyle}>
                   <button disabled style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', background: 'transparent', color: '#666', fontSize: '0.75rem', cursor: 'not-allowed' }}>
                     <T en="Mark Settled" ar="تسوية" />

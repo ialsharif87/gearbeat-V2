@@ -144,13 +144,13 @@ function ReviewRow({ id, reviewer, target, rating, comment, date, isSuperAdmin, 
   return (
     <tr style={{ borderBottom: '1px solid #111' }}>
       <td style={tdStyle}>{reviewer || "Guest"}</td>
-      <td style={tdStyle} style={{ fontWeight: 600 }}>{target}</td>
+      <td style={{ ...tdStyle, fontWeight: 600 }}>{target}</td>
       <td style={tdStyle}>
         <div style={{ color: '#eab308', letterSpacing: 2 }}>
           {"★".repeat(rating)}{"☆".repeat(5 - rating)}
         </div>
       </td>
-      <td style={tdStyle} style={{ maxWidth: 300, fontSize: '0.85rem', color: '#888' }}>{comment}</td>
+      <td style={{ ...tdStyle, maxWidth: 300, fontSize: '0.85rem', color: '#888' }}>{comment}</td>
       <td style={tdStyle}>{new Date(date).toLocaleDateString()}</td>
       <td style={tdStyle}>
         {isSuperAdmin && (
