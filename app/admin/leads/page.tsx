@@ -34,6 +34,13 @@ export default async function AdminLeadsPage({
   const isSalesStaff = adminUser?.admin_role === "sales" || adminUser?.admin_role === "staff" || isSuperAdmin;
 
   const supabase = await createClient();
+  
+  // Tab Counts (status != approved)
+  const [sellerCountData, studioCountData] = await Promise.all([
+    supabase.from("provider_leads").select("id", { count: "exact", head: true }).eq("type", "seller").neq("status", "approved"),
+    supabase.from("provider_leads").select("id", { count: "exact", head: true }).eq("type", "studio").neq("status", "approved"),
+  ]);
+
   let query = supabase
     .from("provider_leads")
     .select("*")
@@ -48,7 +55,7 @@ export default async function AdminLeadsPage({
 
   const { data: leads } = await query;
 
-  // Stats
+  // Stats for the stats bar
   const { data: allLeads } = await supabase.from("provider_leads").select("status");
   const stats = {
     total: allLeads?.length || 0,
@@ -70,7 +77,7 @@ export default async function AdminLeadsPage({
       <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>
-            <T en="Provider Applications" ar="طلبات المزودين" />
+            <T en="Provider Applications" ar="طلبات الانضمام" />
           </h1>
         </div>
         {isSalesStaff && (
@@ -85,6 +92,28 @@ export default async function AdminLeadsPage({
         )}
       </div>
 
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #1a1a1a', marginBottom: 32, gap: 32 }}>
+        <TabLink 
+          href={`/admin/leads?type=seller&status=${statusFilter}`} 
+          active={typeFilter === 'seller'} 
+          en={`Seller Applications (${sellerCountData.count || 0})`} 
+          ar={`طلبات التجار (${sellerCountData.count || 0})`} 
+        />
+        <TabLink 
+          href={`/admin/leads?type=studio&status=${statusFilter}`} 
+          active={typeFilter === 'studio'} 
+          en={`Studio Applications (${studioCountData.count || 0})`} 
+          ar={`طلبات الاستوديوهات (${studioCountData.count || 0})`} 
+        />
+        <TabLink 
+          href={`/admin/leads?type=all&status=${statusFilter}`} 
+          active={typeFilter === 'all'} 
+          en="All Applications" 
+          ar="جميع الطلبات" 
+        />
+      </div>
+
       {/* Stats Bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 32 }}>
         <StatCard labelEn="Total" labelAr="الإجمالي" value={stats.total} />
@@ -94,13 +123,8 @@ export default async function AdminLeadsPage({
         <StatCard labelEn="Approved" labelAr="معتمد" value={stats.approved} color="#22c55e" />
       </div>
 
-      {/* Filters */}
+      {/* Status Filters */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-        <div style={{ display: 'flex', background: '#111', padding: 4, borderRadius: 8, border: '1px solid #1e1e1e' }}>
-          {['all', 'seller', 'studio'].map(t => (
-            <Link key={t} href={`/admin/leads?type=${t}&status=${statusFilter}`} style={{ padding: '6px 16px', fontSize: '0.85rem', borderRadius: 6, textDecoration: 'none', background: typeFilter === t ? (t === 'studio' ? '#3b82f6' : '#cfa86e') : 'transparent', color: typeFilter === t ? (t === 'studio' ? '#fff' : '#000') : '#888', fontWeight: typeFilter === t ? 700 : 400 }}>{t.toUpperCase()}</Link>
-          ))}
-        </div>
         <div style={{ display: 'flex', background: '#111', padding: 4, borderRadius: 8, border: '1px solid #1e1e1e' }}>
           {['all', 'new', 'contacted', 'invited', 'approved'].map(s => (
             <Link key={s} href={`/admin/leads?type=${typeFilter}&status=${s}`} style={{ padding: '6px 16px', fontSize: '0.85rem', borderRadius: 6, textDecoration: 'none', background: statusFilter === s ? '#222' : 'transparent', color: statusFilter === s ? '#fff' : '#666', fontWeight: statusFilter === s ? 700 : 400 }}>{s.toUpperCase()}</Link>
@@ -110,7 +134,11 @@ export default async function AdminLeadsPage({
 
       {/* Leads List */}
       <div style={{ display: 'grid', gap: 12 }}>
-        {leads?.map(lead => (
+        {leads?.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#555' }}>
+            <T en="No applications found matching these filters." ar="لا توجد طلبات تطابق هذه التصفية." />
+          </div>
+        ) : leads?.map(lead => (
           <details key={lead.id} className="lead-details" style={{ background: '#111', borderRadius: 16, border: '1px solid #1e1e1e', overflow: 'hidden' }} open={confirmDeleteId === lead.id || confirmCancelId === lead.id}>
             <summary style={{ padding: '20px 24px', listStyle: 'none', cursor: 'pointer', outline: 'none' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '80px 2fr 1.5fr 1fr 1.2fr 120px 40px', alignItems: 'center', gap: 16 }}>
@@ -185,7 +213,7 @@ export default async function AdminLeadsPage({
                         <form action={createAccountAction} style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
                           <input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><input type="hidden" name="type" value={lead.type} /><input type="hidden" name="name" value={lead.name} />
                           <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.7rem', color: '#666' }}><T en="Commission %" ar="العمولة %" /></label><input name="commission" type="number" defaultValue={lead.commission_percent || (lead.type === 'studio' ? 20 : 15)} min={5} max={30} className="input" style={{ width: 80, height: 44, textAlign: 'center' }} /></div>
-                          <button className="btn" style={{ background: lead.type === 'studio' ? '#3b82f6' : '#cfa86e', color: lead.type === 'studio' ? '#fff' : '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}>
+                          <button className="btn" style={{ background: lead.type === 'studio' ? '#3b82f6' : '#fff', color: lead.type === 'studio' ? '#fff' : '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}>
                             <T en="Approve & Send Invite" ar="اعتماد وإرسال الدعوة" />
                           </button>
                         </form>
@@ -243,7 +271,7 @@ export default async function AdminLeadsPage({
                 <Input labelEn={manualType === 'studio' ? "Studio (EN)" : "Business (EN)"} labelAr={manualType === 'studio' ? "اسم الاستوديو (EN)" : "اسم المنشأة (EN)"} name="name_en" required />
                 <Input labelEn={manualType === 'studio' ? "Studio (AR)" : "Business (AR)"} labelAr={manualType === 'studio' ? "اسم الاستوديو (AR)" : "اسم المنشأة (AR)"} name="name_ar" required />
               </div>
-              <button type="submit" className="btn" style={{ height: 54, borderRadius: 12, background: manualType === 'studio' ? '#3b82f6' : '#cfa86e', color: manualType === 'studio' ? '#fff' : '#000', fontWeight: 800 }}>
+              <button type="submit" className="btn" style={{ height: 54, borderRadius: 12, background: manualType === 'studio' ? '#3b82f6' : '#fff', color: manualType === 'studio' ? '#fff' : '#000', fontWeight: 800 }}>
                 <T en="Create & Invite" ar="إنشاء ودعوة" />
               </button>
             </form>
@@ -253,6 +281,22 @@ export default async function AdminLeadsPage({
 
       <style dangerouslySetInnerHTML={{ __html: `.back-link:hover { color: #cfa86e !important; } .lead-details[open] summary { border-bottom: 1px solid #1e1e1e; } .lead-details summary::-webkit-details-marker { display: none; }`}} />
     </main>
+  );
+}
+
+function TabLink({ href, active, en, ar }: any) {
+  return (
+    <Link href={href} style={{ 
+      padding: '12px 0', 
+      fontSize: '0.95rem', 
+      fontWeight: active ? 700 : 400, 
+      color: active ? '#fff' : '#666', 
+      textDecoration: 'none', 
+      borderBottom: `2px solid ${active ? '#cfa86e' : 'transparent'}`,
+      transition: 'all 0.2s'
+    }}>
+      <T en={en} ar={ar} />
+    </Link>
   );
 }
 
@@ -325,7 +369,6 @@ async function createAccountAction(formData: FormData) {
 
   if (authError) throw authError;
 
-  // FIX 3: Set role based on type
   await supabaseAdmin.from("profiles").insert({
     auth_user_id: authData.user.id, email, full_name: name,
     role: type === 'studio' ? 'owner' : 'vendor', 
@@ -334,15 +377,11 @@ async function createAccountAction(formData: FormData) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   
-  console.log("Attempting to send email to:", email);
-  console.log("Using from:", process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>");
-
-  // FIX 3: Localized email content based on type
   const subject = type === 'studio' ? "بيانات دخولك كاستوديو — GearBeat" : "بيانات دخولك كتاجر — GearBeat";
-  const welcomeMsg = type === 'studio' ? `تم قبول طلبك كاستوديو في GearBeat. مباً ${name}` : `تم قبول طلبك كتاجر في GearBeat. مرحباً ${name}`;
+  const welcomeMsg = type === 'studio' ? `تم قبول طلبك كاستوديو في GearBeat. مرحباً ${name}` : `تم قبول طلبك كتاجر في GearBeat. مرحباً ${name}`;
   const portalUrl = type === 'studio' ? `${process.env.NEXT_PUBLIC_SITE_URL}/portal/studio` : `${process.env.NEXT_PUBLIC_SITE_URL}/portal/login`;
 
-  const { data: emailData, error: emailError } = await resend.emails.send({
+  await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
     subject: subject,
@@ -356,9 +395,6 @@ async function createAccountAction(formData: FormData) {
       <a href="${portalUrl}" style="background:${type === 'studio' ? '#3b82f6' : '#cfa86e'}; color:${type === 'studio' ? '#fff' : '#000'}; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة وتوقيع العقد</a>
     </div>`
   });
-
-  console.log("Email send result:", emailData);
-  console.log("Email send error:", emailError);
 
   await supabaseAdmin.from("provider_leads").update({ status: 'invited', invited_at: new Date().toISOString(), commission_percent: parseInt(commission) }).eq('id', id);
   revalidatePath('/admin/leads');
@@ -388,7 +424,7 @@ async function resendInviteAction(formData: FormData) {
   const subject = type === 'studio' ? "إعادة إرسال بيانات الدخول — GearBeat Studio" : "إعادة إرسال بيانات الدخول — GearBeat Seller";
   const portalUrl = type === 'studio' ? `${process.env.NEXT_PUBLIC_SITE_URL}/portal/studio` : `${process.env.NEXT_PUBLIC_SITE_URL}/portal/login`;
 
-  const { data: emailData, error: emailError } = await resend.emails.send({
+  await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
     subject: subject,
