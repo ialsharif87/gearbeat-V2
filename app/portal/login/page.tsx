@@ -142,6 +142,12 @@ export default function PortalLoginPage() {
               <T en="Sign In" ar="تسجيل الدخول" />
             )}
           </button>
+          
+          <div style={{ textAlign: 'center', marginTop: '16px' }}>
+            <a href="/forgot-password" style={{ color: '#cfa86e', fontSize: '0.85rem', textDecoration: 'none' }}>
+              <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
+            </a>
+          </div>
         </form>
 
         <div className="gb-portal-auth-actions">
