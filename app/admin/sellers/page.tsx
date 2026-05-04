@@ -28,6 +28,7 @@ export default async function AdminSellersPage({
 
   const isSuperAdmin = adminData?.admin_role === "super_admin";
 
+  // Fetch 1: Actual vendor profiles
   const { data: sellersData } = await supabaseAdmin
     .from("profiles")
     .select(`
@@ -38,20 +39,43 @@ export default async function AdminSellersPage({
     .eq("role", "vendor")
     .order("created_at", { ascending: false });
 
-  const sellers = (sellersData || []).map(p => {
+  // Fetch 2: Approved leads who haven't signed up yet
+  const { data: approvedLeads } = await supabaseAdmin
+    .from("provider_leads")
+    .select("*")
+    .eq("status", "approved")
+    .eq("type", "seller");
+
+  // Combine them
+  const actualSellers = (sellersData || []).map(p => {
     const productsCount = p.marketplace_products?.length || 0;
     const ordersCount = p.marketplace_orders?.length || 0;
-    const totalRevenue = p.marketplace_orders?.reduce((acc: number, o: any) => acc + (o.total_amount || 0), 0) || 0;
-    return { ...p, productsCount, ordersCount, totalRevenue };
-  }).filter(s => 
+    const totalRevenue = (p.marketplace_orders as any[])?.reduce((acc: number, o: any) => acc + (o.total_amount || 0), 0) || 0;
+    return { ...p, productsCount, ordersCount, totalRevenue, type: 'active' };
+  });
+
+  const pendingSellers = (approvedLeads || []).filter(l => !actualSellers.some(s => s.email === l.email)).map(l => ({
+    id: l.id,
+    full_name: l.full_name,
+    email: l.email,
+    phone: l.phone,
+    account_status: 'approved',
+    created_at: l.created_at,
+    productsCount: 0,
+    ordersCount: 0,
+    totalRevenue: 0,
+    type: 'onboarding'
+  }));
+
+  const allSellers = [...actualSellers, ...pendingSellers].filter(s => 
     s.full_name?.toLowerCase().includes(query) || 
     s.email?.toLowerCase().includes(query)
-  );
+  ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const stats = {
-    total: sellers.length,
-    active: sellers.filter(s => s.account_status === 'active').length,
-    revenue: sellers.reduce((acc, s) => acc + s.totalRevenue, 0)
+    total: allSellers.length,
+    active: actualSellers.filter(s => s.account_status === 'active').length,
+    revenue: actualSellers.reduce((acc, s) => acc + s.totalRevenue, 0)
   };
 
   return (
@@ -74,16 +98,16 @@ export default async function AdminSellersPage({
 
       {/* Stats Bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
-        <div className="gb-dash-card" style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
-          <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en="Total Sellers" ar="إجمالي التجار" /></div>
+        <div style={statCardStyle}>
+          <div style={statLabelStyle}><T en="Total Sellers" ar="إجمالي التجار" /></div>
           <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#cfa86e' }}>{stats.total}</div>
         </div>
-        <div className="gb-dash-card" style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
-          <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en="Active Sellers" ar="تجار نشطون" /></div>
+        <div style={statCardStyle}>
+          <div style={statLabelStyle}><T en="Active Profiles" ar="حسابات نشطة" /></div>
           <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#22c55e' }}>{stats.active}</div>
         </div>
-        <div className="gb-dash-card" style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
-          <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en="Total Revenue" ar="إجمالي المبيعات" /></div>
+        <div style={statCardStyle}>
+          <div style={statLabelStyle}><T en="Total Revenue" ar="إجمالي المبيعات" /></div>
           <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#cfa86e' }}>{stats.revenue.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>SAR</span></div>
         </div>
       </div>
@@ -103,7 +127,7 @@ export default async function AdminSellersPage({
             </tr>
           </thead>
           <tbody>
-            {sellers.map((seller) => (
+            {allSellers.map((seller) => (
               <tr key={seller.id} style={{ borderBottom: '1px solid #111' }}>
                 <td style={tdStyle}>
                   <div style={{ fontWeight: 700 }}>{seller.full_name}</div>
@@ -118,36 +142,42 @@ export default async function AdminSellersPage({
                     borderRadius: 6, 
                     fontSize: '0.7rem', 
                     fontWeight: 800, 
-                    background: seller.account_status === 'active' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                    color: seller.account_status === 'active' ? '#22c55e' : '#ef4444'
+                    background: seller.type === 'onboarding' ? 'rgba(234, 179, 8, 0.15)' : (seller.account_status === 'active' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'),
+                    color: seller.type === 'onboarding' ? '#eab308' : (seller.account_status === 'active' ? '#22c55e' : '#ef4444')
                   }}>
-                    {seller.account_status?.toUpperCase()}
+                    {seller.type === 'onboarding' ? <T en="ONBOARDING" ar="جاري الربط" /> : seller.account_status?.toUpperCase()}
                   </span>
                 </td>
                 <td style={tdStyle}>{new Date(seller.created_at).toLocaleDateString()}</td>
                 <td style={tdStyle}>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <Link href={`/portal/store`} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', fontSize: '0.75rem', textDecoration: 'none', color: '#fff' }}>
-                      <T en="Portal" ar="البوابة" />
-                    </Link>
-                    {isSuperAdmin && (
-                      seller.account_status === 'active' ? (
-                        <form action={updateStatusAction}>
-                          <input type="hidden" name="id" value={seller.id} />
-                          <input type="hidden" name="status" value="suspended" />
-                          <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer' }}>
-                            <T en="Suspend" ar="إيقاف" />
-                          </button>
-                        </form>
-                      ) : (
-                        <form action={updateStatusAction}>
-                          <input type="hidden" name="id" value={seller.id} />
-                          <input type="hidden" name="status" value="active" />
-                          <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', fontSize: '0.75rem', cursor: 'pointer' }}>
-                            <T en="Activate" ar="تنشيط" />
-                          </button>
-                        </form>
-                      )
+                    {seller.type === 'active' ? (
+                      <>
+                        <Link href={`/portal/store`} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', fontSize: '0.75rem', textDecoration: 'none', color: '#fff' }}>
+                          <T en="Portal" ar="البوابة" />
+                        </Link>
+                        {isSuperAdmin && (
+                          seller.account_status === 'active' ? (
+                            <form action={updateStatusAction}>
+                              <input type="hidden" name="id" value={seller.id} />
+                              <input type="hidden" name="status" value="suspended" />
+                              <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer' }}>
+                                <T en="Suspend" ar="إيقاف" />
+                              </button>
+                            </form>
+                          ) : (
+                            <form action={updateStatusAction}>
+                              <input type="hidden" name="id" value={seller.id} />
+                              <input type="hidden" name="status" value="active" />
+                              <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', fontSize: '0.75rem', cursor: 'pointer' }}>
+                                <T en="Activate" ar="تنشيط" />
+                              </button>
+                            </form>
+                          )
+                        )}
+                      </>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: '#666' }}><T en="Waiting for setup" ar="في انتظار الإعداد" /></span>
                     )}
                   </div>
                 </td>
@@ -162,6 +192,8 @@ export default async function AdminSellersPage({
 
 const thStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.8rem', color: '#666', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' };
 const tdStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.9rem' };
+const statCardStyle: React.CSSProperties = { background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' };
+const statLabelStyle: React.CSSProperties = { color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 };
 
 async function updateStatusAction(formData: FormData) {
   "use server";

@@ -1,488 +1,170 @@
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import T from "@/components/t";
-import { signOutAction } from "@/lib/actions";
+import Link from "next/link";
 
-export default async function AdminDashboardPage() {
-  const supabase = await createClient();
-  const supabaseAdmin = createAdminClient();
+export const dynamic = "force-dynamic";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default async function AdminDashboard() {
+  const { supabaseAdmin, user: adminUserAuth } = await requireAdminLayoutAccess();
 
-  // Fetch admin role and name
+  // Fetch admin role
   const { data: adminData } = await supabaseAdmin
     .from("admin_users")
-    .select("admin_role, email")
-    .eq("auth_user_id", user?.id)
+    .select("admin_role")
+    .eq("auth_user_id", adminUserAuth.id)
     .maybeSingle();
 
+  const isSuperAdmin = adminData?.admin_role === "super_admin";
+
   // Fetch Stats
-  const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
   const [
-    studiosCount,
-    vendorsCount,
-    customersCount,
-    bookingsCount,
-    ordersCount,
-    bookingsRevenue,
-    ordersRevenue,
-    pendingStudios,
-    pendingVendors,
+    totalStudios, 
+    totalSellers, 
+    totalCustomers,
     pendingLeads,
-    openDisputes,
-    recentBookings,
-    recentOrders,
-    recentLeads,
+    recentActivity
   ] = await Promise.all([
-    supabaseAdmin.from("studios").select("id", { count: "exact", head: true }).eq("status", "approved"),
-    supabaseAdmin.from("vendor_profiles").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    supabaseAdmin.from("studios").select("id", { count: "exact", head: true }),
+    supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }).eq("role", "vendor"),
     supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer"),
-    supabaseAdmin.from("bookings").select("id", { count: "exact", head: true }).gte("created_at", firstDayOfMonth),
-    supabaseAdmin.from("marketplace_orders").select("id", { count: "exact", head: true }).gte("created_at", firstDayOfMonth),
-    supabaseAdmin.from("bookings").select("total_amount").gte("created_at", firstDayOfMonth),
-    supabaseAdmin.from("marketplace_orders").select("total_amount").gte("created_at", firstDayOfMonth),
-    
-    supabaseAdmin.from("studios").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    supabaseAdmin.from("vendor_profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    supabaseAdmin.from("provider_leads").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    supabaseAdmin.from("marketplace_disputes").select("id", { count: "exact", head: true }).eq("status", "open"),
-
-    supabaseAdmin.from("bookings").select("id, created_at, total_amount").order("created_at", { ascending: false }).limit(5),
-    supabaseAdmin.from("marketplace_orders").select("id, created_at, total_amount").order("created_at", { ascending: false }).limit(5),
-    supabaseAdmin.from("provider_leads").select("id, created_at, name, type").order("created_at", { ascending: false }).limit(5),
+    supabaseAdmin.from("provider_leads").select("*").neq("status", "approved").order("created_at", { ascending: false }).limit(5),
+    supabaseAdmin.from("provider_leads").select("*").order("created_at", { ascending: false }).limit(5)
   ]);
 
-  const totalRevenue = 
-    (bookingsRevenue.data || []).reduce((acc, b) => acc + (b.total_amount || 0), 0) +
-    (ordersRevenue.data || []).reduce((acc, o) => acc + (o.total_amount || 0), 0);
-
-  // Merge activity
-  const activityItems = [
-    ...(recentBookings.data || []).map(b => ({ ...b, actType: 'booking' })),
-    ...(recentOrders.data || []).map(o => ({ ...o, actType: 'order' })),
-    ...(recentLeads.data || []).map(l => ({ ...l, actType: 'lead' })),
-  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
-
-  const formatTimeAgo = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const diff = Math.floor((new Date().getTime() - d.getTime()) / 60000); // minutes
-    if (diff < 60) return `${diff}m ago`;
-    if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
-    return `${Math.floor(diff / 1440)}d ago`;
-  };
-
   return (
-    <div className="admin-container">
-      {/* SECTION 1: Top Bar */}
-      <div className="top-bar">
-        <div className="top-left">
-          <h1><T en="GearBeat Control Center" ar="مركز تحكم GearBeat" /></h1>
-          <div className="admin-meta">
-            <span className="admin-name">{adminData?.email?.split('@')[0]}</span>
-            <span className="admin-role-badge">{adminData?.admin_role || "Administrator"}</span>
+    <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+        <div>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>
+            <T en="GearBeat Command Center" ar="مركز تحكم GearBeat" />
+          </h1>
+          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+            <span style={{ background: 'rgba(207,168,110,0.1)', color: '#cfa86e', padding: '2px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700 }}>
+              {isSuperAdmin ? "SUPER_ADMIN" : "STAFF"}
+            </span>
+            <span style={{ color: '#555', fontSize: '0.8rem' }}>{adminUserAuth.email}</span>
           </div>
         </div>
-        <div className="top-right" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-end' }}>
-          <form action={signOutAction}>
-            <button className="btn btn-small btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-              <T en="Logout" ar="تسجيل الخروج" />
-            </button>
-          </form>
-          <div style={{ textAlign: 'right' }}>
-            <p className="current-time">{now.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
-            <p className="current-date">{now.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-          </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div style={{ fontSize: '0.8rem', color: '#666' }}>{new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}</div>
         </div>
       </div>
 
-      {/* SECTION 2: Platform Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">🎹</div>
-          <div className="stat-content">
-            <div className="stat-number">{studiosCount.count || 0}</div>
-            <div className="stat-label"><T en="Total Studios" ar="إجمالي الاستوديوهات" /></div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">🏪</div>
-          <div className="stat-content">
-            <div className="stat-number">{vendorsCount.count || 0}</div>
-            <div className="stat-label"><T en="Total Vendors" ar="إجمالي التجار" /></div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">👥</div>
-          <div className="stat-content">
-            <div className="stat-number">{customersCount.count || 0}</div>
-            <div className="stat-label"><T en="Total Customers" ar="إجمالي العملاء" /></div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <div className="stat-number">{bookingsCount.count || 0}</div>
-            <div className="stat-label"><T en="Bookings this month" ar="حجوزات الشهر" /></div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📦</div>
-          <div className="stat-content">
-            <div className="stat-number">{ordersCount.count || 0}</div>
-            <div className="stat-label"><T en="Orders this month" ar="طلبات الشهر" /></div>
-          </div>
-        </div>
-        <div className="stat-card gold-border">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <div className="stat-number">{totalRevenue.toLocaleString()} <span className="currency">SAR</span></div>
-            <div className="stat-label"><T en="Total Revenue" ar="إجمالي الأرباح" /></div>
-          </div>
-        </div>
+      {/* SECTION 1: GLOBAL OVERVIEW */}
+      <h2 style={sectionTitleStyle}><T en="Global Overview" ar="نظرة عامة" /></h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 48 }}>
+        <MetricCard labelEn="Total Studios" labelAr="إجمالي الاستوديوهات" value={totalStudios.count || 0} icon="🎙️" href="/admin/studios" />
+        <MetricCard labelEn="Total Sellers" labelAr="إجمالي التجار" value={totalSellers.count || 0} icon="🏪" href="/admin/sellers" />
+        <MetricCard labelEn="Total Customers" labelAr="إجمالي العملاء" value={totalCustomers.count || 0} icon="👥" href="/admin/customers" />
+        <MetricCard labelEn="Platform Revenue" labelAr="إيرادات المنصة" value="SAR 0" icon="💰" href="/admin/reports" />
       </div>
 
-      {/* SECTION 3: Two Columns */}
-      <div className="dashboard-columns">
-        {/* LEFT: Recent Activity */}
-        <div className="col-left">
-          <div className="content-card">
-            <h2><T en="Recent Platform Activity" ar="أحدث نشاط للمنصة" /></h2>
-            <div className="activity-feed">
-              {activityItems.map((item: any, idx) => (
-                <div key={idx} className="activity-item">
-                  <span className={`act-badge ${item.actType}`}>
-                    {item.actType}
-                  </span>
-                  <div className="act-info">
-                    {item.actType === 'booking' && `New studio booking #${item.id?.slice(0, 8)} - ${item.total_amount} SAR`}
-                    {item.actType === 'order' && `Marketplace order #${item.id?.slice(0, 8)} - ${item.total_amount} SAR`}
-                    {item.actType === 'lead' && `New provider lead: ${item.name} (${item.type})`}
-                  </div>
-                  <span className="act-time">{formatTimeAgo(item.created_at)}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 32, marginBottom: 48 }}>
+        {/* SECTION 2: SELLERS MANAGEMENT */}
+        <div>
+          <h2 style={sectionTitleStyle}><T en="Sellers & Marketplace" ar="إدارة التجار والمتجر" /></h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <QuickActionCard titleEn="Seller Applications" titleAr="طلبات التجار" href="/admin/leads?type=seller" count={pendingLeads.data?.filter(l => l.type === 'seller').length} color="#cfa86e" />
+            <QuickActionCard titleEn="Approved Sellers" titleAr="التجار المعتمدون" href="/admin/sellers" color="#22c55e" />
+            <QuickActionCard titleEn="Marketplace Products" titleAr="المنتجات" href="/admin/products" />
+            <QuickActionCard titleEn="Marketplace Orders" titleAr="الطلبات" href="/admin/marketplace-orders" />
+            <QuickActionCard titleEn="Seller Payments" titleAr="مدفوعات التجار" href="/admin/seller-payments" />
+            <QuickActionCard titleEn="Seller Settlements" titleAr="تسويات التجار" href="/admin/seller-settlements" />
+          </div>
+        </div>
+
+        {/* SECTION 3: RECENT ACTIVITY */}
+        <div>
+          <h2 style={sectionTitleStyle}><T en="Recent Activity" ar="أحدث النشاطات" /></h2>
+          <div style={{ background: '#111', borderRadius: 20, border: '1px solid #1e1e1e', padding: 20 }}>
+            {recentActivity.data?.map((activity: any) => (
+              <div key={activity.id} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid #1a1a1a' }}>
+                <div style={{ background: activity.type === 'seller' ? '#cfa86e' : '#3b82f6', width: 4, borderRadius: 2 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{activity.name} applied as {activity.type}</div>
+                  <div style={{ fontSize: '0.7rem', color: '#555' }}>{new Date(activity.created_at).toLocaleTimeString()}</div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT: Platform Health */}
-        <div className="col-right">
-          <div className="health-grid">
-            <div className="health-card">
-              <div className="health-val">
-                {(pendingStudios.count || 0) > 0 && <span className="red-dot" />}
-                {pendingStudios.count || 0}
               </div>
-              <div className="health-label"><T en="Pending Studios" ar="استوديوهات معلقة" /></div>
-              <Link href="/admin/studios" className="review-btn"><T en="Review" ar="مراجعة" /></Link>
-            </div>
-            <div className="health-card">
-              <div className="health-val">
-                {(pendingVendors.count || 0) > 0 && <span className="red-dot" />}
-                {pendingVendors.count || 0}
-              </div>
-              <div className="health-label"><T en="Pending Vendors" ar="تجار معلقون" /></div>
-              <Link href="/admin/vendors" className="review-btn"><T en="Review" ar="مراجعة" /></Link>
-            </div>
-            <div className="health-card">
-              <div className="health-val">
-                {(pendingLeads.count || 0) > 0 && <span className="red-dot" />}
-                {pendingLeads.count || 0}
-              </div>
-              <div className="health-label"><T en="Provider Leads" ar="طلبات الانضمام" /></div>
-              <Link href="/admin/leads" className="review-btn"><T en="Review" ar="مراجعة" /></Link>
-            </div>
-            <div className="health-card">
-              <div className="health-val">
-                {(openDisputes.count || 0) > 0 && <span className="red-dot" />}
-                {openDisputes.count || 0}
-              </div>
-              <div className="health-label"><T en="Open Disputes" ar="نزاعات مفتوحة" /></div>
-              <Link href="/admin/disputes" className="review-btn"><T en="Review" ar="مراجعة" /></Link>
-            </div>
+            ))}
+            <Link href="/admin/leads" style={{ display: 'block', textAlign: 'center', fontSize: '0.8rem', color: '#cfa86e', textDecoration: 'none', marginTop: 16 }}>
+              <T en="View all activity" ar="عرض كل النشاطات" /> →
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* SECTION 4: Quick Nav Grid */}
-      <div className="quick-nav">
-        <div className="nav-row">
-          <Link href="/admin/studios" className="nav-btn"><T en="Studios" ar="الاستوديوهات" /></Link>
-          <Link href="/admin/vendors" className="nav-btn"><T en="Vendors" ar="التجار" /></Link>
-          <Link href="/admin/bookings" className="nav-btn"><T en="Bookings" ar="الحجوزات" /></Link>
-        </div>
-        <div className="nav-row">
-          <Link href="/admin/orders" className="nav-btn"><T en="Orders" ar="الطلبات" /></Link>
-          <Link href="/admin/payments" className="nav-btn"><T en="Payments" ar="المدفوعات" /></Link>
-          <Link href="/admin/settlements" className="nav-btn"><T en="Settlements" ar="التسويات" /></Link>
-        </div>
-        <div className="nav-row">
-          <Link href="/admin/leads" className="nav-btn"><T en="Leads" ar="طلبات الانضمام" /></Link>
-          <Link href="/admin/reviews" className="nav-btn"><T en="Reviews" ar="التقييمات" /></Link>
-          <Link href="/admin/reports" className="nav-btn"><T en="Reports" ar="التقارير" /></Link>
-        </div>
+      {/* SECTION 4: STUDIOS MANAGEMENT */}
+      <h2 style={sectionTitleStyle}><T en="Studios & Bookings" ar="إدارة الاستوديوهات والحجوزات" /></h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 48 }}>
+        <QuickActionCard titleEn="Studio Applications" titleAr="طلبات الاستوديوهات" href="/admin/leads?type=studio" count={pendingLeads.data?.filter(l => l.type === 'studio').length} color="#cfa86e" />
+        <QuickActionCard titleEn="Approved Studios" titleAr="الاستوديوهات المعتمدة" href="/admin/studios" color="#22c55e" />
+        <QuickActionCard titleEn="Studio Bookings" titleAr="الحجوزات" href="/admin/bookings" />
+        <QuickActionCard titleEn="Studio Payments" titleAr="مدفوعات الاستوديوهات" href="/admin/studio-payments" />
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .admin-container {
-          display: flex;
-          flex-direction: column;
-          gap: 32px;
-          background: #0a0a0a;
-          color: #fff;
-          padding: 20px 0;
-        }
-
-        .top-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          padding-bottom: 20px;
-          border-bottom: 1px solid #222;
-        }
-
-        .top-bar h1 {
-          font-size: 1.8rem;
-          margin: 0 0 8px;
-        }
-
-        .admin-meta {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-        }
-
-        .admin-name {
-          font-weight: 700;
-          color: var(--gb-gold, #cfa86e);
-        }
-
-        .admin-role-badge {
-          background: rgba(255, 255, 255, 0.05);
-          padding: 2px 10px;
-          border-radius: 6px;
-          font-size: 0.75rem;
-          text-transform: uppercase;
-          color: #888;
-        }
-
-        .top-right {
-          text-align: right;
-        }
-
-        .current-time {
-          font-size: 1.5rem;
-          font-weight: 800;
-          margin: 0;
-        }
-
-        .current-date {
-          color: #888;
-          font-size: 0.9rem;
-          margin: 0;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-        }
-
-        .stat-card {
-          background: #111;
-          border: 1px solid #222;
-          padding: 24px;
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .stat-card.gold-border {
-          border-color: var(--gb-gold, #cfa86e);
-        }
-
-        .stat-icon {
-          font-size: 2rem;
-          opacity: 0.5;
-        }
-
-        .stat-number {
-          font-size: 1.8rem;
-          font-weight: 800;
-          color: var(--gb-gold, #cfa86e);
-        }
-
-        .stat-label {
-          color: #888;
-          font-size: 0.85rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .dashboard-columns {
-          display: grid;
-          grid-template-columns: 6fr 4fr;
-          gap: 32px;
-        }
-
-        .content-card {
-          background: #111;
-          border: 1px solid #222;
-          border-radius: 20px;
-          padding: 24px;
-        }
-
-        .content-card h2 {
-          font-size: 1.2rem;
-          margin: 0 0 24px;
-        }
-
-        .activity-feed {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .activity-item {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding-bottom: 16px;
-          border-bottom: 1px solid #1a1a1a;
-        }
-
-        .activity-item:last-child { border-bottom: none; }
-
-        .act-badge {
-          padding: 4px 10px;
-          border-radius: 6px;
-          font-size: 0.7rem;
-          font-weight: 800;
-          text-transform: uppercase;
-        }
-
-        .act-badge.booking { background: rgba(207, 168, 110, 0.15); color: #cfa86e; }
-        .act-badge.order { background: rgba(0, 123, 255, 0.15); color: #007bff; }
-        .act-badge.lead { background: rgba(40, 167, 69, 0.15); color: #28a745; }
-
-        .act-info {
-          flex: 1;
-          font-size: 0.9rem;
-        }
-
-        .act-time {
-          font-size: 0.75rem;
-          color: #555;
-        }
-
-        .health-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-        }
-
-        .health-card {
-          background: #111;
-          border: 1px solid #222;
-          border-radius: 16px;
-          padding: 20px;
-          text-align: center;
-          position: relative;
-        }
-
-        .health-val {
-          font-size: 2.5rem;
-          font-weight: 800;
-          margin-bottom: 4px;
-          position: relative;
-          display: inline-block;
-        }
-
-        .red-dot {
-          width: 10px;
-          height: 10px;
-          background: #e53e3e;
-          border-radius: 50%;
-          position: absolute;
-          top: 8px;
-          right: -12px;
-          box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
-        }
-
-        .health-label {
-          font-size: 0.85rem;
-          color: #888;
-          margin-bottom: 16px;
-        }
-
-        .review-btn {
-          display: block;
-          width: 100%;
-          padding: 8px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid #333;
-          border-radius: 8px;
-          color: #fff;
-          text-decoration: none;
-          font-size: 0.8rem;
-          font-weight: 700;
-          transition: all 0.2s;
-        }
-
-        .review-btn:hover {
-          background: #fff;
-          color: #000;
-        }
-
-        .quick-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .nav-row {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-        }
-
-        .nav-btn {
-          padding: 16px;
-          background: #111;
-          border: 1px solid #222;
-          border-radius: 12px;
-          color: #fff;
-          text-decoration: none;
-          text-align: center;
-          font-weight: 600;
-          transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-          border-color: var(--gb-gold, #cfa86e);
-          color: var(--gb-gold, #cfa86e);
-          background: rgba(207, 168, 110, 0.05);
-        }
-
-        @media (max-width: 1024px) {
-          .dashboard-columns { grid-template-columns: 1fr; }
-          .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 600px) {
-          .stats-grid { grid-template-columns: 1fr; }
-          .top-bar { flex-direction: column; align-items: flex-start; gap: 20px; }
-          .top-right { text-align: left; }
-          .nav-row { grid-template-columns: 1fr; }
-        }
-      ` }} />
-    </div>
+      {/* SECTION 5: PLATFORM TOOLS */}
+      <h2 style={sectionTitleStyle}><T en="Platform Configuration" ar="إعدادات المنصة" /></h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <QuickActionCard titleEn="Reviews Management" titleAr="إدارة التقييمات" href="/admin/reviews" icon="⭐" />
+        <QuickActionCard titleEn="Platform Reports" titleAr="التقارير المالية" href="/admin/reports" icon="📊" />
+        <QuickActionCard titleEn="System Settings" titleAr="إعدادات النظام" href="/admin/settings" icon="⚙️" />
+      </div>
+    </main>
   );
 }
+
+function MetricCard({ labelEn, labelAr, value, icon, href }: { labelEn: string, labelAr: string, value: string | number, icon: string, href: string }) {
+  return (
+    <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <div style={{ background: '#111', padding: 24, borderRadius: 20, border: '1px solid #1e1e1e', transition: 'transform 0.2s, border-color 0.2s', cursor: 'pointer' }} className="metric-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontSize: '1.5rem' }}>{icon}</span>
+          <span style={{ color: '#cfa86e', fontSize: '0.8rem' }}>→</span>
+        </div>
+        <div style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 4 }}>{value}</div>
+        <div style={{ color: '#666', fontSize: '0.8rem', fontWeight: 600 }}><T en={labelEn} ar={labelAr} /></div>
+      </div>
+    </Link>
+  );
+}
+
+function QuickActionCard({ titleEn, titleAr, href, count, color, icon }: { titleEn: string, titleAr: string, href: string, count?: number, color?: string, icon?: string }) {
+  return (
+    <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <div style={{ 
+        background: '#111', 
+        padding: '20px 24px', 
+        borderRadius: 16, 
+        border: '1px solid #1e1e1e', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        transition: 'all 0.2s',
+        cursor: 'pointer'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {icon && <span style={{ fontSize: '1.2rem' }}>{icon}</span>}
+          <div style={{ fontWeight: 600, fontSize: '0.95rem' }}><T en={titleEn} ar={titleAr} /></div>
+        </div>
+        {count !== undefined && count > 0 && (
+          <span style={{ background: color || '#cfa86e', color: '#000', fontSize: '0.75rem', fontWeight: 800, padding: '2px 8px', borderRadius: 20 }}>
+            {count}
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+const sectionTitleStyle: React.CSSProperties = { 
+  fontSize: '0.9rem', 
+  fontWeight: 700, 
+  color: '#444', 
+  textTransform: 'uppercase', 
+  marginBottom: 20, 
+  letterSpacing: '1px',
+  borderBottom: '1px solid #111',
+  paddingBottom: 8
+};

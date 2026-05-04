@@ -28,7 +28,7 @@ export default async function AdminStudiosPage({
 
   const isSuperAdmin = adminData?.admin_role === "super_admin";
 
-  // Fetch Studios with aggregated data
+  // Fetch 1: Actual studios
   const { data: studiosData } = await supabaseAdmin
     .from("studios")
     .select(`
@@ -38,23 +38,48 @@ export default async function AdminStudiosPage({
     `)
     .order("created_at", { ascending: false });
 
-  const studios = (studiosData || []).map(s => {
+  // Fetch 2: Approved leads who haven't finished setup
+  const { data: approvedLeads } = await supabaseAdmin
+    .from("provider_leads")
+    .select("*")
+    .eq("status", "approved")
+    .eq("type", "studio");
+
+  // Combine them
+  const actualStudios = (studiosData || []).map(s => {
     const profile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
     const ownerName = profile?.full_name || "Unknown";
     const ownerEmail = profile?.email || "—";
     const bookingsCount = s.bookings?.length || 0;
     const totalRevenue = (s.bookings as any[])?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0;
-    return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue };
-  }).filter(s => 
+    return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue, type: 'active' };
+  });
+
+  const pendingStudios = (approvedLeads || []).filter(l => !actualStudios.some(s => s.ownerEmail === l.email)).map(l => ({
+    id: l.id,
+    name: l.business_name || l.full_name,
+    city: l.city || '—',
+    ownerName: l.full_name,
+    ownerEmail: l.email,
+    bookingsCount: 0,
+    totalRevenue: 0,
+    status: 'approved',
+    verified: false,
+    completion_score: 0,
+    created_at: l.created_at,
+    type: 'onboarding'
+  }));
+
+  const allStudios = [...actualStudios, ...pendingStudios].filter(s => 
     s.name?.toLowerCase().includes(query) || 
     s.ownerName?.toLowerCase().includes(query)
-  );
+  ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const stats = {
-    total: studios.length,
-    active: studios.filter(s => s.status === 'approved' && s.booking_enabled).length,
-    bookings: studios.reduce((acc, s) => acc + s.bookingsCount, 0),
-    revenue: studios.reduce((acc, s) => acc + s.totalRevenue, 0)
+    total: allStudios.length,
+    active: actualStudios.filter(s => s.status === 'approved' && s.booking_enabled).length,
+    bookings: actualStudios.reduce((acc, s) => acc + s.bookingsCount, 0),
+    revenue: actualStudios.reduce((acc, s) => acc + s.totalRevenue, 0)
   };
 
   return (
@@ -98,7 +123,7 @@ export default async function AdminStudiosPage({
             </tr>
           </thead>
           <tbody>
-            {studios.map((studio) => (
+            {allStudios.map((studio) => (
               <tr key={studio.id} style={{ borderBottom: '1px solid #111' }}>
                 <td style={tdStyle}>
                   <div style={{ fontWeight: 700 }}>{studio.name}</div>
@@ -111,7 +136,13 @@ export default async function AdminStudiosPage({
                 <td style={tdStyle}>{studio.bookingsCount}</td>
                 <td style={tdStyle}>{studio.totalRevenue.toLocaleString()} SAR</td>
                 <td style={tdStyle}>
-                  <StatusBadge status={studio.status} verified={studio.verified} />
+                  {studio.type === 'onboarding' ? (
+                    <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: 'rgba(234, 179, 8, 0.15)', color: '#eab308' }}>
+                      ONBOARDING
+                    </span>
+                  ) : (
+                    <StatusBadge status={studio.status} verified={studio.verified} />
+                  )}
                 </td>
                 <td style={tdStyle}>
                   <div style={{ width: 100, height: 4, background: '#222', borderRadius: 2 }}>
@@ -120,27 +151,33 @@ export default async function AdminStudiosPage({
                 </td>
                 <td style={tdStyle}>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <Link href={`/studios/${studio.id}`} target="_blank" style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', fontSize: '0.75rem', textDecoration: 'none', color: '#fff' }}>
-                      <T en="View" ar="عرض" />
-                    </Link>
-                    {isSuperAdmin && (
-                      studio.status === 'approved' ? (
-                        <form action={updateStudioStatusAction}>
-                          <input type="hidden" name="id" value={studio.id} />
-                          <input type="hidden" name="status" value="suspended" />
-                          <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer' }}>
-                            <T en="Suspend" ar="إيقاف" />
-                          </button>
-                        </form>
-                      ) : (
-                        <form action={updateStudioStatusAction}>
-                          <input type="hidden" name="id" value={studio.id} />
-                          <input type="hidden" name="status" value="approved" />
-                          <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', fontSize: '0.75rem', cursor: 'pointer' }}>
-                            <T en="Activate" ar="تنشيط" />
-                          </button>
-                        </form>
-                      )
+                    {studio.type === 'active' ? (
+                      <>
+                        <Link href={`/studios/${studio.id}`} target="_blank" style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', fontSize: '0.75rem', textDecoration: 'none', color: '#fff' }}>
+                          <T en="View" ar="عرض" />
+                        </Link>
+                        {isSuperAdmin && (
+                          studio.status === 'approved' ? (
+                            <form action={updateStudioStatusAction}>
+                              <input type="hidden" name="id" value={studio.id} />
+                              <input type="hidden" name="status" value="suspended" />
+                              <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer' }}>
+                                <T en="Suspend" ar="إيقاف" />
+                              </button>
+                            </form>
+                          ) : (
+                            <form action={updateStudioStatusAction}>
+                              <input type="hidden" name="id" value={studio.id} />
+                              <input type="hidden" name="status" value="approved" />
+                              <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', fontSize: '0.75rem', cursor: 'pointer' }}>
+                                <T en="Activate" ar="تنشيط" />
+                              </button>
+                            </form>
+                          )
+                        )}
+                      </>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: '#666' }}><T en="Waiting for setup" ar="في انتظار الإعداد" /></span>
                     )}
                   </div>
                 </td>
