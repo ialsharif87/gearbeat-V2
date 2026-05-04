@@ -315,7 +315,12 @@ async function createAccountAction(formData: FormData) {
   });
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({
+  
+  console.log("Attempting to send email to:", email);
+  console.log("Using from:", process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>");
+  console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
+
+  const { data: emailData, error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
     subject: "بيانات دخولك إلى GearBeat",
@@ -329,6 +334,9 @@ async function createAccountAction(formData: FormData) {
       <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة وتوقيع العقد</a>
     </div>`
   });
+
+  console.log("Email send result:", emailData);
+  console.log("Email send error:", emailError);
 
   await supabaseAdmin.from("provider_leads").update({ status: 'invited', invited_at: new Date().toISOString(), commission_percent: parseInt(commission) }).eq('id', id);
   revalidatePath('/admin/leads');
@@ -354,7 +362,12 @@ async function resendInviteAction(formData: FormData) {
   await supabaseAdmin.auth.admin.updateUserById(user.id, { password: newTempPassword });
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({
+  
+  console.log("Attempting to RESEND email to:", email);
+  console.log("Using from:", process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>");
+  console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
+
+  const { data: emailData, error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
     subject: "إعادة إرسال بيانات الدخول — GearBeat",
@@ -368,6 +381,9 @@ async function resendInviteAction(formData: FormData) {
       <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة</a>
     </div>`
   });
+
+  console.log("Resend Invite Result:", emailData);
+  console.log("Resend Invite Error:", emailError);
 
   await supabaseAdmin.from("provider_leads").update({ invited_at: new Date().toISOString() }).eq('id', id);
   revalidatePath('/admin/leads');
