@@ -146,12 +146,27 @@ export default async function NewProductPage({
         throw new Error("Vendor profile was not found.");
       }
 
-      const productSlugBase = (nameEn || nameAr || sku)
-        .toLowerCase()
-        .replace(/[^a-z0-9\u0600-\u06FF]+/gi, "-")
-        .replace(/^-+|-+$/g, "");
+      const images = formData.getAll("images") as File[];
+      const imageUrls: string[] = [];
 
-      const productSlug = `${productSlugBase || "product"}-${Date.now()}`;
+      if (images && images.length > 0 && images[0].size > 0) {
+        for (const file of images) {
+          if (file.size === 0) continue;
+          const fileName = `${Date.now()}-${file.name}`;
+          const filePath = `products/${user.id}/${fileName}`;
+          
+          const { error: uploadError } = await supabaseAdmin.storage
+            .from("marketplace-assets")
+            .upload(filePath, file);
+            
+          if (!uploadError) {
+            const { data: urlData } = supabaseAdmin.storage
+              .from("marketplace-assets")
+              .getPublicUrl(filePath);
+            imageUrls.push(urlData.publicUrl);
+          }
+        }
+      }
 
       const productPayload = {
         vendor_id: user.id,
@@ -168,6 +183,7 @@ export default async function NewProductPage({
         currency_code: "SAR",
         status: "pending_review",
         is_active: true,
+        images: imageUrls,
         updated_at: new Date().toISOString(),
       };
 
@@ -424,6 +440,24 @@ export default async function NewProductPage({
             <T en="Description (Arabic)" ar="الوصف (عربي)" />
           </label>
           <textarea name="description_ar" className="input" rows={5} />
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <label style={{ display: 'block', marginBottom: 12, fontWeight: 700 }}>
+            <T en="Product Images" ar="صور المنتج" />
+          </label>
+          <div style={{ border: '2px dashed #333', borderRadius: 16, padding: 40, textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+            <input 
+              type="file" 
+              name="images" 
+              multiple 
+              accept="image/*" 
+              style={{ display: 'block', margin: '0 auto' }} 
+            />
+            <p style={{ color: '#666', marginTop: 12, fontSize: '0.85rem' }}>
+              <T en="Upload high-quality images of your product." ar="ارفع صوراً عالية الجودة لمنتجك." />
+            </p>
+          </div>
         </div>
 
         <div

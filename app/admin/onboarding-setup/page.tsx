@@ -186,6 +186,34 @@ async function createTestAction(formData: FormData) {
         status: "approved",
         approved_at: new Date().toISOString()
       }, { onConflict: 'email' });
+
+      // Create Vendor Profile for seller
+      if (role === 'vendor') {
+        await supabase.from("vendor_profiles").upsert({
+          auth_user_id: userId,
+          business_name_en: "GearBeat Test Store",
+          business_name_ar: "متجر قير بيت التجريبي",
+          status: "approved",
+          business_verification_status: "verified",
+          email: email
+        }, { onConflict: 'auth_user_id' });
+      }
+
+      // Create dummy Studio for studio owner
+      if (role === 'owner') {
+        await supabase.from("studios").upsert({
+          owner_auth_user_id: userId,
+          name: "Super Studio One",
+          slug: `super-studio-one-${Date.now()}`,
+          status: "approved",
+          verified: true,
+          booking_enabled: true,
+          city: "Riyadh",
+          description: "This is a super test studio.",
+          price_from: 250,
+          owner_compliance_status: "approved"
+        }, { onConflict: 'owner_auth_user_id' });
+      }
     }
 
     const { error: profileError } = await supabase.from("profiles").upsert({

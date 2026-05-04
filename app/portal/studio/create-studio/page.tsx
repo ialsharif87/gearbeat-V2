@@ -83,7 +83,24 @@ export default async function CreateStudioPage() {
     const address = String(formData.get("address") || "").trim();
     const description = String(formData.get("description") || "").trim();
     const priceFrom = Number(formData.get("price_from") || 0);
-    const coverImageUrl = String(formData.get("cover_image_url") || "").trim();
+    const coverImageFile = formData.get("cover_image_file") as File;
+    let coverImageUrl = "";
+
+    if (coverImageFile && coverImageFile.size > 0) {
+      const fileName = `${Date.now()}-${coverImageFile.name}`;
+      const filePath = `studios/${user.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from("studio-assets")
+        .upload(filePath, coverImageFile);
+        
+      if (!uploadError) {
+        const { data: urlData } = supabaseAdmin.storage
+          .from("studio-assets")
+          .getPublicUrl(filePath);
+        coverImageUrl = urlData.publicUrl;
+      }
+    }
 
     if (!name || !city || !description || !priceFrom) {
       throw new Error("Please fill all required fields.");
@@ -228,13 +245,15 @@ export default async function CreateStudioPage() {
         />
 
         <label>
-          <T en="Cover image URL" ar="رابط صورة الغلاف" />
+          <T en="Cover image" ar="صورة الغلاف" />
         </label>
-        <input
-          className="input"
-          name="cover_image_url"
-          placeholder="https://images.unsplash.com/..."
-        />
+        <div style={{ border: '1px dashed #444', borderRadius: 8, padding: 20, textAlign: 'center', marginBottom: 24 }}>
+          <input
+            type="file"
+            name="cover_image_file"
+            accept="image/*"
+          />
+        </div>
 
         <button className="btn" type="submit">
           <T en="Submit Studio for Review" ar="إرسال الاستوديو للمراجعة" />
