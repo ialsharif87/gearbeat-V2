@@ -316,7 +316,7 @@ async function createAccountAction(formData: FormData) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
-    from: "GearBeat <noreply@gearbeat.sa>",
+    from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
     subject: "بيانات دخولك إلى GearBeat",
     html: `<div dir="rtl" style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #fff;">
@@ -355,7 +355,7 @@ async function resendInviteAction(formData: FormData) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
-    from: "GearBeat <noreply@gearbeat.sa>",
+    from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
     subject: "إعادة إرسال بيانات الدخول — GearBeat",
     html: `<div dir="rtl" style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #fff;">
