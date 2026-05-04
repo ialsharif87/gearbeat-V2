@@ -20,6 +20,8 @@ export default function FirstLoginPage() {
 
   // Step 2: Contract
   const [contractFile, setContractFile] = useState<File | null>(null);
+  const [contractLoading, setContractLoading] = useState(false);
+  const [contractError, setContractError] = useState<string | null>(null);
 
   useEffect(() => {
     async function getUser() {
@@ -40,6 +42,75 @@ export default function FirstLoginPage() {
     }
     getUser();
   }, [router, supabase]);
+
+  async function downloadContract() {
+    try {
+      setContractLoading(true);
+      setContractError(null);
+      
+      const supabaseClient = createClient();
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return;
+  
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role, full_name, email')
+        .eq('id', user.id)
+        .maybeSingle();
+  
+      const { data: lead } = await supabaseClient
+        .from('provider_leads')
+        .select('business_name, business_name_ar, phone, city, commission_percent')
+        .eq('email', user.email)
+        .maybeSingle();
+  
+      const contractData = {
+        type: profile?.role === 'owner' ? 'studio' : 'seller',
+        sellerNameAr: profile?.full_name || 'المزود',
+        sellerNameEn: profile?.full_name || 'Provider',
+        companyNameAr: lead?.business_name_ar || lead?.business_name || 'الشركة',
+        companyNameEn: lead?.business_name || 'Company',
+        email: user.email || '',
+        phone: lead?.phone || '',
+        city: lead?.city || 'الرياض',
+        commissionPercent: lead?.commission_percent || 15,
+        contractDate: new Date().toLocaleDateString('ar-SA'),
+      };
+  
+      const response = await fetch('/api/contracts/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contractData),
+      });
+  
+      if (!response.ok) {
+        throw new Error('API error: ' + response.status);
+      }
+  
+      const html = await response.text();
+      
+      // Open in new tab for printing/saving as PDF
+      const newTab = window.open('', '_blank');
+      if (newTab) {
+        newTab.document.write(html);
+        newTab.document.close();
+      } else {
+        // Fallback: download as HTML file
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'GearBeat-Contract.html';
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Contract download error:', error);
+      setContractError('فشل تحميل العقد. حاول مجدداً.');
+    } finally {
+      setContractLoading(false);
+    }
+  }
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
@@ -171,31 +242,17 @@ export default function FirstLoginPage() {
 
               <button 
                 type="button"
-                onClick={async () => {
-                  try {
-                    const res = await fetch("/api/contracts/generate", { method: "POST" });
-                    if (!res.ok) {
-                      const errData = await res.json();
-                      throw new Error(errData.error || "Failed to generate contract");
-                    }
-                    const blob = await res.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = role === "vendor" ? "seller-agreement.doc" : "studio-agreement.doc";
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                  } catch (err) {
-                    console.error(err);
-                    setError("Failed to download contract. Please try again.");
-                  }
-                }}
+                onClick={downloadContract}
+                disabled={contractLoading}
                 className="btn btn-secondary" 
                 style={{ height: 50, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", fontSize: "0.9rem", cursor: "pointer", border: "1px solid #333", background: "#1a1a1a", color: "#fff" }}
               >
-                <T en="Download Contract Template (.doc)" ar="تحميل نموذج العقد (Word)" />
+                {contractLoading ? 
+                  <T en="Loading..." ar="جاري التحميل..." /> : 
+                  <T en="View & Download Contract" ar="عرض وتحميل العقد" />
+                }
               </button>
+              {contractError && <p style={{ color: "#ff4d4d", fontSize: "0.85rem", textAlign: "center", marginTop: -12 }}>{contractError}</p>}
 
               <div style={{ display: "grid", gap: 8 }}>
                 <label style={{ fontSize: "0.85rem", color: "#666" }}><T en="Upload Signed Contract" ar="ارفع العقد الموقع" /></label>
