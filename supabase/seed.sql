@@ -113,4 +113,5 @@ END $$;
 
 -- Ensure provider_leads has the contract column
 ALTER TABLE provider_leads 
-ADD COLUMN IF NOT EXISTS signed_contract_url TEXT;
+ADD COLUMN IF NOT EXISTS signed_contract_url TEXT,
+ADD COLUMN IF NOT EXISTS commission_percent INTEGER DEFAULT 15;

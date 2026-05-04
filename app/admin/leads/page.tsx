@@ -192,11 +192,27 @@ export default async function AdminLeadsPage({
                   )}
                   {lead.status === 'contacted' && (
                     <>
-                      <form action={createAccountAction}>
+                      <form action={createAccountAction} style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
                         <input type="hidden" name="id" value={lead.id} />
                         <input type="hidden" name="email" value={lead.email} />
                         <input type="hidden" name="type" value={lead.type} />
                         <input type="hidden" name="name" value={lead.name} />
+                        
+                        <div style={{ display: 'grid', gap: 4 }}>
+                          <label style={{ fontSize: '0.7rem', color: '#666' }}>
+                            <T en="Commission %" ar="العمولة %" />
+                          </label>
+                          <input 
+                            name="commission" 
+                            type="number" 
+                            defaultValue={15} 
+                            min={5} 
+                            max={30} 
+                            className="input" 
+                            style={{ width: 80, height: 44, textAlign: 'center' }} 
+                          />
+                        </div>
+
                         <button className="btn" style={{ background: '#cfa86e', color: '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}>
                           <T en="Approve & Send Invite" ar="اعتماد وإرسال الدعوة" />
                         </button>
@@ -324,6 +340,7 @@ async function createAccountAction(formData: FormData) {
   const email = formData.get("email")?.toString();
   const type = formData.get("type")?.toString();
   const name = formData.get("name")?.toString();
+  const commission = formData.get("commission")?.toString() || "15";
   if (!id || !email) return;
 
   const { supabaseAdmin } = await requireAdminLayoutAccess();
@@ -349,12 +366,22 @@ async function createAccountAction(formData: FormData) {
     html: `<div dir="rtl" style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #fff;">
       <h2 style="color: #cfa86e;">مرحباً ${name}</h2>
       <p>تم قبول طلبك. بيانات دخولك:</p>
-      <p>البريد: ${email}<br/>كلمة المرور: ${tempPassword}</p>
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:10px 20px; text-decoration:none; border-radius:5px;">دخول البوابة</a>
+      <div style="background: #111; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <p>البريد: ${email}<br/>كلمة المرور: ${tempPassword}</p>
+        <p style="color: #cfa86e;">نسبة العمولة المتفق عليها: ${commission}%</p>
+      </div>
+      <p>يمكنك عرض العقد الرسمي الخاص بك عبر الرابط التالي:</p>
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة وتوقيع العقد</a>
+      <p style="font-size: 12px; color: #666; margin-top: 20px;">يرجى تغيير كلمة المرور فور دخولك لأول مرة.</p>
     </div>`
   });
 
-  await supabaseAdmin.from("provider_leads").update({ status: 'invited', invited_at: new Date().toISOString() }).eq('id', id);
+  await supabaseAdmin.from("provider_leads").update({ 
+    status: 'invited', 
+    invited_at: new Date().toISOString(),
+    commission_percent: parseInt(commission)
+  }).eq('id', id);
+  
   revalidatePath('/admin/leads');
 }
 
