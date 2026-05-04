@@ -169,14 +169,30 @@ export default function FirstLoginPage() {
                 </p>
               </div>
 
-              <a 
-                href={role === "vendor" ? "/contracts/seller-agreement.pdf" : "/contracts/studio-agreement.pdf"} 
-                download 
+              <button 
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/contracts/generate", { method: "POST" });
+                    if (!res.ok) throw new Error("Failed to generate contract");
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = role === "vendor" ? "seller-agreement.doc" : "studio-agreement.doc";
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  } catch (err) {
+                    console.error(err);
+                    setError("Failed to download contract. Please try again.");
+                  }
+                }}
                 className="btn btn-secondary" 
-                style={{ height: 50, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: "0.9rem" }}
+                style={{ height: 50, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", fontSize: "0.9rem", cursor: "pointer", border: "1px solid #333", background: "#1a1a1a", color: "#fff" }}
               >
-                <T en="Download Contract Template" ar="تحميل نموذج العقد" />
-              </a>
+                <T en="Download Contract Template (.doc)" ar="تحميل نموذج العقد (Word)" />
+              </button>
 
               <div style={{ display: "grid", gap: 8 }}>
                 <label style={{ fontSize: "0.85rem", color: "#666" }}><T en="Upload Signed Contract" ar="ارفع العقد الموقع" /></label>

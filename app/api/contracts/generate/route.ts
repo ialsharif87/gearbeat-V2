@@ -9,48 +9,48 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await request.json();
-    const {
-      type,
-      sellerNameAr,
-      sellerNameEn,
-      companyNameAr,
-      companyNameEn,
-      email,
-      phone,
-      city,
-      commissionPercent = 15,
-    } = body;
+    // 2. Fetch lead data
+    const { data: lead } = await supabase
+      .from("provider_leads")
+      .select("*")
+      .eq("email", user.email)
+      .maybeSingle();
 
+    if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+
+    const type = lead.type;
     const contractDate = new Date().toLocaleDateString('ar-SA');
     
     const html = type === "studio"
       ? generateStudioContract({
-          sellerNameAr,
-          sellerNameEn,
-          companyNameAr,
-          companyNameEn,
-          email,
-          phone,
-          city,
-          commissionPercent,
+          sellerNameAr: lead.name, // Using lead.name as sellerNameAr
+          sellerNameEn: lead.name,
+          companyNameAr: lead.business_name_ar || lead.business_name,
+          companyNameEn: lead.business_name,
+          email: lead.email,
+          phone: lead.phone,
+          city: lead.city,
+          commissionPercent: lead.commission_percent || 15,
           contractDate,
         })
       : generateSellerContract({
-          sellerNameAr,
-          sellerNameEn,
-          companyNameAr,
-          companyNameEn,
-          email,
-          phone,
-          city,
-          commissionPercent,
+          sellerNameAr: lead.name,
+          sellerNameEn: lead.name,
+          companyNameAr: lead.business_name_ar || lead.business_name,
+          companyNameEn: lead.business_name,
+          email: lead.email,
+          phone: lead.phone,
+          city: lead.city,
+          commissionPercent: lead.commission_percent || 15,
           contractDate,
         });
 
+    const filename = type === "studio" ? "studio-agreement.doc" : "seller-agreement.doc";
+
     return new NextResponse(html, {
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
+        "Content-Type": "application/msword",
+        "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
   } catch (error) {
