@@ -5,63 +5,58 @@ import { requireAdminLayoutAccess } from "@/lib/route-guards";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminStudioPaymentsPage() {
+export default async function AdminSellerPaymentsPage() {
   const { supabaseAdmin } = await requireAdminLayoutAccess();
 
-  // Fetch aggregated payments for completed bookings
+  // Fetch aggregated payments for delivered orders
   const { data: paymentsData } = await supabaseAdmin
-    .from("bookings")
+    .from("marketplace_orders")
     .select(`
       total_amount,
-      studios (
-        id, name,
-        profiles!studios_owner_auth_user_id_fkey (full_name, email)
-      )
+      profiles!marketplace_orders_vendor_auth_user_id_fkey (full_name, email)
     `)
-    .eq("status", "completed")
-    .eq("payment_status", "paid");
+    .eq("status", "delivered");
 
-  const studioGroups: Record<string, any> = {};
+  const sellerGroups: Record<string, any> = {};
 
-  (paymentsData || []).forEach(booking => {
-    const studioId = booking.studios?.id;
-    if (!studioId) return;
-    if (!studioGroups[studioId]) {
-      studioGroups[studioId] = {
-        name: booking.studios.name,
-        owner: booking.studios.profiles?.full_name,
-        email: booking.studios.profiles?.email,
-        bookingCount: 0,
+  (paymentsData || []).forEach(order => {
+    const email = order.profiles?.email;
+    if (!email) return;
+    if (!sellerGroups[email]) {
+      sellerGroups[email] = {
+        name: order.profiles.full_name,
+        email: email,
+        orderCount: 0,
         gross: 0,
         commission: 0,
         net: 0
       };
     }
-    studioGroups[studioId].bookingCount += 1;
-    studioGroups[studioId].gross += booking.total_amount || 0;
-    studioGroups[studioId].commission += (booking.total_amount || 0) * 0.15;
-    studioGroups[studioId].net += (booking.total_amount || 0) * 0.85;
+    sellerGroups[email].orderCount += 1;
+    sellerGroups[email].gross += order.total_amount || 0;
+    sellerGroups[email].commission += (order.total_amount || 0) * 0.15;
+    sellerGroups[email].net += (order.total_amount || 0) * 0.85;
   });
 
-  const studios = Object.values(studioGroups).sort((a, b) => b.gross - a.gross);
+  const sellers = Object.values(sellerGroups).sort((a, b) => b.gross - a.gross);
 
   const totals = {
-    gross: studios.reduce((acc, s) => acc + s.gross, 0),
-    commission: studios.reduce((acc, s) => acc + s.commission, 0),
-    net: studios.reduce((acc, s) => acc + s.net, 0)
+    gross: sellers.reduce((acc, s) => acc + s.gross, 0),
+    commission: sellers.reduce((acc, s) => acc + s.commission, 0),
+    net: sellers.reduce((acc, s) => acc + s.net, 0)
   };
 
   return (
     <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
       <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 32 }}>
-        <T en="Studio Payments" ar="مدفوعات الاستوديوهات" />
+        <T en="Seller Payments" ar="مدفوعات التجار" />
       </h1>
 
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
-        <SummaryCard labelEn="Total Gross Bookings" labelAr="إجمالي إيرادات الحجوزات" value={totals.gross} />
-        <SummaryCard labelEn="Platform Commission" labelAr="عمولة المنصة" value={totals.commission} color="#3b82f6" />
-        <SummaryCard labelEn="Net to Owners" labelAr="صافي أصحاب الاستوديوهات" value={totals.net} color="#22c55e" />
+        <SummaryCard labelEn="Total Gross Revenue" labelAr="إجمالي الإيرادات" value={totals.gross} />
+        <SummaryCard labelEn="Total Commission" labelAr="إجمالي العمولات" value={totals.commission} color="#cfa86e" />
+        <SummaryCard labelEn="Total Net Payable" labelAr="صافي المستحقات" value={totals.net} color="#22c55e" />
       </div>
 
       {/* Payments Table */}
@@ -69,28 +64,24 @@ export default async function AdminStudioPaymentsPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid #1e1e1e' }}>
-              <th style={thStyle}><T en="Studio" ar="الاستوديو" /></th>
-              <th style={thStyle}><T en="Owner" ar="المالك" /></th>
-              <th style={thStyle}><T en="Bookings" ar="الحجوزات" /></th>
+              <th style={thStyle}><T en="Seller" ar="التاجر" /></th>
+              <th style={thStyle}><T en="Orders" ar="الطلبات" /></th>
               <th style={thStyle}><T en="Gross" ar="الإجمالي" /></th>
-              <th style={thStyle}><T en="Commission (15%)" ar="العمولة" /></th>
-              <th style={thStyle}><T en="Net" ar="الصافي" /></th>
+              <th style={thStyle}><T en="Commission (15%)" ar="العمولة (15%)" /></th>
+              <th style={thStyle}><T en="Net Payable" ar="الصافي للمورد" /></th>
               <th style={thStyle}><T en="Actions" ar="إجراءات" /></th>
             </tr>
           </thead>
           <tbody>
-            {studios.map((s, idx) => (
+            {sellers.map((s, idx) => (
               <tr key={idx} style={{ borderBottom: '1px solid #111' }}>
                 <td style={tdStyle}>
                   <div style={{ fontWeight: 700 }}>{s.name}</div>
-                </td>
-                <td style={tdStyle}>
-                  <div style={{ fontWeight: 500 }}>{s.owner}</div>
                   <div style={{ fontSize: '0.8rem', color: '#666' }}>{s.email}</div>
                 </td>
-                <td style={tdStyle}>{s.bookingCount}</td>
+                <td style={tdStyle}>{s.orderCount}</td>
                 <td style={tdStyle}>{s.gross.toLocaleString()} SAR</td>
-                <td style={tdStyle} style={{ color: '#3b82f6' }}>{s.commission.toLocaleString()} SAR</td>
+                <td style={tdStyle} style={{ color: '#cfa86e' }}>{s.commission.toLocaleString()} SAR</td>
                 <td style={tdStyle} style={{ color: '#22c55e', fontWeight: 700 }}>{s.net.toLocaleString()} SAR</td>
                 <td style={tdStyle}>
                   <button disabled style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', background: 'transparent', color: '#666', fontSize: '0.75rem', cursor: 'not-allowed' }}>

@@ -1,823 +1,191 @@
-import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import T from "@/components/t";
+import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import { revalidatePath } from "next/cache";
-import { requireAdminRole } from "../../../lib/admin";
-import { createAdminClient } from "../../../lib/supabase/admin";
-import T from "../../../components/t";
+import Link from "next/link";
 
-function studioStatusStyle(status: string) {
-  if (status === "approved") {
-    return {
-      background: "rgba(103, 197, 135, 0.18)",
-      color: "var(--gb-success)",
-      border: "1px solid rgba(103, 197, 135, 0.45)"
-    };
-  }
+export const dynamic = "force-dynamic";
 
-  if (status === "suspended" || status === "rejected") {
-    return {
-      background: "rgba(226, 109, 90, 0.18)",
-      color: "var(--gb-danger)",
-      border: "1px solid rgba(226, 109, 90, 0.45)"
-    };
-  }
+export default async function AdminStudiosPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string }>;
+}) {
+  const { supabaseAdmin, user: adminUserAuth } = await requireAdminLayoutAccess();
+  const params = await (searchParams || {});
+  const query = params.q?.toLowerCase() || "";
 
-  return {
-    background: "rgba(255, 193, 7, 0.18)",
-    color: "var(--gb-warning)",
-    border: "1px solid rgba(255, 193, 7, 0.45)"
-  };
-}
+  // Fetch admin info for permissions
+  const { data: adminData } = await supabaseAdmin
+    .from("admin_users")
+    .select("admin_role")
+    .eq("auth_user_id", adminUserAuth.id)
+    .maybeSingle();
 
-function ownerStatusStyle(status: string) {
-  if (status === "active") {
-    return {
-      background: "rgba(103, 197, 135, 0.18)",
-      color: "var(--gb-success)",
-      border: "1px solid rgba(103, 197, 135, 0.45)"
-    };
-  }
+  const isSuperAdmin = adminData?.admin_role === "super_admin";
 
-  if (status === "pending_deletion" || status === "suspended") {
-    return {
-      background: "rgba(255, 193, 7, 0.18)",
-      color: "var(--gb-warning)",
-      border: "1px solid rgba(255, 193, 7, 0.45)"
-    };
-  }
-
-  if (status === "deleted") {
-    return {
-      background: "rgba(226, 109, 90, 0.18)",
-      color: "var(--gb-danger)",
-      border: "1px solid rgba(226, 109, 90, 0.45)"
-    };
-  }
-
-  return {
-    background: "rgba(255, 255, 255, 0.08)",
-    color: "var(--gb-cream)",
-    border: "1px solid rgba(255, 255, 255, 0.14)"
-  };
-}
-
-function bookingReadinessStyle(isReady: boolean) {
-  if (isReady) {
-    return {
-      background: "rgba(103, 197, 135, 0.18)",
-      color: "var(--gb-success)",
-      border: "1px solid rgba(103, 197, 135, 0.45)"
-    };
-  }
-
-  return {
-    background: "rgba(255, 193, 7, 0.18)",
-    color: "var(--gb-warning)",
-    border: "1px solid rgba(255, 193, 7, 0.45)"
-  };
-}
-
-function isStudioBookable(studio: any) {
-  return (
-    studio.status === "approved" &&
-    studio.verified === true &&
-    studio.booking_enabled === true &&
-    studio.owner_compliance_status === "approved"
-  );
-}
-
-function getBookingReadinessReason(studio: any) {
-  if (!studio.owner_auth_user_id) {
-    return {
-      en: "Missing owner",
-      ar: "لا يوجد مالك مربوط"
-    };
-  }
-
-  if (studio.status !== "approved") {
-    return {
-      en: "Studio not approved",
-      ar: "الاستوديو غير معتمد"
-    };
-  }
-
-  if (!studio.verified) {
-    return {
-      en: "Studio not verified",
-      ar: "الاستوديو غير موثق"
-    };
-  }
-
-  if (studio.owner_compliance_status !== "approved") {
-    return {
-      en: "Owner compliance pending",
-      ar: "امتثال المالك غير مكتمل"
-    };
-  }
-
-  if (!studio.booking_enabled) {
-    return {
-      en: "Booking disabled",
-      ar: "الحجز غير مفعل"
-    };
-  }
-
-  return {
-    en: "Ready for booking",
-    ar: "جاهز للحجز"
-  };
-}
-
-export default async function AdminStudiosPage() {
-  const { admin } = await requireAdminRole(["operations", "content", "sales"]);
-  const supabaseAdmin = createAdminClient();
-
-  const canManageStudios =
-    admin.admin_role === "super_admin" ||
-    admin.admin_role === "operations" ||
-    admin.admin_role === "content";
-
-  async function updateStudioStatus(formData: FormData) {
-    "use server";
-
-    const { admin } = await requireAdminRole(["operations", "content"]);
-
-    const canUpdate =
-      admin.admin_role === "super_admin" ||
-      admin.admin_role === "operations" ||
-      admin.admin_role === "content";
-
-    if (!canUpdate) {
-      throw new Error("You do not have permission to update studio status.");
-    }
-
-    const supabaseAdmin = createAdminClient();
-
-    const studioId = String(formData.get("studio_id") || "");
-    const studioSlug = String(formData.get("studio_slug") || "");
-    const status = String(formData.get("status") || "");
-
-    if (!studioId) {
-      throw new Error("Missing studio ID.");
-    }
-
-    const allowedStatuses = ["pending", "approved", "suspended", "rejected"];
-
-    if (!allowedStatuses.includes(status)) {
-      throw new Error("Invalid studio status.");
-    }
-
-    const { error } = await supabaseAdmin
-      .from("studios")
-      .update({
-        status,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", studioId);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    revalidatePath("/admin/studios");
-    revalidatePath("/admin");
-
-    if (studioSlug) {
-      revalidatePath(`/studios/${studioSlug}`);
-    }
-  }
-
-  async function updateStudioVerified(formData: FormData) {
-    "use server";
-
-    const { admin } = await requireAdminRole(["operations", "content"]);
-
-    const canUpdate =
-      admin.admin_role === "super_admin" ||
-      admin.admin_role === "operations" ||
-      admin.admin_role === "content";
-
-    if (!canUpdate) {
-      throw new Error("You do not have permission to verify studios.");
-    }
-
-    const supabaseAdmin = createAdminClient();
-
-    const studioId = String(formData.get("studio_id") || "");
-    const studioSlug = String(formData.get("studio_slug") || "");
-    const verified = String(formData.get("verified") || "") === "true";
-
-    if (!studioId) {
-      throw new Error("Missing studio ID.");
-    }
-
-    const { error } = await supabaseAdmin
-      .from("studios")
-      .update({
-        verified,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", studioId);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    revalidatePath("/admin/studios");
-    revalidatePath("/admin");
-
-    if (studioSlug) {
-      revalidatePath(`/studios/${studioSlug}`);
-    }
-  }
-
-  const { data: studios, error } = await supabaseAdmin
+  // Fetch Studios with aggregated data
+  const { data: studiosData } = await supabaseAdmin
     .from("studios")
     .select(`
-      id,
-      name,
-      slug,
-      city,
-      district,
-      price_from,
-      status,
-      verified,
-      booking_enabled,
-      owner_compliance_status,
-      google_maps_url,
-      google_reviews_url,
-      google_rating,
-      google_user_ratings_total,
-      tripadvisor_url,
-      tripadvisor_rating,
-      tripadvisor_reviews_total,
-      owner_auth_user_id,
-      created_at,
-      bookings (
-        id
-      ),
-      reviews (
-        id
-      )
+      id, name, city, status, verified, booking_enabled, price_from, created_at, owner_auth_user_id, completion_score,
+      profiles!studios_owner_auth_user_id_fkey (full_name, email),
+      bookings (id, total_amount)
     `)
     .order("created_at", { ascending: false });
 
-  const ownerIds = Array.from(
-    new Set(
-      (studios || [])
-        .map((studio) => studio.owner_auth_user_id)
-        .filter(Boolean)
-    )
+  const studios = (studiosData || []).map(s => {
+    const ownerName = s.profiles?.full_name || "Unknown";
+    const ownerEmail = s.profiles?.email || "—";
+    const bookingsCount = s.bookings?.length || 0;
+    const totalRevenue = s.bookings?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0;
+    return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue };
+  }).filter(s => 
+    s.name?.toLowerCase().includes(query) || 
+    s.ownerName?.toLowerCase().includes(query)
   );
 
-  const { data: ownerProfiles } = ownerIds.length
-    ? await supabaseAdmin
-        .from("profiles")
-        .select("auth_user_id, full_name, email, phone, role, account_status")
-        .in("auth_user_id", ownerIds)
-    : { data: [] };
-
-  const ownerProfileMap = new Map(
-    (ownerProfiles || []).map((profile) => [profile.auth_user_id, profile])
-  );
-
-  const totalStudios = studios?.length || 0;
-  const approvedStudios =
-    studios?.filter((studio) => studio.status === "approved").length || 0;
-  const pendingStudios =
-    studios?.filter((studio) => studio.status === "pending").length || 0;
-  const suspendedStudios =
-    studios?.filter((studio) => studio.status === "suspended").length || 0;
-  const verifiedStudios =
-    studios?.filter((studio) => studio.verified).length || 0;
-  const bookableStudios =
-    studios?.filter((studio) => isStudioBookable(studio)).length || 0;
+  const stats = {
+    total: studios.length,
+    active: studios.filter(s => s.status === 'approved' && s.booking_enabled).length,
+    bookings: studios.reduce((acc, s) => acc + s.bookingsCount, 0),
+    revenue: studios.reduce((acc, s) => acc + s.totalRevenue, 0)
+  };
 
   return (
-    <section>
-      <div className="section-head">
-        <span className="badge">
-          <T en="Admin" ar="الإدارة" />
-        </span>
-
-        <h1>
-          <T en="Studios Monitoring" ar="مراقبة الاستوديوهات" />
+    <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
+      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>
+          <T en="Approved Studios" ar="الاستوديوهات المعتمدة" />
         </h1>
-
-        <p>
-          <T
-            en="Review all studios, approve or suspend listings, manage verification, monitor trust sources, identify owners, and check booking readiness."
-            ar="راجع كل الاستوديوهات، اعتمد أو أوقف القوائم، أدر التوثيق، راقب مصادر الثقة، وتأكد من جاهزية الحجز."
-          />
-        </p>
-      </div>
-
-      <div className="actions" style={{ marginBottom: 24 }}>
-        <Link href="/admin" className="btn btn-secondary">
-          <T en="Back to Admin Dashboard" ar="العودة إلى لوحة الإدارة" />
-        </Link>
-
-        {admin.admin_role === "super_admin" ? (
-          <Link href="/admin/team" className="btn btn-secondary">
-            <T en="Admin Team" ar="فريق الإدارة" />
-          </Link>
-        ) : null}
-      </div>
-
-      <div className="admin-kpi-grid">
-        <div className="card admin-kpi-card">
-          <span>
-            <T en="Total Studios" ar="إجمالي الاستوديوهات" />
-          </span>
-          <strong>{totalStudios}</strong>
-        </div>
-
-        <div className="card admin-kpi-card">
-          <span>
-            <T en="Approved" ar="معتمدة" />
-          </span>
-          <strong>{approvedStudios}</strong>
-        </div>
-
-        <div className="card admin-kpi-card">
-          <span>
-            <T en="Pending" ar="معلقة" />
-          </span>
-          <strong>{pendingStudios}</strong>
-        </div>
-
-        <div className="card admin-kpi-card">
-          <span>
-            <T en="Suspended" ar="موقوفة" />
-          </span>
-          <strong>{suspendedStudios}</strong>
-        </div>
-
-        <div className="card admin-kpi-card">
-          <span>
-            <T en="Verified" ar="موثقة" />
-          </span>
-          <strong>{verifiedStudios}</strong>
-        </div>
-
-        <div className="card admin-kpi-card">
-          <span>
-            <T en="Bookable" ar="قابلة للحجز" />
-          </span>
-          <strong>{bookableStudios}</strong>
-        </div>
-      </div>
-
-      <div style={{ height: 24 }} />
-
-      {error ? (
-        <div className="card">
-          <span className="badge">
-            <T en="Error" ar="خطأ" />
-          </span>
-          <p>{error.message}</p>
-        </div>
-      ) : null}
-
-      {!canManageStudios ? (
-        <div className="card">
-          <span className="badge">
-            <T en="View Only" ar="عرض فقط" />
-          </span>
-
-          <p>
-            <T
-              en="Your role can view studios, but cannot approve, suspend, or verify them."
-              ar="صلاحيتك تسمح بعرض الاستوديوهات فقط، ولا تسمح بالاعتماد أو الإيقاف أو التوثيق."
+        <div style={{ position: 'relative', width: 300 }}>
+          <form method="GET">
+            <input 
+              name="q"
+              placeholder="Search by name or owner..." 
+              defaultValue={query}
+              style={{ width: '100%', background: '#111', border: '1px solid #1e1e1e', padding: '12px 16px', borderRadius: 12, color: '#fff', outline: 'none' }} 
             />
-          </p>
-        </div>
-      ) : null}
-
-      <div className="card">
-        <span className="badge">
-          <T en="All Studios" ar="كل الاستوديوهات" />
-        </span>
-
-        <h2>
-          <T en="Studio list" ar="قائمة الاستوديوهات" />
-        </h2>
-
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>
-                  <T en="Studio" ar="الاستوديو" />
-                </th>
-                <th>
-                  <T en="Studio Owner" ar="صاحب الاستوديو" />
-                </th>
-                <th>
-                  <T en="Location" ar="الموقع" />
-                </th>
-                <th>
-                  <T en="Price" ar="السعر" />
-                </th>
-                <th>
-                  <T en="Status" ar="الحالة" />
-                </th>
-                <th>
-                  <T en="Booking Readiness" ar="جاهزية الحجز" />
-                </th>
-                <th>
-                  <T en="Trust" ar="الثقة" />
-                </th>
-                <th>
-                  <T en="Activity" ar="النشاط" />
-                </th>
-                <th>
-                  <T en="Actions" ar="الإجراءات" />
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {studios?.length ? (
-                studios.map((studio) => {
-                  const bookingsCount = Array.isArray(studio.bookings)
-                    ? studio.bookings.length
-                    : 0;
-
-                  const reviewsCount = Array.isArray(studio.reviews)
-                    ? studio.reviews.length
-                    : 0;
-
-                  const ownerProfile = studio.owner_auth_user_id
-                    ? ownerProfileMap.get(studio.owner_auth_user_id)
-                    : null;
-
-                  const bookable = isStudioBookable(studio);
-                  const readinessReason = getBookingReadinessReason(studio);
-
-                  return (
-                    <tr key={studio.id}>
-                      <td>
-                        <strong>{studio.name}</strong>
-                        <p className="admin-muted-line">{studio.slug}</p>
-                      </td>
-
-                      <td>
-                        {studio.owner_auth_user_id ? (
-                          ownerProfile ? (
-                            <div className="admin-owner-cell">
-                              <strong>
-                                {ownerProfile.full_name || "Studio Owner"}
-                              </strong>
-
-                              <p className="admin-muted-line">
-                                {ownerProfile.email || "No email"}
-                              </p>
-
-                              <p className="admin-muted-line">
-                                {ownerProfile.phone || "No phone"}
-                              </p>
-
-                              <div className="admin-badge-stack">
-                                <span
-                                  className="badge"
-                                  style={ownerStatusStyle(
-                                    ownerProfile.account_status || "active"
-                                  )}
-                                >
-                                  {ownerProfile.account_status || "active"}
-                                </span>
-
-                                <span className="badge">
-                                  {ownerProfile.role || "owner"}
-                                </span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="admin-owner-cell">
-                              <strong>
-                                <T
-                                  en="Linked without profile"
-                                  ar="مربوط بدون ملف شخصي"
-                                />
-                              </strong>
-
-                              <p className="admin-muted-line">
-                                <T
-                                  en="Owner ID exists, but no profile was found."
-                                  ar="يوجد رقم مالك، لكن لا يوجد ملف شخصي."
-                                />
-                              </p>
-
-                              <p className="admin-muted-line">
-                                {studio.owner_auth_user_id}
-                              </p>
-                            </div>
-                          )
-                        ) : (
-                          <div className="admin-owner-cell">
-                            <strong>
-                              <T en="Not linked" ar="غير مربوط" />
-                            </strong>
-
-                            <p className="admin-muted-line">
-                              <T
-                                en="No owner assigned to this studio."
-                                ar="لا يوجد صاحب استوديو مربوط بهذا الاستوديو."
-                              />
-                            </p>
-                          </div>
-                        )}
-                      </td>
-
-                      <td>
-                        {studio.city || "-"}
-                        {studio.district ? ` · ${studio.district}` : ""}
-                      </td>
-
-                      <td>{studio.price_from ?? 0} SAR</td>
-
-                      <td>
-                        <div className="admin-badge-stack">
-                          <span
-                            className="badge"
-                            style={studioStatusStyle(studio.status)}
-                          >
-                            {studio.status}
-                          </span>
-
-                          {studio.verified ? (
-                            <span className="badge">
-                              <T en="Verified" ar="موثق" />
-                            </span>
-                          ) : (
-                            <span className="badge">
-                              <T en="Not verified" ar="غير موثق" />
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="admin-booking-readiness-cell">
-                          <span
-                            className="badge"
-                            style={bookingReadinessStyle(bookable)}
-                          >
-                            {bookable ? (
-                              <T en="Ready" ar="جاهز" />
-                            ) : (
-                              <T en="Not Ready" ar="غير جاهز" />
-                            )}
-                          </span>
-
-                          <p className="admin-muted-line">
-                            <T
-                              en={readinessReason.en}
-                              ar={readinessReason.ar}
-                            />
-                          </p>
-
-                          <div className="admin-badge-stack">
-                            <span className="badge">
-                              <T en="Booking:" ar="الحجز:" />{" "}
-                              {studio.booking_enabled ? "On" : "Off"}
-                            </span>
-
-                            <span className="badge">
-                              <T en="Owner compliance:" ar="امتثال المالك:" />{" "}
-                              {studio.owner_compliance_status || "incomplete"}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="admin-badge-stack">
-                          {studio.google_rating ? (
-                            <span className="badge">
-                              Google {studio.google_rating} ★
-                            </span>
-                          ) : (
-                            <span className="badge">Google —</span>
-                          )}
-
-                          {studio.tripadvisor_rating ? (
-                            <span className="badge">
-                              TripAdvisor {studio.tripadvisor_rating} ★
-                            </span>
-                          ) : (
-                            <span className="badge">TripAdvisor —</span>
-                          )}
-
-                          {studio.google_user_ratings_total ? (
-                            <small>
-                              Google reviews: {studio.google_user_ratings_total}
-                            </small>
-                          ) : null}
-
-                          {studio.tripadvisor_reviews_total ? (
-                            <small>
-                              TripAdvisor reviews:{" "}
-                              {studio.tripadvisor_reviews_total}
-                            </small>
-                          ) : null}
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="admin-badge-stack">
-                          <span>
-                            <T en="Bookings:" ar="الحجوزات:" />{" "}
-                            <strong>{bookingsCount}</strong>
-                          </span>
-
-                          <span>
-                            <T en="Reviews:" ar="التقييمات:" />{" "}
-                            <strong>{reviewsCount}</strong>
-                          </span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="admin-studio-actions">
-                          <div className="actions">
-                            <Link
-                              href={`/studios/${studio.slug}`}
-                              className="btn btn-small"
-                            >
-                              <T en="View" ar="عرض" />
-                            </Link>
-
-                            {studio.google_maps_url ? (
-                              <a
-                                href={studio.google_maps_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-secondary btn-small"
-                              >
-                                Google
-                              </a>
-                            ) : null}
-
-                            {studio.tripadvisor_url ? (
-                              <a
-                                href={studio.tripadvisor_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-secondary btn-small"
-                              >
-                                TripAdvisor
-                              </a>
-                            ) : null}
-                          </div>
-
-                          {canManageStudios ? (
-                            <div className="admin-inline-action-grid">
-                              {studio.status !== "approved" ? (
-                                <form action={updateStudioStatus}>
-                                  <input
-                                    type="hidden"
-                                    name="studio_id"
-                                    value={studio.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="studio_slug"
-                                    value={studio.slug}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="status"
-                                    value="approved"
-                                  />
-                                  <button
-                                    className="btn btn-small"
-                                    type="submit"
-                                  >
-                                    <T en="Approve" ar="اعتماد" />
-                                  </button>
-                                </form>
-                              ) : null}
-
-                              {studio.status !== "pending" ? (
-                                <form action={updateStudioStatus}>
-                                  <input
-                                    type="hidden"
-                                    name="studio_id"
-                                    value={studio.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="studio_slug"
-                                    value={studio.slug}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="status"
-                                    value="pending"
-                                  />
-                                  <button
-                                    className="btn btn-secondary btn-small"
-                                    type="submit"
-                                  >
-                                    <T en="Set Pending" ar="تعليق" />
-                                  </button>
-                                </form>
-                              ) : null}
-
-                              {studio.status !== "suspended" ? (
-                                <form action={updateStudioStatus}>
-                                  <input
-                                    type="hidden"
-                                    name="studio_id"
-                                    value={studio.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="studio_slug"
-                                    value={studio.slug}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="status"
-                                    value="suspended"
-                                  />
-                                  <button
-                                    className="btn btn-secondary btn-small"
-                                    type="submit"
-                                  >
-                                    <T en="Suspend" ar="إيقاف" />
-                                  </button>
-                                </form>
-                              ) : null}
-
-                              {!studio.verified ? (
-                                <form action={updateStudioVerified}>
-                                  <input
-                                    type="hidden"
-                                    name="studio_id"
-                                    value={studio.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="studio_slug"
-                                    value={studio.slug}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="verified"
-                                    value="true"
-                                  />
-                                  <button
-                                    className="btn btn-small"
-                                    type="submit"
-                                  >
-                                    <T en="Verify" ar="توثيق" />
-                                  </button>
-                                </form>
-                              ) : (
-                                <form action={updateStudioVerified}>
-                                  <input
-                                    type="hidden"
-                                    name="studio_id"
-                                    value={studio.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="studio_slug"
-                                    value={studio.slug}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="verified"
-                                    value="false"
-                                  />
-                                  <button
-                                    className="btn btn-secondary btn-small"
-                                    type="submit"
-                                  >
-                                    <T en="Unverify" ar="إلغاء التوثيق" />
-                                  </button>
-                                </form>
-                              )}
-                            </div>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={9}>
-                    <T en="No studios found." ar="لا توجد استوديوهات." />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          </form>
         </div>
       </div>
-    </section>
+
+      {/* Stats Bar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 32 }}>
+        <StatCard labelEn="Total Studios" labelAr="إجمالي الاستوديوهات" value={stats.total} />
+        <StatCard labelEn="Active" labelAr="نشط" value={stats.active} color="#22c55e" />
+        <StatCard labelEn="Bookings" labelAr="الحجوزات" value={stats.bookings} />
+        <StatCard labelEn="Total Revenue" labelAr="إجمالي الأرباح" value={`${stats.revenue.toLocaleString()} SAR`} color="#cfa86e" />
+      </div>
+
+      {/* Studios Table */}
+      <div style={{ background: '#111', borderRadius: 20, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid #1e1e1e' }}>
+              <th style={thStyle}><T en="Studio" ar="الاستوديو" /></th>
+              <th style={thStyle}><T en="Owner" ar="المالك" /></th>
+              <th style={thStyle}><T en="Bookings" ar="الحجوزات" /></th>
+              <th style={thStyle}><T en="Revenue" ar="الإيراد" /></th>
+              <th style={thStyle}><T en="Status" ar="الحالة" /></th>
+              <th style={thStyle}><T en="Completion" ar="اكتمال الملف" /></th>
+              <th style={thStyle}><T en="Actions" ar="إجراءات" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            {studios.map((studio) => (
+              <tr key={studio.id} style={{ borderBottom: '1px solid #111' }}>
+                <td style={tdStyle}>
+                  <div style={{ fontWeight: 700 }}>{studio.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#666' }}>{studio.city}</div>
+                </td>
+                <td style={tdStyle}>
+                  <div style={{ fontWeight: 500 }}>{studio.ownerName}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#666' }}>{studio.ownerEmail}</div>
+                </td>
+                <td style={tdStyle}>{studio.bookingsCount}</td>
+                <td style={tdStyle}>{studio.totalRevenue.toLocaleString()} SAR</td>
+                <td style={tdStyle}>
+                  <StatusBadge status={studio.status} verified={studio.verified} />
+                </td>
+                <td style={tdStyle}>
+                  <div style={{ width: 100, height: 4, background: '#222', borderRadius: 2 }}>
+                    <div style={{ width: `${studio.completion_score || 0}%`, height: '100%', background: '#cfa86e', borderRadius: 2 }} />
+                  </div>
+                </td>
+                <td style={tdStyle}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Link href={`/studios/${studio.id}`} target="_blank" style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #333', fontSize: '0.75rem', textDecoration: 'none', color: '#fff' }}>
+                      <T en="View" ar="عرض" />
+                    </Link>
+                    {isSuperAdmin && (
+                      studio.status === 'approved' ? (
+                        <form action={updateStudioStatusAction}>
+                          <input type="hidden" name="id" value={studio.id} />
+                          <input type="hidden" name="status" value="suspended" />
+                          <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer' }}>
+                            <T en="Suspend" ar="إيقاف" />
+                          </button>
+                        </form>
+                      ) : (
+                        <form action={updateStudioStatusAction}>
+                          <input type="hidden" name="id" value={studio.id} />
+                          <input type="hidden" name="status" value="approved" />
+                          <button style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #22c55e', background: 'transparent', color: '#22c55e', fontSize: '0.75rem', cursor: 'pointer' }}>
+                            <T en="Activate" ar="تنشيط" />
+                          </button>
+                        </form>
+                      )
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </main>
   );
+}
+
+function StatCard({ labelEn, labelAr, value, color }: any) {
+  return (
+    <div style={{ background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' }}>
+      <div style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}><T en={labelEn} ar={labelAr} /></div>
+      <div style={{ fontSize: '1.8rem', fontWeight: 900, color: color || '#fff' }}>{value}</div>
+    </div>
+  );
+}
+
+function StatusBadge({ status, verified }: any) {
+  let color = '#888';
+  let bg = 'rgba(255,255,255,0.05)';
+  let text = status;
+
+  if (status === 'approved' && verified) { color = '#22c55e'; bg = 'rgba(34, 197, 94, 0.15)'; text = "Approved"; }
+  else if (status === 'pending') { color = '#eab308'; bg = 'rgba(234, 179, 8, 0.15)'; text = "Pending"; }
+  else if (status === 'suspended') { color = '#ef4444'; bg = 'rgba(239, 68, 68, 0.15)'; text = "Suspended"; }
+
+  return (
+    <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: bg, color: color }}>
+      {text?.toUpperCase()}
+    </span>
+  );
+}
+
+const thStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.8rem', color: '#666', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' };
+const tdStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.9rem' };
+
+async function updateStudioStatusAction(formData: FormData) {
+  "use server";
+  const id = formData.get("id")?.toString();
+  const status = formData.get("status")?.toString();
+  const supabaseAdmin = createAdminClient();
+  await supabaseAdmin.from("studios").update({ 
+    status: status, 
+    booking_enabled: status === 'approved',
+    verified: status === 'approved'
+  }).eq("id", id);
+  revalidatePath("/admin/studios");
 }
