@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
+import { signOutAction } from "@/lib/actions";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -86,9 +87,16 @@ export default async function AdminDashboardPage() {
             <span className="admin-role-badge">{adminData?.admin_role || "Administrator"}</span>
           </div>
         </div>
-        <div className="top-right">
-          <p className="current-time">{now.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
-          <p className="current-date">{now.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+        <div className="top-right" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-end' }}>
+          <form action={signOutAction}>
+            <button className="btn btn-small btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+              <T en="Logout" ar="تسجيل الخروج" />
+            </button>
+          </form>
+          <div style={{ textAlign: 'right' }}>
+            <p className="current-time">{now.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
+            <p className="current-date">{now.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+          </div>
         </div>
       </div>
 
