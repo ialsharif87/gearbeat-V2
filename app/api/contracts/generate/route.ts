@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateSellerContract } from "@/lib/contracts/seller-template";
+import { generateStudioContract } from "@/lib/contracts/studio-template";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
+      type,
       sellerNameAr,
       sellerNameEn,
       companyNameAr,
@@ -22,17 +24,29 @@ export async function POST(request: NextRequest) {
 
     const contractDate = new Date().toLocaleDateString('ar-SA');
     
-    const html = generateSellerContract({
-      sellerNameAr,
-      sellerNameEn,
-      companyNameAr,
-      companyNameEn,
-      email,
-      phone,
-      city,
-      commissionPercent,
-      contractDate,
-    });
+    const html = type === "studio"
+      ? generateStudioContract({
+          sellerNameAr,
+          sellerNameEn,
+          companyNameAr,
+          companyNameEn,
+          email,
+          phone,
+          city,
+          commissionPercent,
+          contractDate,
+        })
+      : generateSellerContract({
+          sellerNameAr,
+          sellerNameEn,
+          companyNameAr,
+          companyNameEn,
+          email,
+          phone,
+          city,
+          commissionPercent,
+          contractDate,
+        });
 
     return new NextResponse(html, {
       headers: {

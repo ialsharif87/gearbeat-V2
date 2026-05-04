@@ -12,13 +12,14 @@ export const dynamic = "force-dynamic";
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ type?: string; status?: string; modal?: string; confirmDelete?: string; confirmCancel?: string }>;
+  searchParams?: Promise<{ type?: string; status?: string; modal?: string; mtype?: string; confirmDelete?: string; confirmCancel?: string }>;
 }) {
   const { supabaseAdmin, user } = await requireAdminLayoutAccess();
   const params = searchParams ? await searchParams : {};
   const typeFilter = params.type || "all";
   const statusFilter = params.status || "all";
   const showModal = params.modal === "manual";
+  const manualType = params.mtype || "seller";
   const confirmDeleteId = params.confirmDelete;
   const confirmCancelId = params.confirmCancel;
 
@@ -73,9 +74,14 @@ export default async function AdminLeadsPage({
           </h1>
         </div>
         {isSalesStaff && (
-          <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&modal=manual`} className="btn btn-primary" style={{ height: 44, padding: '0 24px', fontSize: '0.9rem', borderRadius: 10, display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <T en="+ Add Seller Manually" ar="+ إضافة تاجر يدوياً" />
-          </Link>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&modal=manual&mtype=seller`} className="btn" style={{ background: '#111', color: '#fff', height: 44, padding: '0 20px', borderRadius: 10, fontSize: '0.85rem', textDecoration: 'none', display: 'flex', alignItems: 'center', border: '1px solid #1e1e1e' }}>
+              <T en="+ Add Seller" ar="+ إضافة تاجر" />
+            </Link>
+            <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}&modal=manual&mtype=studio`} className="btn" style={{ background: '#111', color: '#fff', height: 44, padding: '0 20px', borderRadius: 10, fontSize: '0.85rem', textDecoration: 'none', display: 'flex', alignItems: 'center', border: '1px solid #1e1e1e' }}>
+              <T en="+ Add Studio" ar="+ إضافة استوديو" />
+            </Link>
+          </div>
         )}
       </div>
 
@@ -92,7 +98,7 @@ export default async function AdminLeadsPage({
       <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
         <div style={{ display: 'flex', background: '#111', padding: 4, borderRadius: 8, border: '1px solid #1e1e1e' }}>
           {['all', 'seller', 'studio'].map(t => (
-            <Link key={t} href={`/admin/leads?type=${t}&status=${statusFilter}`} style={{ padding: '6px 16px', fontSize: '0.85rem', borderRadius: 6, textDecoration: 'none', background: typeFilter === t ? '#cfa86e' : 'transparent', color: typeFilter === t ? '#000' : '#888', fontWeight: typeFilter === t ? 700 : 400 }}>{t.toUpperCase()}</Link>
+            <Link key={t} href={`/admin/leads?type=${t}&status=${statusFilter}`} style={{ padding: '6px 16px', fontSize: '0.85rem', borderRadius: 6, textDecoration: 'none', background: typeFilter === t ? (t === 'studio' ? '#3b82f6' : '#cfa86e') : 'transparent', color: typeFilter === t ? (t === 'studio' ? '#fff' : '#000') : '#888', fontWeight: typeFilter === t ? 700 : 400 }}>{t.toUpperCase()}</Link>
           ))}
         </div>
         <div style={{ display: 'flex', background: '#111', padding: 4, borderRadius: 8, border: '1px solid #1e1e1e' }}>
@@ -124,10 +130,10 @@ export default async function AdminLeadsPage({
             <div style={{ background: '#0d0d0d', borderTop: '1px solid #1e1e1e', padding: 32, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
               {/* Info */}
               <div>
-                <h4 style={{ color: '#cfa86e', marginBottom: 20, fontSize: '1rem' }}><T en="Application Details" ar="تفاصيل الطلب" /></h4>
+                <h4 style={{ color: lead.type === 'studio' ? '#3b82f6' : '#cfa86e', marginBottom: 20, fontSize: '1rem' }}><T en="Application Details" ar="تفاصيل الطلب" /></h4>
                 <div style={{ display: 'grid', gap: 16 }}>
-                  <InfoRow labelEn="Company (EN)" labelAr="اسم الشركة (EN)" value={lead.business_name} />
-                  <InfoRow labelEn="Company (AR)" labelAr="اسم الشركة (AR)" value={lead.business_name_ar} />
+                  <InfoRow labelEn={lead.type === 'studio' ? "Studio (EN)" : "Company (EN)"} labelAr={lead.type === 'studio' ? "اسم الاستوديو (EN)" : "اسم الشركة (EN)"} value={lead.business_name} />
+                  <InfoRow labelEn={lead.type === 'studio' ? "Studio (AR)" : "Company (AR)"} labelAr={lead.type === 'studio' ? "اسم الاستوديو (AR)" : "اسم الشركة (AR)"} value={lead.business_name_ar} />
                   <InfoRow labelEn="Contact Person" labelAr="اسم المسؤول" value={lead.name} />
                   <InfoRow labelEn="Email" labelAr="البريد الإلكتروني" value={lead.email} />
                   <InfoRow labelEn="Phone" labelAr="رقم الجوال" value={lead.phone} />
@@ -154,10 +160,15 @@ export default async function AdminLeadsPage({
               {/* Actions */}
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <h4 style={{ color: '#cfa86e', marginBottom: 20, fontSize: '1rem' }}><T en="Review Documents" ar="مراجعة الوثائق" /></h4>
+                  <h4 style={{ color: lead.type === 'studio' ? '#3b82f6' : '#cfa86e', marginBottom: 20, fontSize: '1rem' }}><T en="Review Documents" ar="مراجعة الوثائق" /></h4>
                   <div style={{ display: 'grid', gap: 12 }}>
                     <DocRow labelEn="Commercial Registration" labelAr="السجل التجاري" url={lead.cr_document_url} />
-                    <DocRow labelEn="VAT Certificate" labelAr="شهادة الضريبة" url={lead.vat_document_url} optional />
+                    <DocRow 
+                      labelEn={lead.type === 'studio' ? "Location License" : "VAT Certificate"} 
+                      labelAr={lead.type === 'studio' ? "رخصة الموقع" : "شهادة الضريبة"} 
+                      url={lead.vat_document_url} 
+                      optional={lead.type === 'seller'} 
+                    />
                     <DocRow labelEn="National Address" labelAr="العنوان الوطني" url={lead.national_address_url} />
                     <DocRow labelEn="Bank Document" labelAr="وثيقة البنك" url={lead.bank_document_url} />
                   </div>
@@ -173,8 +184,10 @@ export default async function AdminLeadsPage({
                       {isSalesStaff && (
                         <form action={createAccountAction} style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
                           <input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><input type="hidden" name="type" value={lead.type} /><input type="hidden" name="name" value={lead.name} />
-                          <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.7rem', color: '#666' }}><T en="Commission %" ar="العمولة %" /></label><input name="commission" type="number" defaultValue={lead.commission_percent || 15} min={5} max={30} className="input" style={{ width: 80, height: 44, textAlign: 'center' }} /></div>
-                          <button className="btn" style={{ background: '#cfa86e', color: '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}><T en="Approve & Send Invite" ar="اعتماد وإرسال الدعوة" /></button>
+                          <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.7rem', color: '#666' }}><T en="Commission %" ar="العمولة %" /></label><input name="commission" type="number" defaultValue={lead.commission_percent || (lead.type === 'studio' ? 20 : 15)} min={5} max={30} className="input" style={{ width: 80, height: 44, textAlign: 'center' }} /></div>
+                          <button className="btn" style={{ background: lead.type === 'studio' ? '#3b82f6' : '#cfa86e', color: lead.type === 'studio' ? '#fff' : '#000', fontWeight: 800, padding: '0 32px', height: 44, borderRadius: 10 }}>
+                            <T en="Approve & Send Invite" ar="اعتماد وإرسال الدعوة" />
+                          </button>
                         </form>
                       )}
                       {isSuperAdmin && (
@@ -185,9 +198,9 @@ export default async function AdminLeadsPage({
 
                   {lead.status === 'invited' && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
-                      <span style={{ color: '#cfa86e', fontWeight: 700 }}>Invited ✓</span>
+                      <span style={{ color: lead.type === 'studio' ? '#3b82f6' : '#cfa86e', fontWeight: 700 }}>Invited ✓</span>
                       {isSalesStaff && (
-                        <form action={resendInviteAction}><input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><input type="hidden" name="name" value={lead.name} /><input type="hidden" name="type" value={lead.type} /><button className="btn" style={{ background: 'transparent', border: '1px solid #cfa86e', color: '#cfa86e', height: 40, padding: '0 16px', borderRadius: 8, fontSize: '0.8rem' }}><T en="Resend Invite" ar="إعادة إرسال الدعوة" /></button></form>
+                        <form action={resendInviteAction}><input type="hidden" name="id" value={lead.id} /><input type="hidden" name="email" value={lead.email} /><input type="hidden" name="name" value={lead.name} /><input type="hidden" name="type" value={lead.type} /><button className="btn" style={{ background: 'transparent', border: `1px solid ${lead.type === 'studio' ? '#3b82f6' : '#cfa86e'}`, color: lead.type === 'studio' ? '#3b82f6' : '#cfa86e', height: 40, padding: '0 16px', borderRadius: 8, fontSize: '0.8rem' }}><T en="Resend Invite" ar="إعادة إرسال الدعوة" /></button></form>
                       )}
                       {isSuperAdmin && (
                         <div>
@@ -204,7 +217,7 @@ export default async function AdminLeadsPage({
                     </div>
                   )}
 
-                  {lead.status === 'approved' && <span style={{ color: '#3b82f6', fontWeight: 700 }}>Approved ✓</span>}
+                  {lead.status === 'approved' && <span style={{ color: '#22c55e', fontWeight: 700 }}>Approved ✓</span>}
                 </div>
               </div>
             </div>
@@ -212,24 +225,27 @@ export default async function AdminLeadsPage({
         ))}
       </div>
 
-      {/* Manual Entry */}
+      {/* Manual Entry Modal */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
           <div style={{ background: '#111', width: '100%', maxWidth: 700, borderRadius: 24, border: '1px solid #1e1e1e', padding: 40 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
-              <h2 style={{ margin: 0 }}><T en="Add Seller Manually" ar="إضافة تاجر يدوياً" /></h2>
+              <h2 style={{ margin: 0 }}><T en={manualType === 'studio' ? "Add Studio Manually" : "Add Seller Manually"} ar={manualType === 'studio' ? "إضافة استوديو يدوياً" : "إضافة تاجر يدوياً"} /></h2>
               <Link href={`/admin/leads?type=${typeFilter}&status=${statusFilter}`} style={{ color: '#888', textDecoration: 'none', fontSize: '1.5rem' }}>×</Link>
             </div>
             <form action={manualCreateAction} style={{ display: 'grid', gap: 20 }}>
+              <input type="hidden" name="type" value={manualType} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <Input labelEn="Full Name" labelAr="الاسم الكامل" name="full_name" required />
                 <Input labelEn="Email" labelAr="البريد الإلكتروني" name="email" type="email" required />
                 <Input labelEn="Phone" labelAr="رقم الجوال" name="phone" required />
-                <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.8rem', color: '#666' }}><T en="City" ar="المدينة" /></label><select className="input" name="city"><option value="Riyadh">Riyadh</option><option value="Jeddah">Jeddah</option><option value="Dammam">Dammam</option><option value="Other">Other</option></select></div>
-                <Input labelEn="Business (EN)" labelAr="اسم المنشأة (EN)" name="name_en" required />
-                <Input labelEn="Business (AR)" labelAr="اسم المنشأة (AR)" name="name_ar" required />
+                <div style={{ display: 'grid', gap: 4 }}><label style={{ fontSize: '0.8rem', color: '#666' }}><T en="City" ar="المدينة" /></label><select className="input" name="city"><option value="Riyadh">Riyadh</option><option value="Jeddah">Jeddah</option><option value="Dammam">Dammam</option><option value="Makkah">Makkah</option><option value="Madinah">Madinah</option><option value="Other">Other</option></select></div>
+                <Input labelEn={manualType === 'studio' ? "Studio (EN)" : "Business (EN)"} labelAr={manualType === 'studio' ? "اسم الاستوديو (EN)" : "اسم المنشأة (EN)"} name="name_en" required />
+                <Input labelEn={manualType === 'studio' ? "Studio (AR)" : "Business (AR)"} labelAr={manualType === 'studio' ? "اسم الاستوديو (AR)" : "اسم المنشأة (AR)"} name="name_ar" required />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ height: 54, borderRadius: 12 }}><T en="Create Lead & Invite" ar="إنشاء الطلب والدعوة" /></button>
+              <button type="submit" className="btn" style={{ height: 54, borderRadius: 12, background: manualType === 'studio' ? '#3b82f6' : '#cfa86e', color: manualType === 'studio' ? '#fff' : '#000', fontWeight: 800 }}>
+                <T en="Create & Invite" ar="إنشاء ودعوة" />
+              </button>
             </form>
           </div>
         </div>
@@ -309,29 +325,35 @@ async function createAccountAction(formData: FormData) {
 
   if (authError) throw authError;
 
+  // FIX 3: Set role based on type
   await supabaseAdmin.from("profiles").insert({
     auth_user_id: authData.user.id, email, full_name: name,
-    role: type === 'seller' ? 'vendor' : 'owner', account_status: 'active'
+    role: type === 'studio' ? 'owner' : 'vendor', 
+    account_status: 'active'
   });
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   
   console.log("Attempting to send email to:", email);
   console.log("Using from:", process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>");
-  console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
+
+  // FIX 3: Localized email content based on type
+  const subject = type === 'studio' ? "بيانات دخولك كاستوديو — GearBeat" : "بيانات دخولك كتاجر — GearBeat";
+  const welcomeMsg = type === 'studio' ? `تم قبول طلبك كاستوديو في GearBeat. مباً ${name}` : `تم قبول طلبك كتاجر في GearBeat. مرحباً ${name}`;
+  const portalUrl = type === 'studio' ? `${process.env.NEXT_PUBLIC_SITE_URL}/portal/studio` : `${process.env.NEXT_PUBLIC_SITE_URL}/portal/login`;
 
   const { data: emailData, error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
-    subject: "بيانات دخولك إلى GearBeat",
+    subject: subject,
     html: `<div dir="rtl" style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #fff;">
-      <h2 style="color: #cfa86e;">مرحباً ${name}</h2>
-      <p>تم قبول طلبك. بيانات دخولك:</p>
+      <h2 style="color: ${type === 'studio' ? '#3b82f6' : '#cfa86e'};">${welcomeMsg}</h2>
+      <p>بيانات دخولك:</p>
       <div style="background: #111; padding: 15px; border-radius: 8px; margin: 15px 0;">
         <p>البريد: ${email}<br/>كلمة المرور: ${tempPassword}</p>
-        <p style="color: #cfa86e;">نسبة العمولة المتفق عليها: ${commission}%</p>
+        <p style="color: ${type === 'studio' ? '#3b82f6' : '#cfa86e'};">نسبة العمولة المتفق عليها: ${commission}%</p>
       </div>
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة وتوقيع العقد</a>
+      <a href="${portalUrl}" style="background:${type === 'studio' ? '#3b82f6' : '#cfa86e'}; color:${type === 'studio' ? '#fff' : '#000'}; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة وتوقيع العقد</a>
     </div>`
   });
 
@@ -363,27 +385,23 @@ async function resendInviteAction(formData: FormData) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   
-  console.log("Attempting to RESEND email to:", email);
-  console.log("Using from:", process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>");
-  console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
+  const subject = type === 'studio' ? "إعادة إرسال بيانات الدخول — GearBeat Studio" : "إعادة إرسال بيانات الدخول — GearBeat Seller";
+  const portalUrl = type === 'studio' ? `${process.env.NEXT_PUBLIC_SITE_URL}/portal/studio` : `${process.env.NEXT_PUBLIC_SITE_URL}/portal/login`;
 
   const { data: emailData, error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || "GearBeat <onboarding@resend.dev>",
     to: email,
-    subject: "إعادة إرسال بيانات الدخول — GearBeat",
+    subject: subject,
     html: `<div dir="rtl" style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #fff;">
-      <h2 style="color: #cfa86e;">مرحباً ${name}</h2>
+      <h2 style="color: ${type === 'studio' ? '#3b82f6' : '#cfa86e'};">مرحباً ${name}</h2>
       <p>تم تحديث بيانات دخولك. البيانات الجديدة:</p>
       <div style="background: #111; padding: 15px; border-radius: 8px; margin: 15px 0;">
         <p>البريد: ${email}<br/>كلمة المرور الجديدة: ${newTempPassword}</p>
-        <p style="color: #cfa86e;">نسبة العمولة: ${commission}%</p>
+        <p style="color: ${type === 'studio' ? '#3b82f6' : '#cfa86e'};">نسبة العمولة: ${commission}%</p>
       </div>
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/login" style="background:#cfa86e; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة</a>
+      <a href="${portalUrl}" style="background:${type === 'studio' ? '#3b82f6' : '#cfa86e'}; color:${type === 'studio' ? '#fff' : '#000'}; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; display:inline-block;">دخول البوابة</a>
     </div>`
   });
-
-  console.log("Resend Invite Result:", emailData);
-  console.log("Resend Invite Error:", emailError);
 
   await supabaseAdmin.from("provider_leads").update({ invited_at: new Date().toISOString() }).eq('id', id);
   revalidatePath('/admin/leads');
@@ -418,15 +436,17 @@ async function deleteLeadAction(formData: FormData) {
 async function manualCreateAction(formData: FormData) {
   "use server";
   const { supabaseAdmin } = await requireAdminLayoutAccess();
+  const type = formData.get("type")?.toString() || "seller";
   const { data: lead } = await supabaseAdmin.from("provider_leads").insert({
     name: formData.get("full_name"), business_name: formData.get("name_en"), business_name_ar: formData.get("name_ar"),
     email: formData.get("email"), phone: formData.get("phone"), city: formData.get("city"),
-    type: formData.get("type") || "seller", status: 'contacted', created_at: new Date().toISOString()
+    type: type, status: 'contacted', created_at: new Date().toISOString()
   }).select().single();
   
   if (lead) {
      const fd = new FormData();
      fd.set("id", lead.id); fd.set("email", lead.email); fd.set("type", lead.type); fd.set("name", lead.name);
+     fd.set("commission", type === 'studio' ? "20" : "15");
      await createAccountAction(fd);
   }
   revalidatePath('/admin/leads');
