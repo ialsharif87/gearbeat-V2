@@ -83,6 +83,7 @@ export default async function AdminLeadsPage({
             <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid #1e1e1e' }}>
               <th style={thStyle}><T en="Provider" ar="المزود" /></th>
               <th style={thStyle}><T en="Type" ar="النوع" /></th>
+              <th style={thStyle}><T en="Compliance" ar="الامتثال" /></th>
               <th style={thStyle}><T en="Status" ar="الحالة" /></th>
               <th style={thStyle}><T en="Applied" ar="تاريخ الطلب" /></th>
               <th style={thStyle}><T en="Actions" ar="إجراءات" /></th>
@@ -146,6 +147,20 @@ function LeadRow({ lead, isSuperAdmin }: { lead: any, isSuperAdmin: boolean }) {
         </span>
       </td>
       <td style={tdStyle}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {lead.signed_contract_url ? (
+            <a href={lead.signed_contract_url} target="_blank" style={{ fontSize: '0.7rem', color: '#cfa86e', textDecoration: 'underline' }}>
+              📄 <T en="Signed Contract" ar="العقد الموقع" />
+            </a>
+          ) : (
+            <span style={{ fontSize: '0.7rem', color: '#555' }}><T en="No Contract" ar="لا يوجد عقد" /></span>
+          )}
+          <div style={{ fontSize: '0.7rem', color: '#888' }}>
+            <T en="Comm:" ar="العمولة:" /> {lead.commission_percent || 15}%
+          </div>
+        </div>
+      </td>
+      <td style={tdStyle}>
         <span style={{ 
           padding: '4px 12px', 
           borderRadius: 8, 
@@ -163,12 +178,17 @@ function LeadRow({ lead, isSuperAdmin }: { lead: any, isSuperAdmin: boolean }) {
       <td style={tdStyle}>
         <div style={{ display: 'flex', gap: 10 }}>
           {isSuperAdmin && !isApproved && (
-            <form action={approveLeadAction}>
-              <input type="hidden" name="id" value={lead.id} />
-              <button style={{ background: '#cfa86e', color: '#000', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
-                <T en="Approve" ar="اعتماد" />
+            <>
+              <form action={approveLeadAction}>
+                <input type="hidden" name="id" value={lead.id} />
+                <button style={{ background: '#cfa86e', color: '#000', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+                  <T en="Approve" ar="اعتماد" />
+                </button>
+              </form>
+              <button style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '8px 16px', borderRadius: 8, fontSize: '0.8rem', cursor: 'pointer' }}>
+                <T en="Docs" ar="الوثائق" />
               </button>
-            </form>
+            </>
           )}
         </div>
       </td>

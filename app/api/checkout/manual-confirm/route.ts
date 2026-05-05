@@ -757,6 +757,43 @@ export async function POST(request: Request) {
               transaction_id: transaction.id
             }
           });
+
+          // --- [AUTOMATED SMART NOTIFICATIONS] ---
+          try {
+            const { sendSmartNotification } = await import("@/lib/emails");
+            
+            // 1. Notify Customer (Thank you)
+            await sendSmartNotification(supabaseAdmin, {
+              userId: user.id,
+              email: user.email,
+              titleEn: "Payment Confirmed",
+              titleAr: "تم تأكيد الدفع",
+              bodyEn: `Your payment of ${amount} ${session.currency_code || 'SAR'} has been successfully processed. Thank you for using GearBeat!`,
+              bodyAr: `تمت معالجة دفعتك بقيمة ${amount} ${session.currency_code || 'SAR'} بنجاح. شكراً لاستخدامك جير بيت!`,
+              actionUrl: sourceType === 'studio_booking' ? '/customer/bookings' : '/customer/marketplace-orders',
+              entityType: sourceType,
+              entityId: sourceId
+            });
+
+            // 2. Notify Partner (New Order/Booking)
+            const { data: partnerProfile } = await supabaseAdmin.from("profiles").select("email, full_name").eq("auth_user_id", partnerId).maybeSingle();
+            if (partnerProfile?.email) {
+              await sendSmartNotification(supabaseAdmin, {
+                userId: partnerId,
+                email: partnerProfile.email,
+                titleEn: "New Successful Transaction",
+                titleAr: "عملية ناجحة جديدة",
+                bodyEn: `Congratulations! A new ${sourceType.replace('_', ' ')} has been confirmed for ${amount} ${session.currency_code || 'SAR'}. Check your portal for details.`,
+                bodyAr: `تهانينا! تم تأكيد ${sourceType === 'studio_booking' ? 'حجز استوديو' : 'طلب جديد'} بقيمة ${amount} ${session.currency_code || 'SAR'}. راجع لوحة التحكم للتفاصيل.`,
+                actionUrl: partnerType === 'studio_owner' ? '/portal/studio/bookings' : '/portal/store/orders',
+                entityType: sourceType,
+                entityId: sourceId
+              });
+            }
+          } catch (notifErr) {
+            console.error("Smart notification failed:", notifErr);
+          }
+          // --- [/AUTOMATED SMART NOTIFICATIONS] ---
         }
       }
     } catch (e) {
