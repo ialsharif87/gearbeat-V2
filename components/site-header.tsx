@@ -2,7 +2,6 @@ import Link from "next/link";
 import LanguageSwitcher from "./language-switcher";
 import T from "./t";
 import CartBadge from "./cart-badge";
-import NotificationBell from "./notification-bell";
 
 type SiteHeaderProps = {
   isLoggedIn: boolean;
@@ -42,15 +41,14 @@ export default function SiteHeader({
       <div className="gb-header-shell">
         <Link href="/" aria-label="GearBeat Home" className="gb-logo-link">
           <img
-            src="/brand/logo-horizontal.svg"
+            src="/brand/logo-horizontal-ai.png"
             alt="GearBeat"
-            style={{ height: 40, width: 'auto' }}
+            className="gb-header-logo-image"
           />
         </Link>
 
         <nav className="gb-header-nav" aria-label="Main navigation">
           <NavLink href="/studios" en="Studios" ar="الاستوديوهات" />
-          <NavLink href="/services" en="Services" ar="الخدمات" />
           <NavLink href="/gear" en="Gear" ar="المعدات" />
           <NavLink href="/how-it-works" en="How it Works" ar="كيف يعمل" />
 
@@ -59,9 +57,11 @@ export default function SiteHeader({
               <Link href={dashboardPath} className="gb-nav-link gb-nav-link-strong">
                 <T en="Dashboard" ar="لوحة التحكم" />
               </Link>
-              <NotificationBell />
+              <Link href="/notifications" className="gb-nav-link">
+                <T en="Notifications" ar="التنبيهات" />
+              </Link>
               {isVendor && (
-                <Link href="/portal/store" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
+                <Link href="/vendor" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
                   <T en="Vendor Portal" ar="بوابة التاجر" />
                 </Link>
               )}
@@ -73,14 +73,14 @@ export default function SiteHeader({
                 <span className="chevron">▾</span>
               </button>
               <div className="partner-dropdown-menu">
-                <Link href="/join/studio" className="partner-item">
+                <Link href="/owner/onboarding" className="partner-item">
                   <span className="partner-icon">🎧</span>
                   <div className="partner-text">
                     <strong><T en="Studio Owner" ar="صاحب استديو" /></strong>
                     <p><T en="List your space" ar="اعرض مساحتك" /></p>
                   </div>
                 </Link>
-                <Link href="/join/seller" className="partner-item">
+                <Link href="/vendor-signup" className="partner-item">
                   <div className="partner-icon">📦</div>
                   <div className="partner-text">
                     <strong><T en="Gear Vendor" ar="تاجر معدات" /></strong>

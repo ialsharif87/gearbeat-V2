@@ -7,10 +7,18 @@ const footerColumns = [
     titleAr: "استكشف",
     links: [
       { href: "/studios", en: "Browse studios", ar: "تصفح الاستوديوهات" },
-      { href: "/services", en: "Book Services", ar: "احجز خدمة" },
       { href: "/marketplace", en: "Marketplace", ar: "السوق" },
       { href: "/about", en: "About GearBeat", ar: "من نحن" },
       { href: "/support", en: "Support", ar: "الدعم" },
+    ],
+  },
+  {
+    titleEn: "For Studios",
+    titleAr: "لأصحاب الاستوديوهات",
+    links: [
+      { href: "/signup", en: "List your studio", ar: "أضف استوديوك" },
+      { href: "/owner", en: "Owner dashboard", ar: "لوحة المالك" },
+      { href: "/support", en: "Partner support", ar: "دعم الشركاء" },
     ],
   },
   {
@@ -34,9 +42,9 @@ export default function Footer() {
           <div className="gb-footer-brand">
             <Link href="/" aria-label="GearBeat Home" className="gb-footer-logo-link">
               <img
-                src="/brand/logo-horizontal.svg"
+                src="/brand/logo-horizontal-ai.png"
                 alt="GearBeat"
-                style={{ height: 40, width: 'auto' }}
+                className="gb-footer-logo"
               />
             </Link>
 
@@ -84,9 +92,9 @@ export default function Footer() {
         <div className="gb-footer-middle">
           <div className="gb-footer-card">
             <img
-              src="/brand/logo-mark.svg"
+              src="/brand/logo-mark-ai.png"
               alt=""
-              style={{ height: 32, width: 'auto' }}
+              className="gb-footer-mark"
             />
 
             <div>
@@ -106,6 +114,10 @@ export default function Footer() {
             <Link href="/studios" className="gb-footer-primary-button">
               <T en="Browse studios" ar="تصفح الاستوديوهات" />
             </Link>
+
+            <Link href="/signup" className="gb-footer-ghost-button">
+              <T en="List your studio" ar="أضف استوديوك" />
+            </Link>
           </div>
         </div>
 
@@ -114,15 +126,6 @@ export default function Footer() {
             © {currentYear} GearBeat.{" "}
             <T en="All rights reserved." ar="جميع الحقوق محفوظة." />
           </p>
-
-          <div style={{ marginTop: 8, display: "flex", gap: 16, justifyContent: "center", opacity: 0.8 }}>
-            <Link href="/join/studio" style={{ color: "var(--gb-muted)", fontSize: "0.75rem", textDecoration: "none" }}>
-              <T en="List your studio" ar="سجّل استوديوك" />
-            </Link>
-            <Link href="/join/seller" style={{ color: "var(--gb-muted)", fontSize: "0.75rem", textDecoration: "none" }}>
-              <T en="Sell on GearBeat" ar="بع على GearBeat" />
-            </Link>
-          </div>
 
           <div className="gb-footer-legal">
             <Link href="/support">
