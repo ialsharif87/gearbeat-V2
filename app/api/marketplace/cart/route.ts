@@ -165,3 +165,55 @@ export async function GET() {
     );
   }
 }
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { sync_items } = body;
+
+    if (!Array.isArray(sync_items)) {
+      return NextResponse.json({ error: "Invalid sync_items." }, { status: 400 });
+    }
+
+    const supabaseAdmin = createAdminClient();
+    const cart = await ensureActiveCart({ supabaseAdmin, authUserId: user.id });
+
+    // Clear existing cart items for this sync
+    // In a production app, you might want to merge instead of clear
+    await supabaseAdmin
+      .from("marketplace_cart_items")
+      .delete()
+      .eq("cart_id", cart.id)
+      .eq("auth_user_id", user.id);
+
+    if (sync_items.length > 0) {
+      const itemsToInsert = sync_items.map((item: any) => ({
+        cart_id: cart.id,
+        auth_user_id: user.id,
+        product_id: item.productId,
+        variant_id: item.variantId || null,
+        quantity: item.quantity,
+        currency_code: "SAR",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+
+      const { error: insertError } = await supabaseAdmin
+        .from("marketplace_cart_items")
+        .insert(itemsToInsert);
+
+      if (insertError) throw new Error(insertError.message);
+    }
+
+    return NextResponse.json({ ok: true, cartId: cart.id });
+  } catch (error) {
+    console.error("Cart sync error:", error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Sync failed" }, { status: 500 });
+  }
+}
