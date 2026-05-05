@@ -34,9 +34,9 @@ export default function Footer() {
           <div className="gb-footer-brand">
             <Link href="/" aria-label="GearBeat Home" className="gb-footer-logo-link">
               <img
-                src="/brand/logo-horizontal-ai.png"
+                src="/brand/logo-horizontal.svg"
                 alt="GearBeat"
-                className="gb-footer-logo"
+                style={{ height: 40, width: 'auto' }}
               />
             </Link>
 
@@ -84,9 +84,9 @@ export default function Footer() {
         <div className="gb-footer-middle">
           <div className="gb-footer-card">
             <img
-              src="/brand/logo-mark-ai.png"
+              src="/brand/logo-mark.svg"
               alt=""
-              className="gb-footer-mark"
+              style={{ height: 32, width: 'auto' }}
             />
 
             <div>

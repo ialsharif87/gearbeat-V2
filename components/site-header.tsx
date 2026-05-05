@@ -42,9 +42,9 @@ export default function SiteHeader({
       <div className="gb-header-shell">
         <Link href="/" aria-label="GearBeat Home" className="gb-logo-link">
           <img
-            src="/brand/logo-horizontal-ai.png"
+            src="/brand/logo-horizontal.svg"
             alt="GearBeat"
-            className="gb-header-logo-image"
+            style={{ height: 40, width: 'auto' }}
           />
         </Link>
 

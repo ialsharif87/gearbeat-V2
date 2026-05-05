@@ -137,9 +137,13 @@ export default async function HomePage() {
       <div style={{ padding: '80px 40px' }}>
         <h2 style={{ fontSize: '2.5rem', marginBottom: 40 }}><T en="Top Rated Studios" ar="أفضل الاستوديوهات" /></h2>
         <div style={{ display: 'flex', gap: 24, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 20 }}>
-          {studios?.map((studio) => (
             <div key={studio.id} className="premium-card" style={{ minWidth: 350, height: 450 }}>
-              <div style={{ height: '60%', backgroundImage: `url(${studio.cover_image_url})`, backgroundSize: 'cover' }} />
+              <div style={{ 
+                height: '60%', 
+                backgroundImage: `url(${studio.cover_image_url || 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800'})`, 
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }} />
               <div style={{ padding: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <h3>{studio.name_en}</h3>
@@ -178,8 +182,12 @@ export default async function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
           {products?.map((p) => (
             <div key={p.id} className="premium-card" style={{ padding: 20 }}>
-               <div style={{ height: 200, background: 'rgba(255,255,255,0.02)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 {p.images?.[0] ? <img src={p.images[0]} style={{ maxWidth: '80%', maxHeight: '80%' }} /> : '📦'}
+               <div style={{ height: 200, background: 'rgba(255,255,255,0.02)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                 <img 
+                   src={p.images?.[0] || 'https://images.unsplash.com/photo-1558403194-611308249627?w=400'} 
+                   alt={p.name_en}
+                   style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+                 />
                </div>
                <div style={{ marginTop: 20 }}>
                  <span style={{ fontSize: '0.7rem', color: 'var(--gb-teal)', fontWeight: 900 }}>NEW DROP</span>
