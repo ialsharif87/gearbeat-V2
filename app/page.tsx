@@ -158,10 +158,10 @@ export default async function HomePage() {
       </div>
 
       {/* 6. LIVE ACTIVITY TICKER */}
-      <div style={{ background: 'var(--gb-surface-light)', padding: '20px 0', overflow: 'hidden', borderY: '1px solid #333' }}>
+      <div style={{ background: 'var(--gb-surface-light)', padding: '20px 0', overflow: 'hidden', borderTop: '1px solid #333', borderBottom: '1px solid #333' }}>
         <div style={{ display: 'flex', whiteSpace: 'nowrap', animation: 'tickerMove 30s linear infinite' }}>
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 20, marginHorizontal: 40, fontSize: '0.9rem', fontWeight: 700 }}>
+            <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 20, marginInline: 40, fontSize: '0.9rem', fontWeight: 700 }}>
               <span style={{ color: 'var(--gb-gold)' }}>●</span> أحمد حجز استديو صوت في الرياض
               <span style={{ color: 'var(--gb-teal)' }}>●</span> سارة اشترت ميكروفون Shure SM7B
               <span style={{ color: 'var(--gb-gold)' }}>●</span> فهد قام بتوثيق استديو جديد
