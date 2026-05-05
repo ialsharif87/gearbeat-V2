@@ -327,5 +327,3 @@ const labelStyle: React.CSSProperties = {
   fontWeight: 600,
   textTransform: 'uppercase'
 };
-  );
-}

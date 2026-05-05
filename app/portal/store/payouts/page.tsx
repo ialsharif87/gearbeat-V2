@@ -131,5 +131,3 @@ export default async function VendorFinancePage() {
     </main>
   );
 }
-  );
-}
