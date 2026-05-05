@@ -1,6 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
-import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +91,9 @@ export default async function AccountingPage() {
             {ledger && ledger.length > 0 ? (
               ledger.map((entry) => (
                 <tr key={entry.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
-                  <td style={tdStyle}>{format(new Date(entry.transaction_date), 'MMM dd, HH:mm')}</td>
+                  <td style={tdStyle}>
+                    {new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(entry.transaction_date))}
+                  </td>
                   <td style={tdStyle}>
                     <span style={{ fontSize: '0.75rem', color: '#555' }}>{entry.source_type}</span>
                     <div style={{ fontWeight: 600 }}>{entry.source_id.slice(0, 8)}...</div>
