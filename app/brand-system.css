@@ -1,35 +1,27 @@
-/* GearBeat Logo - clean fixed version */
+/* GearBeat Logo System */
 
 .gb-logo {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 14px;
+  gap: 16px;
   direction: ltr !important;
   text-align: left !important;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.gb-logo-mark {
-  display: block;
-  flex: 0 0 auto;
 }
 
 .gb-logo-word-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  min-width: 0;
+  line-height: 1;
 }
 
 .gb-logo-word {
-  font-family: var(--font-latin), "Space Grotesk", Inter, Arial, sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--gb-cream);
-  text-shadow: 0 0 10px rgba(244, 241, 234, 0.16);
+  font-size: 2.2rem;
 }
 
 .gb-logo-word span {
@@ -37,113 +29,23 @@
 }
 
 .gb-logo-tagline {
-  margin-top: 9px;
-  font-family: var(--font-latin), "Space Grotesk", Inter, Arial, sans-serif;
+  margin-top: 8px;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  letter-spacing: 0.42em;
+  letter-spacing: 0.4em;
   color: var(--gb-copper);
+  font-size: 0.65rem;
 }
 
-/* Sizes */
+/* SIZES */
+.gb-logo-lg .gb-logo-word { font-size: 3.2rem; }
+.gb-logo-lg .gb-logo-tagline { font-size: 0.85rem; }
 
-.gb-logo-sm .gb-logo-mark {
-  width: 46px;
-  height: 46px;
-}
+.gb-logo-sm .gb-logo-word { font-size: 1.5rem; }
+.gb-logo-sm .gb-logo-tagline { display: none; }
 
-.gb-logo-sm .gb-logo-word {
-  font-size: 26px;
-}
-
-.gb-logo-sm .gb-logo-tagline {
-  font-size: 7px;
-}
-
-.gb-logo-md .gb-logo-mark {
-  width: 66px;
-  height: 66px;
-}
-
-.gb-logo-md .gb-logo-word {
-  font-size: 38px;
-}
-
-.gb-logo-md .gb-logo-tagline {
-  font-size: 9px;
-}
-
-.gb-logo-lg .gb-logo-mark {
-  width: 92px;
-  height: 92px;
-}
-
-.gb-logo-lg .gb-logo-word {
-  font-size: 54px;
-}
-
-.gb-logo-lg .gb-logo-tagline {
-  font-size: 12px;
-}
-
-/* Light background option */
-
-.gb-logo-light .gb-logo-word {
-  color: #0b0f16;
-  text-shadow: none;
-}
-
-/* Header logo sizing */
-
-.gb-logo-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  line-height: 0;
-  text-decoration: none;
-  direction: ltr !important;
-}
-
-.gb-header-logo .gb-logo-md .gb-logo-mark {
-  width: 58px;
-  height: 58px;
-}
-
-.gb-header-logo .gb-logo-md .gb-logo-word {
-  font-size: 34px;
-}
-
-.gb-header-logo .gb-logo-md .gb-logo-tagline {
-  font-size: 7.5px;
-  letter-spacing: 0.38em;
-  margin-top: 7px;
-}
-
-@media (max-width: 900px) {
-  .gb-header-logo .gb-logo-md .gb-logo-mark {
-    width: 52px;
-    height: 52px;
-  }
-
-  .gb-header-logo .gb-logo-md .gb-logo-word {
-    font-size: 30px;
-  }
-
-  .gb-header-logo .gb-logo-md .gb-logo-tagline {
-    font-size: 7px;
-  }
-}
-
-@media (max-width: 520px) {
-  .gb-header-logo .gb-logo-md .gb-logo-mark {
-    width: 44px;
-    height: 44px;
-  }
-
-  .gb-header-logo .gb-logo-md .gb-logo-word {
-    font-size: 25px;
-  }
-
-  .gb-header-logo .gb-logo-md .gb-logo-tagline {
-    display: none;
-  }
+/* Header & Footer specifically use Image Logos as per requirements */
+.gb-header-logo-image, .gb-footer-logo {
+  max-width: 220px;
+  object-fit: contain;
 }
