@@ -52,12 +52,8 @@ function createDefaultRules() {
 
 function normalizeRules(initialRules: AvailabilityRule[]) {
   const defaults = createDefaultRules();
-
   return defaults.map((defaultRule) => {
-    const savedRule = initialRules.find(
-      (rule) => rule.dayOfWeek === defaultRule.dayOfWeek
-    );
-
+    const savedRule = initialRules.find((rule) => rule.dayOfWeek === defaultRule.dayOfWeek);
     return savedRule || defaultRule;
   });
 }
@@ -69,13 +65,8 @@ export default function StudioAvailabilityManager({
   initialExceptions,
 }: StudioAvailabilityManagerProps) {
   const router = useRouter();
-
-  const [rules, setRules] = useState<AvailabilityRule[]>(
-    normalizeRules(initialRules)
-  );
-
-  const [exceptions, setExceptions] =
-    useState<AvailabilityException[]>(initialExceptions);
+  const [rules, setRules] = useState<AvailabilityRule[]>(normalizeRules(initialRules));
+  const [exceptions, setExceptions] = useState<AvailabilityException[]>(initialExceptions);
 
   const [newExceptionDate, setNewExceptionDate] = useState("");
   const [newExceptionReason, setNewExceptionReason] = useState("");
@@ -88,43 +79,25 @@ export default function StudioAvailabilityManager({
   const [errorMessage, setErrorMessage] = useState("");
 
   const sortedExceptions = useMemo(() => {
-    return [...exceptions].sort((a, b) =>
-      a.exceptionDate.localeCompare(b.exceptionDate)
-    );
+    return [...exceptions].sort((a, b) => a.exceptionDate.localeCompare(b.exceptionDate));
   }, [exceptions]);
 
-  function updateRule(
-    dayOfWeek: number,
-    key: keyof AvailabilityRule,
-    value: string | number | boolean
-  ) {
-    setRules((currentRules) =>
-      currentRules.map((rule) =>
-        rule.dayOfWeek === dayOfWeek ? { ...rule, [key]: value } : rule
-      )
-    );
+  function updateRule(dayOfWeek: number, key: keyof AvailabilityRule, value: any) {
+    setRules((current) => current.map((rule) => (rule.dayOfWeek === dayOfWeek ? { ...rule, [key]: value } : rule)));
   }
 
   function addException() {
     setErrorMessage("");
-    setMessage("");
-
     if (!newExceptionDate) {
       setErrorMessage("Select an exception date first.");
       return;
     }
-
-    const alreadyExists = exceptions.some(
-      (exception) => exception.exceptionDate === newExceptionDate
-    );
-
-    if (alreadyExists) {
+    if (exceptions.some((e) => e.exceptionDate === newExceptionDate)) {
       setErrorMessage("This date already has an exception.");
       return;
     }
-
-    setExceptions((currentExceptions) => [
-      ...currentExceptions,
+    setExceptions((curr) => [
+      ...curr,
       {
         exceptionDate: newExceptionDate,
         isClosed: newExceptionIsClosed,
@@ -133,335 +106,226 @@ export default function StudioAvailabilityManager({
         reason: newExceptionReason,
       },
     ]);
-
     setNewExceptionDate("");
     setNewExceptionReason("");
-    setNewExceptionIsClosed(true);
-    setNewExceptionOpenTime("09:00");
-    setNewExceptionCloseTime("18:00");
-  }
-
-  function removeException(exceptionDate: string) {
-    setExceptions((currentExceptions) =>
-      currentExceptions.filter(
-        (exception) => exception.exceptionDate !== exceptionDate
-      )
-    );
   }
 
   async function saveAvailability() {
     setIsSaving(true);
     setMessage("");
     setErrorMessage("");
-
     try {
-      const response = await fetch("/api/portal/studios/availability/update", {
+      const res = await fetch("/api/portal/studios/availability/update", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studioId,
-          rules,
-          exceptions,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studioId, rules, exceptions }),
       });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        setErrorMessage(result?.error || "Could not save availability.");
-        return;
-      }
-
+      if (!res.ok) throw new Error("Could not save availability.");
       setMessage("Availability saved successfully.");
       router.refresh();
-    } catch {
-      setErrorMessage("Could not save availability.");
+    } catch (err: any) {
+      setErrorMessage(err.message);
     } finally {
       setIsSaving(false);
     }
   }
 
   return (
-    <section className="gb-card">
-      <div className="gb-card-header">
+    <div style={{ display: 'grid', gap: '40px' }}>
+      {/* Header & Save Action */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#111', padding: '24px 32px', borderRadius: '20px', border: '1px solid #222' }}>
         <div>
-          <p className="gb-eyebrow">
-            <T en="Availability" ar="التوافر" />
-          </p>
-          <h2>{studioName}</h2>
-          <p className="gb-muted-text">
-            <T
-              en="Manage working hours, closed days, booking slots, and special date exceptions for your studios."
-              ar="أدر ساعات العمل والأيام المغلقة وفترات الحجز والاستثناءات الخاصة."
-            />
+          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>{studioName}</h2>
+          <p style={{ margin: '4px 0 0', color: '#666', fontSize: '0.9rem' }}>
+            <T en="Configure your weekly operating schedule." ar="قم بتهيئة جدول تشغيلك الأسبوعي." />
           </p>
         </div>
-
-        <button
-          type="button"
-          className="gb-button"
-          onClick={saveAvailability}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <T en="Saving..." ar="جاري الحفظ..." />
-          ) : (
-            <T en="Save availability" ar="حفظ التوافر" />
-          )}
+        <button className="gb-button" onClick={saveAvailability} disabled={isSaving}>
+          {isSaving ? <T en="Saving..." ar="جاري الحفظ..." /> : <T en="Save Changes" ar="حفظ التغييرات" />}
         </button>
       </div>
 
-      {message ? <p className="gb-success-text">{message}</p> : null}
-      {errorMessage ? <p className="gb-error-text">{errorMessage}</p> : null}
+      {message && <p style={{ color: '#22c55e', textAlign: 'center', fontWeight: 600 }}>{message}</p>}
+      {errorMessage && <p style={{ color: '#ef4444', textAlign: 'center', fontWeight: 600 }}>{errorMessage}</p>}
 
-      <div className="gb-table-wrap" style={{ overflowX: 'auto' }}>
-        <table className="gb-table">
-          <thead>
-            <tr>
-              <th>
-                <T en="Day" ar="اليوم" />
-              </th>
-              <th>
-                <T en="Open" ar="مفتوح" />
-              </th>
-              <th>
-                <T en="Open time" ar="وقت الفتح" />
-              </th>
-              <th>
-                <T en="Close time" ar="وقت الإغلاق" />
-              </th>
-              <th>
-                <T en="Slot minutes" ar="مدة الفترة" />
-              </th>
-              <th>
-                <T en="Buffer minutes" ar="وقت الفاصل" />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rules.map((rule) => {
-              const day = days.find((item) => item.value === rule.dayOfWeek);
-
-              return (
-                <tr key={rule.dayOfWeek}>
-                  <td>{day?.label || rule.dayOfWeek}</td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={rule.isOpen}
-                      onChange={(event) =>
-                        updateRule(
-                          rule.dayOfWeek,
-                          "isOpen",
-                          event.target.checked
-                        )
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="time"
-                      value={rule.openTime}
-                      disabled={!rule.isOpen}
-                      onChange={(event) =>
-                        updateRule(
-                          rule.dayOfWeek,
-                          "openTime",
-                          event.target.value
-                        )
-                      }
-                      className="gb-input"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="time"
-                      value={rule.closeTime}
-                      disabled={!rule.isOpen}
-                      onChange={(event) =>
-                        updateRule(
-                          rule.dayOfWeek,
-                          "closeTime",
-                          event.target.value
-                        )
-                      }
-                      className="gb-input"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min={15}
-                      max={720}
-                      value={rule.slotMinutes}
-                      disabled={!rule.isOpen}
-                      onChange={(event) =>
-                        updateRule(
-                          rule.dayOfWeek,
-                          "slotMinutes",
-                          Number(event.target.value)
-                        )
-                      }
-                      className="gb-input"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      max={240}
-                      value={rule.bufferMinutes}
-                      disabled={!rule.isOpen}
-                      onChange={(event) =>
-                        updateRule(
-                          rule.dayOfWeek,
-                          "bufferMinutes",
-                          Number(event.target.value)
-                        )
-                      }
-                      className="gb-input"
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="gb-section-divider" style={{ margin: '24px 0', borderTop: '1px solid rgba(255,255,255,0.1)' }} />
-
-      <div className="gb-card-header">
-        <div>
-          <p className="gb-eyebrow">
-            <T en="Date exceptions" ar="استثناءات التواريخ" />
-          </p>
-          <h3>
-            <T en="Closed dates or special hours" ar="تواريخ مغلقة أو ساعات خاصة" />
+      {/* Weekly Rules Grid */}
+      <section>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ width: '4px', height: '24px', background: 'var(--gb-gold)', borderRadius: '2px' }} />
+          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
+            <T en="Weekly Schedule" ar="الجدول الأسبوعي" />
           </h3>
-          <p className="gb-muted-text">
-            <T
-              en="Use this for holidays, private events, maintenance, or special working hours."
-              ar="استخدم هذا للأجازات أو الفعاليات الخاصة أو الصيانة أو ساعات العمل الخاصة."
-            />
-          </p>
         </div>
-      </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+          {rules.map((rule) => {
+            const dayLabel = days.find((d) => d.value === rule.dayOfWeek)?.label;
+            return (
+              <div key={rule.dayOfWeek} style={{ 
+                background: rule.isOpen ? '#111' : '#0a0a0a', 
+                border: '1px solid #1e1e1e', 
+                borderRadius: '24px', 
+                padding: '24px',
+                opacity: rule.isOpen ? 1 : 0.6,
+                transition: 'all 0.3s'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>{dayLabel}</span>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#888' }}>{rule.isOpen ? <T en="Open" ar="مفتوح" /> : <T en="Closed" ar="مغلق" />}</span>
+                    <input 
+                      type="checkbox" 
+                      checked={rule.isOpen} 
+                      onChange={(e) => updateRule(rule.dayOfWeek, "isOpen", e.target.checked)}
+                      style={{ width: '20px', height: '20px', accentColor: 'var(--gb-gold)' }}
+                    />
+                  </label>
+                </div>
 
-      <div className="gb-form-grid" style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: '24px' }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span>Date</span>
-          <input
-            type="date"
-            value={newExceptionDate}
-            onChange={(event) => setNewExceptionDate(event.target.value)}
-            className="gb-input"
-          />
-        </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <label style={labelStyle}><T en="From" ar="من" /></label>
+                    <input 
+                      type="time" 
+                      className="gb-input" 
+                      value={rule.openTime} 
+                      disabled={!rule.isOpen}
+                      onChange={(e) => updateRule(rule.dayOfWeek, "openTime", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}><T en="To" ar="إلى" /></label>
+                    <input 
+                      type="time" 
+                      className="gb-input" 
+                      value={rule.closeTime} 
+                      disabled={!rule.isOpen}
+                      onChange={(e) => updateRule(rule.dayOfWeek, "closeTime", e.target.value)}
+                    />
+                  </div>
+                </div>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span>Closed all day</span>
-          <input
-            type="checkbox"
-            checked={newExceptionIsClosed}
-            onChange={(event) => setNewExceptionIsClosed(event.target.checked)}
-          />
-        </label>
-
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span>Open time</span>
-          <input
-            type="time"
-            value={newExceptionOpenTime}
-            disabled={newExceptionIsClosed}
-            onChange={(event) => setNewExceptionOpenTime(event.target.value)}
-            className="gb-input"
-          />
-        </label>
-
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span>Close time</span>
-          <input
-            type="time"
-            value={newExceptionCloseTime}
-            disabled={newExceptionIsClosed}
-            onChange={(event) => setNewExceptionCloseTime(event.target.value)}
-            className="gb-input"
-          />
-        </label>
-
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span>
-            <T en="Reason" ar="السبب" />
-          </span>
-          <input
-            type="text"
-            value={newExceptionReason}
-            onChange={(event) => setNewExceptionReason(event.target.value)}
-            placeholder="..."
-            className="gb-input"
-          />
-        </label>
-
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-          <button type="button" className="gb-button" onClick={addException}>
-            <T en="Add exception" ar="إضافة استثناء" />
-          </button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}><T en="Slot (min)" ar="الفترة" /></label>
+                    <input 
+                      type="number" 
+                      className="gb-input" 
+                      value={rule.slotMinutes} 
+                      disabled={!rule.isOpen}
+                      onChange={(e) => updateRule(rule.dayOfWeek, "slotMinutes", Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}><T en="Buffer" ar="فاصل" /></label>
+                    <input 
+                      type="number" 
+                      className="gb-input" 
+                      value={rule.bufferMinutes} 
+                      disabled={!rule.isOpen}
+                      onChange={(e) => updateRule(rule.dayOfWeek, "bufferMinutes", Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      </section>
 
-      {sortedExceptions.length > 0 ? (
-        <div className="gb-table-wrap" style={{ overflowX: 'auto' }}>
-          <table className="gb-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Hours</th>
-                <th>Reason</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedExceptions.map((exception) => (
-                <tr key={exception.exceptionDate}>
-                  <td>{exception.exceptionDate}</td>
-                  <td>
-                    {exception.isClosed ? (
-                      <T en="Closed" ar="مغلق" />
-                    ) : (
-                      <T en="Special hours" ar="ساعات خاصة" />
-                    )}
-                  </td>
-                  <td>
-                    {exception.isClosed ? (
-                      <T en="Closed all day" ar="مغلق طوال اليوم" />
-                    ) : (
-                      `${exception.openTime} - ${exception.closeTime}`
-                    )}
-                  </td>
-                  <td>{exception.reason || "-"}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="gb-button gb-button-small gb-button-secondary"
-                      onClick={() => removeException(exception.exceptionDate)}
+      {/* Exceptions Section */}
+      <section>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ width: '4px', height: '24px', background: '#3b82f6', borderRadius: '2px' }} />
+          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
+            <T en="Exceptions & Holidays" ar="الاستثناءات والعطلات" />
+          </h3>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '32px' }}>
+          {/* List of Exceptions */}
+          <div style={{ background: '#111', borderRadius: '24px', border: '1px solid #1e1e1e', padding: '32px' }}>
+            {sortedExceptions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#555' }}>
+                <T en="No exceptions scheduled." ar="لا توجد استثناءات مجدولة." />
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: '12px' }}>
+                {sortedExceptions.map((ex) => (
+                  <div key={ex.exceptionDate} style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    padding: '16px 20px', 
+                    background: '#0a0a0a', 
+                    borderRadius: '16px', 
+                    border: '1px solid #222' 
+                  }}>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>{ex.exceptionDate}</div>
+                      <div style={{ fontSize: '0.85rem', color: ex.isClosed ? '#ef4444' : '#22c55e' }}>
+                        {ex.isClosed ? <T en="Closed All Day" ar="مغلق طوال اليوم" /> : `${ex.openTime} - ${ex.closeTime}`}
+                        {ex.reason && <span style={{ color: '#555', marginLeft: '8px' }}>• {ex.reason}</span>}
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setExceptions(curr => curr.filter(e => e.exceptionDate !== ex.exceptionDate))}
+                      style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer' }}
                     >
                       Remove
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add Exception Form */}
+          <div style={{ background: '#111', borderRadius: '24px', border: '1px solid #1e1e1e', padding: '32px' }}>
+            <h4 style={{ margin: '0 0 20px', fontSize: '1.1rem' }}><T en="Add New Exception" ar="إضافة استثناء جديد" /></h4>
+            <div style={{ display: 'grid', gap: '16px' }}>
+              <div>
+                <label style={labelStyle}><T en="Date" ar="التاريخ" /></label>
+                <input type="date" className="gb-input" value={newExceptionDate} onChange={(e) => setNewExceptionDate(e.target.value)} />
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={newExceptionIsClosed} onChange={(e) => setNewExceptionIsClosed(e.target.checked)} />
+                <span style={{ fontSize: '0.9rem' }}><T en="Closed all day" ar="مغلق طوال اليوم" /></span>
+              </label>
+              {!newExceptionIsClosed && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}><T en="From" ar="من" /></label>
+                    <input type="time" className="gb-input" value={newExceptionOpenTime} onChange={(e) => setNewExceptionOpenTime(e.target.value)} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}><T en="To" ar="إلى" /></label>
+                    <input type="time" className="gb-input" value={newExceptionCloseTime} onChange={(e) => setNewExceptionCloseTime(e.target.value)} />
+                  </div>
+                </div>
+              )}
+              <div>
+                <label style={labelStyle}><T en="Reason (optional)" ar="السبب (اختياري)" /></label>
+                <input type="text" className="gb-input" value={newExceptionReason} onChange={(e) => setNewExceptionReason(e.target.value)} placeholder="..." />
+              </div>
+              <button className="gb-button" style={{ width: '100%' }} onClick={addException}>
+                <T en="Add Exception" ar="إضافة" />
+              </button>
+            </div>
+          </div>
         </div>
-      ) : (
-        <p className="gb-muted-text">
-          <T en="No exceptions added yet" ar="لا توجد استثناءات بعد" />
-        </p>
-      )}
-    </section>
+      </section>
+    </div>
+  );
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.75rem',
+  color: '#666',
+  marginBottom: '4px',
+  fontWeight: 600,
+  textTransform: 'uppercase'
+};
   );
 }

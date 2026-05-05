@@ -1,295 +1,131 @@
 import Link from "next/link";
-import OwnerFinanceReport, {
-  type OwnerFinanceRow,
-} from "@/components/owner-finance-report";
 import { createClient } from "@/lib/supabase/server";
+import T from "@/components/t";
+import PremiumFinanceDashboard from "@/components/premium-finance-dashboard";
 import {
   requireOwnerOrRedirect,
   readNumber,
   readText,
   type DbRow,
 } from "@/lib/auth-guards";
-import T from "@/components/t";
 
 export const dynamic = "force-dynamic";
 
-type CommissionSetting = {
-  scopeType: string;
-  scopeId: string;
-  commissionRate: number;
-  isActive: boolean;
-};
+async function fetchBalance(supabase: any, ownerId: string) {
+  const { data } = await supabase
+    .from("finance_ledger")
+    .select("amount")
+    .eq("entry_group", "payable")
+    .eq("partner_type", "studio_owner")
+    .eq("partner_id", ownerId)
+    .in("status", ["pending", "posted"]);
 
-function normalizeCommission(row: DbRow): CommissionSetting {
-  return {
-    scopeType: readText(row, ["scope_type"]),
-    scopeId: readText(row, ["scope_id"]),
-    commissionRate: readNumber(row, ["commission_rate"], 15),
-    isActive: Boolean(row.is_active),
-  };
+  return (data || []).reduce((sum: number, row: any) => sum + Number(row.amount || 0), 0);
 }
 
-function getCommissionRate(
-  settings: CommissionSetting[],
-  options: {
-    studioId?: string;
-  }
-) {
-  const activeSettings = settings.filter((setting) => setting.isActive);
-
-  if (options.studioId) {
-    const studioRule = activeSettings.find(
-      (setting) =>
-        setting.scopeType === "studio" && setting.scopeId === options.studioId
-    );
-
-    if (studioRule) return studioRule.commissionRate;
-  }
-
-  const studioBookingRule = activeSettings.find(
-    (setting) =>
-      setting.scopeType === "service_type" &&
-      setting.scopeId === "studio_booking"
-  );
-
-  if (studioBookingRule) return studioBookingRule.commissionRate;
-
-  const globalRule = activeSettings.find(
-    (setting) => setting.scopeType === "global"
-  );
-
-  return globalRule?.commissionRate || 15;
-}
-
-async function fetchCommissionSettings(
-  supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<CommissionSetting[]> {
-  const { data, error } = await supabase
-    .from("commission_settings")
-    .select("*");
-
-  if (error || !data) {
-    return [];
-  }
-
-  return (data as DbRow[]).map(normalizeCommission);
-}
-
-async function fetchOwnedStudios(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  ownerId: string
-): Promise<DbRow[]> {
-  const ownerColumnCandidates = [
-    "owner_auth_user_id",
-    "owner_id",
-    "user_id",
-    "created_by",
-    "profile_id",
-  ];
-
-  for (const ownerColumn of ownerColumnCandidates) {
-    const { data, error } = await supabase
-      .from("studios")
-      .select("*")
-      .eq(ownerColumn, ownerId)
-      .order("created_at", { ascending: false });
-
-    if (!error && data && data.length > 0) {
-      return data as DbRow[];
-    }
-  }
-
-  return [];
-}
-
-async function fetchBookingsForStudios(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  studioIds: string[]
-): Promise<DbRow[]> {
-  if (studioIds.length === 0) {
-    return [];
-  }
-
-  const { data, error } = await supabase
-    .from("bookings")
+async function fetchTransactions(supabase: any, ownerId: string) {
+  const { data: ledger } = await supabase
+    .from("finance_ledger")
     .select("*")
-    .in("studio_id", studioIds)
-    .order("created_at", { ascending: false })
-    .limit(500);
+    .eq("partner_type", "studio_owner")
+    .eq("partner_id", ownerId)
+    .order("transaction_date", { ascending: false })
+    .limit(50);
 
-  if (error || !data) {
-    return [];
-  }
-
-  return data as DbRow[];
-}
-
-async function fetchPaymentSessionsByBookingId(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  bookingIds: string[]
-): Promise<Map<string, DbRow>> {
-  const map = new Map<string, DbRow>();
-
-  if (bookingIds.length === 0) {
-    return map;
-  }
-
-  const { data, error } = await supabase
-    .from("checkout_payment_sessions")
-    .select("*")
-    .in("booking_id", bookingIds);
-
-  if (error || !data) {
-    return map;
-  }
-
-  for (const session of data as DbRow[]) {
-    const bookingId = readText(session, ["booking_id"]);
-
-    if (bookingId) {
-      map.set(bookingId, session);
+  const grouped = (ledger || []).reduce((acc: any, row: any) => {
+    const id = row.source_id;
+    if (!acc[id]) {
+      acc[id] = { id, label: row.source_label || id.slice(0, 8), gross: 0, commission: 0, net: 0, date: row.transaction_date };
     }
-  }
+    
+    const amount = Number(row.amount);
+    if (row.entry_type === "customer_payment") acc[id].gross += amount;
+    if (row.entry_type === "platform_commission") acc[id].commission += amount;
+    if (row.entry_type === "owner_payable") acc[id].net += amount;
+    
+    return acc;
+  }, {});
 
-  return map;
+  return Object.values(grouped).map((t: any) => ({
+    id: t.id,
+    label: t.label,
+    gross_amount: t.gross,
+    commission_amount: t.commission,
+    net_amount: t.net,
+    status: "posted",
+    created_at: t.date
+  }));
 }
 
-function normalizeBookingRow(
-  booking: DbRow,
-  studio: DbRow | undefined,
-  paymentSession: DbRow | undefined,
-  settings: CommissionSetting[]
-): OwnerFinanceRow {
-  const id = readText(booking, ["id"]);
-  const studioId = readText(booking, ["studio_id"]);
+async function fetchPayoutRequests(supabase: any, ownerId: string) {
+  const { data } = await supabase
+    .from("payout_requests")
+    .select("*")
+    .eq("partner_type", "studio_owner")
+    .eq("partner_id", ownerId)
+    .order("created_at", { ascending: false });
 
-  const studioName = readText(
-    studio,
-    ["name", "title", "studio_name"],
-    "Studio"
-  );
-
-  const grossAmount = readNumber(booking, [
-    "total_amount",
-    "total_price",
-    "amount",
-    "price",
-    "subtotal",
-  ]);
-
-  const commissionRate = getCommissionRate(settings, {
-    studioId,
-  });
-
-  const commissionAmount = grossAmount * (commissionRate / 100);
-  const netPayable = grossAmount - commissionAmount;
-
-  const paymentStatus =
-    readText(booking, ["payment_status", "payment_state"]) ||
-    readText(paymentSession, ["status", "payment_status"]) ||
-    "pending";
-
-  const startTime = readText(booking, [
-    "start_time",
-    "starts_at",
-    "booking_start",
-    "start_at",
-    "date",
-  ]);
-
-  const endTime = readText(booking, [
-    "end_time",
-    "ends_at",
-    "booking_end",
-    "end_at",
-  ]);
-
-  return {
-    id,
-    studioId,
-    studioName,
-    bookingLabel: readText(booking, ["booking_number", "reference", "id"], "Booking"),
-    grossAmount,
-    commissionRate,
-    commissionAmount,
-    netPayable,
-    currency: readText(booking, ["currency"], "SAR"),
-    paymentStatus,
-    bookingStatus: readText(booking, ["status"], "unknown"),
-    startTime,
-    endTime,
-    createdAt: readText(booking, ["created_at"]),
-  };
+  return data || [];
 }
 
 export default async function OwnerFinancePage() {
   const supabase = await createClient();
-
   const { user } = await requireOwnerOrRedirect(supabase);
 
-  const [settings, studios] = await Promise.all([
-    fetchCommissionSettings(supabase),
-    fetchOwnedStudios(supabase, user.id),
+  const [balance, transactions, requests] = await Promise.all([
+    fetchBalance(supabase, user.id),
+    fetchTransactions(supabase, user.id),
+    fetchPayoutRequests(supabase, user.id),
   ]);
 
-  const studiosById = new Map<string, DbRow>();
-
-  for (const studio of studios) {
-    const studioId = readText(studio, ["id"]);
-
-    if (studioId) {
-      studiosById.set(studioId, studio);
-    }
-  }
-
-  const studioIds = Array.from(studiosById.keys());
-  const bookings = await fetchBookingsForStudios(supabase, studioIds);
-
-  const bookingIds = bookings
-    .map((booking) => readText(booking, ["id"]))
-    .filter(Boolean) as string[];
-
-  const paymentSessionsByBookingId = await fetchPaymentSessionsByBookingId(
-    supabase,
-    bookingIds
-  );
-
-  const rows = bookings.map((booking) => {
-    const bookingId = readText(booking, ["id"]);
-    const studioId = readText(booking, ["studio_id"]);
-
-    return normalizeBookingRow(
-      booking,
-      studiosById.get(studioId),
-      paymentSessionsByBookingId.get(bookingId),
-      settings
-    );
-  });
-
   return (
-    <main className="gb-dashboard-page">
-      <section className="gb-dashboard-header">
+    <main 
+      className="gb-dashboard-page" 
+      style={{ 
+        background: 'linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%)', 
+        minHeight: '100vh', 
+        padding: '40px',
+        color: '#fff'
+      }}
+    >
+      <section style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <p className="gb-eyebrow">
-            <T en="Owner Portal" ar="بوابة المالك" />
-          </p>
-          <h1>
-            <T en="Finance" ar="المالية" />
+          <span className="gb-dash-badge" style={{ background: 'rgba(207, 168, 110, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)', marginBottom: '16px' }}>
+            <T en="Owner Finance" ar="مالية المالك" />
+          </span>
+          <h1 style={{ fontSize: '3rem', fontWeight: 900, margin: '8px 0 0', color: 'white', letterSpacing: '-1px' }}>
+            <T en="Studio Earnings" ar="أرباح الاستوديو" />
           </h1>
-          <p className="gb-muted-text">
-            <T
-              en="Track your studio booking revenue, GearBeat commission, and estimated net payable balance."
-              ar="تابع إيرادات حجوزات استوديوك وعمولة GearBeat والرصيد الصافي المستحق."
-            />
+          <p style={{ color: "#888", fontSize: '1.1rem', marginTop: '12px', maxWidth: '600px', lineHeight: 1.6 }}>
+            <T en="Detailed overview of your studio bookings revenue, platform fees, and withdrawal management." ar="نظرة عامة مفصلة على إيرادات حجوزات الاستوديو، رسوم المنصة، وإدارة سحب الأرباح." />
           </p>
         </div>
 
-        <Link href="/portal/studio" className="gb-button gb-button-secondary">
-          <T en="Back" ar="رجوع" />
+        <Link 
+          href="/portal/studio" 
+          style={{ 
+            color: '#fff', 
+            textDecoration: 'none', 
+            fontSize: '0.95rem',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid #222',
+            padding: '12px 24px',
+            borderRadius: '12px',
+            fontWeight: 600,
+            transition: 'all 0.2s'
+          }}
+        >
+          ← <T en="Back to Dashboard" ar="العودة للوحة التحكم" />
         </Link>
       </section>
 
-      <OwnerFinanceReport rows={rows} />
+      <PremiumFinanceDashboard 
+        partnerType="studio_owner"
+        availableBalance={balance}
+        currency="SAR"
+        transactions={transactions}
+        payoutRequests={requests}
+      />
     </main>
   );
 }
