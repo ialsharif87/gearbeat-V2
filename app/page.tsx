@@ -20,8 +20,7 @@ export default async function HomePage() {
       {/* 1. STICKY HEADER (Glass Morphism) */}
       <header className="glass-nav" style={{ padding: '16px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="logo-section">
-           {/* Logo exists in project - using a placeholder for height representation */}
-           <div style={{ height: 40, width: 120, background: 'var(--gb-gold)', borderRadius: 8, opacity: 0.1 }}>LOGO</div>
+           <img src="/brand/logo-horizontal.svg" alt="GearBeat Logo" style={{ height: 45, width: 'auto' }} />
         </div>
         <nav style={{ display: 'flex', gap: 32, fontSize: '1rem', fontWeight: 700 }}>
           <Link href="/"><T en="Home" ar="الرئيسية" /></Link>
@@ -252,7 +251,7 @@ export default async function HomePage() {
       <footer style={{ padding: '80px 40px', background: '#05070A', borderTop: '1px solid #1a1a1a' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 60 }}>
           <div>
-            <div style={{ height: 40, width: 120, background: 'var(--gb-gold)', borderRadius: 8, opacity: 0.1, marginBottom: 20 }}>LOGO</div>
+            <img src="/brand/logo-horizontal.svg" alt="GearBeat Logo" style={{ height: 40, width: 'auto', marginBottom: 20 }} />
             <p style={{ color: 'var(--gb-text-steel)', fontSize: '0.9rem' }}>The future of music production in the GCC. Built for creators, by creators.</p>
           </div>
           <div>
