@@ -278,7 +278,7 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-        <div style={{ marginTop: 80, pt: 40, borderTop: '1px solid #111', display: 'flex', justifyContent: 'space-between', color: 'var(--gb-text-steel)', fontSize: '0.8rem' }}>
+        <div style={{ marginTop: 80, paddingTop: 40, borderTop: '1px solid #111', display: 'flex', justifyContent: 'space-between', color: 'var(--gb-text-steel)', fontSize: '0.8rem' }}>
           <div>© 2026 GearBeat - جميع الحقوق محفوظة</div>
           <div style={{ display: 'flex', gap: 15 }}>
             💳 🍎 🛡️
