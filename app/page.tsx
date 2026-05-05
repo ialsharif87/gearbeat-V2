@@ -40,7 +40,7 @@ export default async function HomePage() {
       {/* 2. HERO SECTION */}
       <div className="hero-section" style={{ position: 'relative', padding: '120px 40px', overflow: 'hidden', minHeight: '80vh', display: 'flex', alignItems: 'center' }}>
         {/* Animated Waveform Background */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', display: 'flex', gap: 8, opacity: 0.1, zHeight: -1 }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', display: 'flex', gap: 8, opacity: 0.1, zIndex: -1 }}>
           {Array.from({ length: 40 }).map((_, i) => (
             <div key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.1}s`, height: `${Math.random() * 100 + 50}px` }} />
           ))}
