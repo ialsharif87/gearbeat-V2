@@ -43,6 +43,7 @@ export function AdminSidebar({
           <T en="Overview" ar="نظرة عامة" />
         </div>
         <NavItem href="/admin" icon="📊" labelEn="Dashboard" labelAr="لوحة التحكم" active={isActive('/admin')} />
+        <NavItem href="/admin/accounting" icon="💰" labelEn="Accounting" labelAr="المحاسبة" active={isActive('/admin/accounting')} />
 
         {/* SECTION 2: Sellers */}
         <div onClick={() => setSellersOpen(!sellersOpen)} style={collapsibleHeaderStyle}>

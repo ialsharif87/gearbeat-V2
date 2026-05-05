@@ -711,6 +711,59 @@ export async function POST(request: Request) {
       authUserId: user.id,
     });
 
+    // --- [AUTOMATED FINANCE LEDGER PROCESSING] ---
+    let financeLedgerResult = null;
+    try {
+      const sourceType = String(session.source_type || "").trim();
+      const sourceId = session.source_id;
+
+      if (sourceId && (sourceType === 'studio_booking' || sourceType === 'booking' || sourceType === 'marketplace_order' || sourceType === 'order')) {
+        let partnerId = "";
+        let partnerType: "vendor" | "studio_owner" = "vendor";
+
+        if (sourceType === 'studio_booking' || sourceType === 'booking') {
+          partnerType = "studio_owner";
+          const { data: booking } = await supabaseAdmin
+            .from("bookings")
+            .select("studio_id, studios(owner_auth_user_id)")
+            .eq("id", sourceId)
+            .maybeSingle();
+          
+          partnerId = (booking?.studios as any)?.owner_auth_user_id || "";
+        } else {
+          partnerType = "vendor";
+          const { data: orderItem } = await supabaseAdmin
+            .from("marketplace_order_items")
+            .select("vendor_id, marketplace_products(vendor_auth_user_id)")
+            .eq("order_id", sourceId)
+            .limit(1)
+            .maybeSingle();
+          
+          partnerId = (orderItem?.marketplace_products as any)?.vendor_auth_user_id || "";
+        }
+
+        if (partnerId) {
+          const { import_processFinanceLedgerAfterPayment } = await import("@/lib/finance-ledger").then(mod => ({ import_processFinanceLedgerAfterPayment: mod.processFinanceLedgerAfterPayment }));
+          financeLedgerResult = await import_processFinanceLedgerAfterPayment(supabaseAdmin, {
+            sourceType: (sourceType === 'studio_booking' || sourceType === 'booking') ? 'studio_booking' : 'marketplace_order',
+            sourceId,
+            amount,
+            currency: session.currency_code || "SAR",
+            authUserId: user.id,
+            partnerId,
+            partnerType,
+            metadata: {
+              checkout_session_id: session.id,
+              transaction_id: transaction.id
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Finance ledger auto-processing failed:", e);
+    }
+    // --- [/AUTOMATED FINANCE LEDGER PROCESSING] ---
+
     const { error: sessionUpdateError } = await supabaseAdmin
       .from("checkout_payment_sessions")
       .update({
@@ -727,6 +780,7 @@ export async function POST(request: Request) {
           source_update: sourceUpdateResult,
           coupon_redemption: couponRedemptionResult,
           loyalty_award: loyaltyAwardResult,
+          finance_ledger: financeLedgerResult,
         },
       })
       .eq("id", session.id);
