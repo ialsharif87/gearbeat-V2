@@ -1,51 +1,70 @@
-/* GearBeat Logo System */
+/* GearBeat Logo System - Premium Refinement */
 
 .gb-logo {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 18px;
   direction: ltr !important;
   text-align: left !important;
+  transition: all 0.4s ease;
+}
+
+.gb-logo:hover {
+  filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
 }
 
 .gb-logo-word-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  line-height: 1;
+  line-height: 0.9;
 }
 
 .gb-logo-word {
   font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   color: var(--gb-cream);
-  font-size: 2.2rem;
+  font-size: 2.4rem;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .gb-logo-word span {
-  color: var(--gb-gold);
+  background: linear-gradient(135deg, var(--gb-gold-bright), var(--gb-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3));
 }
 
 .gb-logo-tagline {
-  margin-top: 8px;
+  margin-top: 10px;
   font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.45em;
   color: var(--gb-copper);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
+  opacity: 0.8;
 }
 
 /* SIZES */
-.gb-logo-lg .gb-logo-word { font-size: 3.2rem; }
-.gb-logo-lg .gb-logo-tagline { font-size: 0.85rem; }
+.gb-logo-lg .gb-logo-word { font-size: 3.5rem; }
+.gb-logo-lg .gb-logo-tagline { font-size: 0.75rem; margin-top: 14px; }
 
-.gb-logo-sm .gb-logo-word { font-size: 1.5rem; }
+.gb-logo-sm .gb-logo-word { font-size: 1.6rem; }
 .gb-logo-sm .gb-logo-tagline { display: none; }
 
-/* Header & Footer specifically use Image Logos as per requirements */
+/* Image Logos - Premium Filtering */
 .gb-header-logo-image, .gb-footer-logo {
-  max-width: 220px;
+  max-width: 200px;
+  height: auto;
   object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.2));
+  transition: all 0.3s ease;
+}
+
+.gb-header-logo-image:hover {
+  filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+  transform: scale(1.02);
 }

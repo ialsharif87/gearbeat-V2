@@ -5,9 +5,10 @@ import T from "../components/t";
 export default function HomePage() {
   return (
     <section className="home-page">
+      {/* CINEMATIC HERO */}
       <div className="home-hero card">
         <div className="home-hero-content">
-          <div style={{ marginBottom: 30 }}>
+          <div style={{ marginBottom: 40 }}>
             <div className="gb-logo gb-logo-lg">
               <div className="gb-logo-word-group">
                 <span className="gb-logo-word">Gear<span>Beat</span></span>
@@ -52,26 +53,27 @@ export default function HomePage() {
             <span />
             <span />
             <span />
+            <span />
           </div>
         </div>
       </div>
 
       {/* JOIN THE ECOSYSTEM SECTION */}
       <div className="section-padding" style={{ textAlign: 'center' }}>
-        <div className="section-head">
-          <span className="badge badge-gold"><T en="Partner Ecosystem" ar="منظومة الشركاء" /></span>
-          <h2><T en="Choose your path" ar="اختر مسارك في GearBeat" /></h2>
-          <p><T en="Whether you are creating, hosting, or selling - we have a place for you." ar="سواء كنت مبدعاً، مستضيفاً، أو بائعاً - مكانك محجوز معنا." /></p>
+        <div className="section-head" style={{ marginBottom: 60 }}>
+          <span className="badge"><T en="Partner Ecosystem" ar="منظومة الشركاء" /></span>
+          <h2 style={{ fontSize: '3.5rem', marginTop: 24, letterSpacing: '-0.03em' }}><T en="Choose your path" ar="اختر مسارك في GearBeat" /></h2>
+          <p style={{ fontSize: '1.2rem', opacity: 0.7 }}><T en="Whether you are creating, hosting, or selling - we have a place for you." ar="سواء كنت مبدعاً، مستضيفاً، أو بائعاً - مكانك محجوز معنا." /></p>
         </div>
 
-        <div className="grid grid-3" style={{ marginTop: 50, gap: 30 }}>
+        <div className="grid grid-3" style={{ gap: 30 }}>
           <Link href="/signup" className="card home-join-card">
             <div className="join-icon">🎵</div>
             <h3><T en="I am a Creator" ar="أنا مبدع" /></h3>
             <p><T en="Book studios and buy gear." ar="احجز الاستديوهات واشترِ المعدات." /></p>
           </Link>
 
-          <Link href="/owner/onboarding" className="card home-join-card" style={{ border: '1px solid var(--gb-gold)' }}>
+          <Link href="/owner/onboarding" className="card home-join-card" style={{ border: '1px solid var(--gb-gold-bright)' }}>
             <div className="join-icon">🎧</div>
             <h3><T en="Studio Owner" ar="صاحب استوديو" /></h3>
             <p><T en="List and manage your space." ar="اعرض وأدر مساحتك الخاصة." /></p>
@@ -85,22 +87,21 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div style={{ height: 60 }} />
-
+      {/* TRUST SECTION */}
       <div className="card home-trust-card">
         <div>
           <span className="badge">
             <T en="Trust & Safety" ar="الثقة والأمان" />
           </span>
 
-          <h2>
+          <h2 style={{ fontSize: '3rem', margin: '30px 0', lineHeight: 1.1 }}>
             <T
               en="Built for real sessions and clear accountability."
               ar="مبنية لجلسات حقيقية ومسؤولية واضحة."
             />
           </h2>
 
-          <p>
+          <p style={{ fontSize: '1.1rem', color: 'var(--gb-muted)', lineHeight: 1.7 }}>
             <T
               en="GearBeat is designed with customer profiles, studio approval flows, and internal audit logs to support a trusted marketplace."
               ar="GearBeat صُممت بملفات عملاء، موافقات استوديو، وسجل تغييرات داخلي لدعم ماركت بليس موثوق."
@@ -109,9 +110,18 @@ export default function HomePage() {
         </div>
 
         <div className="trust-points">
-          <div><strong>01</strong><span><T en="Verified Studios" ar="استديوهات موثقة" /></span></div>
-          <div><strong>02</strong><span><T en="Secure Payments" ar="دفع آمن" /></span></div>
-          <div><strong>03</strong><span><T en="Real Reviews" ar="تقييمات حقيقية" /></span></div>
+          <div>
+            <strong>01</strong>
+            <span><T en="Verified Studios" ar="استديوهات موثقة" /></span>
+          </div>
+          <div>
+            <strong>02</strong>
+            <span><T en="Secure Payments" ar="دفع آمن" /></span>
+          </div>
+          <div>
+            <strong>03</strong>
+            <span><T en="Real Reviews" ar="تقييمات حقيقية" /></span>
+          </div>
         </div>
       </div>
     </section>
