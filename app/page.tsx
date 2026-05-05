@@ -7,302 +7,348 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const supabase = createAdminClient();
 
-  // Data Fetching
-  const [{ data: promos }, { data: products }, { data: studios }] = await Promise.all([
-    supabase.from("marketplace_promos").select("*").eq("is_active", true).order("priority", { ascending: false }),
+  const [{ data: products }, { data: studios }] = await Promise.all([
     supabase.from("marketplace_products").select("*").eq("is_active", true).limit(4),
     supabase.from("studios").select("*").eq("status", "approved").limit(6),
   ]);
 
   return (
-    <section className="premium-homepage" style={{ background: 'var(--gb-bg)', color: 'var(--gb-text-ivory)' }}>
-      
-      {/* 1. STICKY HEADER (Glass Morphism) */}
-      <header className="glass-nav" style={{ padding: '16px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="logo-section">
-           <img src="/brand/logo-horizontal.svg" alt="GearBeat Logo" style={{ height: 45, width: 'auto' }} />
-        </div>
-        <nav style={{ display: 'flex', gap: 32, fontSize: '1rem', fontWeight: 700 }}>
-          <Link href="/"><T en="Home" ar="الرئيسية" /></Link>
-          <Link href="/studios"><T en="Studios" ar="الاستوديوهات" /></Link>
-          <Link href="/gear/products"><T en="Equipment" ar="المعدات" /></Link>
-          <Link href="/services"><T en="Services" ar="الخدمات" /></Link>
-        </nav>
-        <div className="header-actions" style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          <button style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '6px 12px', borderRadius: 8, fontSize: '0.8rem' }}>EN / عربي</button>
-          <div style={{ position: 'relative' }}>
-            🛒 <span style={{ position: 'absolute', top: -8, right: -8, background: 'var(--gb-gold)', color: '#000', fontSize: '0.6rem', padding: '2px 5px', borderRadius: 10, fontWeight: 900 }}>3</span>
-          </div>
-        </div>
-      </header>
-
-      {/* 2. HERO SECTION */}
-      <div className="hero-section" style={{ position: 'relative', padding: '120px 40px', overflow: 'hidden', minHeight: '80vh', display: 'flex', alignItems: 'center' }}>
-        {/* Animated Waveform Background */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', display: 'flex', gap: 8, opacity: 0.1, zIndex: -1 }}>
-          {Array.from({ length: 40 }).map((_, i) => (
-            <div key={i} className="waveform-bar" style={{ animationDelay: `${i * 0.1}s`, height: `${Math.random() * 100 + 50}px` }} />
-          ))}
-        </div>
-        
-        <div style={{ maxWidth: 800, position: 'relative', zIndex: 1 }}>
-          <h1 className="gold-gradient" style={{ fontSize: '6rem', fontWeight: 900, lineHeight: 1.1 }}>
-            <T en="Start Your Sound" ar="ابدأ صوتك" />
-          </h1>
-          <p style={{ fontSize: '1.5rem', color: 'var(--gb-text-steel)', marginTop: 24, maxWidth: 600 }}>
+    <div className="gb-home-root">
+      {/* Hero Section */}
+      <section className="gb-hero">
+        <div className="gb-hero-overlay" />
+        <div className="gb-hero-content container">
+          <p className="gb-eyebrow">
+            <span className="gb-eyebrow-line" />
+            <T en="STUDIO. SOUND. CONNECTED." ar="استوديو. صوت. تواصل." />
+          </p>
+          <h1 className="gb-hero-title">
             <T 
-              en="World-class music ecosystem in Saudi Arabia. Rent gear, book studios, and collaborate with legends." 
-              ar="أول منظومة موسيقية عالمية في السعودية. استأجر المعدات، احجز الاستوديوهات، وتعاون مع الأساطير." 
+              en="Book premium creative studios across Saudi Arabia." 
+              ar="احجز أفخم الاستوديوهات الإبداعية في المملكة العربية السعودية." 
+            />
+          </h1>
+          <p className="gb-hero-text">
+            <T 
+              en="GearBeat connects audio creators with verified studios, clear pricing, and a smoother booking experience built for the Saudi and GCC market." 
+              ar="جير بيت يربط المبدعين باستوديوهات موثقة، بأسعار واضحة، وتجربة حجز سلسة مصممة للسوق السعودي والخليجي." 
             />
           </p>
-          <div style={{ display: 'flex', gap: 20, marginTop: 40 }}>
-            <Link href="/studios" className="btn-gold"><T en="Explore Studios" ar="استكشف الاستوديوهات" /></Link>
-            <Link href="/gear/products" className="btn-teal-outline"><T en="Browse Equipment" ar="تصفح المعدات" /></Link>
-          </div>
-          
-          {/* Floating Badges */}
-          <div style={{ display: 'flex', gap: 30, marginTop: 60 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', padding: '12px 20px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.1)' }}>
-              <span style={{ color: 'var(--gb-gold)', fontWeight: 900 }}>+500</span> <T en="Studios" ar="استوديو" />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', padding: '12px 20px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.1)' }}>
-              <span style={{ color: 'var(--gb-teal)', fontWeight: 900 }}>+10K</span> <T en="Bookings" ar="حجز ناجح" />
-            </div>
+          <div className="gb-cta-row">
+            <Link href="/studios" className="gb-button-primary">
+              <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+            </Link>
+            <Link href="/join/studio" className="gb-button-secondary">
+              <T en="List Your Studio" ar="أضف استوديوك" />
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3. CATEGORY BUBBLES */}
-      <div style={{ padding: '40px', overflowX: 'auto', display: 'flex', gap: 20, scrollbarWidth: 'none' }}>
-        {[
-          { en: "Recording", ar: "تسجيل صوتي", icon: "🎙️" },
-          { en: "Podcast", ar: "بودكاست", icon: "📱" },
-          { en: "Mix & Master", ar: "مكس وماسترنج", icon: "🎚️" },
-          { en: "Photography", ar: "تصوير", icon: "📸" },
-          { en: "Music Production", ar: "إنتاج موسيقي", icon: "🎹" },
-          { en: "Live Stream", ar: "بث مباشر", icon: "🎥" },
-          { en: "Gear Rental", ar: "تأجير معدات", icon: "🎤" },
-          { en: "Lessons", ar: "دروس خصوصية", icon: "🎸" }
-        ].map((cat, i) => (
-          <div key={i} style={{ 
-            minWidth: 160, 
-            padding: '24px', 
-            borderRadius: 24, 
-            background: 'linear-gradient(135deg, #1C2230 0%, #151A22 100%)', 
-            textAlign: 'center', 
-            border: '1px solid rgba(255,255,255,0.05)',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }} className="category-bubble">
-            <div style={{ fontSize: '2rem', marginBottom: 12 }}>{cat.icon}</div>
-            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}><T en={cat.en} ar={cat.ar} /></div>
-          </div>
-        ))}
-      </div>
-
-      {/* 4. BENTO GRID */}
-      <div style={{ padding: '80px 40px' }}>
-        <div className="bento-grid">
-          <div className="premium-card" style={{ gridColumn: 'span 2', gridRow: 'span 2', padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', backgroundImage: 'url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800)', backgroundSize: 'cover' }}>
-             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, #000, transparent)' }} />
-             <div style={{ position: 'relative' }}>
-               <span className="badge badge-gold" style={{ marginBottom: 10 }}>STUDIO OF THE MONTH</span>
-               <h2 style={{ fontSize: '2.5rem' }}>The Red Room Riyadh</h2>
-               <button className="btn-gold" style={{ marginTop: 20 }}>Book Now</button>
-             </div>
-          </div>
-          <div className="premium-card" style={{ padding: 30 }}>
-            <h3><T en="Services" ar="الخدمات" /></h3>
-            <ul style={{ listStyle: 'none', marginTop: 20, color: 'var(--gb-text-steel)', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <li>✅ Mixing & Mastering</li>
-              <li>✅ Vocal Tuning</li>
-              <li>✅ Beat Licensing</li>
-            </ul>
-          </div>
-          <div className="premium-card" style={{ padding: 30, background: 'var(--gb-teal-glow)' }}>
-            <h3><T en="Gear Showcase" ar="استعراض المعدات" /></h3>
-            <p style={{ marginTop: 10 }}>Explore the latest analog synths.</p>
-          </div>
-          <div className="premium-card" style={{ gridColumn: 'span 2', padding: 30, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h3>Featured Studio Preview</h3>
-              <p style={{ color: 'var(--gb-text-steel)' }}>High-end acoustics in Jeddah.</p>
-            </div>
-            <button className="btn-gold">Preview</button>
-          </div>
+      {/* Featured Studios */}
+      <section className="gb-section container" id="studios">
+        <div className="gb-section-header">
+          <span className="gb-section-tag"><T en="Featured Studios" ar="استوديوهات مميزة" /></span>
+          <h2><T en="Premium spaces for serious creators." ar="مساحات فاخرة للمبدعين الجادين." /></h2>
         </div>
-      </div>
 
-      {/* 5. FEATURED STUDIOS (Netflix Carousel) */}
-      <div style={{ padding: '80px 40px' }}>
-        <h2 style={{ fontSize: '2.5rem', marginBottom: 40 }}><T en="Top Rated Studios" ar="أفضل الاستوديوهات" /></h2>
-        <div style={{ display: 'flex', gap: 24, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 20 }}>
+        <div className="gb-studio-grid">
           {studios?.map((studio) => (
-            <div key={studio.id} className="premium-card" style={{ minWidth: 350, height: 450 }}>
-              <div style={{ 
-                height: '60%', 
-                backgroundImage: `url(${studio.cover_image_url || 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800'})`, 
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }} />
-              <div style={{ padding: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <h3>{studio.name_en}</h3>
-                  <div style={{ color: 'var(--gb-gold)' }}>★ 4.9</div>
+            <Link href={`/studios/${studio.slug || studio.id}`} key={studio.id} className="gb-studio-card">
+              <div className="gb-studio-visual">
+                {studio.cover_image_url ? (
+                  <img src={studio.cover_image_url} alt={studio.name_en} className="gb-studio-img" />
+                ) : (
+                  <div className="gb-studio-placeholder" />
+                )}
+                <div className="gb-studio-overlay" />
+              </div>
+              <div className="gb-studio-body">
+                <div className="gb-card-top">
+                  <div>
+                    <h3>{studio.name_en || studio.name_ar}</h3>
+                    <p>{studio.city_name || studio.city}</p>
+                  </div>
+                  <span className="gb-rating">★ 4.9</span>
                 </div>
-                <p style={{ color: 'var(--gb-text-steel)', fontSize: '0.9rem' }}>{studio.city} • {studio.district}</p>
-                <div style={{ marginTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{studio.hourly_rate} <span style={{ fontSize: '0.7rem' }}>SAR/HR</span></div>
-                  <button className="btn-gold" style={{ padding: '8px 16px', fontSize: '0.8rem' }}>Book Now</button>
+                <div className="gb-meta-row">
+                  <strong>{studio.hourly_rate} SAR / hour</strong>
+                  <span className="gb-verified"><T en="Verified" ar="موثق" /></span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* 6. LIVE ACTIVITY TICKER */}
-      <div style={{ background: 'var(--gb-surface-light)', padding: '20px 0', overflow: 'hidden', borderTop: '1px solid #333', borderBottom: '1px solid #333' }}>
-        <div style={{ display: 'flex', whiteSpace: 'nowrap', animation: 'tickerMove 30s linear infinite' }}>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 20, marginInline: 40, fontSize: '0.9rem', fontWeight: 700 }}>
-              <span style={{ color: 'var(--gb-gold)' }}>●</span> أحمد حجز استديو صوت في الرياض
-              <span style={{ color: 'var(--gb-teal)' }}>●</span> سارة اشترت ميكروفون Shure SM7B
-              <span style={{ color: 'var(--gb-gold)' }}>●</span> فهد قام بتوثيق استديو جديد
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 7. FEATURED GEAR */}
-      <div style={{ padding: '80px 40px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
-          <h2 style={{ fontSize: '2.5rem' }}><T en="New Arrivals" ar="وصل حديثاً" /></h2>
-          <Link href="/gear/products" style={{ color: 'var(--gb-gold)' }}>View All Gear</Link>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
-          {products?.map((p) => (
-            <div key={p.id} className="premium-card" style={{ padding: 20 }}>
-               <div style={{ height: 200, background: 'rgba(255,255,255,0.02)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                 <img 
-                   src={p.images?.[0] || 'https://images.unsplash.com/photo-1558403194-611308249627?w=400'} 
-                   alt={p.name_en}
-                   style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
-                 />
-               </div>
-               <div style={{ marginTop: 20 }}>
-                 <span style={{ fontSize: '0.7rem', color: 'var(--gb-teal)', fontWeight: 900 }}>NEW DROP</span>
-                 <h3 style={{ fontSize: '1.1rem', margin: '4px 0' }}>{p.name_en}</h3>
-                 <div style={{ display: 'flex', gap: 4, color: 'var(--gb-gold)', fontSize: '0.8rem' }}>★★★★★</div>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-                   <div style={{ fontWeight: 900 }}>{p.base_price} SAR</div>
-                   <button style={{ background: 'var(--gb-teal)', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: 8, fontSize: '0.8rem' }}>Add to Cart</button>
-                 </div>
-               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 8. WHY GEARBEAT */}
-      <div style={{ padding: '100px 40px', background: 'var(--gb-surface-light)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40 }}>
-          {[
-            { t: "Verified Studios", ar: "استديوهات موثوقة", icon: "🏆" },
-            { t: "Secure Payments", ar: "دفع آمن", icon: "🔒" },
-            { t: "24/7 Support", ar: "دعم ٢٤/٧", icon: "💬" },
-            { t: "Quality Guarantee", ar: "ضمان الجودة", icon: "⭐" }
-          ].map((item, i) => (
-            <div key={i} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: 20 }}>{item.icon}</div>
-              <h3 style={{ marginBottom: 10 }}><T en={item.t} ar={item.ar} /></h3>
-              <p style={{ color: 'var(--gb-text-steel)', fontSize: '0.9rem' }}>Elite standards for professional results.</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 9. ANIMATED STATS */}
-      <div style={{ padding: '80px 40px', display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
-        <div>
-          <div className="gold-gradient" style={{ fontSize: '4rem', fontWeight: 900 }}>+500</div>
-          <div style={{ color: 'var(--gb-text-steel)' }}>استديو معتمد</div>
-        </div>
-        <div>
-          <div className="gold-gradient" style={{ fontSize: '4rem', fontWeight: 900 }}>+10K</div>
-          <div style={{ color: 'var(--gb-text-steel)' }}>حجز مكتمل</div>
-        </div>
-        <div>
-          <div className="gold-gradient" style={{ fontSize: '4rem', fontWeight: 900 }}>+2K</div>
-          <div style={{ color: 'var(--gb-text-steel)' }}>منتج حصري</div>
-        </div>
-        <div>
-          <div className="gold-gradient" style={{ fontSize: '4rem', fontWeight: 900 }}>4.9</div>
-          <div style={{ color: 'var(--gb-text-steel)' }}>متوسط التقييم</div>
-        </div>
-      </div>
-
-      {/* 10. JOIN US CTAs */}
-      <div style={{ padding: '80px 40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 30 }}>
-        <div className="premium-card" style={{ padding: 60, textAlign: 'center', background: 'linear-gradient(135deg, #D4AF37 0%, #B68D27 100%)', color: '#000' }}>
-           <h2 style={{ fontSize: '2.5rem' }}><T en="Own a Studio?" ar="هل تملك استديو؟" /></h2>
-           <p style={{ fontSize: '1.2rem', margin: '20px 0' }}><T en="Join as a partner and start earning." ar="انضم كشريك وابدأ بتحقيق الأرباح." /></p>
-           <button className="btn-gold" style={{ background: '#000', color: '#fff' }}>Get Started</button>
-        </div>
-        <div className="premium-card" style={{ padding: 60, textAlign: 'center' }}>
-           <h2 style={{ fontSize: '2.5rem' }}><T en="Sell Gear?" ar="هل تبيع معدات؟" /></h2>
-           <p style={{ fontSize: '1.2rem', margin: '20px 0' }}><T en="Open your store today." ar="افتح متجرك الإلكتروني اليوم." /></p>
-           <button className="btn-teal-outline">Learn More</button>
-        </div>
-      </div>
-
-      {/* 11. FOOTER */}
-      <footer style={{ padding: '80px 40px', background: '#05070A', borderTop: '1px solid #1a1a1a' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 60 }}>
-          <div>
-            <img src="/brand/logo-horizontal.svg" alt="GearBeat Logo" style={{ height: 40, width: 'auto', marginBottom: 20 }} />
-            <p style={{ color: 'var(--gb-text-steel)', fontSize: '0.9rem' }}>The future of music production in the GCC. Built for creators, by creators.</p>
+      {/* Gear Marketplace Teaser */}
+      <section className="gb-section gb-surface-alt">
+        <div className="container gb-marketplace-teaser">
+          <div className="gb-teaser-content">
+            <span className="gb-section-tag"><T en="Gear Marketplace" ar="سوق المعدات" /></span>
+            <h2><T en="The tools you need to sound your best." ar="الأدوات التي تحتاجها لأفضل صوت." /></h2>
+            <p><T en="From vintage mics to the latest synths, find and rent gear from top vendors in the region." ar="من الميكروفونات الكلاسيكية إلى أحدث أجهزة السنث، ابحث واستأجر المعدات من أفضل الموردين في المنطقة." /></p>
+            <Link href="/gear" className="gb-button-primary" style={{ marginTop: '24px' }}>
+              <T en="Shop Equipment" ar="تسوق المعدات" />
+            </Link>
           </div>
-          <div>
-            <h4 style={{ marginBottom: 20 }}>Links</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, color: 'var(--gb-text-steel)' }}>
-              <li>About Us</li>
-              <li>Terms & Conditions</li>
-              <li>Privacy Policy</li>
-            </ul>
-          </div>
-          <div>
-            <h4 style={{ marginBottom: 20 }}>Support</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, color: 'var(--gb-text-steel)' }}>
-              <li>Help Center</li>
-              <li>Contact Us</li>
-              <li>FAQs</li>
-            </ul>
-          </div>
-          <div>
-            <h4 style={{ marginBottom: 20 }}>Follow Us</h4>
-            <div style={{ display: 'flex', gap: 20, fontSize: '1.5rem' }}>
-              📸 🐦 🎵 📺
-            </div>
+          <div className="gb-teaser-grid">
+            {products?.map((p) => (
+              <div key={p.id} className="gb-mini-product">
+                <img src={p.images?.[0] || "/placeholder-gear.png"} alt={p.name_en} />
+                <div className="gb-mini-product-info">
+                  <strong>{p.name_en}</strong>
+                  <span>{p.base_price} SAR</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div style={{ marginTop: 80, paddingTop: 40, borderTop: '1px solid #111', display: 'flex', justifyContent: 'space-between', color: 'var(--gb-text-steel)', fontSize: '0.8rem' }}>
-          <div>© 2026 GearBeat - جميع الحقوق محفوظة</div>
-          <div style={{ display: 'flex', gap: 15 }}>
-            💳 🍎 🛡️
+      </section>
+
+      {/* Why GearBeat */}
+      <section className="gb-section container">
+        <div className="gb-features-grid">
+          <div className="gb-feature">
+            <div className="gb-feature-icon">🎙️</div>
+            <h3><T en="Sound First" ar="الصوت أولًا" /></h3>
+            <p><T en="Built specifically for the audio production workflow." ar="مصمم خصيصاً لسير عمل الإنتاج الصوتي." /></p>
+          </div>
+          <div className="gb-feature">
+            <div className="gb-feature-icon">🤝</div>
+            <h3><T en="Connect" ar="تواصل" /></h3>
+            <p><T en="Linking talent with the GCC's finest creative spaces." ar="ربط المواهب بأفضل المساحات الإبداعية في الخليج." /></p>
+          </div>
+          <div className="gb-feature">
+            <div className="gb-feature-icon">🛡️</div>
+            <h3><T en="Trust" ar="ثقة" /></h3>
+            <p><T en="Verified providers and secure payment processing." ar="مزودو خدمات موثوقون ومعالجة دفع آمنة." /></p>
           </div>
         </div>
-      </footer>
+      </section>
 
-      {/* MOBILE BOTTOM NAV */}
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', background: 'var(--gb-surface)', display: 'flex', justifyContent: 'space-around', padding: '12px 0', borderTop: '1px solid #333', zIndex: 1000 }}>
-        <Link href="/" style={{ fontSize: '1.2rem' }}>🏠</Link>
-        <Link href="/studios" style={{ fontSize: '1.2rem' }}>🎧</Link>
-        <Link href="/gear" style={{ fontSize: '1.2rem' }}>📦</Link>
-        <Link href="/account" style={{ fontSize: '1.2rem' }}>👤</Link>
-        <Link href="/cart" style={{ fontSize: '1.2rem' }}>🛒</Link>
-      </nav>
-
-    </section>
+      <style jsx>{`
+        .gb-home-root {
+          background: var(--gb-bg);
+          color: var(--gb-text-ivory);
+        }
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
+        .gb-hero {
+          position: relative;
+          padding: 120px 0 80px;
+          min-height: 80vh;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), transparent 40%),
+                      radial-gradient(circle at bottom right, rgba(15, 160, 138, 0.05), transparent 40%);
+        }
+        .gb-hero-content {
+          position: relative;
+          z-index: 2;
+          max-width: 800px;
+        }
+        .gb-eyebrow {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: var(--gb-gold);
+          font-weight: 800;
+          letter-spacing: 0.2em;
+          font-size: 0.8rem;
+          margin-bottom: 24px;
+        }
+        .gb-eyebrow-line {
+          width: 40px;
+          height: 1px;
+          background: linear-gradient(90deg, var(--gb-gold), transparent);
+        }
+        .gb-hero-title {
+          font-size: clamp(2.5rem, 6vw, 5rem);
+          line-height: 1.1;
+          font-weight: 900;
+          margin: 0;
+          letter-spacing: -0.04em;
+        }
+        .gb-hero-text {
+          font-size: 1.25rem;
+          color: var(--gb-text-steel);
+          margin: 32px 0;
+          line-height: 1.6;
+          max-width: 600px;
+        }
+        .gb-cta-row {
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+        .gb-button-primary {
+          background: var(--gb-gold);
+          color: #000;
+          padding: 16px 32px;
+          border-radius: 99px;
+          font-weight: 800;
+          transition: transform 0.2s;
+        }
+        .gb-button-secondary {
+          background: rgba(255,255,255,0.05);
+          color: #fff;
+          border: 1px solid rgba(255,255,255,0.1);
+          padding: 16px 32px;
+          border-radius: 99px;
+          font-weight: 800;
+          transition: transform 0.2s;
+        }
+        .gb-button-primary:hover, .gb-button-secondary:hover {
+          transform: translateY(-2px);
+        }
+        .gb-section {
+          padding: 100px 0;
+        }
+        .gb-section-header {
+          margin-bottom: 48px;
+        }
+        .gb-section-tag {
+          color: var(--gb-teal);
+          font-weight: 800;
+          font-size: 0.75rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          margin-bottom: 12px;
+          display: block;
+        }
+        .gb-section h2 {
+          font-size: 3rem;
+          margin: 0;
+          letter-spacing: -0.03em;
+        }
+        .gb-studio-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+          gap: 24px;
+        }
+        .gb-studio-card {
+          background: var(--gb-surface);
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 24px;
+          overflow: hidden;
+          transition: transform 0.3s, border-color 0.3s;
+        }
+        .gb-studio-card:hover {
+          transform: translateY(-8px);
+          border-color: var(--gb-gold);
+        }
+        .gb-studio-visual {
+          height: 240px;
+          position: relative;
+          background: #000;
+        }
+        .gb-studio-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .gb-studio-placeholder {
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at center, #222, #000);
+        }
+        .gb-studio-body {
+          padding: 24px;
+        }
+        .gb-card-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 20px;
+        }
+        .gb-card-top h3 {
+          margin: 0;
+          font-size: 1.25rem;
+        }
+        .gb-card-top p {
+          margin: 4px 0 0;
+          color: var(--gb-text-steel);
+          font-size: 0.9rem;
+        }
+        .gb-rating {
+          background: rgba(212, 175, 55, 0.1);
+          color: var(--gb-gold);
+          padding: 4px 10px;
+          border-radius: 99px;
+          font-size: 0.8rem;
+          font-weight: 800;
+        }
+        .gb-meta-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 16px;
+          border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .gb-verified {
+          color: var(--gb-teal);
+          font-size: 0.8rem;
+          font-weight: 800;
+        }
+        .gb-surface-alt {
+          background: var(--gb-surface);
+        }
+        .gb-marketplace-teaser {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 60px;
+          align-items: center;
+        }
+        .gb-teaser-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        .gb-mini-product {
+          background: var(--gb-bg);
+          padding: 16px;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .gb-mini-product img {
+          width: 60px;
+          height: 60px;
+          object-fit: contain;
+        }
+        .gb-mini-product-info strong {
+          display: block;
+          font-size: 0.9rem;
+        }
+        .gb-mini-product-info span {
+          color: var(--gb-gold);
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+        .gb-features-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 40px;
+        }
+        .gb-feature {
+          text-align: center;
+        }
+        .gb-feature-icon {
+          font-size: 3rem;
+          margin-bottom: 24px;
+        }
+        @media (max-width: 768px) {
+          .gb-hero-title { font-size: 3rem; }
+          .gb-marketplace-teaser { grid-template-columns: 1fr; }
+          .gb-features-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+    </div>
   );
 }
