@@ -1,5 +1,4 @@
 import T from "@/components/t";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -141,8 +140,23 @@ export default function RoadmapPage() {
   );
 }
 
-function TimelineBlock({ phase, phaseAr, titleEn, titleAr, status, statusAr, items }: any) {
-  const statusColors: any = {
+interface TimelineItem {
+  en: string;
+  ar: string;
+}
+
+interface TimelineBlockProps {
+  phase: string;
+  phaseAr: string;
+  titleEn: string;
+  titleAr: string;
+  status: 'Mandatory' | 'Evaluate' | 'Ongoing';
+  statusAr: string;
+  items: TimelineItem[];
+}
+
+function TimelineBlock({ phase, phaseAr, titleEn, titleAr, status, statusAr, items }: TimelineBlockProps) {
+  const statusColors: Record<string, { bg: string, text: string, border: string }> = {
     Mandatory: { bg: 'rgba(239, 68, 68, 0.1)', text: '#ef4444', border: '#ef4444' },
     Evaluate: { bg: 'rgba(59, 130, 246, 0.1)', text: '#3b82f6', border: '#3b82f6' },
     Ongoing: { bg: 'rgba(34, 197, 94, 0.1)', text: '#22c55e', border: '#22c55e' }
@@ -174,7 +188,7 @@ function TimelineBlock({ phase, phaseAr, titleEn, titleAr, status, statusAr, ite
         </span>
       </div>
       <ul style={{ display: 'grid', gap: 12, padding: 0, listStyle: 'none' }}>
-        {items.map((item: any, i: number) => (
+        {items.map((item, i) => (
           <li key={i} style={{ display: 'flex', gap: 12, fontSize: '0.95rem' }}>
             <span style={{ color: colors.text }}>•</span>
             <div>
@@ -188,7 +202,16 @@ function TimelineBlock({ phase, phaseAr, titleEn, titleAr, status, statusAr, ite
   );
 }
 
-function SimplePhase({ number, titleEn, titleAr, descEn, descAr, active }: any) {
+interface SimplePhaseProps {
+  number: string;
+  titleEn: string;
+  titleAr: string;
+  descEn: string;
+  descAr: string;
+  active?: boolean;
+}
+
+function SimplePhase({ number, titleEn, titleAr, descEn, descAr, active }: SimplePhaseProps) {
   return (
     <div style={{ 
       display: 'flex', 

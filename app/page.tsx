@@ -137,6 +137,7 @@ export default async function HomePage() {
       <div style={{ padding: '80px 40px' }}>
         <h2 style={{ fontSize: '2.5rem', marginBottom: 40 }}><T en="Top Rated Studios" ar="أفضل الاستوديوهات" /></h2>
         <div style={{ display: 'flex', gap: 24, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 20 }}>
+          {studios?.map((studio) => (
             <div key={studio.id} className="premium-card" style={{ minWidth: 350, height: 450 }}>
               <div style={{ 
                 height: '60%', 

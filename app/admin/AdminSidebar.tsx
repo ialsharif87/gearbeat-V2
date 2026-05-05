@@ -106,7 +106,16 @@ export function AdminSidebar({
   );
 }
 
-function NavItem({ href, icon, labelEn, labelAr, active, badge }: any) {
+interface NavItemProps {
+  href: string;
+  icon: string;
+  labelEn: string;
+  labelAr: string;
+  active: boolean;
+  badge?: number;
+}
+
+function NavItem({ href, icon, labelEn, labelAr, active, badge = 0 }: NavItemProps) {
   return (
     <Link href={href} className={`nav-item ${active ? 'active' : ''}`} style={{ 
       display: 'flex', 

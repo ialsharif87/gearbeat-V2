@@ -132,7 +132,15 @@ export default async function AccountingPage() {
   );
 }
 
-function StatCard({ labelEn, labelAr, value, color, isCurrency = true }: any) {
+interface StatCardProps {
+  labelEn: string;
+  labelAr: string;
+  value: number | string;
+  color: string;
+  isCurrency?: boolean;
+}
+
+function StatCard({ labelEn, labelAr, value, color, isCurrency = true }: StatCardProps) {
   return (
     <div className="card" style={{ padding: 24 }}>
       <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: 8 }}>
