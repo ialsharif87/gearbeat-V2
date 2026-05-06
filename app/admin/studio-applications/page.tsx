@@ -32,11 +32,11 @@ export default function AdminStudioApplicationsPage() {
     setLoading(true);
     let query = supabase.from("studio_applications").select("*").order("submitted_at", { ascending: false });
     
-      { filter === "contracts" ? (
-        query = query.not("contract_uploaded_at", "is", null).is("final_approved_at", null)
-      ) : filter !== "all" ? (
-        query = query.eq("status", filter)
-      ) : null }
+    if (filter === "contracts") {
+      query = query.not("contract_uploaded_at", "is", null).is("final_approved_at", null);
+    } else if (filter !== "all") {
+      query = query.eq("status", filter);
+    }
 
     const { data, error } = await query;
     if (!error) setApplications(data || []);
