@@ -48,6 +48,6 @@ export default withSentryConfig(nextConfig, {
   silent: true,
   widenClientFileUpload: true,
   sourcemaps: {
-    hideSources: true,
+    disable: true,
   },
 });
