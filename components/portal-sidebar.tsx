@@ -28,6 +28,7 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
 
   const ownerItems = [
     { href: "/portal/studio", icon: "📊", label: "Dashboard", label_ar: "لوحة التحكم" },
+    { href: "/portal/studio/contract", icon: "📜", label: "Contract & Activation", label_ar: "العقد والتفعيل" },
     { href: "/portal/studio/studios", icon: "🎙️", label: "My Studios", label_ar: "استوديوهاتي" },
     { href: "/portal/studio/bookings", icon: "📅", label: "Bookings", label_ar: "الحجوزات" },
     { href: "/portal/studio/analytics", icon: "📊", label: "Analytics", label_ar: "التحليلات" },

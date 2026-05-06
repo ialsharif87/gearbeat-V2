@@ -5,17 +5,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
-const STUDIO_TYPES = [
-  { id: "recording", en: "Recording Studio", ar: "استوديو تسجيل" },
-  { id: "podcast", en: "Podcast Studio", ar: "استوديو بودكاست" },
-  { id: "voiceover", en: "Voiceover Studio", ar: "استوديو تعليق صوتي" },
-  { id: "dubbing", en: "Dubbing Studio", ar: "استوديو دوبلاج" },
-  { id: "training", en: "Music Training", ar: "تدريب موسيقي" },
-  { id: "rehearsal", en: "Rehearsal Space", ar: "غرف بروفة" },
-  { id: "post_prod", en: "Animation/Post Production", ar: "تحريك وإنتاج مرئي" },
-  { id: "creative", en: "Creative Space", ar: "مساحة إبداعية" },
-];
-
 export default function JoinStudioPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -25,25 +14,18 @@ export default function JoinStudioPage() {
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
-  const [studioNameAr, setStudioNameAr] = useState("");
-  const [studioNameEn, setStudioNameEn] = useState("");
+  const [companyNameAr, setCompanyNameAr] = useState("");
+  const [companyNameEn, setCompanyNameEn] = useState("");
+  const [commercialRegistration, setCommercialRegistration] = useState("");
+  const [vatNumber, setVatNumber] = useState("");
   const [city, setCity] = useState("");
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [rooms, setRooms] = useState("1");
-  const [hourlyPrice, setHourlyPrice] = useState("");
-  const [notes, setNotes] = useState("");
+  const [plannedStudios, setPlannedStudios] = useState("1");
+  const [aboutCompany, setAboutCompany] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Files State
   const [crFile, setCrFile] = useState<File | null>(null);
-  const [licenseFile, setLicenseFile] = useState<File | null>(null);
-  const [addressFile, setAddressFile] = useState<File | null>(null);
-  const [bankFile, setBankFile] = useState<File | null>(null);
-
-  const toggleType = (id: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
-    );
-  };
+  const [vatFile, setVatFile] = useState<File | null>(null);
 
   async function uploadFile(file: File) {
     const supabase = createClient();
@@ -65,46 +47,44 @@ export default function JoinStudioPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!termsAccepted) return;
+    
     setLoading(true);
     setError(null);
 
     try {
-      if (!crFile || !licenseFile || !addressFile || !bankFile) {
-        throw new Error("Please upload all required documents.");
-      }
-      if (selectedTypes.length === 0) {
-        throw new Error("Please select at least one studio type.");
+      if (!crFile) {
+        throw new Error("Please upload your Commercial Registration.");
       }
 
       // Step 1: Upload Files
-      const [crUrl, licenseUrl, addressUrl, bankUrl] = await Promise.all([
-        uploadFile(crFile),
-        uploadFile(licenseFile),
-        uploadFile(addressFile),
-        uploadFile(bankFile),
-      ]);
+      const crUrl = await uploadFile(crFile);
+      let vatUrl = null;
+      if (vatFile) {
+        vatUrl = await uploadFile(vatFile);
+      }
 
-      // Step 2: Insert into DB
+      // Step 2: Insert into DB (studio_applications table)
       const supabase = createClient();
-      const { error: insertError } = await supabase.from("provider_leads").insert({
-        name: fullName,
-        business_name: studioNameEn,
-        business_name_ar: studioNameAr,
+      const { error: insertError } = await supabase.from("studio_applications").insert({
+        full_name: fullName,
         email,
         phone: mobile,
+        company_name_ar: companyNameAr,
+        company_name_en: companyNameEn,
+        commercial_registration: commercialRegistration,
+        vat_number: vatNumber,
+        vat_certificate_url: vatUrl,
         city,
-        product_categories: selectedTypes, // Reusing field for studio types
-        message: `${notes}\n\nRooms: ${rooms}\nPrice: ${hourlyPrice} SAR/hr`,
-        type: "studio",
-        status: "new",
-        cr_document_url: crUrl,
-        vat_document_url: licenseUrl, // Reusing VAT field for Location License
-        national_address_url: addressUrl,
-        bank_document_url: bankUrl,
-        created_at: new Date().toISOString(),
+        planned_studios_count: parseInt(plannedStudios),
+        about_company: aboutCompany,
+        terms_accepted: termsAccepted,
+        terms_accepted_at: new Date().toISOString(),
+        status: "pending",
+        submitted_at: new Date().toISOString(),
       });
 
-      if (insertError) throw new Error("Database insertion failed");
+      if (insertError) throw new Error("Database submission failed: " + insertError.message);
 
       setSuccess(true);
     } catch (err: any) {
@@ -119,12 +99,12 @@ export default function JoinStudioPage() {
     return (
       <main style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
         <div style={{ maxWidth: 640, width: "100%", background: "#111", borderRadius: 24, border: "1px solid #1e1e1e", padding: 60, textAlign: "center" }}>
-          <div style={{ fontSize: "3rem", color: "#22c55e", marginBottom: 24 }}>✓</div>
+          <div style={{ fontSize: "3rem", color: "#D4AF37", marginBottom: 24 }}>✓</div>
           <h1 style={{ fontSize: "2rem", marginBottom: 16 }}>
             <T en="Application Submitted!" ar="تم إرسال طلبك!" />
           </h1>
           <p style={{ color: "#888", fontSize: "1.1rem", marginBottom: 40, lineHeight: 1.6 }}>
-            <T en="We will review your documents and contact you within 2 business days." ar="سنراجع وثائقك ونتواصل معك خلال يومي عمل." />
+            <T en="We will review your company details and contact you within 2 business days." ar="سنراجع بيانات شركتك ونتواصل معك خلال يومي عمل." />
           </p>
           <Link href="/" className="btn btn-primary" style={{ height: 54, fontSize: "1.1rem", fontWeight: 700, padding: "0 40px" }}>
             <T en="Back to Home" ar="العودة للرئيسية" />
@@ -137,24 +117,24 @@ export default function JoinStudioPage() {
   return (
     <main style={{ minHeight: "100vh", background: "#0a0a0a", padding: "60px 20px" }}>
       <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center", marginBottom: 40 }}>
-        <div style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-1px", marginBottom: 24 }}>GearBeat</div>
-        <div style={{ display: "inline-block", background: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", padding: "4px 12px", borderRadius: 99, fontSize: "0.85rem", fontWeight: 700, marginBottom: 16 }}>
-          <T en="List Your Studio" ar="سجّل استوديوك" />
+        <div style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-1px", marginBottom: 24, color: "#D4AF37" }}>GearBeat</div>
+        <div style={{ display: "inline-block", background: "rgba(212, 175, 55, 0.1)", color: "#D4AF37", padding: "4px 12px", borderRadius: 99, fontSize: "0.85rem", fontWeight: 700, marginBottom: 16 }}>
+          <T en="Studio Owner Program" ar="برنامج ملاك الاستوديوهات" />
         </div>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: 16 }}>
-          <T en="Join GearBeat as a Studio" ar="انضم لـ GearBeat كاستوديو" />
+          <T en="Join GearBeat as a Provider" ar="انضم لـ GearBeat كمزود خدمة" />
         </h1>
         <p style={{ color: "#888", fontSize: "1.1rem" }}>
-          <T en="Fill in your details and we will review your application within 2 business days." ar="أدخل بياناتك وسنراجع طلبك خلال يومي عمل." />
+          <T en="Register your company to manage one or more studios on our premium marketplace." ar="سجل شركتك لإدارة استوديو واحد أو أكثر على منصتنا الفاخرة." />
         </p>
       </div>
 
       <div style={{ maxWidth: 640, margin: "0 auto", background: "#111", borderRadius: 24, border: "1px solid #1e1e1e", padding: 40 }}>
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 32 }}>
-          {/* Section 1: Personal Info */}
+          {/* Section 1: Authorized Person Info */}
           <section>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 20, color: "#3b82f6" }}>
-              <T en="Personal Information" ar="المعلومات الشخصية" />
+            <h3 style={{ fontSize: "1.1rem", marginBottom: 20, color: "#D4AF37" }}>
+              <T en="Authorized Person" ar="الشخص المفوض" />
             </h3>
             <div style={{ display: "grid", gap: 20 }}>
               <div style={{ display: "grid", gap: 8 }}>
@@ -175,20 +155,29 @@ export default function JoinStudioPage() {
             </div>
           </section>
 
-          {/* Section 2: Studio Info */}
+          {/* Section 2: Company Info */}
           <section>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 20, color: "#3b82f6" }}>
-              <T en="Studio Information" ar="معلومات الاستوديو" />
+            <h3 style={{ fontSize: "1.1rem", marginBottom: 20, color: "#D4AF37" }}>
+              <T en="Company Information" ar="معلومات الشركة" />
             </h3>
             <div style={{ display: "grid", gap: 20 }}>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studio Name (Arabic)" ar="اسم الاستوديو بالعربي" /></label>
-                <input className="input" value={studioNameAr} onChange={(e) => setStudioNameAr(e.target.value)} required />
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (Arabic)" ar="اسم الشركة (بالعربي)" /></label>
+                <input className="input" value={companyNameAr} onChange={(e) => setCompanyNameAr(e.target.value)} required />
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studio Name (English)" ar="اسم الاستوديو بالإنجليزي" /></label>
-                <input className="input" value={studioNameEn} onChange={(e) => setStudioNameEn(e.target.value)} required />
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (English)" ar="اسم الشركة (بالإنجليزي)" /></label>
+                <input className="input" value={companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} required />
               </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Commercial Registration Number" ar="رقم السجل التجاري" /></label>
+                <input className="input" value={commercialRegistration} onChange={(e) => setCommercialRegistration(e.target.value)} required />
+              </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="VAT Number (Optional)" ar="الرقم الضريبي (اختياري)" /></label>
+                <input className="input" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} />
+              </div>
+              
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div style={{ display: "grid", gap: 8 }}>
                   <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="City" ar="المدينة" /></label>
@@ -203,30 +192,8 @@ export default function JoinStudioPage() {
                   </select>
                 </div>
                 <div style={{ display: "grid", gap: 8 }}>
-                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Number of Rooms" ar="عدد الغرف" /></label>
-                  <select className="input" value={rooms} onChange={(e) => setRooms(e.target.value)} required>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4+">4+</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Starting Price per Hour (SAR)" ar="سعر الساعة يبدأ من (ريال)" /></label>
-                <input className="input" type="number" value={hourlyPrice} onChange={(e) => setHourlyPrice(e.target.value)} required />
-              </div>
-
-              <div style={{ display: "grid", gap: 12 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studio Type" ar="نوع الاستوديو" /></label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {STUDIO_TYPES.map((type) => (
-                    <label key={type.id} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: "0.85rem", cursor: "pointer", background: "rgba(255,255,255,0.02)", padding: "8px 12px", borderRadius: 8, border: selectedTypes.includes(type.id) ? "1px solid #3b82f6" : "1px solid transparent" }}>
-                      <input type="checkbox" checked={selectedTypes.includes(type.id)} onChange={() => toggleType(type.id)} style={{ width: 16, height: 16 }} />
-                      <T en={type.en} ar={type.ar} />
-                    </label>
-                  ))}
+                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studios Planned" ar="عدد الاستوديوهات المخططة" /></label>
+                  <input className="input" type="number" min="1" value={plannedStudios} onChange={(e) => setPlannedStudios(e.target.value)} required />
                 </div>
               </div>
             </div>
@@ -234,27 +201,42 @@ export default function JoinStudioPage() {
 
           {/* Section 3: Documents */}
           <section>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 4, color: "#3b82f6" }}>
-              <T en="Required Documents" ar="الوثائق المطلوبة" />
+            <h3 style={{ fontSize: "1.1rem", marginBottom: 4, color: "#D4AF37" }}>
+              <T en="Documents" ar="الوثائق" />
             </h3>
             <p style={{ color: "#666", fontSize: "0.85rem", marginBottom: 20 }}>
-              <T en="Upload clear photos or PDF files" ar="ارفع صوراً واضحة أو ملفات PDF" />
+              <T en="Upload Commercial Registration and VAT certificate (if available)" ar="ارفع السجل التجاري وشهادة ضريبة القيمة المضافة (إن وجدت)" />
             </p>
             
             <div style={{ display: "grid", gap: 16 }}>
               <UploadField labelEn="Commercial Registration" labelAr="السجل التجاري" file={crFile} onChange={setCrFile} required />
-              <UploadField labelEn="Location/Municipality License" labelAr="رخصة الموقع/البلدية" file={licenseFile} onChange={setLicenseFile} required />
-              <UploadField labelEn="National Address Certificate" labelAr="العنوان الوطني" file={addressFile} onChange={setAddressFile} required />
-              <UploadField labelEn="Bank Account / IBAN Document" labelAr="وثيقة الحساب البنكي / الآيبان" file={bankFile} onChange={setBankFile} required />
+              <UploadField labelEn="VAT Certificate" labelAr="شهادة الضريبة" file={vatFile} onChange={setVatFile} optional />
             </div>
           </section>
 
-          {/* Section 4: Additional Info */}
+          {/* Section 4: About */}
           <section>
             <div style={{ display: "grid", gap: 8 }}>
-              <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Tell us about your studio..." ar="أخبرنا عن استوديوك..." /></label>
-              <textarea className="input" style={{ minHeight: 100, paddingTop: 12 }} maxLength={500} placeholder="..." value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="About the company" ar="نبذة عن الشركة" /></label>
+              <textarea className="input" style={{ minHeight: 100, paddingTop: 12 }} maxLength={1000} placeholder="..." value={aboutCompany} onChange={(e) => setAboutCompany(e.target.value)} required />
             </div>
+          </section>
+
+          {/* Section 5: Terms */}
+          <section>
+            <label style={{ display: "flex", gap: 12, cursor: "pointer", alignItems: "flex-start" }}>
+              <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} style={{ width: 20, height: 20, marginTop: 4 }} />
+              <div style={{ fontSize: "0.9rem", color: "#aaa", lineHeight: 1.6 }}>
+                <T 
+                  en="I agree to the Terms & Conditions and allow GearBeat to review my data for verification and contracting purposes. I understand my data is protected under our Privacy Policy and Saudi PDPL." 
+                  ar="أوافق على الشروط والأحكام وأتيح لـ GearBeat الاطلاع على بياناتي لأغراض التحقق والتعاقد. أفهم أن بياناتي محفوظة ومحمية وفقاً لسياسة الخصوصية ونظام PDPL السعودي." 
+                />
+                <div style={{ marginTop: 8 }}>
+                  <Link href="/terms" style={{ color: "#D4AF37", marginRight: 12 }}><T en="Terms & Conditions" ar="الشروط والأحكام" /></Link>
+                  <Link href="/privacy" style={{ color: "#D4AF37" }}><T en="Privacy Policy" ar="سياسة الخصوصية" /></Link>
+                </div>
+              </div>
+            </label>
           </section>
 
           {error && (
@@ -263,7 +245,7 @@ export default function JoinStudioPage() {
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary" style={{ height: 60, fontSize: "1.2rem", fontWeight: 800, borderRadius: 12 }} disabled={loading}>
+          <button type="submit" className="btn btn-primary" style={{ height: 60, fontSize: "1.2rem", fontWeight: 800, borderRadius: 12 }} disabled={loading || !termsAccepted}>
             {loading ? "..." : <T en="Submit Application" ar="إرسال الطلب" />}
           </button>
         </form>
@@ -281,8 +263,8 @@ export default function JoinStudioPage() {
           position: relative;
         }
         .upload-area:hover {
-          border-color: #3b82f6;
-          background: rgba(59, 130, 246, 0.05);
+          border-color: #D4AF37;
+          background: rgba(212, 175, 55, 0.05);
         }
         .upload-area input {
           position: absolute;
