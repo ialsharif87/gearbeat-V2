@@ -364,7 +364,7 @@ export default async function StudiosPage({
         (matchingEquipmentRows || []) as EquipmentMatchRow[];
 
       const matchingEquipmentStudioIds = uniqueClean(
-        matchingEquipmentRowsList.map((item: EquipmentMatchRow) => item.id)
+        matchingEquipmentRowsList.map((item: EquipmentMatchRow) => item.studio_id)
       );
 
       studioIdFilters.push(matchingEquipmentStudioIds);
