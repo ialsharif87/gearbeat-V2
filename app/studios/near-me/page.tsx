@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import T from "@/components/t";
 import GoogleMapsLink from "@/components/google-maps-link";
 import { createClient } from "@/lib/supabase/client";
@@ -80,7 +80,7 @@ export default function StudiosNearMePage() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [userCoordinates, setUserCoordinates] =
     useState<UserCoordinates | null>(null);
-  const [locationError, setLocationError] = useState("");
+  const [locationError, setLocationError] = useState<React.ReactNode>(null);
   const [dataError, setDataError] = useState("");
 
   useEffect(() => {
@@ -130,40 +130,76 @@ export default function StudiosNearMePage() {
     loadStudios();
   }, []);
 
-  function requestLocation() {
-    setLocationError("");
-
-    if (!navigator.geolocation) {
-      setLocationError("Your browser does not support location access.");
-      return;
-    }
-
+  function performGeolocation() {
     setLocationLoading(true);
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUserCoordinates({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
-
         setLocationLoading(false);
       },
       (error) => {
         console.error("Browser location error:", error);
-
-        setLocationError(
-          "Location permission was not allowed. You can still browse studios by city."
-        );
-
+        
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError(
+            <T 
+              en="Please allow location access in your browser settings" 
+              ar="يرجى السماح بالوصول إلى موقعك من إعدادات المتصفح" 
+            />
+          );
+        } else {
+          setLocationError(
+            <T 
+              en="Could not get your location, try searching by city" 
+              ar="تعذر تحديد موقعك، جرب البحث بالمدينة" 
+            />
+          );
+        }
         setLocationLoading(false);
       },
       {
-        enableHighAccuracy: true,
-        timeout: 12000,
-        maximumAge: 5 * 60 * 1000,
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
       }
     );
+  }
+
+  async function requestLocation() {
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError(
+        <T 
+          en="Your browser does not support location access." 
+          ar="متصفحك لا يدعم الوصول إلى الموقع." 
+        />
+      );
+      return;
+    }
+
+    // Try permissions API first if available
+    if (navigator.permissions && navigator.permissions.query) {
+      try {
+        const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (result.state === 'denied') {
+          setLocationError(
+            <T 
+              en="Please allow location access in your browser settings" 
+              ar="يرجى السماح بالوصول إلى موقعك من إعدادات المتصفح" 
+            />
+          );
+          return;
+        }
+      } catch (e) {
+        console.warn("Permissions API query failed", e);
+      }
+    }
+
+    performGeolocation();
   }
 
   const studiosWithDistance = useMemo(() => {
