@@ -262,6 +262,7 @@ export default async function StudioDetailsPage({
             flexWrap: "wrap",
           }}
         >
+          <div>
             <h1 style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
               {studioName}
               {isCertified && (
