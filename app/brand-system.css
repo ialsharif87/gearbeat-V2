@@ -68,3 +68,27 @@
   filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
   transform: scale(1.02);
 }
+
+/* TIER BADGES */
+.tier-tag-mini {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.tier-1 { background: #333; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+.tier-2 { background: #1a2a3a; color: #5dade2; border: 1px solid rgba(93,173,226,0.3); }
+.tier-3 { background: #3e1a1a; color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+.tier-4 { background: #2a1a3a; color: #a569bd; border: 1px solid rgba(165,105,189,0.3); }
+.tier-5 { 
+  background: linear-gradient(135deg, var(--gb-gold-bright), var(--gb-gold)); 
+  color: #000; 
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}

@@ -73,7 +73,21 @@ export default async function StudioDashboardPage() {
 
     supabase
       .from("studios")
-      .select("completion_score")
+      .select(`
+        completion_score,
+        certified_studios(
+          status,
+          studio_tiers(
+            level,
+            name_en,
+            name_ar
+          )
+        ),
+        merch_fulfillment_orders(
+          status,
+          kit_id
+        )
+      `)
       .eq("owner_auth_user_id", user.id)
       .order("completion_score", { ascending: false })
       .limit(1),
@@ -94,7 +108,11 @@ export default async function StudioDashboardPage() {
     : "5.0";
 
   const recentBookings = recentBookingsResult.data || [];
-  const studioScore = studiosResult.data?.[0]?.completion_score || 0;
+  const studioData = studiosResult.data?.[0] as any;
+  const studioScore = studioData?.completion_score || 0;
+  const cert = studioData?.certified_studios?.[0];
+  const tier = cert?.studio_tiers;
+  const kitOrder = studioData?.merch_fulfillment_orders?.[0];
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -229,8 +247,44 @@ export default async function StudioDashboardPage() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Quick Actions */}
+        {/* RIGHT COLUMN: Partner Status & Quick Actions */}
         <div className="grid-right">
+          <div className="content-card partner-status-card" style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2><T en="Partner Status" ar="حالة الشريك" /></h2>
+              {cert?.status === 'approved' ? (
+                <span className="badge badge-success-mini">✓ <T en="Certified" ar="موثق" /></span>
+              ) : (
+                <span className="badge badge-muted-mini"><T en="Pending" ar="تحت المراجعة" /></span>
+              )}
+            </div>
+            
+            <div className="tier-display" style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div className={`tier-tag tier-${tier?.level || 1}`} style={{ fontSize: '1.2rem', padding: '10px 20px' }}>
+                <T en={tier?.name_en || 'Verified Studio'} ar={tier?.name_ar || 'استوديو موثق'} />
+              </div>
+              <p style={{ marginTop: 12, fontSize: '0.85rem', color: 'var(--gb-muted)' }}>
+                <T en="Complete more bookings to reach the next tier." ar="أكمل المزيد من الحجوزات للوصول للمستوى التالي." />
+              </p>
+            </div>
+
+            <Link href="/portal/studio/partner-status" className="view-all" style={{ display: 'block', textAlign: 'center', marginBottom: 12 }}>
+              <T en="View partner rewards" ar="عرض مكافآت الشريك" />
+            </Link>
+
+            {kitOrder && (
+              <div className="kit-status" style={{ background: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--gb-muted)', marginBottom: 4 }}>
+                  <T en="Welcome Kit Status" ar="حالة الهدية الترحيبية" />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <strong style={{ fontSize: '0.9rem' }}>{kitOrder.status.toUpperCase()}</strong>
+                  <span style={{ fontSize: '1.2rem' }}>📦</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="content-card actions-card">
             <h2><T en="Quick Actions" ar="إجراءات سريعة" /></h2>
             <div className="actions-list">

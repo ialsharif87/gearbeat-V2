@@ -149,7 +149,15 @@ export default async function StudioDetailsPage({
       minimum_photos_required,
       owner_trust_summary,
       instant_booking_enabled,
-      verified_location
+      verified_location,
+      certified_studios(
+        status,
+        studio_tiers(
+          level,
+          name_en,
+          name_ar
+        )
+      )
     `)
     .eq("slug", slug)
     .eq("status", "approved")
@@ -238,6 +246,10 @@ export default async function StudioDetailsPage({
   const minimumPhotosRequired = Number(studio.minimum_photos_required || 6);
   const photoCount = studioImages?.length || 0;
 
+  const cert = studio.certified_studios as any;
+  const isCertified = cert?.status === 'approved';
+  const tier = cert?.studio_tiers;
+
   return (
     <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
       <section style={{ marginTop: 24 }}>
@@ -250,12 +262,16 @@ export default async function StudioDetailsPage({
             flexWrap: "wrap",
           }}
         >
-          <div>
-            <span className="badge badge-gold">
-              <T en="Premium Studio" ar="استوديو مميز" />
-            </span>
-
-            <h1 style={{ marginTop: 10 }}>{studioName}</h1>
+            <h1 style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+              {studioName}
+              {isCertified && (
+                <Link href={`/gearbeat-certified/${studio.slug}`} title="GearBeat Certified">
+                  <span className={`tier-tag-mini tier-${tier?.level}`}>
+                    <T en={tier?.name_en} ar={tier?.name_ar} />
+                  </span>
+                </Link>
+              )}
+            </h1>
 
             <p style={{ color: "var(--muted)" }}>{displayLocation}</p>
 
