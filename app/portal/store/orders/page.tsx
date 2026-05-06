@@ -140,11 +140,9 @@ export default async function VendorOrdersPage() {
 
   return (
     <main 
-      className="dashboard-page" 
+      className="gb-dashboard-page container" 
       style={{ 
-        background: '#0a0a0a', 
-        minHeight: '100vh', 
-        padding: '32px' 
+        minHeight: '100vh' 
       }}
     >
       <section style={{ marginBottom: '32px' }}>
@@ -165,24 +163,24 @@ export default async function VendorOrdersPage() {
       </section>
 
       <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
-        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Total items" ar="إجمالي العناصر" /></div>
+        <div className="gb-card" style={{ background: 'var(--gb-card)', border: '1px solid var(--gb-border)', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '8px' }}><T en="Total items" ar="إجمالي العناصر" /></div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{items?.length || 0}</div>
         </div>
 
-        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Paid/active" ar="مدفوع/نشط" /></div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{paidItems.length}</div>
+        <div className="gb-card" style={{ background: 'var(--gb-card)', border: '1px solid var(--gb-border)', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '8px' }}><T en="Paid/active" ar="مدفوع/نشط" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--gb-teal)' }}>{paidItems.length}</div>
         </div>
 
-        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Pending" ar="معلق" /></div>
+        <div className="gb-card" style={{ background: 'var(--gb-card)', border: '1px solid var(--gb-border)', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '8px' }}><T en="Pending" ar="معلق" /></div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{pendingItems.length}</div>
         </div>
 
-        <div className="gb-card" style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}><T en="Revenue" ar="الإيراد" /></div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#cfa86e' }}>{formatMoney(totalRevenue)}</div>
+        <div className="gb-card" style={{ background: 'var(--gb-card)', border: '1px solid var(--gb-border)', padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '8px' }}><T en="Revenue" ar="الإيراد" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--gb-gold)' }}>{formatMoney(totalRevenue)}</div>
         </div>
       </section>
 
@@ -266,8 +264,14 @@ export default async function VendorOrdersPage() {
                             borderRadius: '99px', 
                             fontSize: '0.75rem',
                             fontWeight: 600,
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            color: '#3b82f6'
+                            background: 
+                              item.status === 'delivered' ? 'rgba(15, 160, 138, 0.1)' :
+                              item.status === 'cancelled' ? 'rgba(239, 68, 68, 0.1)' :
+                              'rgba(212, 175, 55, 0.1)',
+                            color:
+                              item.status === 'delivered' ? 'var(--gb-teal)' :
+                              item.status === 'cancelled' ? '#ef4444' :
+                              'var(--gb-gold)'
                           }}
                         >
                           {statusLabels[item.status] || item.status}

@@ -266,239 +266,192 @@ export default async function OwnerBankPage({
   }
 
   return (
-    <section>
-      <div className="section-head">
-        <span className="badge">
-          <T en="Studio Owner Finance" ar="مالية صاحب الاستوديو" />
-        </span>
-
-        <h1>
-          <T en="Bank Account" ar="الحساب البنكي" />
-        </h1>
-
-        <p>
-          <T
-            en="Add the bank account where GearBeat payouts will be transferred after your bookings are completed and approved for payout."
-            ar="أضف الحساب البنكي الذي سيتم تحويل مستحقات GearBeat إليه بعد اكتمال الحجوزات واعتمادها للبياوت."
-          />
-        </p>
-      </div>
-
-      <div className="actions" style={{ marginBottom: 24 }}>
-        <Link href="/portal/studio" className="btn btn-secondary">
-          <T en="Back to Dashboard" ar="العودة إلى لوحة التحكم" />
-        </Link>
-
-        <Link href="/portal/studio/payouts" className="btn btn-secondary">
-          <T en="Finance Overview" ar="نظرة مالية" />
-        </Link>
-
-        <Link href="/portal/studio/payouts" className="btn btn-secondary">
-          <T en="Payouts" ar="البياوت" />
-        </Link>
-      </div>
-
-      {params?.saved ? (
-        <div className="success" style={{ marginBottom: 24 }}>
-          <T
-            en="Bank account saved and sent for admin review."
-            ar="تم حفظ الحساب البنكي وإرساله لمراجعة الإدارة."
-          />
-        </div>
-      ) : null}
-
-      <div className="admin-detail-grid">
-        <div className="card">
-          <span className="badge">
-            <T en="Current Status" ar="الحالة الحالية" />
-          </span>
-
-          {defaultBankAccount ? (
-            <>
-              <h2>{defaultBankAccount.bank_name}</h2>
-
-              <p>
-                <T en="Beneficiary:" ar="اسم المستفيد:" />{" "}
-                <strong>{defaultBankAccount.beneficiary_name}</strong>
-              </p>
-
-              <p>
-                <T en="IBAN:" ar="الآيبان:" />{" "}
-                <strong>{defaultBankAccount.iban}</strong>
-              </p>
-
-              <span
-                className="badge"
-                style={bankStatusStyle(defaultBankAccount.account_status)}
-              >
-                {defaultBankAccount.account_status}
-              </span>
-
-              {defaultBankAccount.rejection_reason ? (
-                <p style={{ marginTop: 14 }}>
-                  <T en="Rejection reason:" ar="سبب الرفض:" />{" "}
-                  {defaultBankAccount.rejection_reason}
-                </p>
-              ) : null}
-
-              {defaultBankAccount.account_status === "approved" ? (
-                <p style={{ marginTop: 14 }}>
-                  <T
-                    en="This bank account is approved for payouts."
-                    ar="هذا الحساب البنكي معتمد للتحويلات."
-                  />
-                </p>
-              ) : null}
-
-              {defaultBankAccount.account_status === "pending_review" ? (
-                <p style={{ marginTop: 14 }}>
-                  <T
-                    en="Your bank account is waiting for admin review."
-                    ar="حسابك البنكي بانتظار مراجعة الإدارة."
-                  />
-                </p>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <h2>
-                <T en="No bank account yet" ar="لا يوجد حساب بنكي بعد" />
-              </h2>
-
-              <p>
-                <T
-                  en="Add your bank account details to receive future payouts."
-                  ar="أضف بيانات حسابك البنكي لاستلام التحويلات المستقبلية."
-                />
-              </p>
-            </>
-          )}
-        </div>
-
-        <form className="card form" action={saveBankAccount}>
-          <span className="badge">
-            <T en="Bank Details" ar="بيانات البنك" />
-          </span>
-
-          <h2>
-            <T en="Payout bank account" ar="حساب تحويل المستحقات" />
-          </h2>
-
-          <p>
+    <main className="gb-dashboard-page container">
+      <section className="gb-dashboard-header">
+        <div>
+          <p className="gb-eyebrow">
+            <T en="Owner Portal" ar="بوابة المالك" />
+          </p>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
+            <T en="Bank Account" ar="الحساب البنكي" />
+          </h1>
+          <p className="gb-muted-text" style={{ marginTop: '8px' }}>
             <T
-              en="Any update to an approved bank account will require admin review again before payouts can be sent."
-              ar="أي تعديل على حساب بنكي معتمد سيحتاج مراجعة الإدارة مرة أخرى قبل إرسال التحويلات."
+              en="Manage your withdrawal bank account. Payouts are transferred here after bookings are completed."
+              ar="أدر حسابك البنكي للسحب. سيتم تحويل المستحقات هنا بعد اكتمال الحجوزات."
             />
           </p>
-
-          <label>
-            <T en="Bank name" ar="اسم البنك" />
-          </label>
-          <input
-            className="input"
-            name="bank_name"
-            defaultValue={defaultBankAccount?.bank_name || ""}
-            placeholder="Example: Al Rajhi Bank"
-            required
-          />
-
-          <label>
-            <T en="IBAN" ar="الآيبان" />
-          </label>
-          <input
-            className="input"
-            name="iban"
-            defaultValue={defaultBankAccount?.iban || ""}
-            placeholder="SA0000000000000000000000"
-            required
-          />
-
-          <label>
-            <T en="Beneficiary name" ar="اسم المستفيد" />
-          </label>
-          <input
-            className="input"
-            name="beneficiary_name"
-            defaultValue={defaultBankAccount?.beneficiary_name || ""}
-            placeholder="Company or account holder name"
-            required
-          />
-
-          <button className="btn" type="submit">
-            <T en="Save Bank Account" ar="حفظ الحساب البنكي" />
-          </button>
-        </form>
-      </div>
-
-      <div style={{ height: 24 }} />
-
-      <div className="card">
-        <span className="badge">
-          <T en="Important" ar="مهم" />
-        </span>
-
-        <h2>
-          <T en="How payouts will work" ar="كيف سيتم تحويل المستحقات" />
-        </h2>
-
-        <div className="admin-list">
-          <div className="admin-list-row">
-            <div>
-              <strong>
-                <T en="1. Customer pays GearBeat" ar="1. العميل يدفع لـ GearBeat" />
-              </strong>
-              <p>
-                <T
-                  en="The customer payment is recorded under the booking."
-                  ar="يتم تسجيل دفعة العميل على الحجز."
-                />
-              </p>
-            </div>
-          </div>
-
-          <div className="admin-list-row">
-            <div>
-              <strong>
-                <T en="2. Booking is completed" ar="2. يتم إكمال الحجز" />
-              </strong>
-              <p>
-                <T
-                  en="After the session is completed, the booking becomes eligible for settlement."
-                  ar="بعد انتهاء الجلسة، يصبح الحجز مؤهلًا للتسوية."
-                />
-              </p>
-            </div>
-          </div>
-
-          <div className="admin-list-row">
-            <div>
-              <strong>
-                <T en="3. GearBeat calculates payout" ar="3. GearBeat يحسب البياوت" />
-              </strong>
-              <p>
-                <T
-                  en="Commission is deducted, and the net amount becomes available for payout."
-                  ar="يتم خصم العمولة، ويصبح صافي المبلغ متاحًا للتحويل."
-                />
-              </p>
-            </div>
-          </div>
-
-          <div className="admin-list-row">
-            <div>
-              <strong>
-                <T en="4. Finance sends payout" ar="4. المالية ترسل التحويل" />
-              </strong>
-              <p>
-                <T
-                  en="Approved payouts are sent to your approved bank account."
-                  ar="يتم تحويل البياوت المعتمد إلى حسابك البنكي المعتمد."
-                />
-              </p>
-            </div>
-          </div>
         </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Link href="/portal/studio" className="gb-button gb-button-outline">
+            <T en="Back to Dashboard" ar="العودة للوحة التحكم" />
+          </Link>
+          <Link href="/portal/studio/payouts" className="gb-button gb-button-primary">
+            <T en="Finance Overview" ar="نظرة مالية" />
+          </Link>
+        </div>
+      </section>
+
+      {params?.saved && (
+        <div 
+          className="gb-card" 
+          style={{ 
+            marginBottom: '32px', 
+            borderInlineStart: '4px solid var(--gb-teal)', 
+            background: 'rgba(15, 160, 138, 0.05)', 
+            padding: '16px 24px' 
+          }}
+        >
+          <p style={{ margin: 0, color: 'var(--gb-teal)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>✅</span>
+            <T
+              en="Bank account details saved and sent for admin review."
+              ar="تم حفظ بيانات الحساب البنكي وإرسالها لمراجعة الإدارة."
+            />
+          </p>
+        </div>
+      )}
+
+      <div className="gb-dash-grid-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', alignItems: 'start', gap: '32px' }}>
+        <section className="gb-card" style={{ padding: '40px' }}>
+          <p className="gb-eyebrow" style={{ marginBottom: '24px' }}>
+            <T en="Current Active Account" ar="الحساب النشط حالياً" />
+          </p>
+
+          {defaultBankAccount ? (
+            <div className="gb-dashboard-stack" style={{ gap: '32px' }}>
+              <div>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'white', margin: '0 0 8px' }}>{defaultBankAccount.bank_name}</h2>
+                <span
+                  className="gb-dash-badge"
+                  style={{ 
+                    padding: '4px 12px',
+                    fontSize: '0.7rem',
+                    ...bankStatusStyle(defaultBankAccount.account_status)
+                  }}
+                >
+                  {defaultBankAccount.account_status.toUpperCase()}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gap: '24px' }}>
+                <div>
+                  <span className="gb-detail-label" style={{ marginBottom: '4px', display: 'block' }}><T en="Beneficiary Name" ar="اسم المستفيد" /></span>
+                  <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{defaultBankAccount.beneficiary_name}</div>
+                </div>
+
+                <div>
+                  <span className="gb-detail-label" style={{ marginBottom: '4px', display: 'block' }}><T en="IBAN Number" ar="رقم الآيبان" /></span>
+                  <div style={{ color: 'var(--gb-gold)', fontWeight: 900, fontSize: '1.25rem', letterSpacing: '1px', fontFamily: 'monospace' }}>{defaultBankAccount.iban}</div>
+                </div>
+              </div>
+
+              {defaultBankAccount.rejection_reason && (
+                <div style={{ padding: '20px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                  <span className="gb-detail-label" style={{ color: '#ef4444', marginBottom: '8px', display: 'block' }}><T en="Action Required" ar="مطلوب إجراء" /></span>
+                  <p style={{ margin: 0, color: 'white', fontSize: '0.9rem', lineHeight: 1.5 }}>{defaultBankAccount.rejection_reason}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="gb-empty-state" style={{ padding: '40px 0' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '24px', opacity: 0.2 }}>🏦</div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', marginBottom: '12px' }}>
+                <T en="No bank account linked" ar="لا يوجد حساب بنكي مرتبط" />
+              </h2>
+              <p className="gb-muted-text">
+                <T
+                  en="Add your bank details to enable automatic payouts for your bookings."
+                  ar="أضف بيانات البنك لتفعيل التحويلات التلقائية لحجوزاتك."
+                />
+              </p>
+            </div>
+          )}
+        </section>
+
+        <section className="gb-card" style={{ padding: '40px' }}>
+          <p className="gb-eyebrow" style={{ marginBottom: '24px' }}>
+            <T en="Update Bank Details" ar="تحديث بيانات البنك" />
+          </p>
+
+          <form action={saveBankAccount} className="gb-dashboard-stack" style={{ gap: '24px' }}>
+            <div>
+              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                <T en="Bank Name" ar="اسم البنك" />
+              </label>
+              <input
+                className="gb-input"
+                name="bank_name"
+                defaultValue={defaultBankAccount?.bank_name || ""}
+                placeholder="e.g. Al Rajhi Bank"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                <T en="IBAN Number" ar="رقم الآيبان" />
+              </label>
+              <input
+                className="gb-input"
+                name="iban"
+                defaultValue={defaultBankAccount?.iban || ""}
+                placeholder="SA..."
+                required
+                style={{ fontFamily: 'monospace' }}
+              />
+            </div>
+
+            <div>
+              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                <T en="Beneficiary Name" ar="اسم المستفيد" />
+              </label>
+              <input
+                className="gb-input"
+                name="beneficiary_name"
+                defaultValue={defaultBankAccount?.beneficiary_name || ""}
+                placeholder="Full name as per bank records"
+                required
+              />
+            </div>
+
+            <div style={{ marginTop: '8px' }}>
+              <button className="gb-button gb-button-primary" type="submit" style={{ width: '100%', justifyContent: 'center', height: '52px' }}>
+                <T en="Save & Submit for Review" ar="حفظ وإرسال للمراجعة" />
+              </button>
+              <p className="gb-muted-text" style={{ fontSize: '0.75rem', textAlign: 'center', marginTop: '16px' }}>
+                <T en="Changes will put your account into pending status for admin review." ar="التغييرات ستضع حسابك في حالة انتظار لمراجعة الإدارة." />
+              </p>
+            </div>
+          </form>
+        </section>
       </div>
-    </section>
+
+      <section className="gb-card" style={{ marginTop: '48px', padding: '40px' }}>
+        <p className="gb-eyebrow" style={{ marginBottom: '32px' }}>
+          <T en="Payout Lifecycle" ar="دورة حياة التحويلات" />
+        </p>
+
+        <div className="gb-dash-grid-4" style={{ gap: '32px' }}>
+          {[
+            { icon: "💰", titleEn: "1. Booking Payment", titleAr: "1. دفع الحجز", textEn: "Customer pays GearBeat securely at the time of booking.", textAr: "يدفع العميل لـ GearBeat بأمان عند الحجز." },
+            { icon: "🎵", titleEn: "2. Session Complete", titleAr: "2. اكتمال الجلسة", textEn: "Once the studio session ends, the amount is processed.", textAr: "بمجرد انتهاء الجلسة، تبدأ معالجة المبلغ." },
+            { icon: "⚖️", titleEn: "3. Net Calculation", titleAr: "3. حساب الصافي", textEn: "Platform fee is deducted and net profit is added to your ledger.", textAr: "تُخصم رسوم المنصة ويُضاف صافي الربح لسجلك." },
+            { icon: "🏦", titleEn: "4. Direct Transfer", titleAr: "4. تحويل مباشر", textEn: "Available balance is transferred to your verified bank account.", textAr: "يتم تحويل الرصيد المتاح لحسابك البنكي الموثق." }
+          ].map((step, idx) => (
+            <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '32px', borderRadius: '24px', border: '1px solid var(--gb-border)' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '20px' }}>{step.icon}</div>
+              <strong style={{ display: 'block', marginBottom: '12px', color: 'white', fontSize: '1rem', fontWeight: 800 }}>
+                <T en={step.titleEn} ar={step.titleAr} />
+              </strong>
+              <p className="gb-muted-text" style={{ fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
+                <T en={step.textEn} ar={step.textAr} />
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }

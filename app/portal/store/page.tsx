@@ -130,37 +130,16 @@ export default async function VendorDashboardPage() {
         <div style={{ display: 'flex', gap: '12px' }}>
           <Link 
             href="/portal/store/products/new"
-            style={{ 
-              background: 'linear-gradient(135deg, #cfa86e, #b8923a)', 
-              color: '#000', 
-              border: 'none',
-              borderRadius: '10px',
-              padding: '12px 24px',
-              fontWeight: 700,
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 15px rgba(207, 168, 110, 0.2)'
-            }}
+            className="gb-button gb-button-primary"
+            style={{ padding: '12px 24px' }}
           >
             <span>➕</span>
             <T en="Add Product" ar="إضافة منتج" />
           </Link>
           <Link 
             href="/portal/store/orders"
-            style={{ 
-              background: '#111', 
-              color: '#fff', 
-              border: '1px solid #222',
-              borderRadius: '10px',
-              padding: '12px 24px',
-              fontWeight: 700,
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
+            className="gb-button gb-button-outline"
+            style={{ padding: '12px 24px' }}
           >
             <span>🧾</span>
             <T en="View Orders" ar="عرض الطلبات" />
@@ -202,12 +181,12 @@ export default async function VendorDashboardPage() {
           className="gb-card" 
           style={{ 
             background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
+            border: '1px solid var(--gb-border)', 
             borderRadius: '20px', 
             padding: '24px', 
             position: 'relative', 
             overflow: 'hidden',
-            borderTop: '3px solid #3b82f6'
+            borderTop: '3px solid var(--gb-teal)'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
@@ -286,27 +265,27 @@ export default async function VendorDashboardPage() {
           marginBottom: '32px'
         }}
       >
-        <div style={{ textAlign: 'center', borderRight: '1px solid #222' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
+        <div style={{ textAlign: 'center', borderRight: '1px solid var(--gb-border)' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}>
             <T en="Avg Order Value" ar="متوسط قيمة الطلب" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#cfa86e' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
             {totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0} <small style={{ fontSize: '0.8rem' }}>SAR</small>
           </div>
         </div>
-        <div style={{ textAlign: 'center', borderRight: '1px solid #222' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
+        <div style={{ textAlign: 'center', borderRight: '1px solid var(--gb-border)' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}>
             <T en="Completion Rate" ar="معدل الإكمال" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#cfa86e' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
             {totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0}%
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}>
             <T en="Total Products" ar="إجمالي المنتجات" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#cfa86e' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
             {totalProducts}
           </div>
         </div>
@@ -365,15 +344,13 @@ export default async function VendorDashboardPage() {
                             fontSize: '0.75rem',
                             fontWeight: 600,
                             background: 
-                              order.status === 'delivered' ? 'rgba(34, 197, 94, 0.1)' :
+                              order.status === 'delivered' ? 'rgba(15, 160, 138, 0.1)' :
                               order.status === 'cancelled' ? 'rgba(239, 68, 68, 0.1)' :
-                              order.status === 'pending' ? 'rgba(234, 179, 8, 0.1)' :
-                              'rgba(59, 130, 246, 0.1)',
+                              'rgba(212, 175, 55, 0.1)',
                             color:
-                              order.status === 'delivered' ? '#22c55e' :
+                              order.status === 'delivered' ? 'var(--gb-teal)' :
                               order.status === 'cancelled' ? '#ef4444' :
-                              order.status === 'pending' ? '#eab308' :
-                              '#3b82f6'
+                              'var(--gb-gold)'
                           }}
                         >
                           {order.status}

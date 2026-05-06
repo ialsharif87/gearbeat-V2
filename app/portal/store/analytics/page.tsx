@@ -135,12 +135,12 @@ export default function VendorAnalyticsPage() {
       datasets: [{
         label: "Revenue (SAR)",
         data,
-        borderColor: "#cfa86e",
-        backgroundColor: "rgba(207, 168, 110, 0.1)",
+        borderColor: "var(--gb-gold)",
+        backgroundColor: "rgba(212, 175, 55, 0.1)",
         fill: true,
         tension: 0.4,
         pointRadius: 4,
-        pointBackgroundColor: "#cfa86e"
+        pointBackgroundColor: "var(--gb-gold)"
       }]
     }
   }, [orders])
@@ -179,7 +179,7 @@ export default function VendorAnalyticsPage() {
           <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0 }}>
             <T en="Sales Analytics" ar="تحليلات المبيعات" />
           </h1>
-          <p style={{ color: '#cfa86e', fontSize: '0.9rem', marginTop: '4px' }}>
+          <p style={{ color: 'var(--gb-gold)', fontSize: '0.9rem', marginTop: '4px' }}>
             {range === '7D' && <T en="Last 7 Days" ar="آخر 7 أيام" />}
             {range === '30D' && <T en="Last 30 Days" ar="آخر 30 يوم" />}
             {range === 'CM' && <T en="Current Month Analysis" ar="تحليل الشهر الحالي" />}
@@ -190,15 +190,8 @@ export default function VendorAnalyticsPage() {
         </div>
         <button 
           onClick={exportCSV}
-          style={{ 
-            background: 'linear-gradient(135deg, #cfa86e, #b8923a)', 
-            color: '#000', 
-            border: 'none', 
-            borderRadius: '10px', 
-            padding: '10px 20px', 
-            fontWeight: 700, 
-            cursor: 'pointer' 
-          }}
+          className="gb-button gb-button-primary"
+          style={{ padding: '10px 20px' }}
         >
           📥 <T en="Export CSV" ar="تصدير CSV" />
         </button>
@@ -207,22 +200,22 @@ export default function VendorAnalyticsPage() {
       {/* Range Selectors */}
       <div style={{ display: 'flex', gap: '8px', background: '#111', border: '1px solid #222', borderRadius: '99px', padding: '6px', width: 'fit-content', marginBottom: '32px' }}>
         {["7D", "30D", "CM", "YTD", "LY", "Custom"].map(r => (
-          <button
-            key={r}
-            onClick={() => setRange(r)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '99px',
-              border: 'none',
-              background: range === r ? '#cfa86e' : 'transparent',
-              color: range === r ? '#000' : '#888',
-              fontWeight: range === r ? 700 : 400,
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-          >
-            {r}
-          </button>
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '99px',
+                border: 'none',
+                background: range === r ? 'var(--gb-gold)' : 'transparent',
+                color: range === r ? '#000' : 'var(--gb-text-muted)',
+                fontWeight: range === r ? 800 : 400,
+                cursor: 'pointer',
+                transition: '0.2s'
+              }}
+            >
+              {r}
+            </button>
         ))}
       </div>
 
@@ -235,24 +228,24 @@ export default function VendorAnalyticsPage() {
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
-        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #cfa86e', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Revenue" ar="الإيراد" /></div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.revenue.toLocaleString()} <small style={{ fontSize: '0.9rem', color: '#666' }}>SAR</small></div>
+        <div style={{ background: 'var(--gb-card)', borderRadius: '20px', border: '1px solid var(--gb-border)', padding: '24px', borderTop: '3px solid var(--gb-gold)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: 'var(--gb-text-muted)', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Revenue" ar="الإيراد" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.revenue.toLocaleString()} <small style={{ fontSize: '0.9rem', color: 'var(--gb-text-muted)' }}>SAR</small></div>
           <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>💰</span>
         </div>
-        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #3b82f6', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Orders" ar="الطلبات" /></div>
+        <div style={{ background: 'var(--gb-card)', borderRadius: '20px', border: '1px solid var(--gb-border)', padding: '24px', borderTop: '3px solid var(--gb-teal)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: 'var(--gb-text-muted)', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Orders" ar="الطلبات" /></div>
           <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.orderCount}</div>
           <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>🧾</span>
         </div>
-        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #22c55e', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Top Product" ar="أفضل منتج" /></div>
+        <div style={{ background: 'var(--gb-card)', borderRadius: '20px', border: '1px solid var(--gb-border)', padding: '24px', borderTop: '3px solid #22c55e', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: 'var(--gb-text-muted)', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Top Product" ar="أفضل منتج" /></div>
           <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{stats.topProduct}</div>
           <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>🏆</span>
         </div>
-        <div style={{ background: '#111', borderRadius: '20px', border: '1px solid #1e1e1e', padding: '24px', borderTop: '3px solid #a855f7', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ color: '#888', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Avg Order Value" ar="متوسط قيمة الطلب" /></div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{Math.round(stats.avgOrderValue)} <small style={{ fontSize: '0.9rem', color: '#666' }}>SAR</small></div>
+        <div style={{ background: 'var(--gb-card)', borderRadius: '20px', border: '1px solid var(--gb-border)', padding: '24px', borderTop: '3px solid #a855f7', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ color: 'var(--gb-text-muted)', fontSize: '0.8rem', marginBottom: '8px' }}><T en="Avg Order Value" ar="متوسط قيمة الطلب" /></div>
+          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{Math.round(stats.avgOrderValue)} <small style={{ fontSize: '0.9rem', color: 'var(--gb-text-muted)' }}>SAR</small></div>
           <span style={{ position: 'absolute', bottom: -10, right: -10, fontSize: '4rem', opacity: 0.05 }}>📊</span>
         </div>
       </div>
@@ -283,18 +276,18 @@ export default function VendorAnalyticsPage() {
       </div>
 
       {/* Summary Strip */}
-      <div style={{ background: '#111', borderRadius: '16px', border: '1px solid #1e1e1e', padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px', marginBottom: '32px' }}>
+      <div style={{ background: 'var(--gb-card)', borderRadius: '16px', border: '1px solid var(--gb-border)', padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px', marginBottom: '32px' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}><T en="Completion Rate" ar="معدل الإكمال" /></div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#cfa86e' }}>{Math.round(stats.completionRate)}%</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}><T en="Completion Rate" ar="معدل الإكمال" /></div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--gb-gold)' }}>{Math.round(stats.completionRate)}%</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}><T en="Avg Order Value" ar="متوسط قيمة الطلب" /></div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#cfa86e' }}>{Math.round(stats.avgOrderValue)} <small style={{ fontSize: '0.9rem' }}>SAR</small></div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}><T en="Avg Order Value" ar="متوسط قيمة الطلب" /></div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--gb-gold)' }}>{Math.round(stats.avgOrderValue)} <small style={{ fontSize: '0.9rem' }}>SAR</small></div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}><T en="Total Products Sold" ar="إجمالي المنتجات المباعة" /></div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#cfa86e' }}>{stats.totalItemsSold}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}><T en="Total Products Sold" ar="إجمالي المنتجات المباعة" /></div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--gb-gold)' }}>{stats.totalItemsSold}</div>
         </div>
       </div>
 
@@ -323,8 +316,8 @@ export default function VendorAnalyticsPage() {
                       padding: '4px 12px', 
                       borderRadius: '99px', 
                       fontSize: '0.75rem', 
-                      background: o.status === 'delivered' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)',
-                      color: o.status === 'delivered' ? '#22c55e' : '#3b82f6'
+                      background: o.status === 'delivered' ? 'rgba(15,160,138,0.1)' : 'rgba(212,175,55,0.1)',
+                      color: o.status === 'delivered' ? 'var(--gb-teal)' : 'var(--gb-gold)'
                     }}>
                       {o.status}
                     </span>

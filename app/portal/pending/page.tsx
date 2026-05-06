@@ -48,14 +48,15 @@ export default function PortalPendingPage() {
           width: 100%;
           max-width: 500px;
           padding: 48px;
-          background: var(--gb-surface);
+          background: var(--gb-card);
           border: 1px solid var(--gb-border);
           border-radius: 32px;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+          box-shadow: var(--shadow-premium);
         }
         .portal-pending-logo {
           height: 40px;
           margin-bottom: 40px;
+          filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.2));
         }
         .portal-pending-status {
           margin-bottom: 24px;
@@ -64,24 +65,26 @@ export default function PortalPendingPage() {
         }
         .status-badge {
           display: inline-flex;
-          padding: 6px 16px;
-          background: rgba(214, 179, 92, 0.1);
+          padding: 8px 20px;
+          background: rgba(212, 175, 55, 0.05);
           border: 1px solid var(--gb-gold);
           border-radius: 99px;
           color: var(--gb-gold);
           font-size: 0.8rem;
           font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.1em;
         }
         .portal-pending-card h1 {
           font-size: 2rem;
           margin: 0 0 16px;
           color: var(--gb-text);
           line-height: 1.2;
+          font-weight: 800;
         }
         .portal-pending-card p {
-          font-size: 1.1rem;
+          font-size: 1rem;
+          color: var(--gb-text-muted);
           margin-bottom: 40px;
           line-height: 1.6;
         }
@@ -94,7 +97,17 @@ export default function PortalPendingPage() {
           min-height: 48px;
           padding: 0 32px;
           font-size: 1rem;
-          font-weight: 700;
+          font-weight: 800;
+          background: var(--gb-gold);
+          color: #000;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: var(--transition);
+        }
+        .portal-pending-actions .btn:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-gold);
         }
       `}} />
     </div>

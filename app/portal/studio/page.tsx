@@ -129,17 +129,20 @@ export default async function StudioDashboardPage() {
   };
 
   return (
-    <div className="dashboard-container">
+    <main className="gb-dashboard-page container">
       {/* SECTION 1: Welcome Bar */}
-      <div className="welcome-bar">
-        <div className="welcome-text">
-          <h1>
+      <section className="gb-dashboard-header">
+        <div>
+          <p className="gb-eyebrow">
+            <T en="Owner Overview" ar="نظرة عامة للمالك" />
+          </p>
+          <h1 style={{ fontSize: '2.8rem', fontWeight: 900, margin: 0, color: 'white', letterSpacing: '-1px' }}>
             <T 
-              en={`Welcome, ${ownerName}`} 
-              ar={`مرحباً، ${ownerName}`} 
+              en={`Welcome back, ${ownerName}`} 
+              ar={`مرحباً بعودتك، ${ownerName}`} 
             />
           </h1>
-          <p className="date-display">
+          <p className="gb-muted-text" style={{ marginTop: '8px', fontSize: '1.1rem' }}>
             {new Date().toLocaleDateString("en-GB", { 
               weekday: 'long', 
               year: 'numeric', 
@@ -149,465 +152,211 @@ export default async function StudioDashboardPage() {
           </p>
         </div>
         <div className="welcome-badge">
-          <span className="badge-gold">
-            <T en="Studio Portal" ar="بوابة الاستوديو" />
+          <span className="gb-dash-badge" style={{ padding: '8px 20px', fontSize: '0.8rem', background: 'rgba(212, 175, 55, 0.05)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+            <T en="Premium Portal" ar="البوابة الفاخرة" />
           </span>
         </div>
-      </div>
+      </section>
 
       {/* SECTION 2: Stats Row */}
-      <div className="stats-row">
-        <div className="stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <div className="stat-number">{totalBookingsMonth}</div>
-            <div className="stat-label">
-              <T en="Bookings this month" ar="حجوزات هذا الشهر" />
+      <section className="gb-dash-grid-4" style={{ marginBottom: '40px' }}>
+        {[
+          { icon: "📅", val: totalBookingsMonth, labelEn: "Month Bookings", labelAr: "حجوزات الشهر", color: 'var(--gb-gold)' },
+          { icon: "⏳", val: pendingBookings, labelEn: "Action Required", labelAr: "طلبات معلقة", color: 'white' },
+          { icon: "💰", val: `${totalRevenue.toLocaleString()} SAR`, labelEn: "Net Revenue", labelAr: "صافي الأرباح", color: 'var(--gb-teal)' },
+          { icon: "⭐", val: avgRating, labelEn: "Studio Rating", labelAr: "تقييم الاستوديو", color: 'var(--gb-gold)' }
+        ].map((stat, idx) => (
+          <div key={idx} className="gb-card" style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 32px' }}>
+            <div style={{ fontSize: '2.4rem', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))' }}>{stat.icon}</div>
+            <div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: stat.color, letterSpacing: '-0.5px' }}>{stat.val}</div>
+              <div className="gb-eyebrow" style={{ fontSize: '0.7rem', marginTop: '2px' }}>
+                <T en={stat.labelEn} ar={stat.labelAr} />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <div className="stat-number">{pendingBookings}</div>
-            <div className="stat-label">
-              <T en="Pending bookings" ar="حجوزات معلقة" />
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <div className="stat-number">{totalRevenue.toLocaleString()} <span className="currency">SAR</span></div>
-            <div className="stat-label">
-              <T en="Revenue this month" ar="أرباح هذا الشهر" />
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-content">
-            <div className="stat-number">{avgRating}</div>
-            <div className="stat-label">
-              <T en="Rating average" ar="متوسط التقييم" />
-            </div>
-          </div>
-        </div>
-      </div>
+        ))}
+      </section>
 
       {/* SECTION 3: Two Columns */}
-      <div className="dashboard-grid">
+      <div className="gb-dash-grid-4" style={{ gridTemplateColumns: '1fr 380px', gap: '32px', marginBottom: '40px' }}>
         {/* LEFT COLUMN: Recent Bookings */}
-        <div className="grid-left">
-          <div className="content-card">
-            <div className="card-header">
-              <h2><T en="Recent Bookings" ar="أحدث الحجوزات" /></h2>
-              <Link href="/portal/studio/bookings" className="view-all">
-                <T en="View all bookings" ar="عرض كل الحجوزات" />
-              </Link>
-            </div>
-            <div className="table-wrapper">
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th><T en="Customer" ar="العميل" /></th>
-                    <th><T en="Studio" ar="الاستوديو" /></th>
-                    <th><T en="Date" ar="التاريخ" /></th>
-                    <th><T en="Time" ar="الوقت" /></th>
-                    <th><T en="Amount" ar="المبلغ" /></th>
-                    <th><T en="Status" ar="الحالة" /></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentBookings.length > 0 ? (
-                    recentBookings.map((booking: any) => (
-                      <tr key={booking.id}>
-                        <td>{booking.profiles?.full_name || "Guest"}</td>
-                        <td>{booking.studios?.name}</td>
-                        <td>{formatDate(booking.start_time)}</td>
-                        <td>{formatTime(booking.start_time)}</td>
-                        <td>{booking.total_amount} SAR</td>
-                        <td>
-                          <span className={`status-pill ${booking.status}`}>
-                            {booking.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>
-                        <T en="No recent bookings found" ar="لا توجد حجوزات حديثة" />
+        <section className="gb-card" style={{ padding: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'white', margin: 0 }}>
+              <T en="Recent Activity" ar="النشاط الأخير" />
+            </h2>
+            <Link href="/portal/studio/bookings" className="gb-button gb-button-outline" style={{ height: '36px', fontSize: '0.8rem', padding: '0 16px' }}>
+              <T en="View All" ar="عرض الكل" />
+            </Link>
+          </div>
+          
+          <div className="gb-table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+              <thead>
+                <tr style={{ textAlign: 'start' }}>
+                  <th className="gb-detail-label" style={{ padding: '0 16px 12px' }}><T en="Customer" ar="العميل" /></th>
+                  <th className="gb-detail-label" style={{ padding: '0 16px 12px' }}><T en="Studio" ar="الاستوديو" /></th>
+                  <th className="gb-detail-label" style={{ padding: '0 16px 12px' }}><T en="Schedule" ar="الجدول" /></th>
+                  <th className="gb-detail-label" style={{ padding: '0 16px 12px' }}><T en="Total" ar="الإجمالي" /></th>
+                  <th className="gb-detail-label" style={{ padding: '0 16px 12px' }}><T en="Status" ar="الحالة" /></th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentBookings.length > 0 ? (
+                  recentBookings.map((booking: any) => (
+                    <tr key={booking.id} style={{ background: 'rgba(255,255,255,0.02)', transition: 'background 0.2s' }}>
+                      <td style={{ padding: '16px', borderRadius: '12px 0 0 12px', border: '1px solid var(--gb-border)', borderRight: 'none', color: 'white', fontWeight: 700 }}>
+                        {booking.profiles?.full_name || "Guest"}
+                      </td>
+                      <td style={{ padding: '16px', borderTop: '1px solid var(--gb-border)', borderBottom: '1px solid var(--gb-border)', color: 'rgba(255,255,255,0.7)' }}>
+                        {booking.studios?.name}
+                      </td>
+                      <td style={{ padding: '16px', borderTop: '1px solid var(--gb-border)', borderBottom: '1px solid var(--gb-border)' }}>
+                        <div style={{ color: 'white', fontSize: '0.9rem', fontWeight: 600 }}>{formatDate(booking.start_time)}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}>{formatTime(booking.start_time)}</div>
+                      </td>
+                      <td style={{ padding: '16px', borderTop: '1px solid var(--gb-border)', borderBottom: '1px solid var(--gb-border)', color: 'var(--gb-gold)', fontWeight: 900 }}>
+                        {booking.total_amount} <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>SAR</span>
+                      </td>
+                      <td style={{ padding: '16px', borderRadius: '0 12px 12px 0', border: '1px solid var(--gb-border)', borderLeft: 'none', textAlign: 'right' }}>
+                        <span 
+                          className="gb-dash-badge"
+                          style={{ 
+                            padding: '4px 12px', 
+                            fontSize: '0.7rem', 
+                            background: 
+                              booking.status === 'confirmed' ? 'rgba(15, 160, 138, 0.1)' :
+                              booking.status === 'cancelled' ? 'rgba(239, 68, 68, 0.1)' :
+                              'rgba(212, 175, 55, 0.1)',
+                            color:
+                              booking.status === 'confirmed' ? 'var(--gb-teal)' :
+                              booking.status === 'cancelled' ? '#ef4444' :
+                              'var(--gb-gold)',
+                            border: '1px solid currentColor'
+                          }}
+                        >
+                          {booking.status.toUpperCase()}
+                        </span>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '60px' }}>
+                      <div className="gb-empty-state">
+                        <T en="No recent activity found." ar="لا يوجد نشاط حديث." />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
+        </section>
 
         {/* RIGHT COLUMN: Partner Status & Quick Actions */}
-        <div className="grid-right">
-          <div className="content-card partner-status-card" style={{ marginBottom: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2><T en="Partner Status" ar="حالة الشريك" /></h2>
-              {cert?.status === 'approved' ? (
-                <span className="badge badge-success-mini">✓ <T en="Certified" ar="موثق" /></span>
-              ) : (
-                <span className="badge badge-muted-mini"><T en="Pending" ar="تحت المراجعة" /></span>
-              )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <section className="gb-card" style={{ padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white', margin: 0 }}><T en="Partner Level" ar="مستوى الشريك" /></h2>
+              <Link href="/portal/studio/partner-status" style={{ fontSize: '0.8rem', color: 'var(--gb-gold)', textDecoration: 'none', fontWeight: 700 }}>
+                <T en="Details" ar="التفاصيل" />
+              </Link>
             </div>
             
-            <div className="tier-display" style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div className={`tier-tag tier-${tier?.level || 1}`} style={{ fontSize: '1.2rem', padding: '10px 20px' }}>
-                <T en={tier?.name_en || 'Verified Studio'} ar={tier?.name_ar || 'استوديو موثق'} />
+            <div style={{ textAlign: 'center', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid var(--gb-border)', marginBottom: '24px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🏆</div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'white', margin: '0 0 8px' }}>
+                <T en={tier?.name_en || 'Verified Member'} ar={tier?.name_ar || 'عضو موثق'} />
+              </h3>
+              <div className="gb-dash-badge" style={{ 
+                display: 'inline-flex',
+                background: cert?.status === 'approved' ? 'rgba(15, 160, 138, 0.1)' : 'rgba(212, 175, 55, 0.1)',
+                color: cert?.status === 'approved' ? 'var(--gb-teal)' : 'var(--gb-gold)',
+                border: '1px solid currentColor',
+                padding: '4px 16px',
+                fontSize: '0.7rem'
+              }}>
+                {cert?.status === 'approved' ? <T en="FULLY CERTIFIED" ar="موثق بالكامل" /> : <T en="UNDER REVIEW" ar="تحت المراجعة" />}
               </div>
-              <p style={{ marginTop: 12, fontSize: '0.85rem', color: 'var(--gb-muted)' }}>
-                <T en="Complete more bookings to reach the next tier." ar="أكمل المزيد من الحجوزات للوصول للمستوى التالي." />
-              </p>
             </div>
-
-            <Link href="/portal/studio/partner-status" className="view-all" style={{ display: 'block', textAlign: 'center', marginBottom: 12 }}>
-              <T en="View partner rewards" ar="عرض مكافآت الشريك" />
-            </Link>
 
             {kitOrder && (
-              <div className="kit-status" style={{ background: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--gb-muted)', marginBottom: 4 }}>
-                  <T en="Welcome Kit Status" ar="حالة الهدية الترحيبية" />
+              <div style={{ background: 'rgba(212, 175, 55, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(212, 175, 55, 0.1)' }}>
+                <div className="gb-detail-label" style={{ marginBottom: '8px' }}>
+                  <T en="Welcome Package" ar="الهدية الترحيبية" />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong style={{ fontSize: '0.9rem' }}>{kitOrder.status.toUpperCase()}</strong>
-                  <span style={{ fontSize: '1.2rem' }}>📦</span>
+                  <strong style={{ fontSize: '0.9rem', color: 'white', letterSpacing: '1px' }}>{kitOrder.status.toUpperCase()}</strong>
+                  <span style={{ fontSize: '1.4rem' }}>🎁</span>
                 </div>
               </div>
             )}
-          </div>
+          </section>
 
-          <div className="content-card actions-card">
-            <h2><T en="Quick Actions" ar="إجراءات سريعة" /></h2>
-            <div className="actions-list">
-              <Link href="/portal/studio/studios" className="action-btn">
-                <span>🎙️</span> <T en="My Studios" ar="استوديوهاتي" />
-              </Link>
-              <Link href="/portal/studio/availability" className="action-btn">
-                <span>📅</span> <T en="Availability" ar="التوافر" />
-              </Link>
-              <Link href="/portal/studio/payouts" className="action-btn">
-                <span>💰</span> <T en="Payouts" ar="التحويلات المالية" />
-              </Link>
-              <Link href="/portal/studio/boost" className="action-btn">
-                <span>🚀</span> <T en="Boost" ar="التسريع" />
-              </Link>
-              <Link href="/portal/studio/reviews" className="action-btn">
-                <span>⭐</span> <T en="Reviews" ar="التقييمات" />
-              </Link>
+          <section className="gb-card" style={{ padding: '32px' }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white', margin: '0 0 24px' }}><T en="Management" ar="الإدارة" /></h2>
+            <div className="gb-dashboard-stack" style={{ gap: '12px' }}>
+              {[
+                { href: "/portal/studio/studios", icon: "🎙️", label: "My Studios", ar: "استوديوهاتي" },
+                { href: "/portal/studio/availability", icon: "🗓️", label: "Availability", ar: "التوافر" },
+                { href: "/portal/studio/payouts", icon: "💳", label: "Earnings", ar: "الأرباح" },
+                { href: "/portal/studio/boost", icon: "🚀", label: "Visibility", ar: "الظهور" },
+                { href: "/portal/studio/settings", icon: "⚙️", label: "Settings", ar: "الإعدادات" },
+              ].map(btn => (
+                <Link 
+                  key={btn.href}
+                  href={btn.href} 
+                  className="gb-button gb-button-outline"
+                  style={{ justifyContent: 'flex-start', height: '48px', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)' }}
+                >
+                  <span style={{ fontSize: '1.2rem', marginRight: '12px', opacity: 0.6 }}>{btn.icon}</span> 
+                  <T en={btn.label} ar={btn.ar} />
+                </Link>
+              ))}
             </div>
-          </div>
+          </section>
         </div>
       </div>
 
-      {/* SECTION 4: Bottom Strip */}
-      <div className="bottom-strip">
-        <div className="progress-card">
-          <div className="progress-info">
-            <div className="progress-text">
-              <h3><T en="Complete your profile" ar="أكمل ملفك الشخصي" /></h3>
+      {/* SECTION 4: Profile Completion Strip */}
+      <section className="gb-card" style={{ padding: '32px 40px', borderInlineStart: '8px solid var(--gb-gold)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'white', margin: '0 0 4px' }}>
+              <T en="Elevate Your Profile" ar="ارفع مستوى ملفك" />
+            </h3>
+            <p className="gb-muted-text" style={{ fontSize: '1rem' }}>
               {studioScore < 100 ? (
-                <p>
-                  <T 
-                    en={`Your studio profile is ${studioScore}% complete`} 
-                    ar={`ملف الاستوديو الخاص بك مكتمل بنسبة ${studioScore}%`} 
-                  />
-                </p>
+                <T 
+                  en={`Your studio ranking profile is ${studioScore}% complete. Reach 100% for maximum visibility.`} 
+                  ar={`ملف تصنيف الاستوديو الخاص بك مكتمل بنسبة ${studioScore}%. صل إلى 100% لأقصى قدر من الظهور.`} 
+                />
               ) : (
-                <p><T en="Your profile is 100% complete. Great job!" ar="ملفك الشخصي مكتمل 100%. عمل رائع!" /></p>
+                <T en="Your profile is optimized for maximum booking conversion. Excellent work!" ar="ملفك الشخصي محسن لأعلى معدلات الحجز. عمل ممتاز!" />
               )}
-            </div>
-            {studioScore < 100 && (
-              <Link href="/portal/studio/studios" className="btn-gold-small">
-                <T en="Complete now" ar="أكمل الآن" />
-              </Link>
-            )}
+            </p>
           </div>
-          <div className="progress-bar-container">
-            <div className="progress-bar-bg">
-              <div 
-                className="progress-bar-fill" 
-                style={{ width: `${studioScore}%` }}
-              ></div>
-            </div>
-          </div>
+          {studioScore < 100 && (
+            <Link href="/portal/studio/studios" className="gb-button gb-button-primary" style={{ padding: '0 32px' }}>
+              <T en="Complete Now" ar="أكمل الآن" />
+            </Link>
+          )}
         </div>
-      </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .dashboard-container {
-          padding: 20px 0;
-          color: var(--gb-text, #fff);
-          background: var(--gb-bg, #0a0a0a);
-          display: flex;
-          flex-direction: column;
-          gap: 32px;
-        }
-
-        .welcome-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .welcome-text h1 {
-          font-size: 1.8rem;
-          margin: 0 0 4px;
-        }
-
-        .date-display {
-          color: var(--gb-muted, #888);
-          font-size: 0.9rem;
-        }
-
-        .badge-gold {
-          background: rgba(207, 168, 110, 0.1);
-          border: 1px solid var(--gb-gold, #cfa86e);
-          color: var(--gb-gold, #cfa86e);
-          padding: 6px 16px;
-          border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: 700;
-          text-transform: uppercase;
-        }
-
-        .stats-row {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-        }
-
-        .stat-card {
-          background: var(--gb-surface, #111);
-          border: 1px solid #222;
-          padding: 24px;
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-          transform: translateY(-4px);
-          border-color: var(--gb-gold, #cfa86e);
-        }
-
-        .stat-icon {
-          font-size: 2rem;
-          opacity: 0.8;
-        }
-
-        .stat-number {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--gb-gold, #cfa86e);
-          margin-bottom: 4px;
-        }
-
-        .stat-number .currency {
-          font-size: 0.8rem;
-          opacity: 0.6;
-        }
-
-        .stat-label {
-          font-size: 0.85rem;
-          color: var(--gb-muted, #888);
-        }
-
-        .dashboard-grid {
-          display: grid;
-          grid-template-columns: 7fr 3fr;
-          gap: 32px;
-        }
-
-        .content-card {
-          background: var(--gb-surface, #111);
-          border: 1px solid #222;
-          border-radius: 20px;
-          padding: 24px;
-        }
-
-        .card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-        }
-
-        .card-header h2 {
-          font-size: 1.2rem;
-          margin: 0;
-        }
-
-        .view-all {
-          color: var(--gb-gold, #cfa86e);
-          font-size: 0.9rem;
-          text-decoration: none;
-        }
-
-        .view-all:hover {
-          text-decoration: underline;
-        }
-
-        .table-wrapper {
-          overflow-x: auto;
-        }
-
-        .dashboard-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 0.9rem;
-        }
-
-        .dashboard-table th {
-          text-align: left;
-          padding: 12px;
-          border-bottom: 1px solid #222;
-          color: var(--gb-muted, #888);
-          font-weight: 600;
-        }
-
-        [dir="rtl"] .dashboard-table th {
-          text-align: right;
-        }
-
-        .dashboard-table td {
-          padding: 16px 12px;
-          border-bottom: 1px solid #1a1a1a;
-        }
-
-        .status-pill {
-          padding: 4px 10px;
-          border-radius: 8px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: capitalize;
-        }
-
-        .status-pill.pending { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
-        .status-pill.confirmed { background: rgba(40, 167, 69, 0.15); color: #28a745; }
-        .status-pill.cancelled { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
-
-        .actions-card h2 {
-          font-size: 1.2rem;
-          margin: 0 0 24px;
-        }
-
-        .actions-list {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 14px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid #222;
-          border-radius: 12px;
-          color: #fff;
-          text-decoration: none;
-          transition: all 0.2s;
-          font-weight: 600;
-        }
-
-        .action-btn:hover {
-          background: rgba(207, 168, 110, 0.1);
-          border-color: var(--gb-gold, #cfa86e);
-          color: var(--gb-gold, #cfa86e);
-        }
-
-        .bottom-strip {
-          margin-top: 10px;
-        }
-
-        .progress-card {
-          background: var(--gb-surface, #111);
-          border: 1px solid #222;
-          border-radius: 20px;
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .progress-info {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-        }
-
-        .progress-text h3 {
-          font-size: 1.1rem;
-          margin: 0 0 4px;
-        }
-
-        .progress-text p {
-          color: var(--gb-muted, #888);
-          font-size: 0.9rem;
-          margin: 0;
-        }
-
-        .btn-gold-small {
-          background: var(--gb-gold, #cfa86e);
-          color: #000;
-          padding: 8px 20px;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 700;
-          font-size: 0.85rem;
-        }
-
-        .progress-bar-container {
-          width: 100%;
-        }
-
-        .progress-bar-bg {
-          width: 100%;
-          height: 8px;
-          background: #222;
-          border-radius: 4px;
-          overflow: hidden;
-        }
-
-        .progress-bar-fill {
-          height: 100%;
-          background: var(--gb-gold, #cfa86e);
-          border-radius: 4px;
-          transition: width 1s ease-in-out;
-        }
-
-        @media (max-width: 1024px) {
-          .dashboard-grid {
-            grid-template-columns: 1fr;
-          }
-          .stats-row {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (max-width: 600px) {
-          .stats-row {
-            grid-template-columns: 1fr;
-          }
-          .welcome-bar {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
-          }
-        }
-      ` }} />
-    </div>
+        <div style={{ width: '100%', height: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden', border: '1px solid var(--gb-border)' }}>
+          <div 
+            style={{ 
+              width: `${studioScore}%`, 
+              height: '100%', 
+              background: 'linear-gradient(90deg, var(--gb-teal), var(--gb-gold))',
+              boxShadow: '0 0 20px rgba(15, 160, 138, 0.3)',
+              borderRadius: '100px',
+              transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          ></div>
+        </div>
+      </section>
+    </main>
   );
 }

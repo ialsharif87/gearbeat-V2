@@ -125,7 +125,7 @@ export default function LoginForm() {
 
           {errorMessage ? <p className="error">{errorMessage}</p> : null}
 
-          <button className="btn" type="submit" disabled={loading}>
+          <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', marginTop: 10 }}>
             {loading ? (
               <T en="Logging in..." ar="جاري تسجيل الدخول..." />
             ) : (
@@ -134,8 +134,11 @@ export default function LoginForm() {
           </button>
         </form>
 
-        <div className="actions">
-          <Link href="/signup" className="btn btn-secondary">
+        <div className="actions" style={{ marginTop: 24, textAlign: 'center', borderTop: '1px solid var(--gb-border)', paddingTop: 20 }}>
+          <p style={{ fontSize: '0.9rem', color: 'var(--gb-text-muted)', marginBottom: 16 }}>
+            <T en="Don't have an account?" ar="ليس لديك حساب؟" />
+          </p>
+          <Link href="/signup" className="btn btn-secondary" style={{ width: '100%' }}>
             <T en="Create account" ar="إنشاء حساب" />
           </Link>
         </div>

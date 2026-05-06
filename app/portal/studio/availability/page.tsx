@@ -154,16 +154,16 @@ export default async function StudioAvailabilityPage({
   }
 
   return (
-    <main className="gb-dashboard-page">
+    <main className="gb-dashboard-page container">
       <section className="gb-dashboard-header">
         <div>
           <p className="gb-eyebrow">
             <T en="Owner Portal" ar="بوابة المالك" />
           </p>
-          <h1>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
             <T en="Studio Availability" ar="أوقات الاستوديو" />
           </h1>
-          <p className="gb-muted-text">
+          <p className="gb-muted-text" style={{ marginTop: '8px' }}>
             <T
               en="Manage working hours, closed days, booking slots, and special date exceptions for your studios."
               ar="أدر ساعات العمل والأيام المغلقة وفترات الحجز والاستثناءات الخاصة."
@@ -171,32 +171,39 @@ export default async function StudioAvailabilityPage({
           </p>
         </div>
 
-        <Link href="/portal/studio" className="gb-button gb-button-secondary">
-          <T en="Back" ar="رجوع" />
+        <Link href="/portal/studio" className="gb-button gb-button-outline">
+          <T en="Back to Dashboard" ar="العودة للوحة التحكم" />
         </Link>
       </section>
 
       {ownedStudios.length === 0 ? (
-        <section className="gb-empty-state">
-          <h2>
+        <section className="gb-card gb-empty-state" style={{ padding: '80px 40px' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'white', marginBottom: '16px' }}>
             <T en="No studios found" ar="لا توجد استوديوهات" />
           </h2>
-          <p>
+          <p className="gb-muted-text">
             <T
               en="No studios linked to this account yet."
               ar="لا توجد استوديوهات مرتبطة بهذا الحساب بعد."
             />
           </p>
         </section>
-      ) : null}
-
-      {ownedStudios.length > 0 ? (
-        <>
-          <section className="gb-card" style={{ marginBottom: '24px' }}>
-            <p className="gb-eyebrow">
-              <T en="Select studio" ar="اختر استوديو" />
-            </p>
-            <div className="gb-action-row" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
+      ) : (
+        <div className="gb-dashboard-stack" style={{ gap: '32px' }}>
+          <section className="gb-card" style={{ padding: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ width: '40px', height: '40px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🏢</div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'white' }}>
+                  <T en="Select Studio" ar="اختر الاستوديو" />
+                </h3>
+                <p className="gb-muted-text" style={{ fontSize: '0.85rem' }}>
+                  <T en="Switch between your managed studios" ar="تنقل بين استوديوهاتك المدارة" />
+                </p>
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               {ownedStudios.map((studio) => {
                 const studioId = readText(studio, ["id"]);
                 const studioName = readText(
@@ -211,11 +218,13 @@ export default async function StudioAvailabilityPage({
                   <Link
                     key={studioId}
                     href={`/portal/studio/availability?studioId=${studioId}`}
-                    className={
-                      isSelected
-                        ? "gb-button"
-                        : "gb-button gb-button-secondary"
-                    }
+                    className={`gb-button ${isSelected ? 'gb-button-primary' : 'gb-button-outline'}`}
+                    style={{ 
+                      padding: '12px 24px',
+                      borderRadius: '16px',
+                      minWidth: '140px',
+                      justifyContent: 'center'
+                    }}
                   >
                     {studioName}
                   </Link>
@@ -230,8 +239,8 @@ export default async function StudioAvailabilityPage({
             initialRules={initialRules}
             initialExceptions={initialExceptions}
           />
-        </>
-      ) : null}
+        </div>
+      )}
     </main>
   );
 }

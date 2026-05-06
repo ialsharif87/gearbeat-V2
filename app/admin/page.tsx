@@ -32,29 +32,29 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
+    <main className="gb-dashboard-page container" style={{ minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+      <div className="gb-dashboard-header" style={{ marginBottom: 40 }}>
         <div>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>
             <T en="GearBeat Command Center" ar="مركز تحكم GearBeat" />
           </h1>
-          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-            <span style={{ background: 'rgba(207,168,110,0.1)', color: '#cfa86e', padding: '2px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700 }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+            <span className="badge-gold">
               {isSuperAdmin ? "SUPER_ADMIN" : "STAFF"}
             </span>
-            <span style={{ color: '#555', fontSize: '0.8rem' }}>{adminUserAuth.email}</span>
+            <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.85rem' }}>{adminUserAuth.email}</span>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-          <div style={{ fontSize: '0.8rem', color: '#666' }}>{new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gb-gold)' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)' }}>{new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}</div>
         </div>
       </div>
 
       {/* SECTION 1: GLOBAL OVERVIEW */}
       <h2 style={sectionTitleStyle}><T en="Global Overview" ar="نظرة عامة" /></h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 48 }}>
+      <div className="stats-row" style={{ marginBottom: 48 }}>
         <MetricCard labelEn="Total Studios" labelAr="إجمالي الاستوديوهات" value={totalStudios.count || 0} icon="🎙️" href="/admin/studios" />
         <MetricCard labelEn="Total Sellers" labelAr="إجمالي التجار" value={totalSellers.count || 0} icon="🏪" href="/admin/sellers" />
         <MetricCard labelEn="Total Customers" labelAr="إجمالي العملاء" value={totalCustomers.count || 0} icon="👥" href="/admin/customers" />
@@ -66,8 +66,8 @@ export default async function AdminDashboard() {
         <div>
           <h2 style={sectionTitleStyle}><T en="Sellers & Marketplace" ar="إدارة التجار والمتجر" /></h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <QuickActionCard titleEn="Seller Applications" titleAr="طلبات التجار" href="/admin/leads?type=seller" count={pendingLeads.data?.filter(l => l.type === 'seller').length} color="#cfa86e" />
-            <QuickActionCard titleEn="Approved Sellers" titleAr="التجار المعتمدون" href="/admin/sellers" color="#22c55e" />
+            <QuickActionCard titleEn="Seller Applications" titleAr="طلبات التجار" href="/admin/leads?type=seller" count={pendingLeads.data?.filter(l => l.type === 'seller').length} color="var(--gb-gold)" />
+            <QuickActionCard titleEn="Approved Sellers" titleAr="التجار المعتمدون" href="/admin/sellers" color="var(--gb-teal)" />
             <QuickActionCard titleEn="Marketplace Products" titleAr="المنتجات" href="/admin/products" />
             <QuickActionCard titleEn="Marketplace Orders" titleAr="الطلبات" href="/admin/marketplace-orders" />
             <QuickActionCard titleEn="Seller Payments" titleAr="مدفوعات التجار" href="/admin/seller-payments" />
@@ -78,17 +78,17 @@ export default async function AdminDashboard() {
         {/* SECTION 3: RECENT ACTIVITY */}
         <div>
           <h2 style={sectionTitleStyle}><T en="Recent Activity" ar="أحدث النشاطات" /></h2>
-          <div style={{ background: '#111', borderRadius: 20, border: '1px solid #1e1e1e', padding: 20 }}>
+          <div className="gb-card" style={{ padding: 20 }}>
             {recentActivity.data?.map((activity: any) => (
-              <div key={activity.id} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid #1a1a1a' }}>
-                <div style={{ background: activity.type === 'seller' ? '#cfa86e' : '#3b82f6', width: 4, borderRadius: 2 }} />
+              <div key={activity.id} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--gb-border)' }}>
+                <div style={{ background: activity.type === 'seller' ? 'var(--gb-gold)' : 'var(--gb-teal)', width: 4, borderRadius: 2 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{activity.name} applied as {activity.type}</div>
-                  <div style={{ fontSize: '0.7rem', color: '#555' }}>{new Date(activity.created_at).toLocaleTimeString()}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--gb-text-muted)' }}>{new Date(activity.created_at).toLocaleTimeString()}</div>
                 </div>
               </div>
             ))}
-            <Link href="/admin/leads" style={{ display: 'block', textAlign: 'center', fontSize: '0.8rem', color: '#cfa86e', textDecoration: 'none', marginTop: 16 }}>
+            <Link href="/admin/leads" className="gb-text-link" style={{ display: 'block', textAlign: 'center', marginTop: 16 }}>
               <T en="View all activity" ar="عرض كل النشاطات" /> →
             </Link>
           </div>
@@ -98,8 +98,8 @@ export default async function AdminDashboard() {
       {/* SECTION 4: STUDIOS MANAGEMENT */}
       <h2 style={sectionTitleStyle}><T en="Studios & Bookings" ar="إدارة الاستوديوهات والحجوزات" /></h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 48 }}>
-        <QuickActionCard titleEn="Studio Applications" titleAr="طلبات الاستوديوهات" href="/admin/leads?type=studio" count={pendingLeads.data?.filter(l => l.type === 'studio').length} color="#cfa86e" />
-        <QuickActionCard titleEn="Approved Studios" titleAr="الاستوديوهات المعتمدة" href="/admin/studios" color="#22c55e" />
+        <QuickActionCard titleEn="Studio Applications" titleAr="طلبات الاستوديوهات" href="/admin/leads?type=studio" count={pendingLeads.data?.filter(l => l.type === 'studio').length} color="var(--gb-gold)" />
+        <QuickActionCard titleEn="Approved Studios" titleAr="الاستوديوهات المعتمدة" href="/admin/studios" color="var(--gb-teal)" />
         <QuickActionCard titleEn="Studio Bookings" titleAr="الحجوزات" href="/admin/bookings" />
         <QuickActionCard titleEn="Studio Payments" titleAr="مدفوعات الاستوديوهات" href="/admin/studio-payments" />
       </div>
@@ -118,13 +118,15 @@ export default async function AdminDashboard() {
 function MetricCard({ labelEn, labelAr, value, icon, href }: { labelEn: string, labelAr: string, value: string | number, icon: string, href: string }) {
   return (
     <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div style={{ background: '#111', padding: 24, borderRadius: 20, border: '1px solid #1e1e1e', transition: 'transform 0.2s, border-color 0.2s', cursor: 'pointer' }} className="metric-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={{ fontSize: '1.5rem' }}>{icon}</span>
-          <span style={{ color: '#cfa86e', fontSize: '0.8rem' }}>→</span>
+      <div className="stat-card" style={{ cursor: 'pointer' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, width: '100%' }}>
+          <span className="stat-icon">{icon}</span>
+          <span className="gb-text-link">→</span>
         </div>
-        <div style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 4 }}>{value}</div>
-        <div style={{ color: '#666', fontSize: '0.8rem', fontWeight: 600 }}><T en={labelEn} ar={labelAr} /></div>
+        <div>
+          <div className="stat-number">{value}</div>
+          <div className="stat-label"><T en={labelEn} ar={labelAr} /></div>
+        </div>
       </div>
     </Link>
   );
@@ -133,11 +135,8 @@ function MetricCard({ labelEn, labelAr, value, icon, href }: { labelEn: string, 
 function QuickActionCard({ titleEn, titleAr, href, count, color, icon }: { titleEn: string, titleAr: string, href: string, count?: number, color?: string, icon?: string }) {
   return (
     <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div style={{ 
-        background: '#111', 
-        padding: '20px 24px', 
-        borderRadius: 16, 
-        border: '1px solid #1e1e1e', 
+      <div className="gb-card" style={{ 
+        padding: '16px 20px', 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
@@ -146,10 +145,10 @@ function QuickActionCard({ titleEn, titleAr, href, count, color, icon }: { title
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {icon && <span style={{ fontSize: '1.2rem' }}>{icon}</span>}
-          <div style={{ fontWeight: 600, fontSize: '0.95rem' }}><T en={titleEn} ar={titleAr} /></div>
+          <div style={{ fontWeight: 700, fontSize: '0.95rem' }}><T en={titleEn} ar={titleAr} /></div>
         </div>
         {count !== undefined && count > 0 && (
-          <span style={{ background: color || '#cfa86e', color: '#000', fontSize: '0.75rem', fontWeight: 800, padding: '2px 8px', borderRadius: 20 }}>
+          <span style={{ background: color || 'var(--gb-gold)', color: '#000', fontSize: '0.75rem', fontWeight: 900, padding: '4px 10px', borderRadius: 20 }}>
             {count}
           </span>
         )}
@@ -159,12 +158,12 @@ function QuickActionCard({ titleEn, titleAr, href, count, color, icon }: { title
 }
 
 const sectionTitleStyle: React.CSSProperties = { 
-  fontSize: '0.9rem', 
-  fontWeight: 700, 
-  color: '#444', 
+  fontSize: '0.75rem', 
+  fontWeight: 800, 
+  color: 'var(--gb-text-muted)', 
   textTransform: 'uppercase', 
   marginBottom: 20, 
-  letterSpacing: '1px',
-  borderBottom: '1px solid #111',
-  paddingBottom: 8
+  letterSpacing: '2px',
+  borderBottom: '1px solid var(--gb-border)',
+  paddingBottom: 12
 };

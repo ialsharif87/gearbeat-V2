@@ -79,43 +79,22 @@ export default async function OwnerFinancePage() {
   ]);
 
   return (
-    <main 
-      className="gb-dashboard-page" 
-      style={{ 
-        background: 'linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%)', 
-        minHeight: '100vh', 
-        padding: '40px',
-        color: '#fff'
-      }}
-    >
-      <section style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <main className="gb-dashboard-page container">
+      <section className="gb-dashboard-header">
         <div>
-          <span className="gb-dash-badge" style={{ background: 'rgba(207, 168, 110, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)', marginBottom: '16px' }}>
+          <span className="gb-dash-badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)', marginBottom: '12px' }}>
             <T en="Owner Finance" ar="مالية المالك" />
           </span>
-          <h1 style={{ fontSize: '3rem', fontWeight: 900, margin: '8px 0 0', color: 'white', letterSpacing: '-1px' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '8px 0 0', color: 'white' }}>
             <T en="Studio Earnings" ar="أرباح الاستوديو" />
           </h1>
-          <p style={{ color: "#888", fontSize: '1.1rem', marginTop: '12px', maxWidth: '600px', lineHeight: 1.6 }}>
+          <p className="gb-muted-text">
             <T en="Detailed overview of your studio bookings revenue, platform fees, and withdrawal management." ar="نظرة عامة مفصلة على إيرادات حجوزات الاستوديو، رسوم المنصة، وإدارة سحب الأرباح." />
           </p>
         </div>
 
-        <Link 
-          href="/portal/studio" 
-          style={{ 
-            color: '#fff', 
-            textDecoration: 'none', 
-            fontSize: '0.95rem',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid #222',
-            padding: '12px 24px',
-            borderRadius: '12px',
-            fontWeight: 600,
-            transition: 'all 0.2s'
-          }}
-        >
-          ← <T en="Back to Dashboard" ar="العودة للوحة التحكم" />
+        <Link href="/portal/studio" className="gb-button gb-button-secondary">
+          <T en="Back to Dashboard" ar="العودة للوحة التحكم" />
         </Link>
       </section>
 

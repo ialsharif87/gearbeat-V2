@@ -93,21 +93,18 @@ export default async function OwnerBoostPage() {
       </section>
 
       {/* SECTION 1: Current Status */}
-      <section className="gb-card" style={{ marginBottom: '32px' }}>
+      <section className="gb-card" style={{ marginBottom: '32px', borderTop: activeBoost ? '4px solid var(--gb-gold)' : 'none' }}>
         <div className="gb-card-header">
-          <h3><T en="Boost Status" ar="حالة التعزيز" /></h3>
+          <h2 style={{ fontSize: '1.25rem', margin: 0 }}><T en="Current Boost Status" ar="حالة التعزيز الحالية" /></h2>
         </div>
         
         {activeBoost ? (
           <div
             style={{
-              background: "#111",
-              border: "1px solid rgba(207, 168, 110, 0.3)",
-              borderRadius: "16px",
-              padding: "24px",
               display: "flex",
               flexDirection: "column",
               gap: "24px",
+              marginTop: '20px'
             }}
           >
             {/* ROW 1: Status Header */}
@@ -121,12 +118,13 @@ export default async function OwnerBoostPage() {
               <span
                 className="gb-dash-badge"
                 style={{
-                  background: "rgba(207, 168, 110, 0.1)",
-                  color: "var(--gb-gold)",
-                  border: "1px solid var(--gb-gold)",
+                  background: "rgba(15, 160, 138, 0.1)",
+                  color: "var(--gb-teal)",
+                  border: "1px solid var(--gb-teal)",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
+                  padding: '8px 16px'
                 }}
               >
                 <span
@@ -134,7 +132,8 @@ export default async function OwnerBoostPage() {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "#22c55e",
+                    background: "var(--gb-teal)",
+                    boxShadow: '0 0 10px var(--gb-teal)'
                   }}
                 ></span>
                 <T en="Active Boost" ar="تعزيز نشط" />
@@ -147,39 +146,32 @@ export default async function OwnerBoostPage() {
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
                 gap: "20px",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-                paddingBottom: "24px",
+                background: 'rgba(0,0,0,0.2)',
+                padding: '24px',
+                borderRadius: '16px',
+                border: '1px solid var(--gb-border)'
               }}
             >
-              <div
-                style={{
-                  borderInlineEnd: "1px solid rgba(255,255,255,0.05)",
-                  paddingInlineEnd: "20px",
-                }}
-              >
+              <div>
                 <span className="gb-detail-label">
                   <T en="Base Commission" ar="العمولة الأساسية" />
                 </span>
                 <strong
-                  style={{ display: "block", fontSize: "1.2rem", color: "white" }}
+                  style={{ display: "block", fontSize: "1.5rem", color: "white", fontWeight: 900 }}
                 >
                   {activeBoost.base_commission_percent}%
                 </strong>
               </div>
-              <div
-                style={{
-                  borderInlineEnd: "1px solid rgba(255,255,255,0.05)",
-                  paddingInlineEnd: "20px",
-                }}
-              >
+              <div>
                 <span className="gb-detail-label">
                   <T en="Your Boost" ar="إضافتك" />
                 </span>
                 <strong
                   style={{
                     display: "block",
-                    fontSize: "1.2rem",
-                    color: "#cfa86e",
+                    fontSize: "1.5rem",
+                    color: "var(--gb-gold)",
+                    fontWeight: 900
                   }}
                 >
                   +{activeBoost.boost_commission_percent}%
@@ -192,37 +184,24 @@ export default async function OwnerBoostPage() {
                 <strong
                   style={{
                     display: "block",
-                    fontSize: "1.5rem",
-                    color: "#cfa86e",
+                    fontSize: "2rem",
+                    color: "var(--gb-gold)",
+                    fontWeight: 900,
+                    textShadow: '0 0 20px var(--gb-gold-glow)'
                   }}
                 >
                   {activeBoost.total_commission_percent}%
                 </strong>
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "var(--gb-gold)",
-                    opacity: 0.8,
-                  }}
-                >
-                  <T en="Applied to all bookings" ar="مطبق على كل الحجوزات" />
-                </span>
               </div>
             </div>
 
             {/* ROW 3: Time Info */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: "15px",
-              }}
-            >
+            <div className="gb-dash-grid-4" style={{ marginTop: '12px' }}>
               <div>
                 <span className="gb-detail-label">
                   <T en="Started" ar="بدأ في" />
                 </span>
-                <strong style={{ display: "block", fontSize: "0.9rem" }}>
+                <strong style={{ display: "block", fontSize: "0.95rem", color: 'white' }}>
                   {formatDateTimeFull(activeBoost.starts_at)}
                 </strong>
               </div>
@@ -230,7 +209,7 @@ export default async function OwnerBoostPage() {
                 <span className="gb-detail-label">
                   <T en="Ends" ar="ينتهي في" />
                 </span>
-                <strong style={{ display: "block", fontSize: "0.9rem" }}>
+                <strong style={{ display: "block", fontSize: "0.95rem", color: 'white' }}>
                   {formatDateTimeFull(activeBoost.ends_at)}
                 </strong>
               </div>
@@ -238,7 +217,7 @@ export default async function OwnerBoostPage() {
                 <span className="gb-detail-label">
                   <T en="Duration" ar="المدة" />
                 </span>
-                <strong style={{ display: "block", fontSize: "0.9rem" }}>
+                <strong style={{ display: "block", fontSize: "0.95rem", color: 'white' }}>
                   {activeBoost.duration_days} <T en="days" ar="يوم" />
                 </strong>
               </div>
@@ -251,12 +230,12 @@ export default async function OwnerBoostPage() {
                     (new Date(activeBoost.ends_at).getTime() - Date.now()) /
                       (1000 * 60 * 60 * 24)
                   );
-                  let color = "#22c55e";
+                  let color = "var(--gb-teal)";
                   if (daysLeft <= 1) color = "#ef4444";
-                  else if (daysLeft <= 7) color = "#f59e0b";
+                  else if (daysLeft <= 7) color = "var(--gb-gold)";
                   return (
                     <strong
-                      style={{ display: "block", fontSize: "1.2rem", color }}
+                      style={{ display: "block", fontSize: "1.5rem", color, fontWeight: 900 }}
                     >
                       {daysLeft}
                     </strong>
@@ -268,14 +247,14 @@ export default async function OwnerBoostPage() {
             {/* ROW 4: Info Note */}
             <div
               style={{
-                background: "rgba(255,255,255,0.03)",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                borderInlineStart: "3px solid var(--gb-gold)",
+                background: "rgba(212, 175, 55, 0.05)",
+                padding: "16px",
+                borderRadius: "12px",
+                borderInlineStart: "4px solid var(--gb-gold)",
               }}
             >
               <p
-                style={{ margin: 0, fontSize: "0.85rem", color: "var(--gb-muted)" }}
+                style={{ margin: 0, fontSize: "0.9rem", color: "var(--gb-text-muted)", lineHeight: 1.6 }}
               >
                 <T
                   en={`This boost will expire automatically on ${formatDateTime(
@@ -293,7 +272,7 @@ export default async function OwnerBoostPage() {
             </div>
           </div>
         ) : (
-          <div className="gb-empty-state" style={{ padding: '40px' }}>
+          <div className="gb-empty-state" style={{ marginTop: '20px' }}>
             <p><T en="No active boost. Increase your commission to get featured and rank higher in search." ar="لا يوجد تعزيز نشط. قم بزيادة عمولتك للظهور في النتائج الأولى." /></p>
           </div>
         )}

@@ -93,20 +93,20 @@ export default function StudioOnboardingPage() {
 
   if (submitted) {
     return (
-      <main className="dashboard-page" style={{ maxWidth: 800, margin: "60px auto", textAlign: "center" }}>
-        <div className="card" style={{ padding: 60 }}>
+      <main className="gb-dashboard-page container" style={{ maxWidth: 800, margin: "60px auto", textAlign: "center" }}>
+        <div className="gb-card" style={{ padding: 60 }}>
           <div style={{ fontSize: "4rem", marginBottom: 20 }}>✅</div>
-          <h2>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'white' }}>
             <T en="Onboarding Submitted!" ar="تم إرسال طلب الانضمام!" />
           </h2>
-          <p style={{ color: "var(--muted)", marginTop: 16, fontSize: "1.1rem" }}>
+          <p className="gb-muted-text" style={{ marginTop: 16, fontSize: "1.1rem" }}>
             <T 
               en="Your studio has been submitted. We will review and approve within 2 business days." 
               ar="تم إرسال استوديوك. سنراجع ونوافق خلال يومي عمل." 
             />
           </p>
-          <div style={{ marginTop: 30 }}>
-            <a href="/portal/studio" className="btn btn-primary">
+          <div style={{ marginTop: 40 }}>
+            <a href="/portal/studio" className="gb-button gb-button-primary">
               <T en="Go to Dashboard" ar="الذهاب للوحة التحكم" />
             </a>
           </div>
@@ -116,144 +116,180 @@ export default function StudioOnboardingPage() {
   }
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 800, margin: "40px auto" }}>
-      <div className="section-head" style={{ textAlign: "center" }}>
-        <h1><T en="Studio Onboarding" ar="انضمام الاستوديو" /></h1>
-        <p><T en="Complete your profile to start receiving bookings." ar="أكمل ملفك الشخصي للبدء في استقبال الحجوزات." /></p>
-      </div>
+    <main className="gb-dashboard-page container" style={{ maxWidth: 800, margin: "40px auto" }}>
+      <section className="gb-dashboard-header" style={{ textAlign: "center", marginBottom: '40px' }}>
+        <div>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white' }}><T en="Studio Onboarding" ar="انضمام الاستوديو" /></h1>
+          <p className="gb-muted-text"><T en="Complete your profile to start receiving bookings." ar="أكمل ملفك الشخصي للبدء في استقبال الحجوزات." /></p>
+        </div>
+      </section>
 
       {/* Progress Bar */}
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, fontSize: "0.9rem", fontWeight: 600 }}>
+      <div style={{ marginBottom: 48 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, fontSize: "0.9rem", fontWeight: 800, color: 'white' }}>
           <span><T en={`Step ${step} of 4`} ar={`الخطوة ${step} من 4`} /></span>
-          <span>{Math.round((step / 4) * 100)}%</span>
+          <span style={{ color: 'var(--gb-gold)' }}>{Math.round((step / 4) * 100)}%</span>
         </div>
-        <div style={{ height: 6, background: "rgba(255,255,255,0.05)", borderRadius: 10, overflow: "hidden" }}>
-          <div style={{ width: `${(step / 4) * 100}%`, height: "100%", background: "var(--gb-gold)", transition: "0.3s ease" }} />
+        <div style={{ height: 8, background: "rgba(255,255,255,0.05)", borderRadius: 10, overflow: "hidden", border: '1px solid var(--gb-border)' }}>
+          <div style={{ width: `${(step / 4) * 100}%`, height: "100%", background: "var(--gb-gold)", transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1)", boxShadow: '0 0 15px var(--gb-gold-glow)' }} />
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         {step === 1 && (
-          <div className="card form">
-            <h2 style={{ marginBottom: 20 }}><T en="Basic Information" ar="المعلومات الأساسية" /></h2>
+          <div className="gb-card" style={{ padding: '40px' }}>
+            <h2 style={{ marginBottom: 24, fontSize: '1.5rem', fontWeight: 800 }}><T en="Basic Information" ar="المعلومات الأساسية" /></h2>
             
-            <label><T en="Studio Name (English)" ar="اسم الاستوديو (إنجليزي)" /> *</label>
-            <input className="input" name="nameEn" value={formData.nameEn} onChange={handleChange} required />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Studio Name (English)" ar="اسم الاستوديو (إنجليزي)" /> *</label>
+              <input className="gb-input" name="nameEn" value={formData.nameEn} onChange={handleChange} required />
+            </div>
 
-            <label><T en="Studio Name (Arabic)" ar="اسم الاستوديو (عربي)" /> *</label>
-            <input className="input" name="nameAr" value={formData.nameAr} onChange={handleChange} required />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Studio Name (Arabic)" ar="اسم الاستوديو (عربي)" /> *</label>
+              <input className="gb-input" name="nameAr" value={formData.nameAr} onChange={handleChange} required />
+            </div>
 
-            <label><T en="Studio Type" ar="نوع الاستوديو" /></label>
-            <select className="input" name="type" value={formData.type} onChange={handleChange}>
-              <option>Recording Studio</option>
-              <option>Podcast Studio</option>
-              <option>Voiceover Studio</option>
-              <option>Music Training Room</option>
-              <option>Creative Space</option>
-            </select>
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Studio Type" ar="نوع الاستوديو" /></label>
+              <select className="gb-input" name="type" value={formData.type} onChange={handleChange}>
+                <option>Recording Studio</option>
+                <option>Podcast Studio</option>
+                <option>Voiceover Studio</option>
+                <option>Music Training Room</option>
+                <option>Creative Space</option>
+              </select>
+            </div>
 
-            <label><T en="City" ar="المدينة" /></label>
-            <select className="input" name="city" value={formData.city} onChange={handleChange}>
-              <option>Riyadh</option>
-              <option>Jeddah</option>
-              <option>Dammam</option>
-              <option>Other</option>
-            </select>
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="City" ar="المدينة" /></label>
+              <select className="gb-input" name="city" value={formData.city} onChange={handleChange}>
+                <option>Riyadh</option>
+                <option>Jeddah</option>
+                <option>Dammam</option>
+                <option>Other</option>
+              </select>
+            </div>
 
-            <label><T en="District" ar="الحي" /></label>
-            <input className="input" name="district" value={formData.district} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="District" ar="الحي" /></label>
+              <input className="gb-input" name="district" value={formData.district} onChange={handleChange} />
+            </div>
 
-            <label><T en="Address" ar="العنوان" /></label>
-            <input className="input" name="address" value={formData.address} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Address" ar="العنوان" /></label>
+              <input className="gb-input" name="address" value={formData.address} onChange={handleChange} />
+            </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-              <button type="button" className="btn btn-primary" onClick={nextStep} disabled={!formData.nameEn || !formData.nameAr}>
-                <T en="Next" ar="التالي" />
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 32 }}>
+              <button type="button" className="gb-button gb-button-primary" onClick={nextStep} disabled={!formData.nameEn || !formData.nameAr}>
+                <T en="Next Step" ar="الخطوة التالية" />
               </button>
             </div>
           </div>
         )}
 
         {step === 2 && (
-          <div className="card form">
-            <h2 style={{ marginBottom: 20 }}><T en="Business Documents" ar="مستندات العمل" /></h2>
+          <div className="gb-card" style={{ padding: '40px' }}>
+            <h2 style={{ marginBottom: 24, fontSize: '1.5rem', fontWeight: 800 }}><T en="Business Documents" ar="مستندات العمل" /></h2>
 
-            <label><T en="Commercial Registration Number" ar="رقم السجل التجاري" /> *</label>
-            <input className="input" name="crNumber" value={formData.crNumber} onChange={handleChange} required />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Commercial Registration Number" ar="رقم السجل التجاري" /> *</label>
+              <input className="gb-input" name="crNumber" value={formData.crNumber} onChange={handleChange} required />
+            </div>
 
-            <label><T en="VAT Number (Optional)" ar="الرقم الضريبي (اختياري)" /></label>
-            <input className="input" name="vatNumber" value={formData.vatNumber} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="VAT Number (Optional)" ar="الرقم الضريبي (اختياري)" /></label>
+              <input className="gb-input" name="vatNumber" value={formData.vatNumber} onChange={handleChange} />
+            </div>
 
-            <label><T en="National Address" ar="العنوان الوطني" /></label>
-            <input className="input" name="nationalAddress" value={formData.nationalAddress} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="National Address" ar="العنوان الوطني" /></label>
+              <input className="gb-input" name="nationalAddress" value={formData.nationalAddress} onChange={handleChange} />
+            </div>
 
-            <label><T en="IBAN" ar="رقم الآيبان" /> *</label>
-            <input className="input" name="iban" value={formData.iban} onChange={handleChange} placeholder="SA..." required />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="IBAN" ar="رقم الآيبان" /> *</label>
+              <input className="gb-input" name="iban" value={formData.iban} onChange={handleChange} placeholder="SA..." required />
+            </div>
 
-            <label><T en="Bank Name" ar="اسم البنك" /> *</label>
-            <input className="input" name="bankName" value={formData.bankName} onChange={handleChange} required />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Bank Name" ar="اسم البنك" /> *</label>
+              <input className="gb-input" name="bankName" value={formData.bankName} onChange={handleChange} required />
+            </div>
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-              <button type="button" className="btn btn-secondary" onClick={prevStep}><T en="Back" ar="السابق" /></button>
-              <button type="button" className="btn btn-primary" onClick={nextStep} disabled={!formData.crNumber || !formData.iban || !formData.bankName}>
-                <T en="Next" ar="التالي" />
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 32 }}>
+              <button type="button" className="gb-button gb-button-outline" onClick={prevStep}><T en="Back" ar="السابق" /></button>
+              <button type="button" className="gb-button gb-button-primary" onClick={nextStep} disabled={!formData.crNumber || !formData.iban || !formData.bankName}>
+                <T en="Next Step" ar="الخطوة التالية" />
               </button>
             </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="card form">
-            <h2 style={{ marginBottom: 20 }}><T en="Studio Details" ar="تفاصيل الاستوديو" /></h2>
+          <div className="gb-card" style={{ padding: '40px' }}>
+            <h2 style={{ marginBottom: 24, fontSize: '1.5rem', fontWeight: 800 }}><T en="Studio Details" ar="تفاصيل الاستوديو" /></h2>
 
-            <label><T en="Hourly Rate (SAR)" ar="سعر الساعة (ريال)" /> *</label>
-            <input className="input" type="number" name="hourlyRate" value={formData.hourlyRate} onChange={handleChange} required />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Hourly Rate (SAR)" ar="سعر الساعة (ريال)" /> *</label>
+              <input className="gb-input" type="number" name="hourlyRate" value={formData.hourlyRate} onChange={handleChange} required />
+            </div>
 
-            <label><T en="Minimum Booking Hours" ar="الحد الأدنى لساعات الحجز" /></label>
-            <input className="input" type="number" name="minHours" value={formData.minHours} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Minimum Booking Hours" ar="الحد الأدنى لساعات الحجز" /></label>
+              <input className="gb-input" type="number" name="minHours" value={formData.minHours} onChange={handleChange} />
+            </div>
 
-            <label><T en="Capacity (Persons)" ar="السعة (أشخاص)" /></label>
-            <input className="input" type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Capacity (Persons)" ar="السعة (أشخاص)" /></label>
+              <input className="gb-input" type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
+            </div>
 
-            <label><T en="Description (English)" ar="الوصف (إنجليزي)" /></label>
-            <textarea className="input" name="descriptionEn" rows={4} value={formData.descriptionEn} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Description (English)" ar="الوصف (إنجليزي)" /></label>
+              <textarea className="gb-input" name="descriptionEn" rows={4} value={formData.descriptionEn} onChange={handleChange} style={{ height: 'auto' }} />
+            </div>
 
-            <label><T en="Description (Arabic)" ar="الوصف (عربي)" /></label>
-            <textarea className="input" name="descriptionAr" rows={4} value={formData.descriptionAr} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Description (Arabic)" ar="الوصف (عربي)" /></label>
+              <textarea className="gb-input" name="descriptionAr" rows={4} value={formData.descriptionAr} onChange={handleChange} style={{ height: 'auto' }} />
+            </div>
 
-            <label><T en="Cancellation Policy" ar="سياسة الإلغاء" /></label>
-            <textarea className="input" name="cancellationPolicy" rows={3} value={formData.cancellationPolicy} onChange={handleChange} />
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="Cancellation Policy" ar="سياسة الإلغاء" /></label>
+              <textarea className="gb-input" name="cancellationPolicy" rows={3} value={formData.cancellationPolicy} onChange={handleChange} style={{ height: 'auto' }} />
+            </div>
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-              <button type="button" className="btn btn-secondary" onClick={prevStep}><T en="Back" ar="السابق" /></button>
-              <button type="button" className="btn btn-primary" onClick={nextStep} disabled={!formData.hourlyRate}>
-                <T en="Next" ar="التالي" />
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 32 }}>
+              <button type="button" className="gb-button gb-button-outline" onClick={prevStep}><T en="Back" ar="السابق" /></button>
+              <button type="button" className="gb-button gb-button-primary" onClick={nextStep} disabled={!formData.hourlyRate}>
+                <T en="Next Step" ar="الخطوة التالية" />
               </button>
             </div>
           </div>
         )}
 
         {step === 4 && (
-          <div className="card">
-            <h2 style={{ marginBottom: 20 }}><T en="Review & Submit" ar="المراجعة والإرسال" /></h2>
+          <div className="gb-card" style={{ padding: '40px' }}>
+            <h2 style={{ marginBottom: 24, fontSize: '1.5rem', fontWeight: 800 }}><T en="Review & Submit" ar="المراجعة والإرسال" /></h2>
             
-            <div style={{ display: "grid", gap: 16, background: "rgba(255,255,255,0.03)", padding: 20, borderRadius: 12, marginBottom: 24 }}>
-              <div><strong><T en="Studio:" ar="الاستوديو:" /></strong> {formData.nameEn} / {formData.nameAr}</div>
-              <div><strong><T en="Type:" ar="النوع:" /></strong> {formData.type}</div>
-              <div><strong><T en="Location:" ar="الموقع:" /></strong> {formData.district}, {formData.city}</div>
-              <div><strong><T en="Price:" ar="السعر:" /></strong> {formData.hourlyRate} SAR / hour</div>
-              <div><strong><T en="IBAN:" ar="الآيبان:" /></strong> {formData.iban}</div>
+            <div style={{ display: "grid", gap: 20, background: "rgba(0,0,0,0.3)", padding: 24, borderRadius: 16, marginBottom: 32, border: '1px solid var(--gb-border)' }}>
+              <div><strong className="gb-detail-label"><T en="Studio:" ar="الاستوديو:" /></strong> <span style={{ color: 'white' }}>{formData.nameEn} / {formData.nameAr}</span></div>
+              <div><strong className="gb-detail-label"><T en="Type:" ar="النوع:" /></strong> <span style={{ color: 'white' }}>{formData.type}</span></div>
+              <div><strong className="gb-detail-label"><T en="Location:" ar="الموقع:" /></strong> <span style={{ color: 'white' }}>{formData.district}, {formData.city}</span></div>
+              <div><strong className="gb-detail-label"><T en="Price:" ar="السعر:" /></strong> <span style={{ color: 'white' }}>{formData.hourlyRate} SAR / <T en="hour" ar="ساعة" /></span></div>
+              <div><strong className="gb-detail-label"><T en="IBAN:" ar="الآيبان:" /></strong> <span style={{ color: 'white' }}>{formData.iban}</span></div>
             </div>
 
-            <label style={{ display: "flex", gap: 12, alignItems: "center", cursor: "pointer", padding: "10px 0" }}>
-              <input type="checkbox" name="agreed" checked={formData.agreed} onChange={handleChange} style={{ width: 20, height: 20 }} />
-              <span><T en="I agree to GearBeat Studio Agreement" ar="أوافق على اتفاقية استوديو GearBeat" /></span>
+            <label style={{ display: "flex", gap: 12, alignItems: "center", cursor: "pointer", padding: "12px 0", color: 'white' }}>
+              <input type="checkbox" name="agreed" checked={formData.agreed} onChange={handleChange} style={{ width: 20, height: 20, accentColor: 'var(--gb-gold)' }} />
+              <span style={{ fontWeight: 700 }}><T en="I agree to GearBeat Studio Agreement" ar="أوافق على اتفاقية استوديو GearBeat" /></span>
             </label>
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 30 }}>
-              <button type="button" className="btn btn-secondary" onClick={prevStep}><T en="Back" ar="السابق" /></button>
-              <button type="submit" className="btn btn-primary btn-large" disabled={!formData.agreed || loading}>
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 40 }}>
+              <button type="button" className="gb-button gb-button-outline" onClick={prevStep}><T en="Back" ar="السابق" /></button>
+              <button type="submit" className="gb-button gb-button-primary" style={{ minWidth: '200px', justifyContent: 'center' }} disabled={!formData.agreed || loading}>
                 {loading ? <T en="Submitting..." ar="جاري الإرسال..." /> : <T en="Submit for Review" ar="إرسال للمراجعة" />}
               </button>
             </div>

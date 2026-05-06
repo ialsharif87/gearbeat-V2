@@ -152,113 +152,164 @@ export default async function CreateStudioPage() {
   }
 
   return (
-    <section>
-      <div className="section-head">
-        <span className="badge">
-          <T en="Studio Owner" ar="مالك الاستوديو" />
-        </span>
-
-        <h1>
-          <T en="Create Studio" ar="إنشاء استوديو" />
-        </h1>
-
-        <p>
-          <T
-            en="Add your studio details. Your studio will be submitted for admin review before it becomes bookable."
-            ar="أضف تفاصيل الاستوديو. سيتم إرسال الاستوديو لمراجعة الإدارة قبل أن يصبح قابلًا للحجز."
-          />
-        </p>
-      </div>
-
-      <div className="card" style={{ marginBottom: 24 }}>
-        <span className="badge">
-          <T en="Important" ar="مهم" />
-        </span>
-
-        <h2>
-          <T en="Studio will not be bookable immediately" ar="الاستوديو لن يكون قابلًا للحجز مباشرة" />
-        </h2>
-
-        <p>
-          <T
-            en="After creating the studio, GearBeat admin must review and approve it. Also, your business onboarding must be approved before bookings can be activated."
-            ar="بعد إنشاء الاستوديو، يجب على إدارة GearBeat مراجعته واعتماده. كما يجب اعتماد بيانات النشاط التجاري قبل تفعيل الحجوزات."
-          />
-        </p>
-      </div>
-
-      <div style={{ marginBottom: 24 }}>
-        <StudioPhotoRequirements images={[]} />
-      </div>
-
-      <form className="card form" action={createStudio}>
-        <label>
-          <T en="Studio name" ar="اسم الاستوديو" /> *
-        </label>
-        <input
-          className="input"
-          name="name"
-          placeholder="Example: Riyadh Sound Lab"
-          required
-        />
-
-        <label>
-          <T en="City" ar="المدينة" /> *
-        </label>
-        <input className="input" name="city" placeholder="Riyadh" required />
-
-        <label>
-          <T en="District" ar="الحي" />
-        </label>
-        <input className="input" name="district" placeholder="Al Olaya" />
-
-        <label>
-          <T en="Address" ar="العنوان" />
-        </label>
-        <input
-          className="input"
-          name="address"
-          placeholder="Full address or location description"
-        />
-
-        <label>
-          <T en="Description" ar="الوصف" /> *
-        </label>
-        <textarea
-          className="input"
-          name="description"
-          rows={5}
-          placeholder="Describe the studio, equipment, vibe, and services."
-          required
-        />
-
-        <label>
-          <T en="Starting price / hour" ar="السعر الابتدائي / الساعة" /> *
-        </label>
-        <input
-          className="input"
-          name="price_from"
-          type="number"
-          min="1"
-          placeholder="250"
-          required
-        />
-
-        <label>
-          <T en="Cover image" ar="صورة الغلاف" />
-        </label>
-        <div style={{ border: '1px dashed #444', borderRadius: 8, padding: 20, textAlign: 'center', marginBottom: 24 }}>
-          <input
-            type="file"
-            name="cover_image_file"
-            accept="image/*"
-          />
+    <main className="gb-dashboard-page container">
+      <section className="gb-dashboard-header">
+        <div>
+          <p className="gb-eyebrow">
+            <T en="Owner Portal" ar="بوابة المالك" />
+          </p>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
+            <T en="Create Studio" ar="إنشاء استوديو" />
+          </h1>
+          <p className="gb-muted-text" style={{ marginTop: '8px' }}>
+            <T
+              en="Add your studio details. Your studio will be submitted for admin review before it becomes bookable."
+              ar="أضف تفاصيل الاستوديو. سيتم إرسال الاستوديو لمراجعة الإدارة قبل أن يصبح قابلًا للحجز."
+            />
+          </p>
         </div>
 
-        <button className="btn" type="submit">
-          <T en="Submit Studio for Review" ar="إرسال الاستوديو للمراجعة" />
-        </button>
-      </form>
-    </section>
+        <Link href="/portal/studio/studios" className="gb-button gb-button-outline">
+          <T en="Back to My Studios" ar="العودة لاستوديوهاتي" />
+        </Link>
+      </section>
+
+      <div className="gb-dashboard-stack" style={{ gap: '32px' }}>
+        <section 
+          className="gb-card" 
+          style={{ 
+            background: 'rgba(212, 175, 55, 0.05)', 
+            borderInlineStart: '4px solid var(--gb-gold)',
+            padding: '24px 32px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ fontSize: '1.5rem' }}>ℹ️</div>
+            <div>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'white', margin: 0 }}>
+                <T en="Important Note" ar="ملاحظة هامة" />
+              </h2>
+              <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                <T
+                  en="After creation, GearBeat admin will review your listing. Your business onboarding must also be completed and approved before bookings go live."
+                  ar="بعد الإنشاء، ستراجع الإدارة طلبك. يجب أيضاً إكمال بيانات النشاط التجاري واعتمادها قبل تفعيل الحجوزات."
+                />
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <StudioPhotoRequirements images={[]} />
+
+        <section className="gb-card" style={{ padding: '40px' }}>
+          <form action={createStudio} className="gb-dashboard-stack" style={{ gap: '24px' }}>
+            <div className="gb-dash-grid-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                  <T en="Studio Name" ar="اسم الاستوديو" /> *
+                </label>
+                <input
+                  className="gb-input"
+                  name="name"
+                  placeholder="e.g. Riyadh Sound Lab"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                  <T en="Starting Price (per hour)" ar="السعر الابتدائي (بالساعة)" /> *
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    className="gb-input"
+                    name="price_from"
+                    type="number"
+                    min="1"
+                    placeholder="250"
+                    required
+                    style={{ paddingRight: '60px' }}
+                  />
+                  <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: 'var(--gb-gold)', fontWeight: 800 }}>SAR</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="gb-dash-grid-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                  <T en="City" ar="المدينة" /> *
+                </label>
+                <input className="gb-input" name="city" placeholder="Riyadh" required />
+              </div>
+
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                  <T en="District" ar="الحي" />
+                </label>
+                <input className="gb-input" name="district" placeholder="Al Olaya" />
+              </div>
+            </div>
+
+            <div>
+              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                <T en="Full Address / Location" ar="العنوان الكامل / الموقع" />
+              </label>
+              <input
+                className="gb-input"
+                name="address"
+                placeholder="Detailed location for approved bookings"
+              />
+            </div>
+
+            <div>
+              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                <T en="Description" ar="الوصف" /> *
+              </label>
+              <textarea
+                className="gb-input"
+                name="description"
+                rows={5}
+                placeholder="Describe your studio, equipment, and services..."
+                required
+                style={{ resize: 'none' }}
+              />
+            </div>
+
+            <div>
+              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
+                <T en="Cover Image" ar="صورة الغلاف" />
+              </label>
+              <div style={{ 
+                border: '2px dashed var(--gb-border)', 
+                borderRadius: '16px', 
+                padding: '32px', 
+                textAlign: 'center',
+                background: 'rgba(255,255,255,0.02)',
+                transition: 'border-color 0.3s'
+              }}>
+                <input
+                  type="file"
+                  name="cover_image_file"
+                  accept="image/*"
+                  style={{ cursor: 'pointer' }}
+                />
+                <p className="gb-muted-text" style={{ fontSize: '0.8rem', marginTop: '12px', marginBottom: 0 }}>
+                  <T en="JPG, PNG allowed. Max 5MB." ar="مسموح بملفات JPG, PNG. بحد أقصى 5 ميجابايت." />
+                </p>
+              </div>
+            </div>
+
+            <button 
+              className="gb-button gb-button-primary" 
+              type="submit"
+              style={{ width: '100%', justifyContent: 'center', height: '54px', fontSize: '1rem', marginTop: '16px' }}
+            >
+              <T en="Submit Studio for Review" ar="إرسال الاستوديو للمراجعة" />
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
   );
 }

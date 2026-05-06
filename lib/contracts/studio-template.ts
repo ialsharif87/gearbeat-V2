@@ -47,14 +47,14 @@ export function generateStudioContract({
   }
   .header { 
     text-align: center; 
-    border-bottom: 3px solid #3b82f6; 
+    border-bottom: 3px solid #D4AF37; 
     padding-bottom: 30px; 
     margin-bottom: 40px;
   }
   .logo { 
     font-size: 28px; 
     font-weight: 900; 
-    color: #3b82f6; 
+    color: #0B0F16; 
     letter-spacing: 2px;
     margin-bottom: 8px;
   }
@@ -73,8 +73,8 @@ export function generateStudioContract({
   .section-title { 
     font-size: 16px; 
     font-weight: 700; 
-    color: #3b82f6;
-    border-right: 4px solid #3b82f6;
+    color: #D4AF37;
+    border-right: 4px solid #D4AF37;
     padding-right: 12px;
     margin-bottom: 16px;
   }
@@ -100,8 +100,8 @@ export function generateStudioContract({
     font-weight: 600;
   }
   .highlight-box {
-    background: #f0f7ff;
-    border: 2px solid #3b82f6;
+    background: rgba(212, 175, 55, 0.05);
+    border: 2px solid #D4AF37;
     border-radius: 8px;
     padding: 20px;
     margin: 16px 0;
@@ -109,7 +109,7 @@ export function generateStudioContract({
   .commission-number {
     font-size: 36px;
     font-weight: 900;
-    color: #3b82f6;
+    color: #D4AF37;
     text-align: center;
     display: block;
   }
@@ -120,7 +120,7 @@ export function generateStudioContract({
   }
   .clause-number {
     font-weight: 700;
-    color: #3b82f6;
+    color: #D4AF37;
     margin-bottom: 4px;
   }
   .signature-section {
@@ -168,7 +168,7 @@ export function generateStudioContract({
     left: 50%;
     transform: translate(-50%, -50%) rotate(-45deg);
     font-size: 80px;
-    color: rgba(59, 130, 246, 0.05);
+    color: rgba(212, 175, 55, 0.05);
     font-weight: 900;
     pointer-events: none;
     white-space: nowrap;

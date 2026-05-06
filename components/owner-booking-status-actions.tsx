@@ -103,30 +103,49 @@ export default function OwnerBookingStatusActions({
   }
 
   return (
-    <div className="gb-owner-booking-actions">
+    <div className="gb-dashboard-stack" style={{ gap: '16px' }}>
       <textarea
         value={ownerNotes}
         onChange={(event) => setOwnerNotes(event.target.value)}
-        placeholder="Optional owner note"
+        placeholder="Add a note for the customer..."
         className="gb-input"
-        rows={2}
+        style={{ minHeight: '80px', fontSize: '0.9rem', resize: 'none', background: 'rgba(255,255,255,0.03)' }}
       />
 
-      <div className="gb-action-row">
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {actions.map((action) => (
           <button
             key={action.status}
             type="button"
             disabled={isPending}
             onClick={() => updateStatus(action.status)}
-            className="gb-button gb-button-small"
+            className={`gb-button ${action.status === 'accepted' || action.status === 'confirmed' || action.status === 'completed' ? 'gb-button-primary' : 'gb-button-outline'}`}
+            style={{ 
+              flex: 1, 
+              justifyContent: 'center', 
+              fontSize: '0.85rem', 
+              height: '42px',
+              border: action.status === 'rejected' || action.status === 'cancelled' || action.status === 'no_show' ? '1px solid rgba(239, 68, 68, 0.3)' : undefined,
+              color: action.status === 'rejected' || action.status === 'cancelled' || action.status === 'no_show' ? '#ef4444' : undefined
+            }}
           >
-            {isPending ? "Updating..." : action.label}
+            {isPending ? <T en="Wait..." ar="انتظر..." /> : (
+              action.status === 'accepted' ? <T en="Accept" ar="قبول" /> :
+              action.status === 'rejected' ? <T en="Reject" ar="رفض" /> :
+              action.status === 'confirmed' ? <T en="Confirm" ar="تأكيد" /> :
+              action.status === 'cancelled' ? <T en="Cancel" ar="إلغاء" /> :
+              action.status === 'completed' ? <T en="Complete" ar="إكمال" /> :
+              action.status === 'no_show' ? <T en="No Show" ar="عدم حضور" /> : action.label
+            )}
           </button>
         ))}
       </div>
 
-      {errorMessage ? <p className="gb-error-text">{errorMessage}</p> : null}
+      {errorMessage && (
+        <p className="gb-error-text" style={{ fontSize: '0.8rem', margin: 0, textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '8px' }}>
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

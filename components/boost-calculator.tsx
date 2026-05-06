@@ -73,7 +73,7 @@ export default function BoostCalculator({ studioId, baseRate, userId }: Props) {
                 <button
                   key={val}
                   onClick={() => setBoostAddition(val)}
-                  className={`gb-button ${boostAddition === val ? "" : "gb-button-secondary"}`}
+                  className={`gb-button ${boostAddition === val ? "gb-button-primary" : "gb-button-outline"}`}
                   style={{ flex: 1 }}
                 >
                   +{val}%
@@ -89,7 +89,7 @@ export default function BoostCalculator({ studioId, baseRate, userId }: Props) {
                 <button
                   key={val}
                   onClick={() => setDuration(val)}
-                  className={`gb-button ${duration === val ? "" : "gb-button-secondary"}`}
+                  className={`gb-button ${duration === val ? "gb-button-primary" : "gb-button-outline"}`}
                   style={{ flex: 1 }}
                 >
                   {val} <T en="Days" ar="أيام" />
@@ -98,53 +98,53 @@ export default function BoostCalculator({ studioId, baseRate, userId }: Props) {
             </div>
           </div>
 
-          <div style={{ background: 'rgba(207, 168, 110, 0.05)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(207, 168, 110, 0.2)' }}>
+          <div style={{ background: 'rgba(212, 175, 55, 0.05)', padding: '24px', borderRadius: '20px', border: '1px solid var(--gb-gold)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
               <span className="gb-muted-text"><T en="Base Commission" ar="العمولة الأساسية" /></span>
-              <strong>{baseRate}%</strong>
+              <strong style={{ color: 'white' }}>{baseRate}%</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
               <span className="gb-muted-text"><T en="Boost Addition" ar="إضافة التعزيز" /></span>
               <strong style={{ color: 'var(--gb-gold)' }}>+{boostAddition}%</strong>
             </div>
-            <div className="gb-section-divider" style={{ margin: '12px 0', borderTop: '1px solid rgba(255,255,255,0.1)' }} />
+            <div style={{ margin: '12px 0', borderTop: '1px solid var(--gb-border)' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span style={{ fontWeight: 700 }}><T en="Total Commission" ar="إجمالي العمولة" /></span>
-              <strong style={{ fontSize: '2rem', color: 'var(--gb-gold)' }}>{totalCommission}%</strong>
+              <span style={{ fontWeight: 800, color: 'white' }}><T en="Total Commission" ar="إجمالي العمولة" /></span>
+              <strong style={{ fontSize: '2.5rem', color: 'var(--gb-gold)', fontWeight: 900 }}>{totalCommission}%</strong>
             </div>
-            <p style={{ fontSize: '0.85rem', marginTop: '16px', color: 'var(--gb-gold)', fontWeight: 600 }}>
+            <p style={{ fontSize: '0.85rem', marginTop: '16px', color: 'var(--gb-gold)', fontWeight: 700, textAlign: 'center' }}>
               <T en="Higher commission = higher visibility in search results" ar="عمولة أعلى = ظهور أعلى في نتائج البحث" />
             </p>
           </div>
         </div>
       </section>
 
-      <section className="gb-card" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+      <section className="gb-card" style={{ border: '1px solid var(--gb-border)' }}>
         <div className="gb-card-header">
-          <h3><T en="Terms and Activation" ar="الشروط والتفعيل" /></h3>
+          <h3 style={{ margin: 0 }}><T en="Terms and Activation" ar="الشروط والتفعيل" /></h3>
         </div>
-        <p className="gb-muted-text" style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
+        <p className="gb-muted-text" style={{ fontSize: '0.95rem', lineHeight: 1.6, marginTop: '12px' }}>
           <T 
             en="By activating this boost, you agree that the selected commission rate will apply to all bookings made during the boost period. The boost cannot be cancelled once activated. After the period ends, commission returns to the base rate automatically."
             ar="بتفعيل هذا التعزيز، توافق على تطبيق نسبة العمولة المختارة على جميع الحجوزات خلال فترة التعزيز. لا يمكن إلغاء التعزيز بعد التفعيل. بعد انتهاء الفترة، تعود العمولة تلقائياً للنسبة الأساسية."
           />
         </p>
         
-        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', margin: '20px 0', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', gap: '12px', alignItems: 'center', margin: '24px 0', cursor: 'pointer' }}>
           <input 
             type="checkbox" 
             checked={termsAccepted} 
             onChange={(e) => setTermsAccepted(e.target.checked)}
             style={{ width: '20px', height: '20px', accentColor: 'var(--gb-gold)' }}
           />
-          <span style={{ fontWeight: 600 }}>
+          <span style={{ fontWeight: 700, color: 'white' }}>
             <T en="I agree to the boost terms" ar="أوافق على شروط التعزيز" />
           </span>
         </label>
 
         <button 
-          className="gb-button" 
-          style={{ width: '100%', height: '52px' }}
+          className="gb-button gb-button-primary" 
+          style={{ width: '100%', height: '56px', justifyContent: 'center', fontSize: '1.1rem' }}
           disabled={!termsAccepted || isActivating}
           onClick={handleActivate}
         >

@@ -296,16 +296,9 @@ export default async function MarketplacePage({
 
           <form
             action="/marketplace"
-            style={{
-              display: "grid",
-              gap: 14,
-              padding: 18,
-              borderRadius: 22,
-              background: "rgba(255,255,255,0.035)",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
+            className="filter-panel animate-up"
           >
-            <div className="grid grid-4">
+            <div className="grid grid-4" style={{ alignItems: 'end' }}>
               <div>
                 <label>
                   <T en="Search" ar="بحث" />
@@ -313,7 +306,7 @@ export default async function MarketplacePage({
                 <input
                   name="q"
                   className="input"
-                  placeholder="Microphone, mixer, SKU..."
+                  placeholder="..."
                   defaultValue={q}
                 />
               </div>
@@ -326,7 +319,7 @@ export default async function MarketplacePage({
                   <option value="">All categories</option>
                   {categories.map((item: any) => (
                     <option key={item.id} value={item.id}>
-                      {item.name_en} / {item.name_ar}
+                      {item.name_ar || item.name_en}
                     </option>
                   ))}
                 </select>
@@ -340,7 +333,7 @@ export default async function MarketplacePage({
                   <option value="">All brands</option>
                   {brands.map((item: any) => (
                     <option key={item.id} value={item.id}>
-                      {item.name_en} / {item.name_ar}
+                      {item.name_ar || item.name_en}
                     </option>
                   ))}
                 </select>
@@ -354,46 +347,54 @@ export default async function MarketplacePage({
                   <option value="newest">Newest</option>
                   <option value="price_low">Price: low to high</option>
                   <option value="price_high">Price: high to low</option>
-                  <option value="name">Name</option>
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-4">
-              <div>
-                <label>
-                  <T en="Min price" ar="أقل سعر" />
-                </label>
-                <input
-                  name="min_price"
-                  className="input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  defaultValue={minPrice > 0 ? minPrice : ""}
-                />
-              </div>
+            <div className="grid grid-4" style={{ marginTop: 20, alignItems: 'end' }}>
+              <div className="grid grid-2" style={{ gap: 10 }}>
+                <div>
+                  <label>
+                    <T en="Min price" ar="أقل سعر" />
+                  </label>
+                  <input
+                    name="min_price"
+                    className="input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                    defaultValue={minPrice > 0 ? minPrice : ""}
+                  />
+                </div>
 
-              <div>
-                <label>
-                  <T en="Max price" ar="أعلى سعر" />
-                </label>
-                <input
-                  name="max_price"
-                  className="input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  defaultValue={maxPrice > 0 ? maxPrice : ""}
-                />
+                <div>
+                  <label>
+                    <T en="Max price" ar="أعلى سعر" />
+                  </label>
+                  <input
+                    name="max_price"
+                    className="input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="1000"
+                    defaultValue={maxPrice > 0 ? maxPrice : ""}
+                  />
+                </div>
               </div>
 
               <label
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 10,
-                  marginTop: 28,
+                  gap: 12,
+                  background: 'rgba(212, 175, 55, 0.05)',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--gb-border)',
+                  cursor: 'pointer',
+                  margin: 0
                 }}
               >
                 <input
@@ -401,16 +402,19 @@ export default async function MarketplacePage({
                   name="in_stock"
                   value="1"
                   defaultChecked={inStock}
+                  style={{ width: 18, height: 18, accentColor: 'var(--gb-gold)' }}
                 />
-                <T en="In stock only" ar="المتوفر فقط" />
+                <span style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'none' }}>
+                  <T en="In stock only" ar="المتوفر فقط" />
+                </span>
               </label>
 
-              <div style={{ display: "flex", gap: 10, alignItems: "end" }}>
-                <button type="submit" className="btn btn-primary">
+              <div style={{ display: "flex", gap: 10 }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
                   <T en="Apply filters" ar="تطبيق الفلتر" />
                 </button>
 
-                <Link href="/marketplace" className="btn">
+                <Link href="/marketplace" className="btn btn-outline" style={{ flex: 1 }}>
                   <T en="Reset" ar="إعادة ضبط" />
                 </Link>
               </div>

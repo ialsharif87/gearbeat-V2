@@ -401,17 +401,17 @@ export default function SignupPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #020617;
+          background: var(--gb-bg);
           padding: 20px;
         }
         .auth-card {
           width: 100%;
           max-width: 450px;
           padding: 40px;
-          background: #0f172a;
-          border: 1px solid rgba(255,255,255,0.05);
+          background: var(--gb-card);
+          border: 1px solid var(--gb-border);
           border-radius: 24px;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+          box-shadow: var(--shadow-premium);
         }
         .auth-header {
           text-align: center;
@@ -423,7 +423,7 @@ export default function SignupPage() {
           color: #fff;
         }
         .auth-header p {
-          color: #64748b;
+          color: var(--gb-text-muted);
           font-size: 0.95rem;
         }
         .auth-form {
@@ -435,14 +435,16 @@ export default function SignupPage() {
           gap: 8px;
         }
         .field label {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #64748b;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--gb-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
         .gb-input {
           padding: 12px 16px;
-          background: #000;
-          border: 1px solid #222;
+          background: rgba(0,0,0,0.3);
+          border: 1px solid var(--gb-border);
           border-radius: 12px;
           color: #fff;
           font-size: 1rem;
@@ -451,16 +453,16 @@ export default function SignupPage() {
         }
         .gb-input:focus {
           outline: none;
-          border-color: #D4AF37;
+          border-color: var(--gb-gold);
         }
         .gb-button {
           padding: 14px;
-          background: #D4AF37;
+          background: linear-gradient(135deg, var(--gb-gold-light), var(--gb-gold));
           color: #000;
           border: none;
           border-radius: 12px;
           font-size: 1rem;
-          font-weight: 900;
+          font-weight: 800;
           cursor: pointer;
           transition: opacity 0.2s;
         }
@@ -484,13 +486,13 @@ export default function SignupPage() {
           font-size: 0.9rem;
         }
         .auth-footer a {
-          color: #D4AF37;
+          color: var(--gb-gold);
           text-decoration: none;
         }
         .text-btn {
           background: none;
           border: none;
-          color: #D4AF37;
+          color: var(--gb-gold);
           font-size: 0.9rem;
           cursor: pointer;
           padding: 8px;
@@ -508,7 +510,7 @@ export default function SignupPage() {
         }
         .resend-btn {
           background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid var(--gb-border);
           color: #fff;
           padding: 8px 16px;
           border-radius: 8px;
@@ -518,12 +520,12 @@ export default function SignupPage() {
         }
         .resend-btn:hover:not(:disabled) {
           background: rgba(255,255,255,0.1);
-          border-color: #D4AF37;
+          border-color: var(--gb-gold);
         }
         .resend-btn:disabled {
           opacity: 0.5;
           cursor: not-allowed;
-          color: #64748b;
+          color: var(--gb-text-muted);
         }
       `,
         }}

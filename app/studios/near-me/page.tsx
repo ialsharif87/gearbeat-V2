@@ -190,35 +190,27 @@ export default function StudiosNearMePage() {
   }, [studios, userCoordinates]);
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <section
-        className="card"
-        style={{
-          padding: 32,
-          marginTop: 24,
-          background:
-            "linear-gradient(135deg, rgba(207,167,98,0.16), rgba(255,255,255,0.04))",
-        }}
-      >
-        <span className="badge badge-gold">
+    <main className="container gb-dashboard-page">
+      <section className="gb-card animate-up" style={{ borderLeft: '4px solid var(--gb-gold)' }}>
+        <span className="badge-gold">
           <T en="Studios Near Me" ar="استوديوهات قريبة مني" />
         </span>
 
-        <h1 style={{ marginTop: 12 }}>
+        <h1 style={{ marginTop: 20 }}>
           <T
             en="Find studios around you"
             ar="اكتشف الاستوديوهات القريبة منك"
           />
         </h1>
 
-        <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 760 }}>
+        <p className="gb-muted-text">
           <T
             en="Allow location access to sort studios by distance. You can also open any studio directly in Google Maps."
             ar="اسمح بالوصول إلى موقعك لترتيب الاستوديوهات حسب الأقرب. ويمكنك فتح موقع أي استوديو مباشرة في Google Maps."
           />
         </p>
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 22 }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 28 }}>
           <button
             type="button"
             className="btn btn-primary"
@@ -232,14 +224,14 @@ export default function StudiosNearMePage() {
             )}
           </button>
 
-          <Link href="/studios" className="btn">
+          <Link href="/studios" className="btn btn-outline">
             <T en="Browse all studios" ar="تصفح كل الاستوديوهات" />
           </Link>
         </div>
 
         {userCoordinates ? (
-          <p style={{ color: "#00ff88", marginTop: 14 }}>
-            <T
+          <p style={{ color: "var(--gb-teal)", marginTop: 16, fontWeight: 700, fontSize: '0.9rem' }}>
+            ✓ <T
               en="Location enabled. Studios are now sorted by distance."
               ar="تم تفعيل الموقع. يتم الآن ترتيب الاستوديوهات حسب الأقرب."
             />
@@ -247,29 +239,23 @@ export default function StudiosNearMePage() {
         ) : null}
 
         {locationError ? (
-          <p style={{ color: "#ffb020", marginTop: 14 }}>
-            {locationError}
-          </p>
-        ) : null}
-
-        {dataError ? (
-          <p style={{ color: "#ff4d4d", marginTop: 14 }}>
-            {dataError}
+          <p style={{ color: "#ffb020", marginTop: 16, fontSize: '0.9rem' }}>
+            ⚠ {locationError}
           </p>
         ) : null}
       </section>
 
-      <section style={{ marginTop: 28 }}>
+      <section style={{ marginTop: 8 }}>
         {loading ? (
-          <div className="card" style={{ textAlign: "center", padding: 40 }}>
+          <div className="gb-empty-state">
             <T en="Loading studios..." ar="جاري تحميل الاستوديوهات..." />
           </div>
         ) : studiosWithDistance.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", padding: 40 }}>
+          <div className="gb-empty-state">
             <h2>
               <T en="No studios found" ar="لا توجد استوديوهات" />
             </h2>
-            <p style={{ color: "var(--muted)" }}>
+            <p>
               <T
                 en="No approved studios are available right now."
                 ar="لا توجد استوديوهات معتمدة متاحة حاليًا."
@@ -277,13 +263,7 @@ export default function StudiosNearMePage() {
             </p>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: 18,
-            }}
-          >
+          <div className="gb-card-grid">
             {studiosWithDistance.map(({ studio, distanceKm }) => {
               const addressParts = [
                 studio.district,
@@ -291,21 +271,11 @@ export default function StudiosNearMePage() {
               ].filter(Boolean);
 
               return (
-                <article key={studio.id} className="card">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      alignItems: "flex-start",
-                    }}
-                  >
+                <article key={studio.id} className="gb-card animate-up">
+                  <div className="gb-card-header">
                     <div>
-                      <h2 style={{ marginBottom: 6 }}>
-                        {getStudioName(studio)}
-                      </h2>
-
-                      <p style={{ color: "var(--muted)", margin: 0 }}>
+                      <h2>{getStudioName(studio)}</h2>
+                      <p className="gb-muted-text" style={{ fontSize: '0.85rem' }}>
                         {addressParts.length > 0
                           ? addressParts.join(", ")
                           : "Location details coming soon"}
@@ -313,49 +283,27 @@ export default function StudiosNearMePage() {
                     </div>
 
                     {studio.verified_location || studio.verified ? (
-                      <span className="badge badge-success">
+                      <span className="badge-gold" style={{ fontSize: '0.65rem' }}>
                         <T en="Verified" ar="موثق" />
                       </span>
                     ) : null}
                   </div>
 
-                  <p
-                    style={{
-                      marginTop: 14,
-                      color: "var(--muted)",
-                      lineHeight: 1.7,
-                    }}
-                  >
+                  <p className="gb-muted-text" style={{ minHeight: 60, fontSize: '0.9rem' }}>
                     {studio.description_en ||
                       studio.description_ar ||
                       "Premium creative studio on GearBeat."}
                   </p>
 
-                  <div
-                    style={{
-                      marginTop: 16,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      alignItems: "center",
-                    }}
-                  >
+                  <div className="gb-detail-grid" style={{ marginTop: 24, padding: '16px 0', borderTop: '1px solid var(--gb-border)' }}>
                     <div>
-                      <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                        <T en="Starts from" ar="يبدأ من" />
-                      </div>
-
-                      <strong>
-                        {Number(studio.price_from || 0).toFixed(2)} SAR
-                      </strong>
+                      <span className="gb-detail-label"><T en="Starts from" ar="يبدأ من" /></span>
+                      <strong>{Number(studio.price_from || 0).toFixed(0)} SAR</strong>
                     </div>
 
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                        <T en="Distance" ar="المسافة" />
-                      </div>
-
-                      <strong>
+                    <div style={{ textAlign: 'end' }}>
+                      <span className="gb-detail-label"><T en="Distance" ar="المسافة" /></span>
+                      <strong style={{ color: 'var(--gb-teal)' }}>
                         {distanceKm === null
                           ? "—"
                           : formatDistanceKm(distanceKm)}
@@ -363,16 +311,9 @@ export default function StudiosNearMePage() {
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      marginTop: 18,
-                      display: "flex",
-                      gap: 10,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <Link href={getStudioHref(studio)} className="btn btn-primary">
-                      <T en="View Studio" ar="عرض الاستوديو" />
+                  <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
+                    <Link href={getStudioHref(studio)} className="btn btn-primary" style={{ flex: 1, padding: '10px' }}>
+                      <T en="View" ar="عرض" />
                     </Link>
 
                     <GoogleMapsLink
@@ -383,7 +324,8 @@ export default function StudiosNearMePage() {
                       district={studio.district}
                       addressLine={studio.address_line}
                       mode="directions"
-                      className="btn"
+                      className="btn btn-outline"
+                      style={{ flex: 1, padding: '10px' }}
                     />
                   </div>
                 </article>

@@ -70,7 +70,6 @@ export default function OwnerAnalyticsPage() {
 
   const supabase = createClient();
 
-  // Helper to get date objects for ranges
   const rangeDates = useMemo(() => {
     const now = new Date();
     let from = new Date();
@@ -116,7 +115,6 @@ export default function OwnerAnalyticsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // 1. Fetch owned studios
       const { data: studios } = await supabase
         .from("studios")
         .select("id, name, owner_auth_user_id")
@@ -130,7 +128,6 @@ export default function OwnerAnalyticsPage() {
 
       const studioIds = studios.map(s => s.id);
 
-      // 2. Fetch bookings in range
       const { data: bookings } = await supabase
         .from("bookings")
         .select("*, studio:studios(name)")
@@ -139,7 +136,6 @@ export default function OwnerAnalyticsPage() {
         .lte("booking_date", rangeDates.to.toISOString())
         .order("booking_date", { ascending: false });
 
-      // 3. Fetch Average Rating
       const { data: reviews } = await supabase
         .from("studio_reviews")
         .select("rating")
@@ -149,7 +145,6 @@ export default function OwnerAnalyticsPage() {
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
         : 0;
 
-      // 4. Fetch Boost Status (from the new table)
       const { data: boost } = await supabase
         .from("studio_boost_subscriptions")
         .select("total_commission_percent, status")
@@ -158,14 +153,11 @@ export default function OwnerAnalyticsPage() {
         .gt("ends_at", new Date().toISOString())
         .maybeSingle();
 
-      // 5. Ranking (Simplified logic: count studios with more bookings this month)
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
       const { count: totalStudios } = await supabase
         .from("studios")
         .select("*", { count: "exact", head: true });
 
-      // Get booking counts for ALL studios to find rank
-      // In a real app this would be a specialized function or cached view
       const { data: allBookings } = await supabase
         .from("bookings")
         .select("studio_id")
@@ -179,7 +171,6 @@ export default function OwnerAnalyticsPage() {
       const myMaxBookings = Math.max(...studioIds.map(id => counts[id] || 0));
       const rankedHigher = Object.values(counts).filter(c => c > myMaxBookings).length;
 
-      // 6. Performance per studio
       const performance: StudioPerformance[] = studios.map(s => {
         const studioBookings = bookings?.filter(b => b.studio_id === s.id) || [];
         return {
@@ -187,7 +178,7 @@ export default function OwnerAnalyticsPage() {
           name: s.name,
           bookings: studioBookings.length,
           revenue: studioBookings.reduce((sum, b) => sum + (b.payment_status === 'paid' ? b.total_amount : 0), 0),
-          rating: 0, // Would need per-studio review fetch
+          rating: 0,
         };
       });
 
@@ -237,10 +228,7 @@ export default function OwnerAnalyticsPage() {
   const chartData = useMemo(() => {
     if (!data?.bookings) return [];
     
-    // Group by date
     const groups: Record<string, { date: string, revenue: number, bookings: number }> = {};
-    
-    // Fill all dates in range if 30 days or less
     const diffDays = Math.ceil((rangeDates.to.getTime() - rangeDates.from.getTime()) / (1000 * 60 * 60 * 24));
     if (diffDays <= 31) {
       for (let d = new Date(rangeDates.from); d <= rangeDates.to; d.setDate(d.getDate() + 1)) {
@@ -280,48 +268,20 @@ export default function OwnerAnalyticsPage() {
   }
 
   return (
-    <main 
-      className="gb-dashboard-page" 
-      style={{ 
-        background: 'linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%)', 
-        minHeight: '100vh',
-        padding: '32px',
-        color: '#fff'
-      }}
-    >
-      <section 
-        className="gb-dashboard-header" 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '40px' 
-        }}
-      >
+    <main className="gb-dashboard-page container">
+      <section className="gb-dashboard-header">
         <div>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
             <T en="Studio Insights" ar="رؤى الاستوديو" />
           </h1>
-          <p style={{ color: '#cfa86e', fontSize: '0.9rem', marginTop: '4px', fontWeight: 500 }}>
+          <p className="gb-dash-badge" style={{ marginTop: '12px' }}>
             {rangeDates.label}
           </p>
         </div>
 
         <button 
           onClick={exportToExcel}
-          style={{ 
-            background: 'linear-gradient(135deg, #cfa86e, #b8923a)', 
-            color: '#000', 
-            border: 'none',
-            borderRadius: '10px',
-            padding: '10px 24px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            boxShadow: '0 4px 15px rgba(207, 168, 110, 0.2)'
-          }}
+          className="gb-button gb-button-primary"
         >
           <span style={{ fontSize: '1.2rem' }}>📥</span>
           <T en="Export Excel" ar="تصدير Excel" />
@@ -329,14 +289,13 @@ export default function OwnerAnalyticsPage() {
       </section>
 
       <div 
-        className="gb-range-nav" 
         style={{ 
           display: 'flex', 
           gap: '8px', 
-          background: '#111', 
+          background: 'rgba(0,0,0,0.3)', 
           padding: '6px', 
           borderRadius: '99px', 
-          border: '1px solid #222',
+          border: '1px solid var(--gb-border)',
           width: 'fit-content',
           marginBottom: '40px',
           overflowX: 'auto'
@@ -346,16 +305,12 @@ export default function OwnerAnalyticsPage() {
           <button
             key={type}
             onClick={() => setRangeType(type as any)}
+            className={`gb-button ${rangeType === type ? 'gb-button-primary' : 'gb-button-outline'}`}
             style={{ 
-              padding: '8px 24px', 
-              fontSize: '0.85rem',
+              padding: '6px 20px', 
+              fontSize: '0.8rem',
               borderRadius: '99px',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              background: rangeType === type ? '#cfa86e' : 'transparent',
-              color: rangeType === type ? '#000' : '#888',
-              fontWeight: rangeType === type ? 700 : 400
+              border: 'none'
             }}
           >
             {type}
@@ -364,188 +319,130 @@ export default function OwnerAnalyticsPage() {
       </div>
 
       {rangeType === "Custom" && (
-        <section className="gb-card" style={{ marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <section className="gb-card" style={{ marginBottom: '32px', display: 'flex', gap: '16px', alignItems: 'center', padding: '24px' }}>
           <input 
             type="date" 
             className="gb-input" 
             value={customRange.from} 
             onChange={e => setCustomRange(prev => ({ ...prev, from: e.target.value }))}
+            style={{ maxWidth: '200px' }}
           />
-          <span><T en="to" ar="إلى" /></span>
+          <span className="gb-muted-text"><T en="to" ar="إلى" /></span>
           <input 
             type="date" 
             className="gb-input" 
             value={customRange.to} 
             onChange={e => setCustomRange(prev => ({ ...prev, to: e.target.value }))}
+            style={{ maxWidth: '200px' }}
           />
         </section>
       )}
 
       {/* KPI Cards */}
-      <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #cfa86e'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+      <section className="gb-dash-grid-4" style={{ marginBottom: '32px' }}>
+        <div className="gb-card" style={{ borderTop: '4px solid var(--gb-gold)', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+            <span className="gb-detail-label">
               <T en="Revenue" ar="الإيراد" />
             </span>
-            <span style={{ fontSize: '1.8rem', opacity: 0.4 }}>💰</span>
+            <span style={{ fontSize: '1.5rem' }}>💰</span>
           </div>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{revenue}</div>
-          <p style={{ color: revenue > 0 ? '#22c55e' : '#666', fontSize: '0.75rem', margin: 0 }}>
-            {revenue > 0 ? '↑' : '—'} <T en="SAR" ar="ريال" />
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{revenue}</div>
+          <p style={{ color: 'var(--gb-gold)', fontSize: '0.8rem', margin: 0, fontWeight: 700 }}>
+            <T en="SAR" ar="ريال" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>💰</span>
         </div>
 
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #3b82f6'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+        <div className="gb-card" style={{ borderTop: '4px solid var(--gb-teal)', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+            <span className="gb-detail-label">
               <T en="Bookings" ar="الحجوزات" />
             </span>
-            <span style={{ fontSize: '1.8rem', opacity: 0.4 }}>📅</span>
+            <span style={{ fontSize: '1.5rem' }}>📅</span>
           </div>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{totalBookings}</div>
-          <p style={{ color: totalBookings > 0 ? '#22c55e' : '#666', fontSize: '0.75rem', margin: 0 }}>
-            {totalBookings > 0 ? '↑' : '—'} <T en="confirmed + completed" ar="مؤكد + مكتمل" />
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{totalBookings}</div>
+          <p style={{ color: 'var(--gb-teal)', fontSize: '0.8rem', margin: 0, fontWeight: 700 }}>
+            <T en="Confirmed + Completed" ar="مؤكد + مكتمل" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>📅</span>
         </div>
 
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #22c55e'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+        <div className="gb-card" style={{ borderTop: '4px solid #22c55e', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+            <span className="gb-detail-label">
               <T en="Avg Rating" ar="متوسط التقييم" />
             </span>
-            <span style={{ fontSize: '1.8rem', opacity: 0.4 }}>⭐</span>
+            <span style={{ fontSize: '1.5rem' }}>⭐</span>
           </div>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{data?.avgRating.toFixed(1)}</div>
-          <p style={{ color: data?.avgRating && data.avgRating > 0 ? '#22c55e' : '#666', fontSize: '0.75rem', margin: 0 }}>
-            {data?.avgRating && data.avgRating > 0 ? '↑' : '—'} <T en="out of 5" ar="من 5" />
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{data?.avgRating.toFixed(1)}</div>
+          <p style={{ color: '#22c55e', fontSize: '0.8rem', margin: 0, fontWeight: 700 }}>
+            <T en="out of 5 stars" ar="من 5 نجوم" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>⭐</span>
         </div>
 
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #a855f7'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+        <div className="gb-card" style={{ borderTop: '4px solid #a855f7', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+            <span className="gb-detail-label">
               <T en="Commission Rate" ar="نسبة العمولة" />
             </span>
-            <span style={{ fontSize: '1.8rem', opacity: 0.4 }}>🚀</span>
+            <span style={{ fontSize: '1.5rem' }}>🚀</span>
           </div>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{data?.boostStatus.total_commission_percent}%</div>
-          <p style={{ color: data?.boostStatus.is_boosted ? '#cfa86e' : '#666', fontSize: '0.75rem', margin: 0 }}>
-            {data?.boostStatus.is_boosted ? <T en="Boosted" ar="معزز" /> : <T en="Standard" ar="أساسي" />}
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{data?.boostStatus.total_commission_percent}%</div>
+          <p style={{ color: data?.boostStatus.is_boosted ? 'var(--gb-gold)' : 'var(--gb-text-muted)', fontSize: '0.8rem', margin: 0, fontWeight: 700 }}>
+            {data?.boostStatus.is_boosted ? <T en="Boost Active" ar="التعزيز نشط" /> : <T en="Standard Rate" ar="النسبة الأساسية" />}
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>🚀</span>
         </div>
       </section>
 
       {/* Summary Strip */}
       <section 
+        className="gb-card"
         style={{ 
-          background: '#111', 
-          borderRadius: '16px',
-          border: '1px solid #1e1e1e', 
-          padding: '20px 28px', 
+          padding: '24px', 
           display: 'grid', 
-          gridTemplateColumns: '1fr 1fr 1fr', 
-          gap: '0', 
-          marginBottom: '32px'
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '24px', 
+          marginBottom: '32px',
+          background: 'rgba(212, 175, 55, 0.03)',
+          border: '1px solid var(--gb-gold)'
         }}
       >
-        <div style={{ textAlign: 'center', borderRight: '1px solid #222' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
+        <div style={{ textAlign: 'center', borderRight: '1px solid var(--gb-border)' }}>
+          <div className="gb-detail-label" style={{ marginBottom: '8px' }}>
             <T en="Completion Rate" ar="معدل الإكمال" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#cfa86e' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'white' }}>
             {totalBookings > 0 ? Math.round((data?.bookings.filter(b => b.status === 'confirmed').length || 0) / totalBookings * 100) : 0}%
           </div>
         </div>
-        <div style={{ textAlign: 'center', borderRight: '1px solid #222' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
+        <div style={{ textAlign: 'center', borderRight: '1px solid var(--gb-border)' }}>
+          <div className="gb-detail-label" style={{ marginBottom: '8px' }}>
             <T en="Avg Booking Value" ar="متوسط قيمة الحجز" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#cfa86e' }}>
-            {totalBookings > 0 ? Math.round(revenue / totalBookings) : 0} SAR
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'white' }}>
+            {totalBookings > 0 ? Math.round(revenue / totalBookings) : 0} <span style={{ fontSize: '0.9rem', color: 'var(--gb-gold)' }}>SAR</span>
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
-            <T en="Net Revenue" ar="الإيراد الصافي" />
+          <div className="gb-detail-label" style={{ marginBottom: '8px' }}>
+            <T en="Estimated Net" ar="الصافي التقديري" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#cfa86e' }}>
-            {Math.round(revenue - (revenue * (data?.boostStatus.total_commission_percent || 15) / 100))} SAR
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--gb-teal)' }}>
+            {Math.round(revenue - (revenue * (data?.boostStatus.total_commission_percent || 15) / 100))} <span style={{ fontSize: '0.9rem' }}>SAR</span>
           </div>
         </div>
       </section>
 
       {/* Chart Section */}
-      <section 
-        className="gb-card" 
-        style={{ 
-          background: '#111', 
-          borderRadius: '20px', 
-          border: '1px solid #1e1e1e', 
-          padding: '24px', 
-          marginBottom: '32px' 
-        }}
-      >
-        <div style={{ fontSize: '1rem', color: '#888', marginBottom: '16px', fontWeight: 500 }}>
-          <T en="Growth & Revenue" ar="النمو والإيرادات" />
+      <section className="gb-card" style={{ padding: '32px', marginBottom: '32px' }}>
+        <div className="gb-card-header" style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white' }}>
+            <T en="Growth & Revenue" ar="النمو والإيرادات" />
+          </h2>
         </div>
-        <div style={{ width: '100%', height: 300, position: 'relative' }}>
+        <div style={{ width: '100%', height: 350, position: 'relative' }}>
           {chartData.length === 0 || chartData.every(d => d.revenue === 0 && d.bookings === 0) ? (
-            <div style={{ 
-              height: '200px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <p style={{ color: '#444', fontSize: '1rem' }}>
+            <div className="gb-empty-state" style={{ height: '100%' }}>
+              <p className="gb-muted-text">
                 <T en="No bookings in this period" ar="لا توجد حجوزات في هذه الفترة" />
               </p>
             </div>
@@ -557,15 +454,22 @@ export default function OwnerAnalyticsPage() {
                   {
                     label: "Revenue (SAR)",
                     data: chartData.map(d => d.revenue),
-                    borderColor: "#cfa86e",
-                    backgroundColor: "rgba(207,168,110,0.1)",
+                    borderColor: "#D4AF37",
+                    backgroundColor: "rgba(212, 175, 55, 0.1)",
+                    borderWidth: 3,
+                    pointBackgroundColor: "#D4AF37",
+                    pointRadius: 4,
                     tension: 0.4,
+                    fill: true
                   },
                   {
                     label: "Bookings",
                     data: chartData.map(d => d.bookings),
-                    borderColor: "#3b82f6",
-                    backgroundColor: "rgba(59,130,246,0.1)",
+                    borderColor: "#0FA08A",
+                    backgroundColor: "rgba(15, 160, 138, 0.1)",
+                    borderWidth: 2,
+                    pointBackgroundColor: "#0FA08A",
+                    pointRadius: 4,
                     tension: 0.4,
                     yAxisID: "y1",
                   },
@@ -577,28 +481,37 @@ export default function OwnerAnalyticsPage() {
                 interaction: { mode: "index", intersect: false },
                 plugins: {
                   legend: { 
-                    labels: { color: "#888" }
+                    position: 'top',
+                    labels: { color: "#fff", font: { weight: 'bold' } }
                   },
+                  tooltip: {
+                    backgroundColor: '#111',
+                    titleColor: 'var(--gb-gold)',
+                    bodyColor: '#fff',
+                    borderColor: 'var(--gb-border)',
+                    borderWidth: 1,
+                    padding: 12
+                  }
                 },
                 scales: {
                   x: { 
                     ticks: { color: "#888" },
-                    grid: { color: "#1a1a1a" }
+                    grid: { color: "rgba(255,255,255,0.05)" }
                   },
                   y: { 
                     min: 0,
                     ticks: { 
-                      color: "#cfa86e",
+                      color: "#D4AF37",
                       callback: (value) => `${value} SAR`
                     },
-                    grid: { color: "#1a1a1a" },
+                    grid: { color: "rgba(255,255,255,0.05)" },
                     position: "left"
                   },
                   y1: {
                     min: 0,
                     ticks: { 
-                      color: "#3b82f6",
-                      callback: (value) => `${value}`
+                      color: "#0FA08A",
+                      callback: (value) => Math.round(Number(value))
                     },
                     grid: { drawOnChartArea: false },
                     position: "right"
@@ -610,55 +523,44 @@ export default function OwnerAnalyticsPage() {
         </div>
       </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px' }}>
+      <div className="gb-dash-grid-4" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
         {/* Bookings Table */}
-        <section 
-          className="gb-card" 
-          style={{ 
-            background: '#111', 
-            borderRadius: '20px', 
-            border: '1px solid #1e1e1e', 
-            padding: '24px' 
-          }}
-        >
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '20px' }}>
-            <T en="Recent Activity" ar="النشاط الأخير" />
+        <section className="gb-card" style={{ padding: '0', overflow: 'hidden' }}>
+          <div className="gb-card-header" style={{ padding: '24px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white' }}>
+              <T en="Recent Activity" ar="النشاط الأخير" />
+            </h2>
           </div>
-          <div className="gb-table-wrap" style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="gb-table-wrap">
+            <table className="gb-table">
               <thead>
-                <tr style={{ background: '#0d0d0d', color: '#666', fontSize: '0.8rem', textAlign: 'start' }}>
-                  <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Date" ar="التاريخ" /></th>
-                  <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Studio" ar="الاستوديو" /></th>
-                  <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Amount" ar="المبلغ" /></th>
-                  <th style={{ padding: '12px 16px', fontWeight: 500 }}><T en="Status" ar="الحالة" /></th>
+                <tr>
+                  <th><T en="Date" ar="التاريخ" /></th>
+                  <th><T en="Studio" ar="الاستوديو" /></th>
+                  <th><T en="Amount" ar="المبلغ" /></th>
+                  <th><T en="Status" ar="الحالة" /></th>
                 </tr>
               </thead>
               <tbody>
                 {data?.bookings.slice(0, 10).map((b) => (
-                  <tr 
-                    key={b.id} 
-                    style={{ borderBottom: '1px solid #1a1a1a', transition: 'background 0.2s' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <td style={{ padding: '16px' }}>{b.booking_date}</td>
-                    <td style={{ padding: '16px' }}>{b.studio?.name}</td>
-                    <td style={{ padding: '16px' }}><strong>{b.total_amount} SAR</strong></td>
-                    <td style={{ padding: '16px' }}>
-                      <span 
-                        className={`gb-dash-badge ${b.status === 'confirmed' ? 'gb-dash-badge-confirmed' : 'gb-dash-badge-pending'}`}
-                        style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem' }}
-                      >
-                        {b.status}
+                  <tr key={b.id}>
+                    <td className="gb-muted-text">{b.booking_date.split('T')[0]}</td>
+                    <td style={{ fontWeight: 700, color: 'white' }}>{b.studio?.name}</td>
+                    <td style={{ fontWeight: 800, color: 'var(--gb-gold)' }}>{b.total_amount} SAR</td>
+                    <td>
+                      <span className="gb-dash-badge" style={{ 
+                        background: b.status === 'confirmed' ? 'rgba(15, 160, 138, 0.1)' : 'rgba(212, 175, 55, 0.1)',
+                        color: b.status === 'confirmed' ? 'var(--gb-teal)' : 'var(--gb-gold)'
+                      }}>
+                        {b.status.toUpperCase()}
                       </span>
                     </td>
                   </tr>
                 ))}
                 {(!data?.bookings || data.bookings.length === 0) && (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: '#444' }}>
-                      <T en="No data for this period" ar="لا توجد بيانات لهذه الفترة" />
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '60px' }}>
+                      <p className="gb-muted-text"><T en="No data for this period" ar="لا توجد بيانات لهذه الفترة" /></p>
                     </td>
                   </tr>
                 )}
@@ -668,62 +570,50 @@ export default function OwnerAnalyticsPage() {
         </section>
 
         {/* Ranking & Insights */}
-        <section className="gb-dashboard-stack" style={{ display: 'grid', gap: '24px' }}>
-          <section 
-            className="gb-card" 
-            style={{ 
-              background: '#111', 
-              borderRadius: '20px', 
-              border: '1px solid #1e1e1e', 
-              padding: '24px' 
-            }}
-          >
-            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '20px' }}>
-              <T en="Studio Ranking" ar="تصنيف الاستوديو" />
+        <div className="gb-dashboard-stack">
+          <section className="gb-card" style={{ padding: '32px' }}>
+            <div className="gb-card-header" style={{ marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white' }}>
+                <T en="Market Position" ar="المركز في السوق" />
+              </h2>
             </div>
             
             {data?.studios.length === 1 ? (
-              <div style={{ padding: '20px 0', textAlign: 'center' }}>
-                <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '16px' }}>
+              <div style={{ textAlign: 'center' }}>
+                <p className="gb-muted-text" style={{ fontSize: '0.85rem', marginBottom: '24px' }}>
                   <T en="Your studio rank among all GearBeat studios" ar="تصنيف استوديوك بين جميع استوديوهات GearBeat" />
                 </p>
-                <div style={{ fontSize: '4rem', fontWeight: 900, color: '#cfa86e' }}>
+                <div style={{ fontSize: '4.5rem', fontWeight: 900, color: 'var(--gb-gold)', lineHeight: 1 }}>
                   #{data.ranking.rank}
                 </div>
-                <div style={{ fontSize: '1.2rem', color: '#888', marginBottom: '24px' }}>
+                <div className="gb-muted-text" style={{ fontSize: '1.1rem', marginTop: '8px', marginBottom: '32px' }}>
                   <T en="out of" ar="من أصل" /> {data.ranking.total}
                 </div>
-                <div 
-                  style={{ 
-                    height: '6px', 
-                    background: '#1a1a1a', 
-                    borderRadius: '99px', 
-                    overflow: 'hidden' 
-                  }}
-                >
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', overflow: 'hidden', border: '1px solid var(--gb-border)' }}>
                   <div 
                     style={{ 
                       width: `${Math.max(5, 100 - (data.ranking.rank / data.ranking.total) * 100)}%`, 
                       height: '100%', 
-                      background: 'linear-gradient(90deg, #cfa86e, #f0c070)' 
+                      background: 'var(--gb-gold)',
+                      boxShadow: '0 0 15px var(--gb-gold-glow)'
                     }} 
                   />
                 </div>
               </div>
             ) : (
               <div className="gb-table-wrap">
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <table className="gb-table">
                   <thead>
-                    <tr style={{ color: '#666', borderBottom: '1px solid #222', textAlign: 'start' }}>
-                      <th style={{ padding: '12px 8px' }}><T en="Studio" ar="الاستوديو" /></th>
-                      <th style={{ padding: '12px 8px' }}><T en="Revenue" ar="الإيراد" /></th>
+                    <tr>
+                      <th><T en="Studio" ar="الاستوديو" /></th>
+                      <th style={{ textAlign: 'right' }}><T en="Revenue" ar="الإيراد" /></th>
                     </tr>
                   </thead>
                   <tbody>
                     {data?.performance.map((p, i) => (
-                      <tr key={p.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
-                        <td style={{ padding: '12px 8px' }}>#{i+1} {p.name}</td>
-                        <td style={{ padding: '12px 8px', color: '#cfa86e', fontWeight: 700 }}>{p.revenue} SAR</td>
+                      <tr key={p.id}>
+                        <td style={{ color: 'white', fontWeight: 700 }}>#{i+1} {p.name}</td>
+                        <td style={{ textAlign: 'right', color: 'var(--gb-gold)', fontWeight: 800 }}>{p.revenue} SAR</td>
                       </tr>
                     ))}
                   </tbody>
@@ -733,24 +623,24 @@ export default function OwnerAnalyticsPage() {
           </section>
 
           <section 
+            className="gb-card"
             style={{ 
-              background: 'linear-gradient(135deg, rgba(207,168,110,0.08), rgba(207,168,110,0.02))',
-              border: '1px solid rgba(207,168,110,0.2)',
-              borderRadius: '16px',
+              background: 'rgba(212, 175, 55, 0.05)',
+              border: '1px solid var(--gb-gold)',
               padding: '24px'
             }}
           >
-            <h3 style={{ color: '#cfa86e', margin: '0 0 12px 0', fontSize: '1.1rem' }}>
+            <h3 style={{ color: 'var(--gb-gold)', margin: '0 0 12px 0', fontSize: '1.1rem', fontWeight: 900 }}>
               <T en="Quick Insight" ar="رؤية سريعة" />
             </h3>
-            <p style={{ color: '#888', lineHeight: 1.7, margin: 0, fontSize: '0.9rem' }}>
+            <p style={{ color: 'white', lineHeight: 1.6, margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>
               <T 
                 en="Focus on increasing your studio availability during peak weekends to capture more revenue." 
                 ar="ركز على زيادة توافر الاستوديو خلال عطلات نهاية الأسبوع لاقتناص المزيد من الإيرادات." 
               />
             </p>
           </section>
-        </section>
+        </div>
       </div>
     </main>
   );
