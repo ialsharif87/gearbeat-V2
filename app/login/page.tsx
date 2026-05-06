@@ -466,6 +466,7 @@ export default function LoginPage() {
           color: #64748b;
         }
       `,
+        }}
       />
     </div>
   );

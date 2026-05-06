@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import T from "@/components/t";
 import type { CountryOption } from "@/lib/countries";
 import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
@@ -60,7 +60,6 @@ export default function CountryPhoneFields({
   const showPhoneWarning = Boolean(localPhone) && !isValidE164(phoneE164);
 
   // Sync with parent callbacks
-  import { useEffect } from "react";
   useEffect(() => {
     onPhoneE164Change?.(phoneE164);
   }, [phoneE164, onPhoneE164Change]);
