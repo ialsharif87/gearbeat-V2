@@ -13,8 +13,9 @@
     *   تعريب كامل لواجهات المصادقة ورسائل الخطأ.
 2.  **مراقبة الأخطاء (Sentry Monitoring)**:
     *   تثبيت وتكوين Sentry في مشروع Next.js.
-    *   إنشاء ملفات الإعدادات: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`.
-    *   تحديث `next.config.ts` لدمج Sentry مع إعدادات المشروع الحالية.
+    *   إنشاء ملفات الإعدادات وتفعيل الـ `instrumentation.ts` لضمان التوافق مع النسخ الحديثة.
+    *   إضافة `app/global-error.tsx` لالتقاط أخطاء الـ Rendering بشكل شامل.
+    *   تحديث `next.config.ts` لإصلاح أخطاء التوافق مع TypeScript.
     *   إضافة مفاتيح البيئة الخاصة بـ Sentry في `.env.local`.
 3.  **التطوير التقني (Technical)**:
     *   تحديث مكون `CountryPhoneFields` لدعم التفاعل اللحظي (Callbacks).

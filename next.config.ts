@@ -47,6 +47,7 @@ export default withSentryConfig(nextConfig, {
   project: 'javascript-nextjs',
   silent: true,
   widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
+  sourcemaps: {
+    hideSources: true,
+  },
 });
