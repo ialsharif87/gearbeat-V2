@@ -11,9 +11,13 @@
     *   تفعيل الدخول عبر رمز البريد الإلكتروني في (Login, Signup, Portal).
     *   إضافة عداد تبريد (Resend Cooldown) لمدة 60 ثانية.
     *   تعريب كامل لواجهات المصادقة ورسائل الخطأ.
-2.  **التطوير التقني (Technical)**:
+2.  **مراقبة الأخطاء (Sentry Monitoring)**:
+    *   تثبيت وتكوين Sentry في مشروع Next.js.
+    *   إنشاء ملفات الإعدادات: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`.
+    *   تحديث `next.config.ts` لدمج Sentry مع إعدادات المشروع الحالية.
+    *   إضافة مفاتيح البيئة الخاصة بـ Sentry في `.env.local`.
+3.  **التطوير التقني (Technical)**:
     *   تحديث مكون `CountryPhoneFields` لدعم التفاعل اللحظي (Callbacks).
-    *   إصلاح أخطاء البناء (Build Fixes) وضمان استقرار المنصة على Vercel.
     *   تحويل صفحة التسجيل لمكون عميل (Client Component) لزيادة السرعة والتفاعل.
 3.  **الهوية البصرية (UX/UI)**:
     *   تطبيق تصميم "Black & Gold" الفاخر على كافة نماذج الدخول الجديدة.
