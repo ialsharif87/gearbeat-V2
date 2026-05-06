@@ -14,6 +14,8 @@ type CountryPhoneFieldsProps = {
   phoneLocalName?: string;
   phoneE164Name?: string;
   required?: boolean;
+  onCountryChange?: (value: string) => void;
+  onPhoneE164Change?: (value: string) => void;
 };
 
 export default function CountryPhoneFields({
@@ -25,6 +27,8 @@ export default function CountryPhoneFields({
   phoneLocalName = "phone_local",
   phoneE164Name = "phone_e164",
   required = true,
+  onCountryChange,
+  onPhoneE164Change,
 }: CountryPhoneFieldsProps) {
   const initialCountryCode = countries.some(
     (country) => country.country_code === defaultCountryCode
@@ -54,6 +58,16 @@ export default function CountryPhoneFields({
   });
 
   const showPhoneWarning = Boolean(localPhone) && !isValidE164(phoneE164);
+
+  // Sync with parent callbacks
+  import { useEffect } from "react";
+  useEffect(() => {
+    onPhoneE164Change?.(phoneE164);
+  }, [phoneE164, onPhoneE164Change]);
+
+  useEffect(() => {
+    onCountryChange?.(selectedCountryCode);
+  }, [selectedCountryCode, onCountryChange]);
 
   return (
     <div className="grid grid-2">
