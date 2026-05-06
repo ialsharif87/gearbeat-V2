@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
@@ -94,6 +95,18 @@ export default function StaffAccessPage() {
               required
               className="gb-input"
             />
+            <Link 
+              href="/forgot-password" 
+              style={{ 
+                fontSize: '0.8rem', 
+                color: '#D4AF37', 
+                textDecoration: 'none',
+                marginTop: '4px',
+                display: 'inline-block'
+              }}
+            >
+              <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
+            </Link>
           </div>
           <button type="submit" disabled={loading} className="gb-button">
             {loading ? (

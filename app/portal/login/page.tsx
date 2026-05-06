@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
@@ -202,6 +203,18 @@ export default function PortalLoginPage() {
                 placeholder="••••••••"
                 required
               />
+              <Link 
+                href="/forgot-password" 
+                style={{ 
+                  fontSize: '0.8rem', 
+                  color: '#D4AF37', 
+                  textDecoration: 'none',
+                  marginTop: '4px',
+                  display: 'inline-block'
+                }}
+              >
+                <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
+              </Link>
             </label>
             
             <button type="submit" disabled={loading} className="gb-button">
@@ -215,7 +228,7 @@ export default function PortalLoginPage() {
             <button
               type="button"
               className="gb-text-btn"
-              style={{ background: 'none', border: 'none', color: '#cfa86e', width: '100%', marginTop: '16px', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: '#D4AF37', width: '100%', marginTop: '16px', cursor: 'pointer', fontSize: '0.9rem' }}
               onClick={() => {
                 setAuthMode("otp");
                 setStep("request");
@@ -224,12 +237,6 @@ export default function PortalLoginPage() {
             >
               <T en="Login with code (OTP)" ar="تسجيل الدخول برمز (OTP)" />
             </button>
-            
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <a href="/forgot-password" style={{ color: '#cfa86e', fontSize: '0.85rem', textDecoration: 'none' }}>
-                <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
-              </a>
-            </div>
           </form>
         ) : (
           <div className="otp-container">

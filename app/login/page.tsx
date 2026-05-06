@@ -193,6 +193,18 @@ export default function LoginPage() {
                 required
                 className="gb-input"
               />
+              <Link 
+                href="/forgot-password" 
+                style={{ 
+                  fontSize: '0.8rem', 
+                  color: '#D4AF37', 
+                  textDecoration: 'none',
+                  marginTop: '4px',
+                  display: 'inline-block'
+                }}
+              >
+                <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
+              </Link>
             </div>
             <button type="submit" disabled={loading} className="gb-button">
               {loading ? <T en="Signing in..." ar="جاري الدخول..." /> : <T en="Sign In" ar="تسجيل الدخول" />}
@@ -299,11 +311,6 @@ export default function LoginPage() {
         */}
 
         <div className="auth-footer">
-          {authMode === "password" && (
-            <Link href="/forgot-password">
-              <T en="Forgot password?" ar="نسيت كلمة المرور؟" />
-            </Link>
-          )}
           <Link href="/signup">
             <T en="New to GearBeat? Create account" ar="جديد؟ أنشئ حساباً" />
           </Link>

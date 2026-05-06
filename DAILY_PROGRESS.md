@@ -7,11 +7,17 @@
 ## 📅 اليوم: الأربعاء 6 مايو 2026
 
 ### **✅ الإنجازات (Accomplishments)**
-1.  **نظام المصادقة (OTP System)**:
+1.  **نظام المصادقة (OTP & Password Reset Flow)**:
     *   تفعيل الدخول عبر رمز البريد الإلكتروني في (Login, Signup, Portal).
     *   إضافة عداد تبريد (Resend Cooldown) لمدة 60 ثانية.
+    *   إصلاح وتوحيد نظام استعادة كلمة المرور (Forgot Password) وتوجيهه إلى `gearbeat.app/update-password`.
+    *   تحديث صفحة `update-password` لمعالجة الـ Token وتفعيل الجلسة تلقائياً.
+    *   إضافة روابط "نسيت كلمة المرور" لكافة صفحات الدخول (Customer, Portal, Staff) بالتنسيق المطلوب.
     *   تعريب كامل لواجهات المصادقة ورسائل الخطأ.
-2.  **مراقبة الأخطاء (Sentry Monitoring)**:
+2.  **التوثيق (Documentation)**:
+    *   إنشاء `docs/AUTH_SETUP.md` لإعدادات إعادة التوجيه في Supabase.
+    *   تحديث `docs/EMAIL_SETUP.md` لإعدادات DNS (DMARC, SPF, DKIM).
+3.  **مراقبة الأخطاء (Sentry Monitoring)**:
     *   تثبيت وتكوين Sentry في مشروع Next.js.
     *   إنشاء ملفات الإعدادات وتفعيل الـ `instrumentation.ts` لضمان التوافق مع النسخ الحديثة.
     *   إضافة `app/global-error.tsx` لالتقاط أخطاء الـ Rendering بشكل شامل.

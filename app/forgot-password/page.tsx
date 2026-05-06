@@ -8,11 +8,7 @@ import T from "@/components/t";
 export default function ForgotPasswordPage() {
   const supabase = createClient();
 
-  const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"request" | "verify">("request");
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,45 +20,15 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      if (method === "email") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: 'https://gearbeat.app/portal/update-password'
-        });
-        if (error) throw error;
-        setMessage("A reset link has been sent to your email.");
-      } else {
-        // Phone reset via OTP
-        const { error } = await supabase.auth.signInWithOtp({
-          phone: phone,
-        });
-        if (error) throw error;
-        setStep("verify");
-        setMessage("A verification code has been sent to your mobile.");
-      }
-    } catch (err: any) {
-      setErrorMessage(err.message || "An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setErrorMessage("");
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        phone,
-        token: otp,
-        type: 'sms'
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://gearbeat.app/update-password'
       });
+      
       if (error) throw error;
       
-      // Once verified, they are logged in. Redirect to update password.
-      window.location.href = "/portal/update-password";
+      setMessage("Success"); // Logical flag for the UI
     } catch (err: any) {
-      setErrorMessage(err.message || "Invalid code. Please try again.");
+      setErrorMessage(err.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -86,78 +52,45 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        <div className="gb-method-toggle">
-          <button 
-            className={method === "email" ? "active" : ""} 
-            onClick={() => { setMethod("email"); setStep("request"); setMessage(""); setErrorMessage(""); }}
-          >
-            <T en="Email" ar="البريد الإلكتروني" />
-          </button>
-          <button 
-            className={method === "phone" ? "active" : ""} 
-            onClick={() => { setMethod("phone"); setStep("request"); setMessage(""); setErrorMessage(""); }}
-          >
-            <T en="Mobile" ar="الجوال" />
-          </button>
-        </div>
-
-        {errorMessage && <div className="gb-error-msg">{errorMessage}</div>}
-        {message && <div className="gb-success-msg">{message}</div>}
-
-        {step === "request" ? (
-          <form onSubmit={handleResetRequest} className="gb-auth-form">
-            {method === "email" ? (
-              <div className="gb-field">
-                <label><T en="Email Address" ar="البريد الإلكتروني" /></label>
-                <input 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  placeholder="name@example.com"
-                  required 
-                />
-              </div>
+        {errorMessage && (
+          <div className="gb-error-msg">
+            {errorMessage === "User not found" ? (
+              <T en="Email address not found." ar="البريد الإلكتروني غير مسجل لدينا." />
             ) : (
-              <div className="gb-field">
-                <label><T en="Mobile Number" ar="رقم الجوال" /></label>
-                <input 
-                  type="tel" 
-                  value={phone} 
-                  onChange={(e) => setPhone(e.target.value)} 
-                  placeholder="+966XXXXXXXXX"
-                  required 
-                />
-              </div>
+              errorMessage
             )}
+          </div>
+        )}
 
-            <button type="submit" disabled={loading} className="gb-submit-btn">
-              {loading ? <T en="Processing..." ar="جاري المعالجة..." /> : <T en="Send Recovery Code" ar="إرسال كود الاستعادة" />}
-            </button>
-          </form>
+        {message === "Success" ? (
+          <div className="gb-success-msg">
+            <T 
+              en="Password reset link sent to your email" 
+              ar="تم إرسال رابط إعادة التعيين لبريدك الإلكتروني" 
+            />
+          </div>
         ) : (
-          <form onSubmit={handleVerifyOtp} className="gb-auth-form">
+          <form onSubmit={handleResetRequest} className="gb-auth-form">
             <div className="gb-field">
-              <label><T en="Verification Code" ar="كود التحقق" /></label>
+              <label><T en="Email Address" ar="البريد الإلكتروني" /></label>
               <input 
-                type="text" 
-                value={otp} 
-                onChange={(e) => setOtp(e.target.value)} 
-                placeholder="000000"
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="name@example.com"
                 required 
               />
             </div>
+
             <button type="submit" disabled={loading} className="gb-submit-btn">
-              {loading ? <T en="Verifying..." ar="جاري التحقق..." /> : <T en="Verify & Continue" ar="تحقق ومتابعة" />}
-            </button>
-            <button type="button" className="gb-link-btn" onClick={() => setStep("request")}>
-              <T en="Resend code" ar="إعادة إرسال الكود" />
+              {loading ? <T en="Processing..." ar="جاري المعالجة..." /> : <T en="Send Recovery Link" ar="إرسال رابط الاستعادة" />}
             </button>
           </form>
         )}
 
         <div className="gb-auth-footer">
           <Link href="/login">
-            ← <T en="Back to login" ar="العودة لتسجيل الدخول" />
+            <T en="← Back to login" ar="← العودة لتسجيل الدخول" />
           </Link>
         </div>
       </div>
@@ -192,8 +125,8 @@ export default function ForgotPasswordPage() {
         .gb-badge {
           display: inline-block;
           background: rgba(207, 168, 110, 0.1);
-          color: #cfa86e;
-          border: 1px solid #cfa86e;
+          color: #D4AF37;
+          border: 1px solid #D4AF37;
           padding: 4px 12px;
           border-radius: 20px;
           font-size: 0.75rem;
@@ -212,32 +145,6 @@ export default function ForgotPasswordPage() {
           color: #888;
           font-size: 0.95rem;
           line-height: 1.6;
-        }
-
-        .gb-method-toggle {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          background: #111;
-          padding: 6px;
-          border-radius: 14px;
-          margin-bottom: 32px;
-          border: 1px solid #222;
-        }
-
-        .gb-method-toggle button {
-          background: transparent;
-          border: none;
-          color: #666;
-          padding: 10px;
-          border-radius: 10px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .gb-method-toggle button.active {
-          background: #cfa86e;
-          color: black;
         }
 
         .gb-auth-form {
@@ -269,12 +176,12 @@ export default function ForgotPasswordPage() {
 
         .gb-field input:focus {
           outline: none;
-          border-color: #cfa86e;
-          box-shadow: 0 0 0 4px rgba(207, 168, 110, 0.1);
+          border-color: #D4AF37;
+          box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
         }
 
         .gb-submit-btn {
-          background: linear-gradient(135deg, #cfa86e, #b8923a);
+          background: linear-gradient(135deg, #D4AF37, #B8923A);
           color: black;
           border: none;
           padding: 16px;
@@ -287,21 +194,12 @@ export default function ForgotPasswordPage() {
 
         .gb-submit-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 10px 20px rgba(207, 168, 110, 0.2);
+          box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
         }
 
         .gb-submit-btn:disabled {
           opacity: 0.6;
           cursor: not-allowed;
-        }
-
-        .gb-link-btn {
-          background: none;
-          border: none;
-          color: #cfa86e;
-          font-size: 0.9rem;
-          cursor: pointer;
-          padding: 0;
         }
 
         .gb-error-msg {
@@ -341,7 +239,7 @@ export default function ForgotPasswordPage() {
         }
 
         .gb-auth-footer a:hover {
-          color: #cfa86e;
+          color: #D4AF37;
         }
       ` }} />
     </main>
