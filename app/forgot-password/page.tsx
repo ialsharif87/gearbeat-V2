@@ -25,9 +25,8 @@ export default function ForgotPasswordPage() {
 
     try {
       if (method === "email") {
-        const redirectTo = `${window.location.origin}/auth/callback?next=/portal/update-password`;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo
+          redirectTo: 'https://gearbeat.app/portal/update-password'
         });
         if (error) throw error;
         setMessage("A reset link has been sent to your email.");

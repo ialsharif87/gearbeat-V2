@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
@@ -14,15 +15,41 @@ export default function UpdatePasswordPage() {
   const router = useRouter();
   const supabase = createClient();
 
+  const [isSessionReady, setIsSessionReady] = useState(false);
+
   useEffect(() => {
-    // Check if user is logged in (session from recovery link)
-    async function checkSession() {
+    async function initSession() {
+      const hash = window.location.hash;
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+        const type = params.get("type");
+
+        if (type === "recovery" && accessToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || "",
+          });
+
+          if (error) {
+            setErrorMessage("Invalid or expired reset link.");
+          } else {
+            setIsSessionReady(true);
+          }
+          return;
+        }
+      }
+
+      // Fallback: check if session already exists
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setErrorMessage("Invalid or expired reset session. Please request a new link.");
+      if (user) {
+        setIsSessionReady(true);
+      } else {
+        setErrorMessage("Please use the link sent to your email to reset your password.");
       }
     }
-    checkSession();
+    initSession();
   }, [supabase]);
 
   async function handleUpdatePassword(e: React.FormEvent) {
@@ -49,7 +76,7 @@ export default function UpdatePasswordPage() {
 
       if (error) throw error;
 
-      setMessage("Password updated successfully. Redirecting to login...");
+      setMessage("تم تغيير كلمة المرور / Password updated");
       setTimeout(() => {
         router.push("/portal/login");
       }, 2000);
@@ -81,33 +108,43 @@ export default function UpdatePasswordPage() {
         {errorMessage && <div className="gb-error-msg">{errorMessage}</div>}
         {message && <div className="gb-success-msg">{message}</div>}
 
-        <form onSubmit={handleUpdatePassword} className="gb-auth-form">
-          <div className="gb-field">
-            <label><T en="New Password" ar="كلمة المرور الجديدة" /></label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              placeholder="••••••••"
-              required 
-            />
-          </div>
+        {isSessionReady && !message && (
+          <form onSubmit={handleUpdatePassword} className="gb-auth-form">
+            <div className="gb-field">
+              <label><T en="New Password" ar="كلمة المرور الجديدة" /></label>
+              <input 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="••••••••"
+                required 
+              />
+            </div>
 
-          <div className="gb-field">
-            <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
-            <input 
-              type="password" 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              placeholder="••••••••"
-              required 
-            />
-          </div>
+            <div className="gb-field">
+              <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
+              <input 
+                type="password" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                placeholder="••••••••"
+                required 
+              />
+            </div>
 
-          <button type="submit" disabled={loading || !!message} className="gb-submit-btn">
-            {loading ? <T en="Updating..." ar="جاري التحديث..." /> : <T en="Update Password" ar="تحديث كلمة المرور" />}
-          </button>
-        </form>
+            <button type="submit" disabled={loading} className="gb-submit-btn">
+              {loading ? <T en="Updating..." ar="جاري التحديث..." /> : <T en="Update Password" ar="تحديث كلمة المرور" />}
+            </button>
+          </form>
+        )}
+
+        {(!isSessionReady || message) && (
+          <div style={{ textAlign: 'center', marginTop: '24px' }}>
+            <Link href="/portal/login" style={{ color: '#cfa86e', fontWeight: 700, textDecoration: 'none' }}>
+              <T en="Back to Login" ar="العودة لتسجيل الدخول" />
+            </Link>
+          </div>
+        )}
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
