@@ -1,23 +1,85 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+
+const COUNTRY_CODES = [
+  { code: "+966", label: "Saudi Arabia", ar: "المملكة العربية السعودية", flag: "🇸🇦" },
+  { code: "+971", label: "UAE", ar: "الإمارات", flag: "🇦🇪" },
+  { code: "+965", label: "Kuwait", ar: "الكويت", flag: "🇰🇼" },
+  { code: "+974", label: "Qatar", ar: "قطر", flag: "🇶🇦" },
+  { code: "+968", label: "Oman", ar: "عمان", flag: "🇴🇲" },
+  { code: "+973", label: "Bahrain", ar: "البحرين", flag: "🇧🇭" },
+  { code: "+962", label: "Jordan", ar: "الأردن", flag: "🇯🇴" },
+  { code: "+20", label: "Egypt", ar: "مصر", flag: "🇪🇬" },
+  { code: "+1", label: "USA", ar: "الولايات المتحدة", flag: "🇺🇸" },
+  { code: "+44", label: "UK", ar: "المملكة المتحدة", flag: "🇬🇧" },
+  { code: "+49", label: "Germany", ar: "ألمانيا", flag: "🇩🇪" },
+  { code: "+33", label: "France", ar: "فرنسا", flag: "🇫🇷" },
+  { code: "+86", label: "China", ar: "الصين", flag: "🇨🇳" },
+  { code: "+91", label: "India", ar: "الهند", flag: "🇮🇳" },
+  { code: "+81", label: "Japan", ar: "اليابان", flag: "🇯🇵" },
+  { code: "+55", label: "Brazil", ar: "البرازيل", flag: "🇧🇷" },
+  { code: "+7", label: "Russia", ar: "روسيا", flag: "🇷🇺" },
+  { code: "+82", label: "South Korea", ar: "كوريا الجنوبية", flag: "🇰🇷" },
+  { code: "+39", label: "Italy", ar: "إيطاليا", flag: "🇮🇹" },
+  { code: "+34", label: "Spain", ar: "إسبانيا", flag: "🇪🇸" },
+];
+
+const WORLD_COUNTRIES = [
+  { id: "SA", en: "Saudi Arabia", ar: "المملكة العربية السعودية" },
+  { id: "AE", en: "UAE", ar: "الإمارات العربية المتحدة" },
+  { id: "KW", en: "Kuwait", ar: "الكويت" },
+  { id: "QA", en: "Qatar", ar: "قطر" },
+  { id: "BH", en: "Bahrain", ar: "البحرين" },
+  { id: "OM", en: "Oman", ar: "عمان" },
+  { id: "JO", en: "Jordan", ar: "الأردن" },
+  { id: "EG", en: "Egypt", ar: "مصر" },
+  { id: "US", en: "USA", ar: "الولايات المتحدة الأمريكية" },
+  { id: "GB", en: "UK", ar: "المملكة المتحدة" },
+  { id: "DE", en: "Germany", ar: "ألمانيا" },
+  { id: "FR", en: "France", ar: "فرنسا" },
+  { id: "CN", en: "China", ar: "الصين" },
+  { id: "IN", en: "India", ar: "الهند" },
+  { id: "JP", en: "Japan", ar: "اليابان" },
+  { id: "BR", en: "Brazil", ar: "البرازيل" },
+  { id: "RU", en: "Russia", ar: "روسيا" },
+  { id: "KR", en: "South Korea", ar: "كوريا الجنوبية" },
+  { id: "IT", en: "Italy", ar: "إيطاليا" },
+  { id: "ES", en: "Spain", ar: "إسبانيا" },
+];
+
+const CITIES_DATA: Record<string, string[]> = {
+  SA: ["الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "الخبر", "الأحساء", "تبوك", "أبها", "القصيم", "حائل", "نجران", "جازان", "الطائف", "ينبع", "بريدة", "خميس مشيط", "الجبيل", "الخرج", "عرعر"],
+  AE: ["دبي", "أبوظبي", "الشارقة", "عجمان", "رأس الخيمة", "الفجيرة", "أم القيوين"],
+  KW: ["مدينة الكويت", "حولي", "الفروانية", "الأحمدي", "الجهراء", "مبارك الكبير"],
+  QA: ["الدوحة", "الريان", "الوكرة", "أم صلال", "الخور", "الشحانية", "الشمال"],
+  BH: ["المنامة", "المحرق", "الرفاع", "مدينة عيسى", "مدينة حمد", "سترة", "الحد"],
+  OM: ["مسقط", "صلالة", "صحار", "نزوى", "صور", "عبري", "البريمي"],
+  JO: ["عمان", "إربد", "الزرقاء", "العقبة", "السلط", "المفرق", "جرش", "مادبا"],
+  EG: ["القاهرة", "الإسكندرية", "الجيزة", "شرم الشيخ", "الغردقة", "أسوان", "الأقصر", "طنطا", "المنصورة", "الإسماعيلية", "بورسعيد", "السويس"],
+  US: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose", "Austin", "Jacksonville", "Miami", "Seattle", "Denver", "Nashville", "Boston", "Las Vegas", "Portland", "Memphis"],
+  GB: ["London", "Birmingham", "Manchester", "Leeds", "Glasgow", "Liverpool", "Bristol", "Edinburgh", "Sheffield", "Cardiff", "Belfast", "Nottingham"],
+};
 
 export default function JoinStudioPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submittedOnce, setSubmittedOnce] = useState(false);
 
   // Form State
   const [fullName, setFullName] = useState("");
+  const [phoneCode, setPhoneCode] = useState("+966");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [companyNameAr, setCompanyNameAr] = useState("");
   const [companyNameEn, setCompanyNameEn] = useState("");
   const [commercialRegistration, setCommercialRegistration] = useState("");
   const [vatNumber, setVatNumber] = useState("");
+  const [country, setCountry] = useState("SA");
   const [city, setCity] = useState("");
   const [plannedStudios, setPlannedStudios] = useState("1");
   const [aboutCompany, setAboutCompany] = useState("");
@@ -26,17 +88,19 @@ export default function JoinStudioPage() {
   // Files State
   const [crFile, setCrFile] = useState<File | null>(null);
   const [vatFile, setVatFile] = useState<File | null>(null);
+  const [nationalAddressFile, setNationalAddressFile] = useState<File | null>(null);
+  const [bankFile, setBankFile] = useState<File | null>(null);
 
   async function uploadFile(file: File) {
     const supabase = createClient();
-    const fileName = `${Date.now()}-${file.name}`;
+    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
     const filePath = `studio-applications/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("provider-documents")
       .upload(filePath, file);
 
-    if (uploadError) throw new Error("File upload failed");
+    if (uploadError) throw new Error("File upload failed: " + uploadError.message);
 
     const { data: urlData } = supabase.storage
       .from("provider-documents")
@@ -47,34 +111,51 @@ export default function JoinStudioPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!termsAccepted) return;
+    setSubmittedOnce(true);
     
+    if (!termsAccepted) return;
+
+    // Validate Required Documents
+    if (!crFile || !vatFile || !nationalAddressFile || !bankFile) {
+      setError("Please upload all required documents.");
+      return;
+    }
+
+    // Validate VAT Number (15 digits for Saudi Arabia)
+    if (country === "SA" && (vatNumber.length !== 15 || !/^\d+$/.test(vatNumber))) {
+      setError("VAT Number must be exactly 15 digits for Saudi Arabia.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      if (!crFile) {
-        throw new Error("Please upload your Commercial Registration.");
-      }
-
       // Step 1: Upload Files
-      const crUrl = await uploadFile(crFile);
-      let vatUrl = null;
-      if (vatFile) {
-        vatUrl = await uploadFile(vatFile);
-      }
+      const [crUrl, vatUrl, nationalAddressUrl, bankUrl] = await Promise.all([
+        uploadFile(crFile),
+        uploadFile(vatFile),
+        uploadFile(nationalAddressFile),
+        uploadFile(bankFile),
+      ]);
 
-      // Step 2: Insert into DB (studio_applications table)
+      // Step 2: Insert into DB
       const supabase = createClient();
+      const fullMobile = `${phoneCode}${mobile}`;
+      
       const { error: insertError } = await supabase.from("studio_applications").insert({
         full_name: fullName,
         email,
-        phone: mobile,
+        phone: fullMobile,
         company_name_ar: companyNameAr,
         company_name_en: companyNameEn,
         commercial_registration: commercialRegistration,
         vat_number: vatNumber,
         vat_certificate_url: vatUrl,
+        cr_document_url: crUrl,
+        national_address_url: nationalAddressUrl,
+        bank_document_url: bankUrl,
+        country: WORLD_COUNTRIES.find(c => c.id === country)?.en || country,
         city,
         planned_studios_count: parseInt(plannedStudios),
         about_company: aboutCompany,
@@ -114,6 +195,8 @@ export default function JoinStudioPage() {
     );
   }
 
+  const cities = CITIES_DATA[country] || [];
+
   return (
     <main style={{ minHeight: "100vh", background: "#0a0a0a", padding: "60px 20px" }}>
       <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center", marginBottom: 40 }}>
@@ -138,18 +221,27 @@ export default function JoinStudioPage() {
             </h3>
             <div style={{ display: "grid", gap: 20 }}>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Full Name" ar="الاسم الكامل" /></label>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Full Name" ar="الاسم الكامل" /> *</label>
                 <input className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Mobile Number" ar="رقم الجوال" /></label>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Mobile Number" ar="رقم الجوال" /> *</label>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <div style={{ background: "#222", borderRadius: 8, padding: "0 12px", display: "flex", alignItems: "center", fontSize: "0.9rem", color: "#fff", border: "1px solid #1e1e1e" }}>🇸🇦 +966</div>
+                  <select 
+                    className="input" 
+                    style={{ width: "auto", minWidth: 120, padding: "0 8px" }} 
+                    value={phoneCode} 
+                    onChange={(e) => setPhoneCode(e.target.value)}
+                  >
+                    {COUNTRY_CODES.map(c => (
+                      <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                    ))}
+                  </select>
                   <input className="input" style={{ flex: 1 }} placeholder="5XXXXXXXX" value={mobile} onChange={(e) => setMobile(e.target.value)} required />
                 </div>
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Email" ar="البريد الإلكتروني" /></label>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Email" ar="البريد الإلكتروني" /> *</label>
                 <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
             </div>
@@ -162,39 +254,55 @@ export default function JoinStudioPage() {
             </h3>
             <div style={{ display: "grid", gap: 20 }}>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (Arabic)" ar="اسم الشركة (بالعربي)" /></label>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (Arabic)" ar="اسم الشركة (بالعربي)" /> *</label>
                 <input className="input" value={companyNameAr} onChange={(e) => setCompanyNameAr(e.target.value)} required />
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (English)" ar="اسم الشركة (بالإنجليزي)" /></label>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (English)" ar="اسم الشركة (بالإنجليزي)" /> *</label>
                 <input className="input" value={companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} required />
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Commercial Registration Number" ar="رقم السجل التجاري" /></label>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Commercial Registration Number" ar="رقم السجل التجاري" /> *</label>
                 <input className="input" value={commercialRegistration} onChange={(e) => setCommercialRegistration(e.target.value)} required />
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="VAT Number (Optional)" ar="الرقم الضريبي (اختياري)" /></label>
-                <input className="input" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} />
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="VAT Number" ar="الرقم الضريبي" /> *</label>
+                <input className="input" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} required placeholder={country === "SA" ? "15 digits" : ""} />
               </div>
               
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div style={{ display: "grid", gap: 8 }}>
-                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="City" ar="المدينة" /></label>
-                  <select className="input" value={city} onChange={(e) => setCity(e.target.value)} required>
-                    <option value="">Select City</option>
-                    <option value="Riyadh">الرياض / Riyadh</option>
-                    <option value="Jeddah">جدة / Jeddah</option>
-                    <option value="Dammam">الدمام / Dammam</option>
-                    <option value="Makkah">مكة / Makkah</option>
-                    <option value="Madinah">المدينة / Madinah</option>
-                    <option value="Other">أخرى / Other</option>
+                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Country" ar="الدولة" /> *</label>
+                  <select className="input" value={country} onChange={(e) => { setCountry(e.target.value); setCity(""); }} required>
+                    {WORLD_COUNTRIES.map(c => (
+                      <option key={c.id} value={c.id}>
+                        <T en={c.en} ar={c.ar} />
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div style={{ display: "grid", gap: 8 }}>
-                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studios Planned" ar="عدد الاستوديوهات المخططة" /></label>
-                  <input className="input" type="number" min="1" value={plannedStudios} onChange={(e) => setPlannedStudios(e.target.value)} required />
+                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="City" ar="المدينة" /> *</label>
+                  {cities.length > 0 ? (
+                    <select className="input" value={city} onChange={(e) => setCity(e.target.value)} required>
+                      <option value=""><T en="Select City" ar="اختر المدينة" /></option>
+                      {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  ) : (
+                    <input 
+                      className="input" 
+                      value={city} 
+                      onChange={(e) => setCity(e.target.value)} 
+                      required 
+                      placeholder={country === "SA" ? "أدخل اسم المدينة" : "Enter city name"}
+                    />
+                  )}
                 </div>
+              </div>
+
+              <div style={{ display: "grid", gap: 8 }}>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studios Planned" ar="عدد الاستوديوهات المخططة" /> *</label>
+                <input className="input" type="number" min="1" value={plannedStudios} onChange={(e) => setPlannedStudios(e.target.value)} required />
               </div>
             </div>
           </section>
@@ -202,22 +310,40 @@ export default function JoinStudioPage() {
           {/* Section 3: Documents */}
           <section>
             <h3 style={{ fontSize: "1.1rem", marginBottom: 4, color: "#D4AF37" }}>
-              <T en="Documents" ar="الوثائق" />
+              <T en="Required Documents" ar="الوثائق المطلوبة" />
             </h3>
             <p style={{ color: "#666", fontSize: "0.85rem", marginBottom: 20 }}>
-              <T en="Upload Commercial Registration and VAT certificate (if available)" ar="ارفع السجل التجاري وشهادة ضريبة القيمة المضافة (إن وجدت)" />
+              <T en="All documents are mandatory for verification." ar="كافة الوثائق إلزامية لغرض التحقق." />
             </p>
             
-            <div style={{ display: "grid", gap: 16 }}>
-              <UploadField labelEn="Commercial Registration" labelAr="السجل التجاري" file={crFile} onChange={setCrFile} required />
-              <UploadField labelEn="VAT Certificate" labelAr="شهادة الضريبة" file={vatFile} onChange={setVatFile} optional />
+            <div style={{ display: "grid", gap: 24 }}>
+              <UploadField 
+                labelEn="Commercial Registration" labelAr="السجل التجاري" 
+                file={crFile} onChange={setCrFile} required 
+                showError={submittedOnce && !crFile}
+              />
+              <UploadField 
+                labelEn="VAT Certificate" labelAr="شهادة الضريبة" 
+                file={vatFile} onChange={setVatFile} required 
+                showError={submittedOnce && !vatFile}
+              />
+              <UploadField 
+                labelEn="National Address" labelAr="العنوان الوطني" 
+                file={nationalAddressFile} onChange={setNationalAddressFile} required 
+                showError={submittedOnce && !nationalAddressFile}
+              />
+              <UploadField 
+                labelEn="Bank Account Screenshot" labelAr="صورة الحساب البنكي" 
+                file={bankFile} onChange={setBankFile} required 
+                showError={submittedOnce && !bankFile}
+              />
             </div>
           </section>
 
           {/* Section 4: About */}
           <section>
             <div style={{ display: "grid", gap: 8 }}>
-              <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="About the company" ar="نبذة عن الشركة" /></label>
+              <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="About the company" ar="نبذة عن الشركة" /> *</label>
               <textarea className="input" style={{ minHeight: 100, paddingTop: 12 }} maxLength={1000} placeholder="..." value={aboutCompany} onChange={(e) => setAboutCompany(e.target.value)} required />
             </div>
           </section>
@@ -232,8 +358,23 @@ export default function JoinStudioPage() {
                   ar="أوافق على الشروط والأحكام وأتيح لـ GearBeat الاطلاع على بياناتي لأغراض التحقق والتعاقد. أفهم أن بياناتي محفوظة ومحمية وفقاً لسياسة الخصوصية ونظام PDPL السعودي." 
                 />
                 <div style={{ marginTop: 8 }}>
-                  <Link href="/terms" style={{ color: "#D4AF37", marginRight: 12 }}><T en="Terms & Conditions" ar="الشروط والأحكام" /></Link>
-                  <Link href="/privacy" style={{ color: "#D4AF37" }}><T en="Privacy Policy" ar="سياسة الخصوصية" /></Link>
+                  <Link 
+                    href="/terms" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="terms-link"
+                  >
+                    <T en="Terms & Conditions" ar="الشروط والأحكام" />
+                  </Link>
+                  <Link 
+                    href="/privacy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="terms-link"
+                    style={{ marginLeft: 16 }}
+                  >
+                    <T en="Privacy Policy" ar="سياسة الخصوصية" />
+                  </Link>
                 </div>
               </div>
             </label>
@@ -266,25 +407,36 @@ export default function JoinStudioPage() {
           border-color: #D4AF37;
           background: rgba(212, 175, 55, 0.05);
         }
+        .upload-area.error {
+          border-color: #ff4d4d;
+        }
         .upload-area input {
           position: absolute;
           inset: 0;
           opacity: 0;
           cursor: pointer;
         }
+        .terms-link {
+          color: #D4AF37;
+          text-decoration: underline;
+          font-weight: 500;
+          transition: color 0.2s;
+        }
+        .terms-link:hover {
+          color: #f0c94d;
+        }
       `}} />
     </main>
   );
 }
 
-function UploadField({ labelEn, labelAr, file, onChange, required, optional }: any) {
+function UploadField({ labelEn, labelAr, file, onChange, required, showError }: any) {
   return (
     <div style={{ display: "grid", gap: 8 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <label style={{ fontSize: "0.85rem", fontWeight: 600 }}><T en={labelEn} ar={labelAr} /> {required && "*"}</label>
-        {optional && <span style={{ fontSize: "0.7rem", color: "#666", background: "#222", padding: "2px 8px", borderRadius: 4 }}>Optional</span>}
       </div>
-      <div className="upload-area">
+      <div className={`upload-area ${showError ? 'error' : ''}`}>
         <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => onChange(e.target.files?.[0] || null)} required={required} />
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: "1.5rem" }}>📎</span>
@@ -293,6 +445,11 @@ function UploadField({ labelEn, labelAr, file, onChange, required, optional }: a
           </div>
         </div>
       </div>
+      {showError && (
+        <div style={{ color: "#ff4d4d", fontSize: "0.75rem", fontWeight: 600 }}>
+          <T en="This document is required" ar="هذا المستند مطلوب" />
+        </div>
+      )}
     </div>
   );
 }
