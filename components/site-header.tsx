@@ -12,22 +12,6 @@ type SiteHeaderProps = {
   logoutAction?: () => Promise<void>;
 };
 
-function NavLink({
-  href,
-  en,
-  ar,
-}: {
-  href: string;
-  en: string;
-  ar: string;
-}) {
-  return (
-    <Link href={href} className="gb-nav-link">
-      <T en={en} ar={ar} />
-    </Link>
-  );
-}
-
 export default function SiteHeader({
   isLoggedIn,
   isAdmin,
@@ -37,83 +21,153 @@ export default function SiteHeader({
   logoutAction,
 }: SiteHeaderProps) {
   return (
-    <header className="gb-site-header">
-      <div className="gb-header-shell">
-        <Link href="/" aria-label="GearBeat Home" className="gb-logo-link">
+    <header className="site-header glass">
+      <div className="container header-shell">
+        <Link href="/" className="header-logo">
           <img
-            src="/brand/logo-horizontal-ai.png"
+            src="/brand/logo-horizontal.svg"
             alt="GearBeat"
-            className="gb-header-logo-image"
+            className="logo-img"
           />
         </Link>
 
-        <nav className="gb-header-nav" aria-label="Main navigation">
-          <NavLink href="/studios" en="Studios" ar="الاستوديوهات" />
-          <NavLink href="/gear" en="Gear" ar="المعدات" />
-          <NavLink href="/how-it-works" en="How it Works" ar="كيف يعمل" />
-
-          {isLoggedIn ? (
-            <>
-              <Link href={dashboardPath} className="gb-nav-link gb-nav-link-strong">
-                <T en="Dashboard" ar="لوحة التحكم" />
-              </Link>
-              <Link href="/notifications" className="gb-nav-link">
-                <T en="Notifications" ar="التنبيهات" />
-              </Link>
-              {isVendor && (
-                <Link href="/vendor" className="gb-nav-link" style={{ color: 'var(--gb-gold)' }}>
-                  <T en="Vendor Portal" ar="بوابة التاجر" />
-                </Link>
-              )}
-            </>
-          ) : (
-            <div className="partner-dropdown-container">
-              <button className="gb-nav-link partner-trigger">
-                <T en="Partner with Us" ar="انضم كشريك" />
-                <span className="chevron">▾</span>
-              </button>
-              <div className="partner-dropdown-menu">
-                <Link href="/owner/onboarding" className="partner-item">
-                  <span className="partner-icon">🎧</span>
-                  <div className="partner-text">
-                    <strong><T en="Studio Owner" ar="صاحب استديو" /></strong>
-                    <p><T en="List your space" ar="اعرض مساحتك" /></p>
-                  </div>
-                </Link>
-                <Link href="/vendor-signup" className="partner-item">
-                  <div className="partner-icon">📦</div>
-                  <div className="partner-text">
-                    <strong><T en="Gear Vendor" ar="تاجر معدات" /></strong>
-                    <p><T en="Sell your gear" ar="بع معداتك هنا" /></p>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          )}
+        <nav className="header-nav">
+          <Link href="/studios" className="nav-link">
+            <T en="Studios" ar="الاستوديوهات" />
+          </Link>
+          <Link href="/gear" className="nav-link">
+            <T en="Gear" ar="المعدات" />
+          </Link>
+          <Link href="/how-it-works" className="nav-link">
+            <T en="How it Works" ar="كيف يعمل" />
+          </Link>
+          <Link href="/support" className="nav-link">
+            <T en="Contact" ar="اتصل بنا" />
+          </Link>
         </nav>
 
-        <div className="gb-header-actions">
+        <div className="header-actions">
           <CartBadge />
           <LanguageSwitcher />
 
-          {isLoggedIn && logoutAction ? (
-            <form action={logoutAction} className="gb-logout-form">
-              <button type="submit" className="gb-header-ghost-button">
-                <T en="Logout" ar="تسجيل الخروج" />
-              </button>
-            </form>
+          {isLoggedIn ? (
+            <div className="user-group">
+              <Link href={dashboardPath} className="btn btn-primary btn-sm">
+                <T en="Dashboard" ar="لوحة التحكم" />
+              </Link>
+              {logoutAction && (
+                <form action={logoutAction}>
+                  <button type="submit" className="logout-trigger">
+                    <T en="Logout" ar="خروج" />
+                  </button>
+                </form>
+              )}
+            </div>
           ) : (
-            <>
-              <Link href="/login" className="gb-header-ghost-button">
+            <div className="auth-group">
+              <Link href="/login" className="nav-link">
                 <T en="Login" ar="دخول" />
               </Link>
-              <Link href="/signup" className="gb-header-primary-button">
+              <Link href="/signup" className="btn btn-primary btn-sm">
                 <T en="Sign Up" ar="تسجيل" />
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .site-header {
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid var(--gb-border);
+        }
+
+        .header-shell {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 24px;
+        }
+
+        .logo-img {
+          height: 32px;
+          width: auto;
+          display: block;
+        }
+
+        .header-nav {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .nav-link {
+          color: var(--gb-text-muted);
+          font-weight: 600;
+          font-size: 0.9rem;
+          padding: 8px 16px;
+          border-radius: 8px;
+          text-decoration: none;
+          transition: var(--transition);
+        }
+
+        .nav-link:hover {
+          color: var(--gb-gold);
+          background: rgba(201, 162, 77, 0.05);
+        }
+
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .auth-group, .user-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .btn-sm {
+          padding: 10px 20px;
+          font-size: 0.85rem;
+        }
+
+        .logout-trigger {
+          background: none;
+          border: none;
+          color: #ff4d4d;
+          font-weight: 600;
+          font-size: 0.85rem;
+          cursor: pointer;
+          padding: 8px;
+          opacity: 0.7;
+          transition: var(--transition);
+        }
+
+        .logout-trigger:hover {
+          opacity: 1;
+        }
+
+        [dir="rtl"] .header-nav {
+          order: 2;
+        }
+        [dir="rtl"] .header-actions {
+          order: 1;
+        }
+        [dir="rtl"] .header-logo {
+          order: 3;
+        }
+
+        @media (max-width: 900px) {
+          .header-nav { display: none; }
+        }
+      `}} />
     </header>
   );
 }

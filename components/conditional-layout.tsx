@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import SiteHeader from "@/components/site-header";
 import Footer from "@/components/footer";
 
@@ -22,6 +23,13 @@ export default function ConditionalLayout({
   logoutAction?: () => Promise<void>;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") === "en" ? "en" : "ar";
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
 
   const hideChrome =
     pathname.startsWith("/portal") ||
