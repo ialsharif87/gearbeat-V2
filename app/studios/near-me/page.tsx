@@ -316,17 +316,18 @@ export default function StudiosNearMePage() {
                       <T en="View" ar="عرض" />
                     </Link>
 
-                    <GoogleMapsLink
-                      googleMapsUrl={studio.google_maps_url}
-                      latitude={studio.latitude}
-                      longitude={studio.longitude}
-                      cityName={studio.city_name}
-                      district={studio.district}
-                      addressLine={studio.address_line}
-                      mode="directions"
-                      className="btn btn-outline"
-                      style={{ flex: 1, padding: '10px' }}
-                    />
+                    <div style={{ flex: 1 }}>
+                      <GoogleMapsLink
+                        googleMapsUrl={studio.google_maps_url}
+                        latitude={studio.latitude}
+                        longitude={studio.longitude}
+                        cityName={studio.city_name}
+                        district={studio.district}
+                        addressLine={studio.address_line}
+                        mode="directions"
+                        className="btn btn-outline"
+                      />
+                    </div>
                   </div>
                 </article>
               );
