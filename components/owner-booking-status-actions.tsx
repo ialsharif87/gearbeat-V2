@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
+import T from "@/components/t";
 
 type OwnerBookingStatusActionsProps = {
   bookingId: string;
