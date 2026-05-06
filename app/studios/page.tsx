@@ -1,5 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
+import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "الاستوديوهات | GearBeat",
+};
 import T from "@/components/t";
 import StudioFilter from "@/components/studio-filter";
 import { getActiveCountries } from "@/lib/countries";
@@ -183,261 +189,284 @@ export default async function StudiosPage({
 
   const supabase = await createClient();
 
-  const [countries, activeCities] = await Promise.all([
-    getActiveCountries(),
-    getActiveCities(),
-  ]);
-
-  const { data: bookableStudioRows } = await applyBookableStudioFilters(
-    supabase.from("studios").select("id")
+  // FIX 0A: Loading timeout logic (8 seconds)
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("TIMEOUT")), 8000)
   );
 
-  const bookableStudioRowsList = (bookableStudioRows || []) as StudioIdRow[];
+  try {
+    const [countries, activeCities] = (await Promise.race([
+      Promise.all([getActiveCountries(), getActiveCities()]),
+      timeoutPromise,
+    ])) as any;
 
-  const bookableStudioIds = uniqueClean(
-    bookableStudioRowsList.map((item: StudioIdRow) => item.id)
-  );
+    const { data: bookableStudioRows, error: fetchError } = (await Promise.race([
+      applyBookableStudioFilters(supabase.from("studios").select("id")),
+      timeoutPromise,
+    ])) as any;
 
-  const { data: cityRows } = await applyBookableStudioFilters(
-    supabase
-      .from("studios")
-      .select("city")
-      .not("city", "is", null)
-      .order("city", { ascending: true })
-  );
+    if (fetchError) throw fetchError;
 
-  const cityRowsList = (cityRows || []) as CityRow[];
+    const bookableStudioRowsList = (bookableStudioRows || []) as StudioIdRow[];
 
-  const legacyCities = uniqueClean(
-    cityRowsList.map((item: CityRow) => item.city)
-  );
+    const bookableStudioIds = uniqueClean(
+      bookableStudioRowsList.map((item: StudioIdRow) => item.id)
+    );
 
-  const { data: districtRows } = await applyBookableStudioFilters(
-    supabase
-      .from("studios")
-      .select("district")
-      .not("district", "is", null)
-      .order("district", { ascending: true })
-  );
+    const { data: cityRows } = (await Promise.race([
+      applyBookableStudioFilters(
+        supabase
+          .from("studios")
+          .select("city")
+          .not("city", "is", null)
+          .order("city", { ascending: true })
+      ),
+      timeoutPromise,
+    ])) as any;
 
-  const districtRowsList = (districtRows || []) as DistrictRow[];
+    const cityRowsList = (cityRows || []) as CityRow[];
 
-  const districts = uniqueClean(
-    districtRowsList.map((item: DistrictRow) => item.district)
-  );
+    const legacyCities = uniqueClean(
+      cityRowsList.map((item: CityRow) => item.city)
+    );
 
-  const { data: features } = await supabase
-    .from("studio_features")
-    .select("id,name_en,name_ar,category,sort_order")
-    .eq("status", "active")
-    .order("sort_order", { ascending: true });
+    const { data: districtRows } = (await Promise.race([
+      applyBookableStudioFilters(
+        supabase
+          .from("studios")
+          .select("district")
+          .not("district", "is", null)
+          .order("district", { ascending: true })
+      ),
+      timeoutPromise,
+    ])) as any;
 
-  const featuresList = (features || []) as StudioFeatureRow[];
+    const districtRowsList = (districtRows || []) as DistrictRow[];
 
-  let equipmentFilterRows: EquipmentFilterRow[] = [];
+    const districts = uniqueClean(
+      districtRowsList.map((item: DistrictRow) => item.district)
+    );
 
-  if (bookableStudioIds.length > 0) {
-    const { data } = await supabase
-      .from("studio_equipment")
-      .select("studio_id,category,brand")
-      .in("studio_id", bookableStudioIds)
-      .order("category", { ascending: true });
+    const { data: features } = (await Promise.race([
+      supabase
+        .from("studio_features")
+        .select("id,name_en,name_ar,category,sort_order")
+        .eq("status", "active")
+        .order("sort_order", { ascending: true }),
+      timeoutPromise,
+    ])) as any;
 
-    equipmentFilterRows = (data || []) as EquipmentFilterRow[];
-  }
+    const featuresList = (features || []) as StudioFeatureRow[];
 
-  const equipmentCategories = uniqueClean(
-    equipmentFilterRows.map((item: EquipmentFilterRow) => item.category)
-  );
-
-  const equipmentBrands = uniqueClean(
-    equipmentFilterRows.map((item: EquipmentFilterRow) => item.brand)
-  );
-
-  const studioIdFilters: string[][] = [];
-
-  if (selectedFeatureIds.length > 0) {
-    let linkedStudiosQuery = supabase
-      .from("studio_feature_links")
-      .select("studio_id,feature_id")
-      .in("feature_id", selectedFeatureIds);
+    let equipmentFilterRows: EquipmentFilterRow[] = [];
 
     if (bookableStudioIds.length > 0) {
-      linkedStudiosQuery = linkedStudiosQuery.in("studio_id", bookableStudioIds);
-    } else {
-      linkedStudiosQuery = linkedStudiosQuery.in("studio_id", [
-        "00000000-0000-0000-0000-000000000000"
-      ]);
+      const { data } = (await Promise.race([
+        supabase
+          .from("studio_equipment")
+          .select("studio_id,category,brand")
+          .in("studio_id", bookableStudioIds)
+          .order("category", { ascending: true }),
+        timeoutPromise,
+      ])) as any;
+
+      equipmentFilterRows = (data || []) as EquipmentFilterRow[];
     }
 
-    const { data: linkedStudios } = await linkedStudiosQuery;
+    const equipmentCategories = uniqueClean(
+      equipmentFilterRows.map((item: EquipmentFilterRow) => item.category)
+    );
 
-    const linkedStudiosList = (linkedStudios || []) as LinkedStudioFeatureRow[];
+    const equipmentBrands = uniqueClean(
+      equipmentFilterRows.map((item: EquipmentFilterRow) => item.brand)
+    );
 
-    const counts = new Map<string, Set<string>>();
+    const studioIdFilters: string[][] = [];
 
-    for (const item of linkedStudiosList) {
-      if (!counts.has(item.studio_id)) {
-        counts.set(item.studio_id, new Set());
+    if (selectedFeatureIds.length > 0) {
+      let linkedStudiosQuery = supabase
+        .from("studio_feature_links")
+        .select("studio_id,feature_id")
+        .in("feature_id", selectedFeatureIds);
+
+      if (bookableStudioIds.length > 0) {
+        linkedStudiosQuery = linkedStudiosQuery.in("studio_id", bookableStudioIds);
+      } else {
+        linkedStudiosQuery = linkedStudiosQuery.in("studio_id", [
+          "00000000-0000-0000-0000-000000000000",
+        ]);
       }
 
-      counts.get(item.studio_id)?.add(item.feature_id);
+      const { data: linkedStudios } = (await Promise.race([
+        linkedStudiosQuery,
+        timeoutPromise,
+      ])) as any;
+
+      const linkedStudiosList = (linkedStudios || []) as LinkedStudioFeatureRow[];
+
+      const counts = new Map<string, Set<string>>();
+
+      for (const item of linkedStudiosList) {
+        if (!counts.has(item.studio_id)) {
+          counts.set(item.studio_id, new Set());
+        }
+
+        counts.get(item.studio_id)?.add(item.feature_id);
+      }
+
+      const matchingFeatureStudioIds = Array.from(counts.entries())
+        .filter(([, featureSet]) =>
+          selectedFeatureIds.every((featureId: string) => featureSet.has(featureId))
+        )
+        .map(([studioId]) => studioId);
+
+      studioIdFilters.push(matchingFeatureStudioIds);
     }
 
-    const matchingFeatureStudioIds = Array.from(counts.entries())
-      .filter(([, featureSet]) =>
-        selectedFeatureIds.every((featureId: string) => featureSet.has(featureId))
-      )
-      .map(([studioId]) => studioId);
+    const hasEquipmentFilters =
+      selectedEquipmentCategories.length > 0 ||
+      selectedEquipmentBrand ||
+      equipmentKeyword;
 
-    studioIdFilters.push(matchingFeatureStudioIds);
-  }
+    if (hasEquipmentFilters) {
+      let equipmentQuery = supabase
+        .from("studio_equipment")
+        .select("studio_id,name,brand,model,category");
 
-  const hasEquipmentFilters =
-    selectedEquipmentCategories.length > 0 ||
-    selectedEquipmentBrand ||
-    equipmentKeyword;
+      if (bookableStudioIds.length > 0) {
+        equipmentQuery = equipmentQuery.in("studio_id", bookableStudioIds);
+      } else {
+        equipmentQuery = equipmentQuery.in("studio_id", [
+          "00000000-0000-0000-0000-000000000000",
+        ]);
+      }
 
-  if (hasEquipmentFilters) {
-    let equipmentQuery = supabase
-      .from("studio_equipment")
-      .select("studio_id,name,brand,model,category");
+      if (selectedEquipmentCategories.length > 0) {
+        equipmentQuery = equipmentQuery.in("category", selectedEquipmentCategories);
+      }
 
-    if (bookableStudioIds.length > 0) {
-      equipmentQuery = equipmentQuery.in("studio_id", bookableStudioIds);
+      if (selectedEquipmentBrand) {
+        equipmentQuery = equipmentQuery.ilike("brand", `%${selectedEquipmentBrand}%`);
+      }
+
+      if (equipmentKeyword) {
+        equipmentQuery = equipmentQuery.or(
+          `name.ilike.%${equipmentKeyword}%,brand.ilike.%${equipmentKeyword}%,model.ilike.%${equipmentKeyword}%,category.ilike.%${equipmentKeyword}%`
+        );
+      }
+
+      const { data: matchingEquipmentRows } = (await Promise.race([
+        equipmentQuery,
+        timeoutPromise,
+      ])) as any;
+
+      const matchingEquipmentRowsList =
+        (matchingEquipmentRows || []) as EquipmentMatchRow[];
+
+      const matchingEquipmentStudioIds = uniqueClean(
+        matchingEquipmentRowsList.map((item: EquipmentMatchRow) => item.id)
+      );
+
+      studioIdFilters.push(matchingEquipmentStudioIds);
+    }
+
+    const finalMatchingStudioIds = intersectMany(studioIdFilters);
+
+    let studiosQuery = applyBookableStudioFilters(
+      supabase
+        .from("studios")
+        .select(
+          "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at,description,is_featured,completion_score,country_code,city_id,city_name,address_line,google_maps_url,latitude,longitude,minimum_photos_required,instant_booking_enabled,verified_location"
+        )
+    );
+
+    if (queryText) {
+      studiosQuery = studiosQuery.or(
+        `name.ilike.%${queryText}%,city.ilike.%${queryText}%,city_name.ilike.%${queryText}%,district.ilike.%${queryText}%,address_line.ilike.%${queryText}%,description.ilike.%${queryText}%`
+      );
+    }
+
+    if (selectedCountry) {
+      studiosQuery = studiosQuery.eq("country_code", selectedCountry);
+    }
+
+    if (selectedCityId) {
+      studiosQuery = studiosQuery.eq("city_id", selectedCityId);
+    }
+
+    if (selectedCity && !selectedCityId) {
+      studiosQuery = studiosQuery.eq("city", selectedCity);
+    }
+
+    if (selectedDistrict) {
+      studiosQuery = studiosQuery.eq("district", selectedDistrict);
+    }
+
+    if (minPrice > 0) {
+      studiosQuery = studiosQuery.gte("price_from", minPrice);
+    }
+
+    if (maxPrice > 0) {
+      studiosQuery = studiosQuery.lte("price_from", maxPrice);
+    }
+
+    if (verifiedOnly) {
+      studiosQuery = studiosQuery.eq("verified", true);
+    }
+
+    if (minGoogleRating > 0) {
+      studiosQuery = studiosQuery.gte("google_rating", minGoogleRating);
+    }
+
+    if (minTripAdvisorRating > 0) {
+      studiosQuery = studiosQuery.gte("tripadvisor_rating", minTripAdvisorRating);
+    }
+
+    if (finalMatchingStudioIds) {
+      if (finalMatchingStudioIds.length > 0) {
+        studiosQuery = studiosQuery.in("id", finalMatchingStudioIds);
+      } else {
+        studiosQuery = studiosQuery.in("id", [
+          "00000000-0000-0000-0000-000000000000",
+        ]);
+      }
+    }
+
+    if (sort === "price_low") {
+      studiosQuery = studiosQuery.order("price_from", { ascending: true });
+    } else if (sort === "price_high") {
+      studiosQuery = studiosQuery.order("price_from", { ascending: false });
+    } else if (sort === "google_rating") {
+      studiosQuery = studiosQuery.order("google_rating", {
+        ascending: false,
+        nullsFirst: false,
+      });
+    } else if (sort === "tripadvisor_rating") {
+      studiosQuery = studiosQuery.order("tripadvisor_rating", {
+        ascending: false,
+        nullsFirst: false,
+      });
     } else {
-      equipmentQuery = equipmentQuery.in("studio_id", [
-        "00000000-0000-0000-0000-000000000000"
-      ]);
+      studiosQuery = studiosQuery.order("created_at", { ascending: false });
     }
 
-    if (selectedEquipmentCategories.length > 0) {
-      equipmentQuery = equipmentQuery.in(
-        "category",
-        selectedEquipmentCategories
-      );
-    }
+    const { data: studios, error: queryError } = (await Promise.race([
+      studiosQuery,
+      timeoutPromise,
+    ])) as any;
 
-    if (selectedEquipmentBrand) {
-      equipmentQuery = equipmentQuery.ilike(
-        "brand",
-        `%${selectedEquipmentBrand}%`
-      );
-    }
+    if (queryError) throw queryError;
 
-    if (equipmentKeyword) {
-      equipmentQuery = equipmentQuery.or(
-        `name.ilike.%${equipmentKeyword}%,brand.ilike.%${equipmentKeyword}%,model.ilike.%${equipmentKeyword}%,category.ilike.%${equipmentKeyword}%`
-      );
-    }
+    let studiosList = (studios || []) as StudioCardRow[];
 
-    const { data: matchingEquipmentRows } = await equipmentQuery;
-
-    const matchingEquipmentRowsList =
-      (matchingEquipmentRows || []) as EquipmentMatchRow[];
-
-    const matchingEquipmentStudioIds = uniqueClean(
-      matchingEquipmentRowsList.map(
-        (item: EquipmentMatchRow) => item.studio_id
-      )
-    );
-
-    studioIdFilters.push(matchingEquipmentStudioIds);
-  }
-
-  const finalMatchingStudioIds = intersectMany(studioIdFilters);
-
-  let studiosQuery = applyBookableStudioFilters(
-    supabase
-      .from("studios")
-      .select(
-        "id,name,slug,city,district,price_from,status,cover_image_url,verified,booking_enabled,owner_compliance_status,google_rating,google_user_ratings_total,tripadvisor_rating,tripadvisor_reviews_total,created_at,description,is_featured,completion_score,country_code,city_id,city_name,address_line,google_maps_url,latitude,longitude,minimum_photos_required,instant_booking_enabled,verified_location"
-      )
-  );
-
-  if (queryText) {
-    studiosQuery = studiosQuery.or(
-      `name.ilike.%${queryText}%,city.ilike.%${queryText}%,city_name.ilike.%${queryText}%,district.ilike.%${queryText}%,address_line.ilike.%${queryText}%,description.ilike.%${queryText}%`
-    );
-  }
-
-  if (selectedCountry) {
-    studiosQuery = studiosQuery.eq("country_code", selectedCountry);
-  }
-
-  if (selectedCityId) {
-    studiosQuery = studiosQuery.eq("city_id", selectedCityId);
-  }
-
-  if (selectedCity && !selectedCityId) {
-    studiosQuery = studiosQuery.eq("city", selectedCity);
-  }
-
-  if (selectedDistrict) {
-    studiosQuery = studiosQuery.eq("district", selectedDistrict);
-  }
-
-  if (minPrice > 0) {
-    studiosQuery = studiosQuery.gte("price_from", minPrice);
-  }
-
-  if (maxPrice > 0) {
-    studiosQuery = studiosQuery.lte("price_from", maxPrice);
-  }
-
-  if (verifiedOnly) {
-    studiosQuery = studiosQuery.eq("verified", true);
-  }
-
-  if (minGoogleRating > 0) {
-    studiosQuery = studiosQuery.gte("google_rating", minGoogleRating);
-  }
-
-  if (minTripAdvisorRating > 0) {
-    studiosQuery = studiosQuery.gte(
-      "tripadvisor_rating",
-      minTripAdvisorRating
-    );
-  }
-
-  if (finalMatchingStudioIds) {
-    if (finalMatchingStudioIds.length > 0) {
-      studiosQuery = studiosQuery.in("id", finalMatchingStudioIds);
-    } else {
-      studiosQuery = studiosQuery.in("id", [
-        "00000000-0000-0000-0000-000000000000"
-      ]);
-    }
-  }
-
-  if (sort === "price_low") {
-    studiosQuery = studiosQuery.order("price_from", { ascending: true });
-  } else if (sort === "price_high") {
-    studiosQuery = studiosQuery.order("price_from", { ascending: false });
-  } else if (sort === "google_rating") {
-    studiosQuery = studiosQuery.order("google_rating", {
-      ascending: false,
-      nullsFirst: false
-    });
-  } else if (sort === "tripadvisor_rating") {
-    studiosQuery = studiosQuery.order("tripadvisor_rating", {
-      ascending: false,
-      nullsFirst: false
-    });
-  } else {
-    studiosQuery = studiosQuery.order("created_at", { ascending: false });
-  }
-
-  const { data: studios, error } = await studiosQuery;
-
-  let studiosList = (studios || []) as StudioCardRow[];
-
-  if (!error) {
-    const { data: activeBoosts } = await supabase
-      .from("studio_boost_subscriptions")
-      .select("studio_id, total_commission_percent")
-      .eq("status", "active")
-      .gt("ends_at", new Date().toISOString());
+    const { data: activeBoosts } = (await Promise.race([
+      supabase
+        .from("studio_boost_subscriptions")
+        .select("studio_id, total_commission_percent")
+        .eq("status", "active")
+        .gt("ends_at", new Date().toISOString()),
+      timeoutPromise,
+    ])) as any;
 
     const boostMap = new Map<string, number>();
     if (activeBoosts) {
@@ -450,271 +479,305 @@ export default async function StudiosPage({
       studiosList.sort((a, b) => {
         const aBoostScore = boostMap.get(a.id) || 0;
         const bBoostScore = boostMap.get(b.id) || 0;
-        
-        // Priority 1: Boosted studios (higher commission first)
-        if (aBoostScore !== bBoostScore) return bBoostScore - aBoostScore;
 
-        // Priority 2: Featured studios (manual admin flag)
+        if (aBoostScore !== bBoostScore) return bBoostScore - aBoostScore;
         if (a.is_featured && !b.is_featured) return -1;
         if (!a.is_featured && b.is_featured) return 1;
-
-        // Priority 3: Completion score
         const aComp = a.completion_score || 0;
         const bComp = b.completion_score || 0;
         if (aComp !== bComp) return bComp - aComp;
-
-        // Priority 4: Date
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        return (
+          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        );
       });
     }
-    
-    // Add flags for rendering badges
+
     studiosList = studiosList.map((studio) => ({
       ...studio,
       is_boosted: boostMap.has(studio.id),
-      total_boost_commission: boostMap.get(studio.id)
+      total_boost_commission: boostMap.get(studio.id),
     }));
-  }
 
-  if (error) {
+    const resultCount = studiosList.length;
+
+    const hasFilters =
+      queryText ||
+      selectedCountry ||
+      selectedCityId ||
+      selectedCity ||
+      selectedDistrict ||
+      selectedStudioType ||
+      minPrice ||
+      maxPrice ||
+      verifiedOnly ||
+      minGoogleRating ||
+      minTripAdvisorRating ||
+      selectedFeatureIds.length > 0 ||
+      selectedEquipmentCategories.length > 0 ||
+      selectedEquipmentBrand ||
+      equipmentKeyword ||
+      sort !== "newest";
+
     return (
-      <div className="card">
-        <span className="badge">
-          <T en="Error" ar="خطأ" />
-        </span>
-        <h1>
-          <T en="Studios" ar="الاستوديوهات" />
-        </h1>
-        <p>{error.message}</p>
+      <section>
+        <div className="section-head studios-hero-head">
+          <span className="badge">
+            <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+          </span>
+
+          <h1>
+            <T en="Find a studio that matches your" ar="اعثر على استوديو يناسب" />{" "}
+            <span className="neon-text">
+              <T en="sound." ar="صوتك." />
+            </span>
+          </h1>
+
+          <p>
+            <T
+              en="Search, filter, and compare premium recording rooms, podcast spaces, rehearsal studios, and production suites."
+              ar="ابحث، فلتر، وقارن بين غرف التسجيل، مساحات البودكاست، استوديوهات التدريب، وغرف الإنتاج."
+            />
+          </p>
+
+          <div style={{ marginTop: 24 }}>
+            <Link href="/studios/near-me" className="btn btn-secondary">
+              <T en="Studios near me" ar="استوديوهات قريبة مني" />
+            </Link>
+          </div>
+        </div>
+
+        <StudioFilter
+          cities={legacyCities}
+          districts={districts}
+          features={featuresList}
+          equipmentCategories={equipmentCategories}
+          equipmentBrands={equipmentBrands}
+          countries={countries}
+          cityOptions={activeCities}
+          selectedCountry={selectedCountry}
+          selectedCityId={selectedCityId}
+          selectedStudioType={selectedStudioType}
+          initialValues={{
+            q: queryText,
+            city: selectedCity,
+            district: selectedDistrict,
+            min_price: minPrice,
+            max_price: maxPrice,
+            verified: verifiedOnly,
+            min_google_rating: minGoogleRating,
+            min_tripadvisor_rating: minTripAdvisorRating,
+            selectedFeatureIds,
+            selectedEquipmentCategories,
+            selectedEquipmentBrand,
+            equipmentKeyword,
+            sort,
+          }}
+        />
+
+        <div className="studio-results-bar">
+          <div>
+            <span className="badge">
+              {resultCount} <T en="results" ar="نتيجة" />
+            </span>
+
+            {hasFilters ? (
+              <p>
+                <T
+                  en="Showing filtered bookable studio results."
+                  ar="يتم عرض الاستوديوهات القابلة للحجز حسب الفلاتر."
+                />
+              </p>
+            ) : (
+              <p>
+                <T
+                  en="Showing all bookable studios."
+                  ar="يتم عرض جميع الاستوديوهات القابلة للحجز."
+                />
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid">
+          {studiosList.length ? (
+            studiosList.map((studio: StudioCardRow) => {
+              const displayCity = studio.city_name || studio.city;
+              const displayDistrict = studio.district;
+
+              return (
+                <article className="card studio-card" key={studio.id}>
+                  <div className="studio-cover">
+                    {studio.cover_image_url ? (
+                      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                        <Image
+                          src={studio.cover_image_url}
+                          alt={studio.name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{ objectFit: "cover" }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="placeholder">
+                        <T en="No Image" ar="لا توجد صورة" />
+                      </div>
+                    )}
+
+                    <div className="studio-card-floating-badges">
+                      {studio.is_boosted ? (
+                        <span
+                          className="badge"
+                          style={{
+                            borderColor: "var(--gb-gold)",
+                            background: "var(--gb-surface)",
+                            color: "var(--gb-gold)",
+                          }}
+                        >
+                          <T en="Featured" ar="مميز" />
+                        </span>
+                      ) : studio.is_featured ? (
+                        <span
+                          className="badge"
+                          style={{
+                            borderColor: "var(--gb-gold)",
+                            background: "var(--gb-surface)",
+                            color: "var(--gb-gold)",
+                          }}
+                        >
+                          <T en="Featured" ar="مميز" />
+                        </span>
+                      ) : null}
+
+                      <span className="badge studio-bookable-badge">
+                        <T en="Bookable" ar="قابل للحجز" />
+                      </span>
+
+                      <span className="badge">
+                        <T en="Verified" ar="موثق" />
+                      </span>
+
+                      {studio.instant_booking_enabled ? (
+                        <span className="badge badge-success">
+                          <T en="Instant booking" ar="حجز فوري" />
+                        </span>
+                      ) : null}
+
+                      {studio.verified_location ? (
+                        <span className="badge badge-success">
+                          <T en="Location verified" ar="الموقع موثق" />
+                        </span>
+                      ) : null}
+
+                      {studio.google_rating ? (
+                        <span className="badge">{studio.google_rating} <T en="★ Google" ar="★ جوجل" /></span>
+                      ) : null}
+
+                      {studio.tripadvisor_rating ? (
+                        <span className="badge">
+                          {studio.tripadvisor_rating} <T en="★ TripAdvisor" ar="★ تريب أدفايزر" />
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="studio-card-body">
+                    <div>
+                      <span className="badge">
+                        <T en="Available for booking" ar="متاح للحجز" />
+                      </span>
+
+                      <h2>{studio.name}</h2>
+
+                      <p>
+                        {displayCity}
+                        {displayDistrict ? ` · ${displayDistrict}` : ""}
+                      </p>
+
+                      <div className="studio-trust-mini">
+                        {studio.google_user_ratings_total ? (
+                          <span>
+                            Google: {studio.google_user_ratings_total}{" "}
+                            <T en="reviews" ar="تقييم" />
+                          </span>
+                        ) : null}
+
+                        {studio.tripadvisor_reviews_total ? (
+                          <span>
+                            TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
+                            <T en="reviews" ar="تقييم" />
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="studio-card-footer">
+                      <p>
+                        <T en="From" ar="من" />{" "}
+                        <strong>{studio.price_from ?? 0} <T en="SAR" ar="ر.س" /></strong>
+                      </p>
+
+                      <Link href={`/studios/${studio.slug}`} className="btn btn-small">
+                        <T en="View & Book" ar="عرض وحجز" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          ) : (
+            <div
+              className="card"
+              style={{ textAlign: "center", padding: "60px 20px" }}
+            >
+              <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+                <T en="No studios available" ar="لا توجد استوديوهات" />
+              </h2>
+              <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
+                <T
+                  en="Be the first to list your studio on GearBeat!"
+                  ar="كن أول من يضيف استوديو خاص به على GearBeat!"
+                />
+              </p>
+
+              <Link href="/join/studio" className="btn btn-primary">
+                <T en="Join as Studio" ar="انضم كاستوديو" />
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  } catch (err: any) {
+    const isTimeout = err.message === "TIMEOUT";
+
+    return (
+      <div className="card" style={{ textAlign: "center", padding: "60px 20px" }}>
+        <h2 style={{ color: "var(--gb-gold)", marginBottom: "1rem" }}>
+          {isTimeout ? (
+            <T en="Connection Timeout" ar="انتهت مهلة الاتصال" />
+          ) : (
+            <T en="Unexpected Error" ar="حدث خطأ غير متوقع" />
+          )}
+        </h2>
+        <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
+          {isTimeout ? (
+            <T
+              en="The server is taking too long to respond. Please try again."
+              ar="استغرق الخادم وقتاً طويلاً للرد. يرجى المحاولة مرة أخرى."
+            />
+          ) : (
+            <T
+              en="Something went wrong while fetching studios. Please try again later."
+              ar="حدث خطأ ما أثناء جلب الاستوديوهات. يرجى المحاولة مرة أخرى لاحقاً."
+            />
+          )}
+        </p>
+
+        <Link href="/studios" className="btn btn-primary">
+          <T en="Try Again" ar="حاول مرة أخرى" />
+        </Link>
       </div>
     );
   }
-
-  const resultCount = studiosList.length;
-
-  const hasFilters =
-    queryText ||
-    selectedCountry ||
-    selectedCityId ||
-    selectedCity ||
-    selectedDistrict ||
-    selectedStudioType ||
-    minPrice ||
-    maxPrice ||
-    verifiedOnly ||
-    minGoogleRating ||
-    minTripAdvisorRating ||
-    selectedFeatureIds.length > 0 ||
-    selectedEquipmentCategories.length > 0 ||
-    selectedEquipmentBrand ||
-    equipmentKeyword ||
-    sort !== "newest";
-
-  return (
-    <section>
-      <div className="section-head studios-hero-head">
-        <span className="badge">
-          <T en="Browse Studios" ar="تصفح الاستوديوهات" />
-        </span>
-
-        <h1>
-          <T en="Find a studio that matches your" ar="اعثر على استوديو يناسب" />{" "}
-          <span className="neon-text">
-            <T en="sound." ar="صوتك." />
-          </span>
-        </h1>
-
-        <p>
-          <T
-            en="Search, filter, and compare premium recording rooms, podcast spaces, rehearsal studios, and production suites."
-            ar="ابحث، فلتر، وقارن بين غرف التسجيل، مساحات البودكاست، استوديوهات التدريب، وغرف الإنتاج."
-          />
-        </p>
-
-        <div style={{ marginTop: 24 }}>
-          <Link href="/studios/near-me" className="btn btn-secondary">
-            <T en="Studios near me" ar="استوديوهات قريبة مني" />
-          </Link>
-        </div>
-      </div>
-
-      <StudioFilter
-        cities={legacyCities}
-        districts={districts}
-        features={featuresList}
-        equipmentCategories={equipmentCategories}
-        equipmentBrands={equipmentBrands}
-        countries={countries}
-        cityOptions={activeCities}
-        selectedCountry={selectedCountry}
-        selectedCityId={selectedCityId}
-        selectedStudioType={selectedStudioType}
-        initialValues={{
-          q: queryText,
-          city: selectedCity,
-          district: selectedDistrict,
-          min_price: minPrice,
-          max_price: maxPrice,
-          verified: verifiedOnly,
-          min_google_rating: minGoogleRating,
-          min_tripadvisor_rating: minTripAdvisorRating,
-          selectedFeatureIds,
-          selectedEquipmentCategories,
-          selectedEquipmentBrand,
-          equipmentKeyword,
-          sort
-        }}
-      />
-
-      <div className="studio-results-bar">
-        <div>
-          <span className="badge">
-            {resultCount} <T en="results" ar="نتيجة" />
-          </span>
-
-          {hasFilters ? (
-            <p>
-              <T
-                en="Showing filtered bookable studio results."
-                ar="يتم عرض الاستوديوهات القابلة للحجز حسب الفلاتر."
-              />
-            </p>
-          ) : (
-            <p>
-              <T
-                en="Showing all bookable studios."
-                ar="يتم عرض جميع الاستوديوهات القابلة للحجز."
-              />
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid">
-        {studiosList.length ? (
-          studiosList.map((studio: StudioCardRow) => {
-            const displayCity = studio.city_name || studio.city;
-            const displayDistrict = studio.district;
-
-            return (
-              <article className="card studio-card" key={studio.id}>
-                <div className="studio-cover">
-                  {studio.cover_image_url ? (
-                    <img src={studio.cover_image_url} alt={studio.name} />
-                  ) : (
-                    <div className="placeholder">
-                      <T en="No Image" ar="لا توجد صورة" />
-                    </div>
-                  )}
-
-                  <div className="studio-card-floating-badges">
-                    {studio.is_boosted ? (
-                      <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
-                        <T en="Featured" ar="مميز" />
-                      </span>
-                    ) : studio.is_featured ? (
-                      <span className="badge" style={{ borderColor: 'var(--gb-gold)', background: 'var(--gb-surface)', color: 'var(--gb-gold)' }}>
-                        <T en="Featured" ar="مميز" />
-                      </span>
-                    ) : null}
-
-                    <span className="badge studio-bookable-badge">
-                      <T en="Bookable" ar="قابل للحجز" />
-                    </span>
-
-                    <span className="badge">
-                      <T en="Verified" ar="موثق" />
-                    </span>
-
-                    {studio.instant_booking_enabled ? (
-                      <span className="badge badge-success">
-                        <T en="Instant booking" ar="حجز فوري" />
-                      </span>
-                    ) : null}
-
-                    {studio.verified_location ? (
-                      <span className="badge badge-success">
-                        <T en="Location verified" ar="الموقع موثق" />
-                      </span>
-                    ) : null}
-
-                    {studio.google_rating ? (
-                      <span className="badge">
-                        {studio.google_rating} ★ Google
-                      </span>
-                    ) : null}
-
-                    {studio.tripadvisor_rating ? (
-                      <span className="badge">
-                        {studio.tripadvisor_rating} ★ TripAdvisor
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="studio-card-body">
-                  <div>
-                    <span className="badge">
-                      <T en="Available for booking" ar="متاح للحجز" />
-                    </span>
-
-                    <h2>{studio.name}</h2>
-
-                    <p>
-                      {displayCity}
-                      {displayDistrict ? ` · ${displayDistrict}` : ""}
-                    </p>
-
-                    <div className="studio-trust-mini">
-                      {studio.google_user_ratings_total ? (
-                        <span>
-                          Google: {studio.google_user_ratings_total}{" "}
-                          <T en="reviews" ar="تقييم" />
-                        </span>
-                      ) : null}
-
-                      {studio.tripadvisor_reviews_total ? (
-                        <span>
-                          TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
-                          <T en="reviews" ar="تقييم" />
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="studio-card-footer">
-                    <p>
-                      <T en="From" ar="من" />{" "}
-                      <strong>{studio.price_from ?? 0} SAR</strong>
-                    </p>
-
-                    <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                      <T en="View & Book" ar="عرض وحجز" />
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            );
-          })
-        ) : (
-          <div className="card">
-            <h2>
-              <T en="No bookable studios found" ar="لا توجد استوديوهات قابلة للحجز" />
-            </h2>
-            <p>
-              <T
-                en="Try changing the search or filters."
-                ar="جرّب تغيير البحث أو الفلاتر."
-              />
-            </p>
-
-            <Link href="/studios" className="btn">
-              <T en="Reset filters" ar="إعادة ضبط الفلاتر" />
-            </Link>
-          </div>
-        )}
-      </div>
-    </section>
-  );
 }
 

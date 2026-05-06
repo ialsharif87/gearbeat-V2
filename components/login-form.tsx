@@ -37,14 +37,14 @@ export default function LoginForm() {
 
     if (!user) {
       setLoading(false);
-      setErrorMessage("Login failed. Please try again.");
+      setErrorMessage("فشل تسجيل الدخول. يرجى المحاولة مرة أخرى / Login failed. Please try again.");
       return;
     }
 
     const { data: profile, error: profileError } = await supabase
-      .from("users")
+      .from("profiles")
       .select("role")
-      .eq("auth_user_id", user.id)
+      .eq("id", user.id)
       .maybeSingle();
 
     setLoading(false);
@@ -54,19 +54,20 @@ export default function LoginForm() {
       return;
     }
 
-    if (profile?.role === "owner") {
-      router.push("/owner");
+    const role = profile?.role;
+    if (role === "owner" || role === "studio_owner") {
+      router.push("/portal/studio");
       router.refresh();
       return;
     }
 
-    if (profile?.role === "vendor") {
-      router.push("/vendor");
+    if (role === "vendor") {
+      router.push("/portal/store");
       router.refresh();
       return;
     }
 
-    if (profile?.role === "admin") {
+    if (role === "admin") {
       router.push("/admin");
       router.refresh();
       return;

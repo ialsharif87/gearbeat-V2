@@ -1,6 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
+import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "الخدمات | GearBeat",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -200,13 +206,15 @@ export default async function ServicesPage({
                 style={{ padding: 0, overflow: "hidden", display: "block", color: "inherit", textDecoration: "none" }}
               >
                 <div style={{ position: "relative", aspectRatio: "16/10" }}>
-                  <img 
+                  <Image 
                     src={studio.cover_image_url || "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop"} 
                     alt={studio.name}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: "cover" }}
                   />
                   {studio.verified && (
-                    <div style={{ position: "absolute", top: 12, left: 12 }} className="badge badge-success">
+                    <div style={{ position: "absolute", top: 12, left: 12, zIndex: 1 }} className="badge badge-success">
                       ✓ <T en="Verified" ar="موثق" />
                     </div>
                   )}
@@ -216,12 +224,17 @@ export default async function ServicesPage({
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 10 }}>
                     <h3 style={{ margin: 0, fontSize: "1.25rem" }}>{studio.name}</h3>
                     <div style={{ color: "var(--gb-gold)", fontWeight: 700 }}>
-                      {studio.price_from ? `${studio.price_from} SAR` : "—"}
+                      {studio.price_from ? `${studio.price_from} ` : "—"}
+                      {studio.price_from ? <T en="SAR" ar="ر.س" /> : ""}
                     </div>
                   </div>
                   
-                  <div style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: 15 }}>
-                    📍 {studio.city || "Saudi Arabia"}
+                  <div style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: 15, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    {studio.city || <T en="Saudi Arabia" ar="المملكة العربية السعودية" />}
                   </div>
 
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -242,7 +255,12 @@ export default async function ServicesPage({
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "100px 20px", color: "var(--muted)" }}>
-            <div style={{ fontSize: "3rem", marginBottom: 20 }}>🔍</div>
+            <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--gb-gold)' }}>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
             <h3>
               <T en="No service providers found" ar="لم يتم العثور على مزودي خدمة" />
             </h3>

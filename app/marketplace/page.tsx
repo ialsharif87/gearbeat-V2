@@ -1,5 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
+import { Metadata } from "next";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "المعدات | GearBeat",
+};
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +31,9 @@ function formatMoney(value: unknown, currency = "SAR") {
     return `0.00 ${currency}`;
   }
 
-  return `${numberValue.toFixed(2)} ${currency}`;
+  // If it's SAR, show bilingual or Arabic
+  const displayCurrency = currency === "SAR" ? "ر.س / SAR" : currency;
+  return `${numberValue.toFixed(2)} ${displayCurrency}`;
 }
 
 function getProductName(product: any) {
@@ -130,38 +138,43 @@ export default async function MarketplacePage({
 
   const supabaseAdmin = createAdminClient();
 
-  const [categoriesResult, brandsResult] = await Promise.all([
-    supabaseAdmin
-      .from("marketplace_categories")
-      .select("id, slug, name_en, name_ar, sort_order")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .order("name_en", { ascending: true }),
+  // FIX 0A: Loading timeout logic (8 seconds)
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("TIMEOUT")), 8000)
+  );
 
-    supabaseAdmin
-      .from("marketplace_brands")
-      .select("id, slug, name_en, name_ar, sort_order")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .order("name_en", { ascending: true }),
-  ]);
+  try {
+    const [categoriesResult, brandsResult] = (await Promise.race([
+      Promise.all([
+        supabaseAdmin
+          .from("marketplace_categories")
+          .select("id, slug, name_en, name_ar, sort_order")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("name_en", { ascending: true }),
 
-  if (categoriesResult.error) {
-    throw new Error(categoriesResult.error.message);
-  }
+        supabaseAdmin
+          .from("marketplace_brands")
+          .select("id, slug, name_en, name_ar, sort_order")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("name_en", { ascending: true }),
+      ]),
+      timeoutPromise,
+    ])) as any[];
 
-  if (brandsResult.error) {
-    throw new Error(brandsResult.error.message);
-  }
+    if (categoriesResult.error) throw categoriesResult.error;
+    if (brandsResult.error) throw brandsResult.error;
 
-  const categories = categoriesResult.data || [];
-  const brands = brandsResult.data || [];
+    const categories = categoriesResult.data || [];
+    const brands = brandsResult.data || [];
 
-  const sortConfig = getSortConfig(sort);
+    const sortConfig = getSortConfig(sort);
 
-  let productsQuery = supabaseAdmin
-    .from("marketplace_products")
-    .select(`
+    let productsQuery = supabaseAdmin
+      .from("marketplace_products")
+      .select(
+        `
       id,
       vendor_id,
       category_id,
@@ -199,257 +212,266 @@ export default async function MarketplacePage({
         store_name,
         business_verification_status
       )
-    `)
-    .in("status", ["approved", "active", "published"])
-    .eq("is_active", true)
-    .order(sortConfig.column, { ascending: sortConfig.ascending })
-    .limit(120);
+    `
+      )
+      .in("status", ["approved", "active", "published"])
+      .eq("is_active", true)
+      .order(sortConfig.column, { ascending: sortConfig.ascending })
+      .limit(120);
 
-  if (q) {
-    const safeQ = q.replace(/[%_]/g, "");
-    productsQuery = productsQuery.or(
-      `name_en.ilike.%${safeQ}%,name_ar.ilike.%${safeQ}%,sku.ilike.%${safeQ}%`
-    );
-  }
+    if (q) {
+      const safeQ = q.replace(/[%_]/g, "");
+      productsQuery = productsQuery.or(
+        `name_en.ilike.%${safeQ}%,name_ar.ilike.%${safeQ}%,sku.ilike.%${safeQ}%`
+      );
+    }
 
-  if (category) {
-    productsQuery = productsQuery.eq("category_id", category);
-  }
+    if (category) {
+      productsQuery = productsQuery.eq("category_id", category);
+    }
 
-  if (brand) {
-    productsQuery = productsQuery.eq("brand_id", brand);
-  }
+    if (brand) {
+      productsQuery = productsQuery.eq("brand_id", brand);
+    }
 
-  if (minPrice > 0) {
-    productsQuery = productsQuery.gte("base_price", minPrice);
-  }
+    if (minPrice > 0) {
+      productsQuery = productsQuery.gte("base_price", minPrice);
+    }
 
-  if (maxPrice > 0) {
-    productsQuery = productsQuery.lte("base_price", maxPrice);
-  }
+    if (maxPrice > 0) {
+      productsQuery = productsQuery.lte("base_price", maxPrice);
+    }
 
-  if (inStock) {
-    productsQuery = productsQuery.gt("stock_quantity", 0);
-  }
+    if (inStock) {
+      productsQuery = productsQuery.gt("stock_quantity", 0);
+    }
 
-  const productsResult = await productsQuery;
+    const productsResult = (await Promise.race([
+      productsQuery,
+      timeoutPromise,
+    ])) as any;
 
-  if (productsResult.error) {
-    throw new Error(productsResult.error.message);
-  }
+    if (productsResult.error) throw productsResult.error;
 
-  const products = productsResult.data || [];
+    const products = productsResult.data || [];
 
-  const activeFilterCount = [
-    q,
-    category,
-    brand,
-    minPrice > 0 ? "min" : "",
-    maxPrice > 0 ? "max" : "",
-    inStock ? "stock" : "",
-  ].filter(Boolean).length;
+    const activeFilterCount = [
+      q,
+      category,
+      brand,
+      minPrice > 0 ? "min" : "",
+      maxPrice > 0 ? "max" : "",
+      inStock ? "stock" : "",
+    ].filter(Boolean).length;
 
-  return (
-    <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
-      <section
-        style={{
-          marginTop: 24,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr)",
-          gap: 18,
-        }}
+    return (
+      <main
+        className="dashboard-page"
+        style={{ maxWidth: 1240, margin: "0 auto" }}
       >
-        <div>
-          <span className="badge badge-gold">
-            <T en="Marketplace" ar="المتجر" />
-          </span>
-
-          <h1 style={{ marginTop: 10 }}>
-            <T en="Studio gear marketplace" ar="متجر معدات الاستوديو" />
-          </h1>
-
-          <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
-            <T
-              en="Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
-              ar="تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."
-            />
-          </p>
-        </div>
-
-        <form
-          action="/marketplace"
+        <section
           style={{
+            marginTop: 24,
             display: "grid",
-            gap: 14,
-            padding: 18,
-            borderRadius: 22,
-            background: "rgba(255,255,255,0.035)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            gridTemplateColumns: "minmax(0, 1fr)",
+            gap: 18,
           }}
         >
-          <div className="grid grid-4">
-            <div>
-              <label>
-                <T en="Search" ar="بحث" />
-              </label>
-              <input
-                name="q"
-                className="input"
-                placeholder="Microphone, mixer, SKU..."
-                defaultValue={q}
-              />
-            </div>
-
-            <div>
-              <label>
-                <T en="Category" ar="التصنيف" />
-              </label>
-              <select name="category" className="input" defaultValue={category}>
-                <option value="">All categories</option>
-                {categories.map((item: any) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name_en} / {item.name_ar}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label>
-                <T en="Brand" ar="العلامة" />
-              </label>
-              <select name="brand" className="input" defaultValue={brand}>
-                <option value="">All brands</option>
-                {brands.map((item: any) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name_en} / {item.name_ar}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label>
-                <T en="Sort" ar="الترتيب" />
-              </label>
-              <select name="sort" className="input" defaultValue={sort}>
-                <option value="newest">Newest</option>
-                <option value="price_low">Price: low to high</option>
-                <option value="price_high">Price: high to low</option>
-                <option value="name">Name</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-4">
-            <div>
-              <label>
-                <T en="Min price" ar="أقل سعر" />
-              </label>
-              <input
-                name="min_price"
-                className="input"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={minPrice > 0 ? minPrice : ""}
-              />
-            </div>
-
-            <div>
-              <label>
-                <T en="Max price" ar="أعلى سعر" />
-              </label>
-              <input
-                name="max_price"
-                className="input"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={maxPrice > 0 ? maxPrice : ""}
-              />
-            </div>
-
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                marginTop: 28,
-              }}
-            >
-              <input
-                type="checkbox"
-                name="in_stock"
-                value="1"
-                defaultChecked={inStock}
-              />
-              <T en="In stock only" ar="المتوفر فقط" />
-            </label>
-
-            <div style={{ display: "flex", gap: 10, alignItems: "end" }}>
-              <button type="submit" className="btn btn-primary">
-                <T en="Apply filters" ar="تطبيق الفلتر" />
-              </button>
-
-              <Link href="/marketplace" className="btn">
-                <T en="Reset" ar="إعادة ضبط" />
-              </Link>
-            </div>
-          </div>
-        </form>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 12,
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <p style={{ color: "var(--muted)", margin: 0 }}>
-            <strong>{products.length}</strong>{" "}
-            <T en="approved products found" ar="منتج معتمد" />
-          </p>
-
-          {activeFilterCount > 0 ? (
+          <div>
             <span className="badge badge-gold">
-              {activeFilterCount} active filters
+              <T en="Marketplace" ar="المتجر" />
             </span>
-          ) : null}
-        </div>
-      </section>
 
-      <section style={{ marginTop: 26 }}>
-        {products.length === 0 ? (
-          <div
-            className="card"
-            style={{
-              padding: 34,
-              textAlign: "center",
-              background: "rgba(255,255,255,0.035)",
-            }}
-          >
-            <h2>
-              <T en="No products found" ar="لا توجد منتجات" />
-            </h2>
+            <h1 style={{ marginTop: 10 }}>
+              <T en="Studio gear marketplace" ar="متجر معدات الاستوديو" />
+            </h1>
 
-            <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+            <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
               <T
-                en="Try changing filters or check again after vendors publish approved products."
-                ar="جرّب تغيير الفلاتر أو ارجع لاحقًا بعد اعتماد منتجات التجار."
+                en="Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
+                ar="تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."
               />
             </p>
           </div>
-        ) : (
-          <div
+
+          <form
+            action="/marketplace"
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-              gap: 18,
+              gap: 14,
+              padding: 18,
+              borderRadius: 22,
+              background: "rgba(255,255,255,0.035)",
+              border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
+            <div className="grid grid-4">
+              <div>
+                <label>
+                  <T en="Search" ar="بحث" />
+                </label>
+                <input
+                  name="q"
+                  className="input"
+                  placeholder="Microphone, mixer, SKU..."
+                  defaultValue={q}
+                />
+              </div>
+
+              <div>
+                <label>
+                  <T en="Category" ar="التصنيف" />
+                </label>
+                <select name="category" className="input" defaultValue={category}>
+                  <option value="">All categories</option>
+                  {categories.map((item: any) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name_en} / {item.name_ar}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>
+                  <T en="Brand" ar="العلامة" />
+                </label>
+                <select name="brand" className="input" defaultValue={brand}>
+                  <option value="">All brands</option>
+                  {brands.map((item: any) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name_en} / {item.name_ar}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>
+                  <T en="Sort" ar="الترتيب" />
+                </label>
+                <select name="sort" className="input" defaultValue={sort}>
+                  <option value="newest">Newest</option>
+                  <option value="price_low">Price: low to high</option>
+                  <option value="price_high">Price: high to low</option>
+                  <option value="name">Name</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-4">
+              <div>
+                <label>
+                  <T en="Min price" ar="أقل سعر" />
+                </label>
+                <input
+                  name="min_price"
+                  className="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={minPrice > 0 ? minPrice : ""}
+                />
+              </div>
+
+              <div>
+                <label>
+                  <T en="Max price" ar="أعلى سعر" />
+                </label>
+                <input
+                  name="max_price"
+                  className="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={maxPrice > 0 ? maxPrice : ""}
+                />
+              </div>
+
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginTop: 28,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  name="in_stock"
+                  value="1"
+                  defaultChecked={inStock}
+                />
+                <T en="In stock only" ar="المتوفر فقط" />
+              </label>
+
+              <div style={{ display: "flex", gap: 10, alignItems: "end" }}>
+                <button type="submit" className="btn btn-primary">
+                  <T en="Apply filters" ar="تطبيق الفلتر" />
+                </button>
+
+                <Link href="/marketplace" className="btn">
+                  <T en="Reset" ar="إعادة ضبط" />
+                </Link>
+              </div>
+            </div>
+          </form>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <p style={{ color: "var(--muted)", margin: 0 }}>
+              <strong>{products.length}</strong>{" "}
+              <T en="approved products found" ar="منتج معتمد" />
+            </p>
+
+            {activeFilterCount > 0 ? (
+              <span className="badge badge-gold">
+                {activeFilterCount} active filters
+              </span>
+            ) : null}
+          </div>
+        </section>
+
+        <section style={{ marginTop: 26 }}>
+          {products.length === 0 ? (
+            <div
+              className="card"
+              style={{
+                padding: "60px 20px",
+                textAlign: "center",
+                background: "rgba(255,255,255,0.035)",
+              }}
+            >
+              <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+                <T en="No products available" ar="لا توجد منتجات" />
+              </h2>
+
+              <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
+                <T
+                  en="Be the first to list your gear on GearBeat!"
+                  ar="كن أول من يعرض معداته على GearBeat!"
+                />
+              </p>
+
+              <Link href="/join/seller" className="btn btn-primary">
+                <T en="Join as Seller" ar="انضم كتاجر" />
+              </Link>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                gap: 18,
+              }}
+            >
             {products.map((product: any) => {
               const image = getProductImage(product);
               const price = product.sale_price || product.base_price;
@@ -493,15 +515,15 @@ export default async function MarketplacePage({
                       }}
                     >
                       {image ? (
-                        <img
-                          src={image}
-                          alt={getProductName(product)}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
+                        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                          <Image
+                            src={image}
+                            alt={getProductName(product)}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
                       ) : (
                         <div
                           style={{
@@ -511,10 +533,17 @@ export default async function MarketplacePage({
                             display: "grid",
                             placeItems: "center",
                             background: "rgba(207,167,98,0.16)",
-                            fontSize: "2rem",
                           }}
                         >
-                          🎛️
+                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--gb-gold)' }}>
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="12" y1="3" x2="12" y2="21"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <circle cx="7.5" cy="7.5" r="1.5"></circle>
+                            <circle cx="16.5" cy="7.5" r="1.5"></circle>
+                            <circle cx="7.5" cy="16.5" r="1.5"></circle>
+                            <circle cx="16.5" cy="16.5" r="1.5"></circle>
+                          </svg>
                         </div>
                       )}
                     </div>
@@ -603,4 +632,41 @@ export default async function MarketplacePage({
       </section>
     </main>
   );
+} catch (err: any) {
+  const isTimeout = err.message === "TIMEOUT";
+
+  return (
+    <main
+      className="dashboard-page"
+      style={{ maxWidth: 1240, margin: "0 auto", padding: "60px 20px" }}
+    >
+      <div className="card" style={{ textAlign: "center", padding: "60px 20px" }}>
+        <h2 style={{ color: "var(--gb-gold)", marginBottom: "1rem" }}>
+          {isTimeout ? (
+            <T en="Connection Timeout" ar="انتهت مهلة الاتصال" />
+          ) : (
+            <T en="Unexpected Error" ar="حدث خطأ غير متوقع" />
+          )}
+        </h2>
+        <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
+          {isTimeout ? (
+            <T
+              en="The server is taking too long to respond. Please try again."
+              ar="استغرق الخادم وقتاً طويلاً للرد. يرجى المحاولة مرة أخرى."
+            />
+          ) : (
+            <T
+              en="Something went wrong while fetching marketplace items. Please try again later."
+              ar="حدث خطأ ما أثناء جلب منتجات المتجر. يرجى المحاولة مرة أخرى لاحقاً."
+            />
+          )}
+        </p>
+
+        <Link href="/marketplace" className="btn btn-primary">
+          <T en="Try Again" ar="حاول مرة أخرى" />
+        </Link>
+      </div>
+    </main>
+  );
+}
 }

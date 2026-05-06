@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import T from "./t";
 
 export default function Footer() {
@@ -10,9 +11,11 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <Link href="/" className="footer-logo">
-              <img
+              <Image
                 src="/brand/logo-horizontal.svg"
                 alt="GearBeat"
+                width={100}
+                height={24}
                 className="logo-img-sm"
               />
             </Link>
@@ -37,8 +40,8 @@ export default function Footer() {
 
           <div className="footer-col">
             <h4><T en="Partners" ar="الشركاء" /></h4>
-            <Link href="/owner/onboarding"><T en="List Your Studio" ar="أضف استوديوك" /></Link>
-            <Link href="/vendor-signup"><T en="Sell Gear" ar="بع معداتك" /></Link>
+            <Link href="/join/studio"><T en="List Your Studio" ar="أضف استوديوك" /></Link>
+            <Link href="/join/seller"><T en="Sell Gear" ar="بع معداتك" /></Link>
             <Link href="/login?account=owner"><T en="Partner Login" ar="دخول الشركاء" /></Link>
           </div>
 

@@ -133,7 +133,12 @@ export default function SignupPage() {
         setCooldown(60);
       }
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+      const msg = err.message || "";
+      if (msg.includes("email_exists")) {
+        setError("هذا البريد مسجل مسبقاً / Email already registered");
+      } else {
+        setError(msg || "An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }

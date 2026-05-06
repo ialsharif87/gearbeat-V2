@@ -27,7 +27,7 @@ export default function HomePage() {
               <Link href="/studios" className="btn btn-primary btn-lg">
                 <T en="Explore Studios" ar="استكشف الاستوديوهات" />
               </Link>
-              <Link href="/owner/onboarding" className="btn btn-outline btn-lg">
+              <Link href="/join/studio" className="btn btn-outline btn-lg">
                 <T en="List Your Studio" ar="اعرض استوديوك" />
               </Link>
             </div>
@@ -49,21 +49,35 @@ export default function HomePage() {
 
           <div className="grid grid-3 path-grid">
             <Link href="/signup" className="card-premium path-card">
-              <div className="path-icon">🎙️</div>
+              <div className="path-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+              </div>
               <h3><T en="I am a Creator" ar="أنا مبدع" /></h3>
               <p><T en="Book world-class studios and buy elite gear for your next project." ar="احجز استوديوهات عالمية واشترِ معدات احترافية لمشروعك القادم." /></p>
               <span className="path-cta"><T en="Get Started" ar="ابدأ الآن" /> →</span>
             </Link>
 
-            <Link href="/owner/onboarding" className="card-premium path-card active-border">
-              <div className="path-icon">🎧</div>
+            <Link href="/join/studio" className="card-premium path-card active-border">
+              <div className="path-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2v-6H5v-3a7 7 0 0 1 14 0v3h-2v6h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/>
+                </svg>
+              </div>
               <h3><T en="Studio Owner" ar="صاحب استوديو" /></h3>
               <p><T en="List your space, manage bookings, and join a verified network." ar="اعرض مساحتك، أدر حجوزاتك، وانضم لشبكة موثقة من المحترفين." /></p>
               <span className="path-cta"><T en="Join as Owner" ar="انضم كصاحب استوديو" /> →</span>
             </Link>
 
-            <Link href="/vendor-signup" className="card-premium path-card">
-              <div className="path-icon">📦</div>
+            <Link href="/join/seller" className="card-premium path-card">
+              <div className="path-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                </svg>
+              </div>
               <h3><T en="Gear Vendor" ar="تاجر معدات" /></h3>
               <p><T en="Sell your professional audio gear to a targeted creative audience." ar="بع معداتك الصوتية المحترفة لجمهور مبدع ومستهدف." /></p>
               <span className="path-cta"><T en="Start Selling" ar="ابدأ البيع" /> →</span>
@@ -88,19 +102,42 @@ export default function HomePage() {
             </div>
             <div className="grid grid-2 gap-20">
               <div className="card-premium trust-item">
-                <div className="trust-icon">🛡️</div>
+                <div className="trust-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
                 <h4><T en="Verified Studios" ar="استوديوهات موثقة" /></h4>
               </div>
               <div className="card-premium trust-item">
-                <div className="trust-icon">📅</div>
+                <div className="trust-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </div>
                 <h4><T en="Easy Booking" ar="حجز واضح وسهل" /></h4>
               </div>
               <div className="card-premium trust-item">
-                <div className="trust-icon">💳</div>
+                <div className="trust-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                </div>
                 <h4><T en="Secure Payments" ar="مدفوعات آمنة" /></h4>
               </div>
               <div className="card-premium trust-item">
-                <div className="trust-icon">👥</div>
+                <div className="trust-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
                 <h4><T en="Pro Community" ar="مجتمع محترف" /></h4>
               </div>
             </div>
@@ -140,12 +177,16 @@ export default function HomePage() {
         <div className="container">
           <div className="flex-between section-head">
             <h2><T en="Marketplace" ar="سوق المعدات" /></h2>
-            <Link href="/gear" className="text-gold"><T en="Shop Gear" ar="تسوق المعدات" /> →</Link>
+            <Link href="/marketplace" className="text-gold"><T en="Shop Gear" ar="تسوق المعدات" /> →</Link>
           </div>
           <div className="grid grid-4 category-grid">
             {['Microphones', 'Monitors', 'Interfaces', 'Controllers'].map((cat) => (
               <div key={cat} className="card-premium cat-card">
-                <div className="cat-icon">⚡</div>
+                <div className="cat-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
                 <h4>{cat}</h4>
               </div>
             ))}
@@ -161,7 +202,7 @@ export default function HomePage() {
             <Link href="/studios" className="btn btn-primary btn-lg">
               <T en="Book Your Session" ar="احجز جلستك القادمة" />
             </Link>
-            <Link href="/owner/onboarding" className="btn btn-outline btn-lg">
+            <Link href="/join/studio" className="btn btn-outline btn-lg">
               <T en="Join as Partner" ar="انضم كاستوديو معتمد" />
             </Link>
           </div>
