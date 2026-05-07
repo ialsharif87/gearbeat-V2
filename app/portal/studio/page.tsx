@@ -103,27 +103,6 @@ export default async function StudioDashboardPage() {
       .limit(1),
   ]);
 
-  const ownerName = profileResult.data?.full_name || user.email?.split("@")[0] || "User";
-  const totalBookingsMonth = bookingsMonthResult.count || 0;
-  const pendingBookings = pendingBookingsResult.count || 0;
-  
-  const totalRevenue = (revenueResult.data || []).reduce(
-    (acc, b) => acc + (b.total_amount || 0), 
-    0
-  );
-
-  const ratings = ratingResult.data || [];
-  const avgRating = ratings.length > 0 
-    ? (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1)
-    : "5.0";
-
-  const recentBookings = recentBookingsResult.data || [];
-  const studioData = studiosResult.data?.[0] as any;
-  const studioScore = studioData?.completion_score || 0;
-  const cert = studioData?.certified_studios?.[0];
-  const tier = cert?.studio_tiers;
-  const kitOrder = studioData?.merch_fulfillment_orders?.[0];
-
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-GB", {
       day: "2-digit",
