@@ -1,4 +1,5 @@
 import Link from "next/link";
+// GB-FIX: Removed formatDate/formatTime props from StudioDashboardView
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import T from "@/components/t";

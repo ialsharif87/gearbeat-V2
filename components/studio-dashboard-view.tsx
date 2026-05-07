@@ -1,6 +1,8 @@
 "use client";
+// GB-FIX: Functions moved inside component body to fix serializability error
 
 import Link from "next/link";
+// GB-FIX: Removed formatDate and formatTime from StudioDashboardView props
 import T from "@/components/t";
 
 interface StudioDashboardViewProps {
