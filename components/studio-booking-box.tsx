@@ -60,6 +60,7 @@ export default function StudioBookingBox({
 }: StudioBookingBoxProps) {
   const [bookingDate, setBookingDate] = useState(getTodayValue());
   const [startTime, setStartTime] = useState("10:00");
+  const [currentPrice, setCurrentPrice] = useState(hourlyPrice);
   const [durationHours, setDurationHours] = useState(1);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,7 +77,7 @@ export default function StudioBookingBox({
   }, []);
 
   const estimatedTotal = useMemo(() => {
-    const price = Number(hourlyPrice || 0);
+    const price = Number(currentPrice || hourlyPrice || 0);
     const duration = Number(durationHours || 0);
 
     if (!Number.isFinite(price) || !Number.isFinite(duration)) {
@@ -84,7 +85,7 @@ export default function StudioBookingBox({
     }
 
     return price * duration;
-  }, [hourlyPrice, durationHours]);
+  }, [currentPrice, hourlyPrice, durationHours]);
 
   async function createBooking() {
     setLoading(true);
@@ -254,6 +255,9 @@ export default function StudioBookingBox({
           const timePart = slot.startTime.split("T")[1]?.slice(0, 5);
           if (timePart) {
             setStartTime(timePart);
+          }
+          if (slot.pricePerHour) {
+            setCurrentPrice(slot.pricePerHour);
           }
         }}
       />

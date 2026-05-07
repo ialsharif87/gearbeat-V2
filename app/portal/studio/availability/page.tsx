@@ -15,15 +15,18 @@ type AvailabilityRule = {
   closeTime: string;
   slotMinutes: number;
   bufferMinutes: number;
+  pricePerHour: number;
 };
 
 type AvailabilityException = {
   id: string;
-  exceptionDate: string;
+  startDate: string;
+  endDate: string;
   isClosed: boolean;
   openTime: string;
   closeTime: string;
   reason: string;
+  pricePerHour?: number | null;
 };
 
 
@@ -83,17 +86,21 @@ function normalizeRule(row: DbRow): AvailabilityRule {
       typeof row.slot_minutes === "number" ? row.slot_minutes : 60,
     bufferMinutes:
       typeof row.buffer_minutes === "number" ? row.buffer_minutes : 0,
+    pricePerHour:
+      typeof row.price_per_hour === "number" ? row.price_per_hour : 0,
   };
 }
 
 function normalizeException(row: DbRow): AvailabilityException {
   return {
     id: readText(row, ["id"]),
-    exceptionDate: readText(row, ["exception_date"]),
+    startDate: readText(row, ["start_date", "exception_date"]),
+    endDate: readText(row, ["end_date"]) || readText(row, ["start_date", "exception_date"]),
     isClosed: Boolean(row.is_closed),
     openTime: (readText(row, ["open_time"]) || "09:00").slice(0, 5),
     closeTime: (readText(row, ["close_time"]) || "18:00").slice(0, 5),
     reason: readText(row, ["reason"]),
+    pricePerHour: typeof row.price_per_hour === "number" ? row.price_per_hour : null,
   };
 }
 
@@ -147,7 +154,7 @@ export default async function StudioAvailabilityPage({
       .from("studio_availability_exceptions")
       .select("*")
       .eq("studio_id", selectedStudioId)
-      .order("exception_date", { ascending: true });
+      .order("start_date", { ascending: true });
 
     initialRules = ((rules || []) as DbRow[]).map(normalizeRule);
     initialExceptions = ((exceptions || []) as DbRow[]).map(normalizeException);

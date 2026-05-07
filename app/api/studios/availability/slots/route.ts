@@ -144,7 +144,8 @@ export async function GET(request: NextRequest) {
     .from("studio_availability_exceptions")
     .select("*")
     .eq("studio_id", studioId)
-    .eq("exception_date", date)
+    .lte("start_date", date)
+    .gte("end_date", date)
     .maybeSingle();
 
   const exceptionRow = (exception || null) as DbRow | null;
@@ -276,9 +277,14 @@ export async function GET(request: NextRequest) {
     });
 
     if (!hasConflict) {
+      const slotPrice = exceptionRow?.price_per_hour 
+        ? readNumber(exceptionRow, ["price_per_hour"]) 
+        : readNumber(ruleRow, ["price_per_hour"], readNumber(ruleRow, ["hourly_rate"]));
+
       slots.push({
         startTime: slotStart,
         endTime: slotEnd,
+        pricePerHour: slotPrice,
         label: `${minutesToTime(slotStartMinutes)} - ${minutesToTime(
           slotEndMinutes
         )}`,

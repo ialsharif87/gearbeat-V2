@@ -11,15 +11,18 @@ type AvailabilityRule = {
   closeTime: string;
   slotMinutes: number;
   bufferMinutes: number;
+  pricePerHour: number;
 };
 
 type AvailabilityException = {
   id?: string;
-  exceptionDate: string;
+  startDate: string;
+  endDate: string;
   isClosed: boolean;
   openTime: string;
   closeTime: string;
   reason: string;
+  pricePerHour?: number | null;
 };
 
 type StudioAvailabilityManagerProps = {
@@ -47,6 +50,7 @@ function createDefaultRules() {
     closeTime: "18:00",
     slotMinutes: 60,
     bufferMinutes: 0,
+    pricePerHour: 0,
   }));
 }
 
@@ -68,18 +72,20 @@ export default function StudioAvailabilityManager({
   const [rules, setRules] = useState<AvailabilityRule[]>(normalizeRules(initialRules));
   const [exceptions, setExceptions] = useState<AvailabilityException[]>(initialExceptions);
 
-  const [newExceptionDate, setNewExceptionDate] = useState("");
+  const [newExceptionStartDate, setNewExceptionStartDate] = useState("");
+  const [newExceptionEndDate, setNewExceptionEndDate] = useState("");
   const [newExceptionReason, setNewExceptionReason] = useState("");
   const [newExceptionIsClosed, setNewExceptionIsClosed] = useState(true);
   const [newExceptionOpenTime, setNewExceptionOpenTime] = useState("09:00");
   const [newExceptionCloseTime, setNewExceptionCloseTime] = useState("18:00");
+  const [newExceptionPrice, setNewExceptionPrice] = useState<number | "">("");
 
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const sortedExceptions = useMemo(() => {
-    return [...exceptions].sort((a, b) => a.exceptionDate.localeCompare(b.exceptionDate));
+    return [...exceptions].sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [exceptions]);
 
   function updateRule(dayOfWeek: number, key: keyof AvailabilityRule, value: any) {
@@ -88,26 +94,31 @@ export default function StudioAvailabilityManager({
 
   function addException() {
     setErrorMessage("");
-    if (!newExceptionDate) {
-      setErrorMessage("Select an exception date first.");
+    if (!newExceptionStartDate) {
+      setErrorMessage("Select a start date first.");
       return;
     }
-    if (exceptions.some((e) => e.exceptionDate === newExceptionDate)) {
-      setErrorMessage("This date already has an exception.");
+    const endDate = newExceptionEndDate || newExceptionStartDate;
+    if (exceptions.some((e) => e.startDate === newExceptionStartDate)) {
+      setErrorMessage("This start date already has an exception.");
       return;
     }
     setExceptions((curr) => [
       ...curr,
       {
-        exceptionDate: newExceptionDate,
+        startDate: newExceptionStartDate,
+        endDate: endDate,
         isClosed: newExceptionIsClosed,
         openTime: newExceptionOpenTime,
         closeTime: newExceptionCloseTime,
         reason: newExceptionReason,
+        pricePerHour: newExceptionPrice === "" ? null : Number(newExceptionPrice),
       },
     ]);
-    setNewExceptionDate("");
+    setNewExceptionStartDate("");
+    setNewExceptionEndDate("");
     setNewExceptionReason("");
+    setNewExceptionPrice("");
   }
 
   async function saveAvailability() {
@@ -220,7 +231,7 @@ export default function StudioAvailabilityManager({
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
                   <div>
                     <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Slot (min)" ar="الفترة" /></label>
                     <input 
@@ -241,6 +252,17 @@ export default function StudioAvailabilityManager({
                       onChange={(e) => updateRule(rule.dayOfWeek, "bufferMinutes", Number(e.target.value))}
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Price (SAR/hr)" ar="السعر (ساعة)" /></label>
+                  <input 
+                    type="number" 
+                    className="gb-input" 
+                    value={rule.pricePerHour} 
+                    disabled={!rule.isOpen}
+                    onChange={(e) => updateRule(rule.dayOfWeek, "pricePerHour", Number(e.target.value))}
+                  />
                 </div>
               </div>
             );
@@ -277,7 +299,7 @@ export default function StudioAvailabilityManager({
               ) : (
                 <div style={{ display: 'grid', gap: '16px' }}>
                   {sortedExceptions.map((ex) => (
-                    <div key={ex.exceptionDate} className="gb-card" style={{ 
+                    <div key={ex.startDate} className="gb-card" style={{ 
                       display: 'flex', 
                       justifyContent: 'space-between', 
                       alignItems: 'center', 
@@ -290,15 +312,18 @@ export default function StudioAvailabilityManager({
                           {ex.isClosed ? '🚫' : '⏰'}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 900, color: 'white', fontSize: '1.1rem' }}>{ex.exceptionDate}</div>
+                          <div style={{ fontWeight: 900, color: 'white', fontSize: '1.1rem' }}>
+                            {ex.startDate === ex.endDate ? ex.startDate : `${ex.startDate} → ${ex.endDate}`}
+                          </div>
                           <div style={{ fontSize: '0.85rem', marginTop: '4px', fontWeight: 700, color: ex.isClosed ? '#ef4444' : 'var(--gb-teal)' }}>
-                            {ex.isClosed ? <T en="Closed All Day" ar="مغلق طوال اليوم" /> : `${ex.openTime} - ${ex.closeTime}`}
+                            {ex.isClosed ? <T en="Closed" ar="مغلق" /> : `${ex.openTime} - ${ex.closeTime}`}
+                            {ex.pricePerHour && <span style={{ color: 'var(--gb-gold)', marginLeft: '12px' }}>• {ex.pricePerHour} SAR/hr</span>}
                             {ex.reason && <span style={{ color: 'var(--gb-text-muted)', marginLeft: '12px' }}>• {ex.reason}</span>}
                           </div>
                         </div>
                       </div>
                       <button 
-                        onClick={() => setExceptions(curr => curr.filter(e => e.exceptionDate !== ex.exceptionDate))}
+                        onClick={() => setExceptions(curr => curr.filter(e => e.startDate !== ex.startDate))}
                         className="gb-button gb-button-outline"
                         style={{ border: 'none', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '10px 16px' }}
                       >
@@ -318,9 +343,15 @@ export default function StudioAvailabilityManager({
             </h4>
             
             <div className="gb-dashboard-stack" style={{ gap: '24px' }}>
-              <div>
-                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Date" ar="التاريخ" /></label>
-                <input type="date" className="gb-input" value={newExceptionDate} onChange={(e) => setNewExceptionDate(e.target.value)} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="From Date" ar="من تاريخ" /></label>
+                  <input type="date" className="gb-input" value={newExceptionStartDate} onChange={(e) => setNewExceptionStartDate(e.target.value)} />
+                </div>
+                <div>
+                  <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="To Date (optional)" ar="إلى تاريخ (اختياري)" /></label>
+                  <input type="date" className="gb-input" value={newExceptionEndDate} onChange={(e) => setNewExceptionEndDate(e.target.value)} />
+                </div>
               </div>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--gb-border)' }}>
@@ -349,13 +380,24 @@ export default function StudioAvailabilityManager({
               )}
 
               <div>
-                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Reason (optional)" ar="السبب (اختياري)" /></label>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Price Override (optional)" ar="تعديل السعر (اختياري)" /></label>
+                <input 
+                  type="number" 
+                  className="gb-input" 
+                  value={newExceptionPrice} 
+                  onChange={(e) => setNewExceptionPrice(e.target.value === "" ? "" : Number(e.target.value))} 
+                  placeholder="SAR/hr" 
+                />
+              </div>
+
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Reason / Label" ar="السبب / التسمية" /></label>
                 <input 
                   type="text" 
                   className="gb-input" 
                   value={newExceptionReason} 
                   onChange={(e) => setNewExceptionReason(e.target.value)} 
-                  placeholder="..." 
+                  placeholder={newExceptionIsClosed ? "e.g. Maintenance" : "e.g. Weekend Special"} 
                 />
               </div>
 

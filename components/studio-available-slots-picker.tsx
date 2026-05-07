@@ -6,6 +6,7 @@ type AvailableSlot = {
   startTime: string;
   endTime: string;
   label: string;
+  pricePerHour?: number;
 };
 
 type StudioAvailableSlotsPickerProps = {
@@ -117,11 +118,20 @@ export default function StudioAvailableSlotsPicker({
                 border: isSelected ? 'none' : '1px solid rgba(255,255,255,0.1)',
                 background: isSelected ? 'var(--gb-blue)' : 'rgba(255,255,255,0.05)',
                 color: '#fff',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '2px'
               }}
               onClick={() => onSlotSelect?.(slot)}
             >
-              {slot.label}
+              <span>{slot.label}</span>
+              {slot.pricePerHour && (
+                <span style={{ fontSize: '0.65rem', opacity: 0.7, fontWeight: 800 }}>
+                  {slot.pricePerHour} SAR
+                </span>
+              )}
             </button>
           );
         })}

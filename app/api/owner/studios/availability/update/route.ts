@@ -10,14 +10,17 @@ type RuleInput = {
   closeTime: string;
   slotMinutes: number;
   bufferMinutes: number;
+  pricePerHour: number;
 };
 
 type ExceptionInput = {
-  exceptionDate: string;
+  startDate: string;
+  endDate: string;
   isClosed: boolean;
   openTime: string;
   closeTime: string;
   reason: string;
+  pricePerHour: number | null;
 };
 
 function readText(row: DbRow | null | undefined, keys: string[]) {
@@ -89,6 +92,7 @@ function normalizeRules(input: unknown): RuleInput[] {
         closeTime: typeof row.closeTime === "string" ? row.closeTime : "",
         slotMinutes: Number(row.slotMinutes || 60),
         bufferMinutes: Number(row.bufferMinutes || 0),
+        pricePerHour: Number(row.pricePerHour || 0),
       };
     })
     .filter((rule) => {
@@ -110,16 +114,18 @@ function normalizeExceptions(input: unknown): ExceptionInput[] {
       const row = item as Partial<ExceptionInput>;
 
       return {
-        exceptionDate:
-          typeof row.exceptionDate === "string" ? row.exceptionDate : "",
+        startDate: typeof row.startDate === "string" ? row.startDate : "",
+        endDate: typeof row.endDate === "string" ? row.endDate : (typeof row.startDate === "string" ? row.startDate : ""),
         isClosed: Boolean(row.isClosed),
         openTime: typeof row.openTime === "string" ? row.openTime : "",
         closeTime: typeof row.closeTime === "string" ? row.closeTime : "",
         reason: typeof row.reason === "string" ? row.reason.trim() : "",
+        pricePerHour: typeof row.pricePerHour === "number" ? row.pricePerHour : null,
       };
     })
     .filter((exception) => {
-      if (!isValidDate(exception.exceptionDate)) return false;
+      if (!isValidDate(exception.startDate)) return false;
+      if (!isValidDate(exception.endDate)) return false;
       if (exception.isClosed) return true;
 
       return (
@@ -183,6 +189,7 @@ export async function POST(request: NextRequest) {
     close_time: rule.isOpen ? rule.closeTime : null,
     slot_minutes: rule.slotMinutes,
     buffer_minutes: rule.bufferMinutes,
+    price_per_hour: rule.pricePerHour,
     updated_at: now,
   }));
 
@@ -214,11 +221,13 @@ export async function POST(request: NextRequest) {
   if (exceptions.length > 0) {
     const exceptionRows = exceptions.map((exception) => ({
       studio_id: studioId,
-      exception_date: exception.exceptionDate,
+      start_date: exception.startDate,
+      end_date: exception.endDate,
       is_closed: exception.isClosed,
       open_time: exception.isClosed ? null : exception.openTime,
       close_time: exception.isClosed ? null : exception.closeTime,
       reason: exception.reason || null,
+      price_per_hour: exception.pricePerHour,
       updated_at: now,
     }));
 

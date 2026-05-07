@@ -214,7 +214,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const hourlyPrice = getStudioHourlyPrice(studio);
+    const hourlyPrice = exception?.price_per_hour 
+      ? Number(exception.price_per_hour)
+      : (availabilityRule?.price_per_hour ? Number(availabilityRule.price_per_hour) : getStudioHourlyPrice(studio));
 
     if (hourlyPrice <= 0) {
       return NextResponse.json(
@@ -259,7 +261,8 @@ export async function POST(request: Request) {
       .from("studio_availability_exceptions")
       .select("*")
       .eq("studio_id", studio.id)
-      .eq("exception_date", bookingDate)
+      .lte("start_date", bookingDate)
+      .gte("end_date", bookingDate)
       .maybeSingle();
 
     if (exception && exception.is_closed) {
