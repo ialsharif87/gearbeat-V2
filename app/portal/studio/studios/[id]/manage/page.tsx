@@ -332,51 +332,51 @@ export default async function ManageStudioPage({
       studioName={studio.name}
     >
       {/* 1. Basic Info */}
-      <div id="basic" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">📝</span>
-          <h2><T en="Basic Information" ar="المعلومات الأساسية" /></h2>
+      <div id="basic" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">📝</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Basic Information" ar="المعلومات الأساسية" /></h2>
         </div>
-        <form action={updateStudioBasicInfo} className="manage-form">
+        <form action={updateStudioBasicInfo} className="space-y-8">
           <input type="hidden" name="studio_id" value={studio.id} />
-          <div className="form-grid">
-            <div className="input-group">
-              <label><T en="Studio Name" ar="اسم الاستوديو" /></label>
-              <input name="name" className="gb-input" defaultValue={studio.name} required placeholder="e.g. Riyadh Sound Lab" />
+          <div className="grid gap-5">
+            <div className="space-y-2">
+              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Studio Name" ar="اسم الاستوديو" /></label>
+              <input name="name" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.name} required placeholder="e.g. Riyadh Sound Lab" />
             </div>
-            <div className="form-row-2">
-              <div className="input-group">
-                <label><T en="City" ar="المدينة" /></label>
-                <input name="city" className="gb-input" defaultValue={studio.city} required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="City" ar="المدينة" /></label>
+                <input name="city" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.city} required />
               </div>
-              <div className="input-group">
-                <label><T en="District" ar="الحي" /></label>
-                <input name="district" className="gb-input" defaultValue={studio.district || ""} placeholder="Al Olaya" />
+              <div className="space-y-2">
+                <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="District" ar="الحي" /></label>
+                <input name="district" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.district || ""} placeholder="Al Olaya" />
               </div>
             </div>
-            <div className="input-group">
-              <label><T en="Full Address" ar="العنوان الكامل" /></label>
-              <input name="address" className="gb-input" defaultValue={studio.address || ""} placeholder="Building 45, King Fahd Road" />
+            <div className="space-y-2">
+              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Full Address" ar="العنوان الكامل" /></label>
+              <input name="address" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.address || ""} placeholder="Building 45, King Fahd Road" />
             </div>
-            <div className="input-group">
-              <label><T en="Description" ar="الوصف" /></label>
-              <textarea name="description" className="gb-input" rows={4} defaultValue={studio.description || ""} placeholder="Describe your studio..." />
+            <div className="space-y-2">
+              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Description" ar="الوصف" /></label>
+              <textarea name="description" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" rows={4} defaultValue={studio.description || ""} placeholder="Describe your studio..." />
             </div>
           </div>
-          <div className="form-actions">
-            <button type="submit" className="save-btn"><T en="Save Basic Info" ar="حفظ المعلومات الأساسية" /></button>
+          <div className="mt-8 flex justify-end">
+            <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Save Basic Info" ar="حفظ المعلومات الأساسية" /></button>
           </div>
         </form>
       </div>
 
       {/* 2. Availability */}
-      <div id="availability" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">📅</span>
-          <h2><T en="Availability & Hours" ar="التوافر وساعات العمل" /></h2>
+      <div id="availability" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">📅</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Availability & Hours" ar="التوافر وساعات العمل" /></h2>
         </div>
-        <div className="availability-preview">
-          <p className="muted-text">
+        <div className="space-y-4">
+          <p className="text-[#666] text-sm">
             <T 
               en="Manage your weekly working hours and booking slots." 
               ar="أدر ساعات عملك الأسبوعية وفترات الحجز المتاحة." 
@@ -384,118 +384,121 @@ export default async function ManageStudioPage({
           </p>
           <div className="rules-summary">
             {availabilityRules && availabilityRules.length > 0 ? (
-              <div className="rules-grid">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3 my-6">
                 {availabilityRules.sort((a:any,b:any)=>a.day_of_week - b.day_of_week).map((rule: any) => (
-                  <div key={rule.id} className="rule-item">
-                    <span className="day">
+                  <div key={rule.id} className="bg-[rgba(255,255,255,0.02)] p-3 rounded-[12px] text-center border border-[var(--gb-border)]">
+                    <span className="block text-[0.75rem] font-extrabold text-[#555]">
                       {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][rule.day_of_week]}
                     </span>
-                    <span className={`status ${rule.is_open ? 'open' : 'closed'}`}>
+                    <span className={`text-[0.85rem] font-bold mt-1 block ${rule.is_open ? 'text-white' : 'text-[#ef4444]'}`}>
                       {rule.is_open ? `${rule.open_time} - ${rule.close_time}` : "Closed"}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="empty-state">
+              <div className="bg-[rgba(255,255,255,0.02)] p-8 rounded-[12px] text-center border border-dashed border-[var(--gb-border)]">
                 <T en="No working hours set yet." ar="لم يتم تحديد ساعات العمل بعد." />
               </div>
             )}
           </div>
-          <Link href={`/portal/studio/availability?studioId=${studio.id}`} className="link-btn">
+          <Link href={`/portal/studio/availability?studioId=${studio.id}`} className="inline-block text-[var(--gb-teal)] no-underline font-bold text-[0.9rem] hover:opacity-80 transition-opacity">
             <T en="Open Full Availability Manager" ar="فتح مدير التوافر الكامل" />
           </Link>
         </div>
       </div>
 
       {/* 3. Pricing */}
-      <div id="pricing" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">💰</span>
-          <h2><T en="Pricing & Rates" ar="الأسعار والتعرفة" /></h2>
+      <div id="pricing" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">💰</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Pricing & Rates" ar="الأسعار والتعرفة" /></h2>
         </div>
-        <form action={updateStudioPricing} className="manage-form">
+        <form action={updateStudioPricing} className="space-y-6">
           <input type="hidden" name="studio_id" value={studio.id} />
-          <div className="input-group">
-            <label><T en="Hourly Rate (SAR)" ar="سعر الساعة (ريال)" /></label>
-            <div className="price-input-wrap">
-              <input name="price_from" type="number" className="gb-input" defaultValue={studio.price_from} required />
-              <span className="suffix">SAR</span>
+          <div className="space-y-2">
+            <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Hourly Rate (SAR)" ar="سعر الساعة (ريال)" /></label>
+            <div className="relative">
+              <input name="price_from" type="number" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.price_from} required />
+              <span className="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-[0.8rem] font-extrabold text-[var(--gb-gold)]">SAR</span>
             </div>
           </div>
-          <div className="form-actions">
-            <button type="submit" className="save-btn"><T en="Save Pricing" ar="حفظ الأسعار" /></button>
+          <div className="flex justify-end">
+            <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Save Pricing" ar="حفظ الأسعار" /></button>
           </div>
         </form>
       </div>
 
       {/* 4. Equipment */}
-      <div id="equipment" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">🎛️</span>
-          <h2><T en="Studio Equipment" ar="معدات الاستوديو" /></h2>
+      <div id="equipment" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">🎛️</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Studio Equipment" ar="معدات الاستوديو" /></h2>
         </div>
-        <div className="equipment-manager">
-          <table className="gb-table">
-            <thead>
-              <tr>
-                <th><T en="Item" ar="القطعة" /></th>
-                <th><T en="Category" ar="الفئة" /></th>
-                <th><T en="Qty" ar="الكمية" /></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {equipment?.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <strong>{item.name}</strong>
-                    <div className="sub">{item.brand} {item.model}</div>
-                  </td>
-                  <td><span className="badge">{item.category}</span></td>
-                  <td>{item.quantity}</td>
-                  <td>
-                    <form action={deleteEquipment}>
-                      <input type="hidden" name="equipment_id" value={item.id} />
-                      <input type="hidden" name="studio_id" value={studio.id} />
-                      <button type="submit" className="delete-btn">×</button>
-                    </form>
-                  </td>
+        <div className="space-y-6">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse mb-6">
+              <thead>
+                <tr>
+                  <th className="text-left rtl:text-right p-3 text-[0.7rem] text-[#555] uppercase"><T en="Item" ar="القطعة" /></th>
+                  <th className="text-left rtl:text-right p-3 text-[0.7rem] text-[#555] uppercase"><T en="Category" ar="الفئة" /></th>
+                  <th className="text-left rtl:text-right p-3 text-[0.7rem] text-[#555] uppercase"><T en="Qty" ar="الكمية" /></th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {equipment?.map((item) => (
+                  <tr key={item.id}>
+                    <td className="p-[16px_12px] border-t border-[var(--gb-border)]">
+                      <strong className="text-white">{item.name}</strong>
+                      <div className="text-[0.75rem] text-[#666]">{item.brand} {item.model}</div>
+                    </td>
+                    <td className="p-[16px_12px] border-t border-[var(--gb-border)]"><span className="bg-[rgba(255,255,255,0.05)] px-3 py-1 rounded-full text-[0.75rem] text-white/60">{item.category}</span></td>
+                    <td className="p-[16px_12px] border-t border-[var(--gb-border)] text-white">{item.quantity}</td>
+                    <td className="p-[16px_12px] border-t border-[var(--gb-border)] text-right rtl:text-left">
+                      <form action={deleteEquipment}>
+                        <input type="hidden" name="equipment_id" value={item.id} />
+                        <input type="hidden" name="studio_id" value={studio.id} />
+                        <button type="submit" className="bg-none border-none text-[#ef4444] text-2xl cursor-pointer hover:opacity-70 transition-opacity">×</button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <form action={addEquipment} className="add-equipment-form">
+          <form action={addEquipment} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3">
             <input type="hidden" name="studio_id" value={studio.id} />
-            <div className="form-row-3">
-              <input name="name" className="gb-input" placeholder="Item Name" required />
-              <input name="brand" className="gb-input" placeholder="Brand" />
-              <select name="category" className="gb-input">
-                <option value="microphone">Microphone</option>
-                <option value="instrument">Instrument</option>
-                <option value="outboard">Outboard</option>
-                <option value="monitoring">Monitoring</option>
-              </select>
-              <button type="submit" className="add-btn">+</button>
-            </div>
+            <input name="name" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" placeholder="Item Name" required />
+            <input name="brand" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" placeholder="Brand" />
+            <select name="category" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]">
+              <option value="microphone">Microphone</option>
+              <option value="instrument">Instrument</option>
+              <option value="outboard">Outboard</option>
+              <option value="monitoring">Monitoring</option>
+            </select>
+            <button type="submit" className="bg-[var(--gb-teal)] text-white border-none w-11 h-11 rounded-[12px] text-[1.2rem] cursor-pointer flex items-center justify-center hover:opacity-90 transition-opacity">+</button>
           </form>
         </div>
       </div>
 
       {/* 5. Services */}
-      <div id="services" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">🧑‍💻</span>
-          <h2><T en="Services & Amenities" ar="الخدمات والمميزات" /></h2>
+      <div id="services" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">🧑‍💻</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Services & Amenities" ar="الخدمات والمميزات" /></h2>
         </div>
-        <div className="features-grid">
+        <div className="space-y-10">
           {featureGroups.map((group) => {
             const availableGroup = groupedAvailableFeatures[group.key] || [];
             return (
-              <div key={group.key} className="feature-group">
-                <h3><span className="group-icon">{group.icon}</span> <T en={group.titleEn} ar={group.titleAr} /></h3>
-                <div className="feature-options">
+              <div key={group.key}>
+                <h3 className="text-[0.9rem] font-extrabold text-[#666] mb-4 flex items-center gap-2">
+                  <span>{group.icon}</span> 
+                  <T en={group.titleEn} ar={group.titleAr} />
+                </h3>
+                <div className="flex flex-wrap gap-2">
                   {availableGroup.map((item) => {
                     const isSelected = selectedFeatureIds.has(item.id);
                     return (
@@ -505,7 +508,11 @@ export default async function ManageStudioPage({
                         <input type="hidden" name="studio_id" value={studio.id} />
                         <button 
                           type="submit" 
-                          className={`feature-pill ${isSelected ? 'selected' : ''}`}
+                          className={`px-4 py-1.5 rounded-full text-[0.85rem] font-bold cursor-pointer transition-all border ${
+                            isSelected 
+                              ? 'border-[var(--gb-teal)] text-[var(--gb-teal)] bg-[rgba(15,160,138,0.05)]' 
+                              : 'bg-[rgba(255,255,255,0.03)] border-[var(--gb-border)] text-[#888] hover:border-white/20'
+                          }`}
                         >
                           <T en={item.name_en} ar={item.name_ar} />
                         </button>
@@ -520,269 +527,77 @@ export default async function ManageStudioPage({
       </div>
 
       {/* 6. Photo Gallery */}
-      <div id="gallery" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">🎥</span>
-          <h2><T en="Photo Gallery" ar="معرض الصور" /></h2>
+      <div id="gallery" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">🎥</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Photo Gallery" ar="معرض الصور" /></h2>
         </div>
-        <div className="gallery-manager">
-          <div className="gallery-grid">
+        <div className="space-y-8">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
             {studioImages?.map((img) => (
-              <div key={img.id} className={`gallery-item ${img.is_cover ? 'cover' : ''}`}>
-                <img src={img.image_url} alt="Studio" />
-                <div className="item-actions">
+              <div key={img.id} className={`aspect-square rounded-[16px] overflow-hidden relative border-2 transition-all group ${img.is_cover ? 'border-[var(--gb-gold)]' : 'border-transparent'}`}>
+                <img src={img.image_url} alt="Studio" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                   {!img.is_cover && (
                     <form action={setCoverImage}>
                       <input type="hidden" name="image_id" value={img.id} />
                       <input type="hidden" name="studio_id" value={studio.id} />
-                      <button type="submit" className="action-btn gold"><T en="Cover" ar="غلاف" /></button>
+                      <button type="submit" className="px-3 py-1.5 rounded-[8px] text-[0.7rem] font-extrabold cursor-pointer border-none transition-all bg-[var(--gb-gold)] text-black hover:scale-105"><T en="Cover" ar="غلاف" /></button>
                     </form>
                   )}
                   <form action={deleteStudioImage}>
                     <input type="hidden" name="image_id" value={img.id} />
                     <input type="hidden" name="studio_id" value={studio.id} />
                     <input type="hidden" name="image_url" value={img.image_url} />
-                    <button type="submit" className="action-btn red">×</button>
+                    <button type="submit" className="px-3 py-1.5 rounded-[8px] text-[0.7rem] font-extrabold cursor-pointer border-none transition-all bg-[#ef4444] text-white hover:scale-105">×</button>
                   </form>
                 </div>
               </div>
             ))}
           </div>
-          <form action={uploadStudioImages} className="upload-form">
+          <form action={uploadStudioImages} className="space-y-6">
             <input type="hidden" name="studio_id" value={studio.id} />
-            <div className="upload-box">
-              <input type="file" name="images" multiple accept="image/*" id="file-upload" />
-              <label htmlFor="file-upload">
+            <div className="border-2 border-dashed border-[var(--gb-border)] rounded-[16px] p-10 text-center cursor-pointer hover:border-[var(--gb-gold)] transition-colors group">
+              <input type="file" name="images" multiple accept="image/*" id="file-upload" className="hidden" />
+              <label htmlFor="file-upload" className="cursor-pointer text-[#888] font-bold group-hover:text-[var(--gb-gold)] transition-colors">
                 <T en="Click to upload images (Max 10)" ar="اضغط لرفع الصور (بحد أقصى 10)" />
               </label>
             </div>
-            <button type="submit" className="save-btn"><T en="Upload Photos" ar="رفع الصور" /></button>
+            <div className="flex justify-end">
+              <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Upload Photos" ar="رفع الصور" /></button>
+            </div>
           </form>
         </div>
       </div>
 
       {/* 7. External Reviews */}
-      <div id="reviews" className="manage-section-card">
-        <div className="section-header">
-          <span className="icon">⭐</span>
-          <h2><T en="External Reviews" ar="التقييمات الخارجية" /></h2>
+      <div id="reviews" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="text-2xl">⭐</span>
+          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="External Reviews" ar="التقييمات الخارجية" /></h2>
         </div>
-        <form action={updateExternalReviewLinks} className="manage-form">
+        <form action={updateExternalReviewLinks} className="space-y-8">
           <input type="hidden" name="studio_id" value={studio.id} />
           <input type="hidden" name="studio_slug" value={studio.slug} />
-          <div className="form-grid">
-            <div className="input-group">
-              <label><T en="Google Maps URL" ar="رابط خرائط جوجل" /></label>
-              <input name="google_maps_url" className="gb-input" defaultValue={studio.google_maps_url || ""} />
+          <div className="grid gap-5">
+            <div className="space-y-2">
+              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Google Maps URL" ar="رابط خرائط جوجل" /></label>
+              <input name="google_maps_url" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.google_maps_url || ""} />
             </div>
-            <div className="input-group">
-              <label><T en="TripAdvisor URL" ar="رابط تريب أدفايزر" /></label>
-              <input name="tripadvisor_url" className="gb-input" defaultValue={studio.tripadvisor_url || ""} />
+            <div className="space-y-2">
+              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="TripAdvisor URL" ar="رابط تريب أدفايزر" /></label>
+              <input name="tripadvisor_url" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.tripadvisor_url || ""} />
             </div>
-            <div className="input-group">
-              <label><T en="Google Place ID" ar="معرف المكان من جوجل" /></label>
-              <input name="google_place_id" className="gb-input" defaultValue={studio.google_place_id || ""} />
+            <div className="space-y-2">
+              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Google Place ID" ar="معرف المكان من جوجل" /></label>
+              <input name="google_place_id" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.google_place_id || ""} />
             </div>
           </div>
-          <div className="form-actions">
-            <button type="submit" className="save-btn"><T en="Save Links" ar="حفظ الروابط" /></button>
+          <div className="flex justify-end">
+            <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Save Links" ar="حفظ الروابط" /></button>
           </div>
         </form>
       </div>
-
-      <style jsx global>{`
-        .manage-section-card {
-          background: var(--gb-card-bg);
-          border: 1px solid var(--gb-border);
-          border-radius: 24px;
-          padding: 32px;
-          transition: transform 0.3s;
-        }
-
-        .section-header {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 32px;
-        }
-
-        .section-header .icon { font-size: 1.5rem; }
-        .section-header h2 { font-size: 1.25rem; font-weight: 800; margin: 0; }
-
-        .manage-form .form-grid { display: grid; gap: 20px; }
-        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
-        .input-group label {
-          display: block;
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: #666;
-          margin-bottom: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .gb-input {
-          width: 100%;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid var(--gb-border);
-          border-radius: 12px;
-          padding: 12px 16px;
-          color: white;
-          font-size: 0.95rem;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-
-        .gb-input:focus { border-color: var(--gb-gold); }
-
-        .form-actions { margin-top: 32px; display: flex; justify-content: flex-end; }
-
-        .save-btn {
-          background: var(--gb-gold);
-          color: var(--gb-navy);
-          border: none;
-          padding: 12px 24px;
-          border-radius: 12px;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .save-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3); }
-
-        .availability-preview .rules-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 12px;
-          margin: 24px 0;
-        }
-
-        .rule-item {
-          background: rgba(255, 255, 255, 0.02);
-          padding: 12px;
-          border-radius: 12px;
-          text-align: center;
-        }
-
-        .rule-item .day { display: block; font-size: 0.75rem; font-weight: 800; color: #555; }
-        .rule-item .status { font-size: 0.85rem; font-weight: 700; margin-top: 4px; display: block; }
-        .rule-item .status.closed { color: #ef4444; }
-
-        .link-btn {
-          display: inline-block;
-          color: var(--gb-teal);
-          text-decoration: none;
-          font-weight: 700;
-          font-size: 0.9rem;
-        }
-
-        .price-input-wrap { position: relative; }
-        .price-input-wrap .suffix {
-          position: absolute;
-          right: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 0.8rem;
-          font-weight: 800;
-          color: var(--gb-gold);
-        }
-
-        .gb-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-        .gb-table th { text-align: left; padding: 12px; font-size: 0.7rem; color: #555; text-transform: uppercase; }
-        .gb-table td { padding: 16px 12px; border-top: 1px solid var(--gb-border); }
-        .gb-table .sub { font-size: 0.75rem; color: #666; }
-
-        .delete-btn { background: none; border: none; color: #ef4444; font-size: 1.5rem; cursor: pointer; }
-
-        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; }
-        .add-btn {
-          background: var(--gb-teal);
-          color: white;
-          border: none;
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          font-size: 1.2rem;
-          cursor: pointer;
-        }
-
-        .feature-group h3 { font-size: 0.9rem; font-weight: 800; color: #666; margin: 32px 0 16px; }
-        .feature-options { display: flex; flex-wrap: wrap; gap: 8px; }
-        .feature-pill {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid var(--gb-border);
-          color: #888;
-          padding: 6px 16px;
-          border-radius: 99px;
-          font-size: 0.85rem;
-          font-weight: 700;
-          cursor: pointer;
-        }
-        .feature-pill.selected { border-color: var(--gb-teal); color: var(--gb-teal); background: rgba(15, 160, 138, 0.05); }
-
-        .gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-          gap: 16px;
-          margin-bottom: 32px;
-        }
-
-        .gallery-item {
-          aspect-ratio: 1;
-          border-radius: 16px;
-          overflow: hidden;
-          position: relative;
-          border: 2px solid transparent;
-        }
-
-        .gallery-item.cover { border-color: var(--gb-gold); }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-
-        .item-actions {
-          position: absolute;
-          inset: 0;
-          background: rgba(0,0,0,0.6);
-          opacity: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: opacity 0.2s;
-        }
-
-        .gallery-item:hover .item-actions { opacity: 1; }
-
-        .action-btn {
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 0.7rem;
-          font-weight: 800;
-          cursor: pointer;
-          border: none;
-        }
-        .action-btn.gold { background: var(--gb-gold); color: black; }
-        .action-btn.red { background: #ef4444; color: white; }
-
-        .upload-box {
-          border: 2px dashed var(--gb-border);
-          border-radius: 16px;
-          padding: 40px;
-          text-align: center;
-          margin-bottom: 24px;
-          cursor: pointer;
-        }
-        .upload-box input { display: none; }
-        .upload-box label { cursor: pointer; color: #888; font-weight: 700; }
-
-        @media (max-width: 640px) {
-          .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
-          .manage-section-card { padding: 20px; }
-        }
-
-        [dir="rtl"] .price-input-wrap .suffix { right: auto; left: 16px; }
-        [dir="rtl"] .gb-table th { text-align: right; }
-      `}</style>
     </StudioManagementLayout>
   );
 }

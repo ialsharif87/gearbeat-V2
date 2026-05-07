@@ -55,23 +55,25 @@ export default function StudioManagementLayout({
   };
 
   return (
-    <div className="manage-layout-root">
+    <div className="min-h-screen bg-[#0B0F16] text-white pb-[100px]">
       {/* Top Header with Progress */}
-      <header className="manage-header">
-        <div className="header-content">
+      <header className="sticky top-0 z-[100] bg-[rgba(11,15,22,0.8)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.08)] py-6">
+        <div className="max-w-[1400px] mx-auto px-5 lg:px-10 flex justify-between items-center gap-10">
           <div className="studio-info">
-            <h1>{studioName}</h1>
-            <p><T en="Studio Management" ar="إدارة الاستوديو" /></p>
+            <h1 className="text-[1.4rem] lg:text-[1.8rem] font-[900] m-0 tracking-[-1px]">{studioName}</h1>
+            <p className="mt-1 mb-0 text-[0.85rem] text-[#666] uppercase tracking-[1px] font-bold">
+              <T en="Studio Management" ar="إدارة الاستوديو" />
+            </p>
           </div>
           
-          <div className="progress-container">
-            <div className="progress-label">
+          <div className="hidden lg:block flex-1 max-w-[400px]">
+            <div className="flex justify-between text-[0.85rem] font-bold mb-2.5">
               <span><T en="Profile Completion" ar="اكتمال الملف" /></span>
-              <span className="percent">{completionPercentage}%</span>
+              <span className="text-[#D4AF37]">{completionPercentage}%</span>
             </div>
-            <div className="progress-track">
+            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
               <div 
-                className="progress-fill" 
+                className="h-full bg-gradient-to-r from-[#D4AF37] to-[#0FA08A] rounded-full transition-[width] duration-[0.6s] ease-[cubic-bezier(0.4,0,0.2,1)]" 
                 style={{ width: `${completionPercentage}%` }}
               ></div>
             </div>
@@ -80,35 +82,43 @@ export default function StudioManagementLayout({
       </header>
 
       {/* Mobile Tabs */}
-      <nav className="mobile-tabs">
-        <div className="tabs-scroll">
+      <nav className="lg:hidden sticky top-[90px] z-[90] bg-[#0B0F16] border-b border-[rgba(255,255,255,0.08)]">
+        <div className="flex overflow-x-auto p-[12px_20px] gap-3 no-scrollbar">
           {sections.map((s) => (
             <button
               key={s.id}
-              className={`tab-btn ${activeSection === s.id ? "active" : ""}`}
+              className={`whitespace-nowrap px-4 py-2 rounded-full text-[0.85rem] font-bold flex items-center gap-2 border transition-all ${
+                activeSection === s.id 
+                  ? "bg-[#D4AF37] text-[#0B0F16] border-[#D4AF37]" 
+                  : "bg-white/5 border-[rgba(255,255,255,0.08)] text-[#888]"
+              }`}
               onClick={() => scrollToSection(s.id)}
             >
-              <span className="icon">{s.icon}</span>
-              <span className="txt"><T en={s.titleEn} ar={s.titleAr} /></span>
+              <span>{s.icon}</span>
+              <span><T en={s.titleEn} ar={s.titleAr} /></span>
             </button>
           ))}
         </div>
       </nav>
 
-      <div className="manage-grid">
+      <div className="max-w-[1400px] mx-auto my-10 px-5 lg:px-10 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-[60px]">
         {/* Desktop Sidebar */}
-        <aside className="desktop-sidebar">
-          <div className="sidebar-sticky">
-            <nav className="nav-list">
+        <aside className="hidden lg:block">
+          <div className="sticky top-[140px]">
+            <nav className="flex flex-col gap-2">
               {sections.map((s) => (
                 <button
                   key={s.id}
-                  className={`nav-item ${activeSection === s.id ? "active" : ""}`}
+                  className={`bg-transparent border-none p-[16px_20px] rounded-[16px] text-start text-[1rem] font-bold cursor-pointer transition-all duration-200 flex items-center gap-4 relative hover:bg-white/5 hover:text-white ${
+                    activeSection === s.id ? "bg-[rgba(212,175,55,0.1)] text-[#D4AF37]" : "text-[#888]"
+                  }`}
                   onClick={() => scrollToSection(s.id)}
                 >
-                  <span className="icon">{s.icon}</span>
+                  <span className="text-xl">{s.icon}</span>
                   <T en={s.titleEn} ar={s.titleAr} />
-                  {activeSection === s.id && <span className="active-dot"></span>}
+                  {activeSection === s.id && (
+                    <span className="absolute right-5 rtl:right-auto rtl:left-5 w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_10px_#D4AF37]"></span>
+                  )}
                 </button>
               ))}
             </nav>
@@ -116,213 +126,10 @@ export default function StudioManagementLayout({
         </aside>
 
         {/* Main Content */}
-        <main className="manage-main">
+        <main className="flex flex-col gap-10">
           {children}
         </main>
       </div>
-
-      <style jsx global>{`
-        :root {
-          --gb-navy: #0B0F16;
-          --gb-gold: #D4AF37;
-          --gb-teal: #0FA08A;
-          --gb-card-bg: rgba(255, 255, 255, 0.03);
-          --gb-border: rgba(255, 255, 255, 0.08);
-        }
-
-        .manage-layout-root {
-          min-height: 100vh;
-          background: var(--gb-navy);
-          color: white;
-          padding: 0 0 100px 0;
-        }
-
-        .manage-header {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          background: rgba(11, 15, 22, 0.8);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid var(--gb-border);
-          padding: 24px 0;
-        }
-
-        .header-content {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 40px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 40px;
-        }
-
-        .studio-info h1 {
-          font-size: 1.8rem;
-          font-weight: 900;
-          margin: 0;
-          letter-spacing: -1px;
-        }
-
-        .studio-info p {
-          margin: 4px 0 0;
-          font-size: 0.85rem;
-          color: #666;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          font-weight: 700;
-        }
-
-        .progress-container {
-          flex: 1;
-          max-width: 400px;
-        }
-
-        .progress-label {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.85rem;
-          font-weight: 700;
-          margin-bottom: 10px;
-        }
-
-        .progress-label .percent {
-          color: var(--gb-gold);
-        }
-
-        .progress-track {
-          height: 8px;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 99px;
-          overflow: hidden;
-        }
-
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, var(--gb-gold), var(--gb-teal));
-          border-radius: 99px;
-          transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .manage-grid {
-          max-width: 1400px;
-          margin: 40px auto;
-          padding: 0 40px;
-          display: grid;
-          grid-template-columns: 280px 1fr;
-          gap: 60px;
-        }
-
-        .sidebar-sticky {
-          position: sticky;
-          top: 140px;
-        }
-
-        .nav-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .nav-item {
-          background: transparent;
-          border: none;
-          color: #888;
-          padding: 16px 20px;
-          border-radius: 16px;
-          text-align: start;
-          font-size: 1rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          position: relative;
-        }
-
-        .nav-item:hover {
-          background: rgba(255, 255, 255, 0.03);
-          color: white;
-        }
-
-        .nav-item.active {
-          background: rgba(212, 175, 55, 0.1);
-          color: var(--gb-gold);
-        }
-
-        .active-dot {
-          position: absolute;
-          right: 20px;
-          width: 6px;
-          height: 6px;
-          background: var(--gb-gold);
-          border-radius: 50%;
-          box-shadow: 0 0 10px var(--gb-gold);
-        }
-
-        .manage-main {
-          display: flex;
-          flex-direction: column;
-          gap: 40px;
-        }
-
-        .mobile-tabs {
-          display: none;
-          position: sticky;
-          top: 110px;
-          z-index: 90;
-          background: var(--gb-navy);
-          border-bottom: 1px solid var(--gb-border);
-        }
-
-        .tabs-scroll {
-          display: flex;
-          overflow-x: auto;
-          padding: 12px 20px;
-          gap: 12px;
-          scrollbar-width: none;
-        }
-
-        .tabs-scroll::-webkit-scrollbar { display: none; }
-
-        .tab-btn {
-          white-space: nowrap;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid var(--gb-border);
-          color: #888;
-          padding: 8px 16px;
-          border-radius: 99px;
-          font-size: 0.85rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .tab-btn.active {
-          background: var(--gb-gold);
-          color: var(--gb-navy);
-          border-color: var(--gb-gold);
-        }
-
-        @media (max-width: 1024px) {
-          .manage-grid {
-            grid-template-columns: 1fr;
-            padding: 0 20px;
-            margin-top: 20px;
-          }
-          .desktop-sidebar { display: none; }
-          .mobile-tabs { display: block; }
-          .header-content { padding: 0 20px; }
-          .studio-info h1 { font-size: 1.4rem; }
-          .progress-container { display: none; }
-        }
-
-        /* RTL Adjustments */
-        [dir="rtl"] .nav-item { text-align: right; }
-        [dir="rtl"] .active-dot { right: auto; left: 20px; }
-      `}</style>
     </div>
   );
 }
