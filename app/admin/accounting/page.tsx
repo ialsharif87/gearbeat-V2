@@ -100,7 +100,10 @@ export default async function AccountingPage() {
                   </td>
                   <td style={tdStyle}>
                     <span style={getEntryTypeStyle(entry.entry_type)}>
-                      {entry.entry_type.replace(/_/g, ' ')}
+                      <T 
+                        en={entry.entry_type === 'platform_commission' ? 'COMMISSION' : entry.entry_type === 'customer_payment' ? 'PAYMENT' : 'PAYABLE'} 
+                        ar={entry.entry_type === 'platform_commission' ? 'عمولة' : entry.entry_type === 'customer_payment' ? 'دفعة' : 'مستحق'} 
+                      />
                     </span>
                   </td>
                   <td style={tdStyle}>
@@ -113,7 +116,10 @@ export default async function AccountingPage() {
                   </td>
                   <td style={tdStyle}>
                     <span style={getStatusStyle(entry.status)}>
-                      {entry.status}
+                      <T 
+                        en={entry.status === 'posted' ? 'POSTED' : entry.status === 'pending' ? 'PENDING' : 'VOID'} 
+                        ar={entry.status === 'posted' ? 'مرحل' : entry.status === 'pending' ? 'معلق' : 'ملغي'} 
+                      />
                     </span>
                   </td>
                 </tr>

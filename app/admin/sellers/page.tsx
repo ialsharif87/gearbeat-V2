@@ -145,7 +145,12 @@ export default async function AdminSellersPage({
                     background: seller.type === 'onboarding' ? 'rgba(234, 179, 8, 0.15)' : (seller.account_status === 'active' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'),
                     color: seller.type === 'onboarding' ? '#eab308' : (seller.account_status === 'active' ? '#22c55e' : '#ef4444')
                   }}>
-                    {seller.type === 'onboarding' ? <T en="ONBOARDING" ar="جاري الربط" /> : seller.account_status?.toUpperCase()}
+                    {seller.type === 'onboarding' ? <T en="ONBOARDING" ar="جاري الربط" /> : (
+                      <T 
+                        en={seller.account_status === 'active' ? 'ACTIVE' : seller.account_status === 'suspended' ? 'SUSPENDED' : 'PENDING'} 
+                        ar={seller.account_status === 'active' ? 'نشط' : seller.account_status === 'suspended' ? 'موقوف' : 'معلق'} 
+                      />
+                    )}
                   </span>
                 </td>
                 <td style={tdStyle}>{new Date(seller.created_at).toLocaleDateString()}</td>
