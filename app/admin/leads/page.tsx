@@ -29,23 +29,25 @@ export default async function AdminLeadsPage({
     .eq("auth_user_id", adminUserAuth.id)
     .maybeSingle();
 
-  // Fetch all pending leads
+  // Fetch all pending leads (Sellers)
   const { data: leads } = await supabaseAdmin
     .from("provider_leads")
     .select("*")
+    .eq("type", "seller")
     .order("created_at", { ascending: false });
 
-  // Fetch studio applications for extra data
+  // Fetch all studio applications
   const { data: studioApps } = await supabaseAdmin
     .from("studio_applications")
-    .select("*");
-
-  const filteredLeads = (leads || []).filter(l => l.type === activeTab);
+    .select("*")
+    .order("created_at", { ascending: false });
 
   const stats = {
-    sellers: (leads || []).filter(l => l.type === 'seller' && l.status !== 'approved').length,
-    studios: (leads || []).filter(l => l.type === 'studio' && l.status !== 'approved').length,
+    sellers: (leads || []).filter(l => l.status !== 'approved').length,
+    studios: (studioApps || []).filter(sa => sa.status !== 'approved').length,
   };
+
+  const tableData = activeTab === 'seller' ? (leads || []) : (studioApps || []);
 
   return (
     <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
@@ -89,43 +91,47 @@ export default async function AdminLeadsPage({
             </tr>
           </thead>
           <tbody>
-            {filteredLeads.map((lead) => {
-              const studioApp = studioApps?.find(sa => sa.email === lead.email);
-              const companyName = studioApp?.company_name_en || lead.full_name;
-              const lastUpdate = studioApp?.updated_at || lead.created_at;
+            {tableData.length > 0 ? tableData.map((item: any) => {
+              const isStudio = activeTab === 'studio';
+              const name = isStudio ? (item.company_name_en || item.full_name) : (item.business_name || item.full_name);
+              const email = item.email;
+              const status = item.status || 'pending';
+              const date = new Date(item.created_at).toLocaleDateString();
+              const updatedDate = item.updated_at ? new Date(item.updated_at).toLocaleDateString() : date;
+              const id = item.id;
+              
+              const detailLink = `/admin/leads/${id}`;
 
               return (
-                <tr key={lead.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
-                  <td style={tdStyle}>
-                    <Link href={`/admin/leads/${lead.id}`} style={{ color: '#cfa86e', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem' }}>
-                      {companyName}
+                <tr key={id} style={{ borderBottom: '1px solid #1a1a1a' }}>
+                  <td style={{ padding: '20px 24px' }}>
+                    <Link href={detailLink} style={{ color: '#cfa86e', fontWeight: 600, textDecoration: 'none' }}>
+                      {name}
                     </Link>
                   </td>
-                  <td style={tdStyle}>{lead.email}</td>
-                  <td style={tdStyle}>
+                  <td style={{ padding: '20px 24px', color: '#666' }}>{email}</td>
+                  <td style={{ padding: '20px 24px' }}>
                     <span style={{ 
-                      padding: '4px 12px', 
-                      borderRadius: 8, 
-                      fontSize: '0.7rem', 
-                      fontWeight: 800, 
-                      background: lead.status === 'approved' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(234, 179, 8, 0.1)',
-                      color: lead.status === 'approved' ? '#22c55e' : '#eab308'
+                      padding: '4px 12px', borderRadius: 99, fontSize: '0.75rem', fontWeight: 800,
+                      background: status === 'approved' ? '#22c55e22' : '#eab30822',
+                      color: status === 'approved' ? '#22c55e' : '#eab308'
                     }}>
-                      {lead.status?.toUpperCase()}
+                      {status.toUpperCase()}
                     </span>
                   </td>
-                  <td style={tdStyle}>{new Date(lead.created_at).toLocaleDateString()}</td>
-                  <td style={tdStyle}>{new Date(lastUpdate).toLocaleDateString()}</td>
+                  <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{date}</td>
+                  <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{updatedDate}</td>
                 </tr>
               );
-            })}
+            }) : (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '60px', color: '#333' }}>
+                  <T en="No applications found." ar="لا توجد طلبات." />
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-        {filteredLeads.length === 0 && (
-          <div style={{ padding: 60, textAlign: 'center', color: '#444' }}>
-            <T en="No applications found." ar="لا توجد طلبات." />
-          </div>
-        )}
       </div>
     </main>
   );

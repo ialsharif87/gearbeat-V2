@@ -28,40 +28,65 @@ export default function LeadDetailPage() {
   async function fetchData() {
     const supabase = createClient();
     
-    // 1. Fetch Lead
+    // 1. Try Fetching from provider_leads first (Sellers)
     const { data: leadData } = await supabase
       .from("provider_leads")
       .select("*")
       .eq("id", id)
       .single();
 
-    if (!leadData) return;
-    setLead(leadData);
-
-    // 2. Fetch Studio App (if studio)
-    if (leadData.type === "studio") {
+    if (leadData) {
+      setLead(leadData);
+      // If it's a studio lead, try to fetch the app data
+      if (leadData.type === "studio") {
+        const { data: appData } = await supabase
+          .from("studio_applications")
+          .select("*")
+          .eq("email", leadData.email)
+          .single();
+        if (appData) {
+          setStudioApp(appData);
+          setContractDraft(appData.contract_draft || getDefaultContract(appData, leadData));
+        }
+      }
+    } else {
+      // 2. Try Fetching directly from studio_applications (New Studio Flow)
       const { data: appData } = await supabase
         .from("studio_applications")
         .select("*")
-        .eq("email", leadData.email)
+        .eq("id", id)
         .single();
       
-      setStudioApp(appData);
-      
-      // Default Contract Draft
-      setContractDraft(appData?.contract_draft || `STUDIO MANAGEMENT AGREEMENT
+      if (appData) {
+        setStudioApp(appData);
+        // Create a mock lead object for UI compatibility
+        setLead({
+          id: appData.id,
+          full_name: appData.full_name,
+          email: appData.email,
+          phone: appData.phone,
+          status: appData.status || 'pending',
+          created_at: appData.created_at,
+          type: 'studio'
+        });
+        setContractDraft(appData.contract_draft || getDefaultContract(appData, appData));
+      }
+    }
 
-Company: ${appData?.company_name_en || leadData.full_name}
-Registration: ${appData?.commercial_registration || "N/A"}
-VAT: ${appData?.vat_number || "N/A"}
+    setLoading(false);
+  }
+
+  function getDefaultContract(app: any, lead: any) {
+    return `STUDIO MANAGEMENT AGREEMENT
+
+Company: ${app?.company_name_en || lead.full_name}
+Registration: ${app?.commercial_registration || "N/A"}
+VAT: ${app?.vat_number || "N/A"}
 
 This agreement is made between GearBeat and the Company to manage studios on the platform.
 Commission Rate: 15%
 Studio Limit: 1
-... [Rest of contract terms]`);
-    }
-
-    setLoading(false);
+... [Rest of contract terms]`;
   }
 
   async function handleApprove() {
