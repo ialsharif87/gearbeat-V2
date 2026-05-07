@@ -18,16 +18,7 @@ export default async function StudioDashboardPage() {
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [
-    profileResult,
-    studioAppResult,
-    bookingsMonthResult,
-    pendingBookingsResult,
-    revenueResult,
-    ratingResult,
-    recentBookingsResult,
-    studiosResult,
-  ] = await Promise.all([
+  const [profileResult, studioAppResult, studiosResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("full_name")
@@ -40,50 +31,10 @@ export default async function StudioDashboardPage() {
       .eq("email", user.email)
       .maybeSingle(),
 
-    // ... rest of queries
-
-    supabase
-      .from("bookings")
-      .select("id, studios!inner(owner_auth_user_id)", { count: "exact", head: true })
-      .eq("studios.owner_auth_user_id", user.id)
-      .gte("created_at", firstDayOfMonth.toISOString()),
-
-    supabase
-      .from("bookings")
-      .select("id, studios!inner(owner_auth_user_id)", { count: "exact", head: true })
-      .eq("studios.owner_auth_user_id", user.id)
-      .eq("status", "pending"),
-
-    supabase
-      .from("bookings")
-      .select("total_amount, studios!inner(owner_auth_user_id)")
-      .eq("studios.owner_auth_user_id", user.id)
-      .eq("payment_status", "paid")
-      .gte("created_at", firstDayOfMonth.toISOString()),
-
-    supabase
-      .from("studio_reviews")
-      .select("rating, studios!inner(owner_auth_user_id)")
-      .eq("studios.owner_auth_user_id", user.id),
-
-    supabase
-      .from("bookings")
-      .select(`
-        id, 
-        created_at, 
-        total_amount, 
-        status, 
-        start_time,
-        profiles:customer_id(full_name),
-        studios(name)
-      `)
-      .eq("studios.owner_auth_user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5),
-
     supabase
       .from("studios")
       .select(`
+        id,
         completion_score,
         certified_studios(
           status,
@@ -100,8 +51,72 @@ export default async function StudioDashboardPage() {
       `)
       .eq("owner_auth_user_id", user.id)
       .order("completion_score", { ascending: false })
-      .limit(1),
   ]);
+
+  const studioApp = studioAppResult.data;
+  const userStudios = (studiosResult.data || []) as any[];
+  const studioIds = userStudios.map(s => s.id);
+  const studioData = userStudios[0];
+
+  // Secondary fetches based on studio IDs
+  let totalBookingsMonth = 0;
+  let pendingBookings = 0;
+  let totalRevenue = 0;
+  let recentBookings: any[] = [];
+  let avgRating = "5.0";
+
+  if (studioIds.length > 0) {
+    const [monthRes, pendingRes, revRes, recentRes, ratingsRes] = await Promise.all([
+      supabase
+        .from("bookings")
+        .select("id", { count: "exact", head: true })
+        .in("studio_id", studioIds)
+        .gte("created_at", firstDayOfMonth.toISOString()),
+      
+      supabase
+        .from("bookings")
+        .select("id", { count: "exact", head: true })
+        .in("studio_id", studioIds)
+        .eq("status", "pending"),
+
+      supabase
+        .from("bookings")
+        .select("total_amount")
+        .in("studio_id", studioIds)
+        .eq("payment_status", "paid")
+        .gte("created_at", firstDayOfMonth.toISOString()),
+
+      supabase
+        .from("bookings")
+        .select(`
+          id, 
+          created_at, 
+          total_amount, 
+          status, 
+          start_time,
+          profiles:customer_id(full_name),
+          studios(name)
+        `)
+        .in("studio_id", studioIds)
+        .order("created_at", { ascending: false })
+        .limit(5),
+
+      supabase
+        .from("studio_reviews")
+        .select("rating")
+        .in("studio_id", studioIds)
+    ]);
+
+    totalBookingsMonth = monthRes.count || 0;
+    pendingBookings = pendingRes.count || 0;
+    totalRevenue = (revRes.data || []).reduce((acc, b) => acc + (b.total_amount || 0), 0);
+    recentBookings = recentRes.data || [];
+    
+    const ratings = ratingsRes.data || [];
+    if (ratings.length > 0) {
+      avgRating = (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1);
+    }
+  }
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -179,21 +194,6 @@ export default async function StudioDashboardPage() {
 
   // Original Dashboard Logic continues...
   const ownerName = profileResult.data?.full_name || user.email?.split("@")[0] || "User";
-  const totalBookingsMonth = bookingsMonthResult.count || 0;
-  const pendingBookings = pendingBookingsResult.count || 0;
-  
-  const totalRevenue = (revenueResult.data || []).reduce(
-    (acc, b) => acc + (b.total_amount || 0), 
-    0
-  );
-
-  const ratings = ratingResult.data || [];
-  const avgRating = ratings.length > 0 
-    ? (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1)
-    : "5.0";
-
-  const recentBookings = recentBookingsResult.data || [];
-  const studioData = studiosResult.data?.[0] as any;
   const studioScore = studioData?.completion_score || 0;
   const cert = studioData?.certified_studios?.[0];
   const tier = cert?.studio_tiers;
