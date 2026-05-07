@@ -91,47 +91,45 @@ export default async function AdminLeadsPage({
             </tr>
           </thead>
           <tbody>
-              const tableData = activeTab === 'seller' ? (leads || []) : (studioApps || []);
+            {tableData.length > 0 ? tableData.map((item: any) => {
+              const isStudio = activeTab === 'studio';
+              const name = isStudio ? (item.company_name_en || item.full_name) : (item.business_name || item.full_name);
+              const email = item.email;
+              const status = item.status || 'pending';
+              const date = new Date(item.created_at).toLocaleDateString();
+              const updatedDate = item.updated_at ? new Date(item.updated_at).toLocaleDateString() : date;
+              const id = item.id;
+              
+              const isWaitingFinal = isStudio && item.contract_url && !item.final_approved_at;
+              const detailLink = `/admin/leads/${id}`;
 
-              return tableData.length > 0 ? tableData.map((item: any) => {
-                const isStudio = activeTab === 'studio';
-                const name = isStudio ? (item.company_name_en || item.full_name) : (item.business_name || item.full_name);
-                const email = item.email;
-                const status = item.status || 'pending';
-                const date = new Date(item.created_at).toLocaleDateString();
-                const updatedDate = item.updated_at ? new Date(item.updated_at).toLocaleDateString() : date;
-                const id = item.id;
-                
-                const isWaitingFinal = isStudio && item.contract_url && !item.final_approved_at;
-                const detailLink = `/admin/leads/${id}`;
-
-                return (
-                  <tr key={id} style={{ borderBottom: '1px solid #1a1a1a', background: isWaitingFinal ? 'rgba(212, 175, 55, 0.05)' : 'transparent' }}>
-                    <td style={{ padding: '20px 24px' }}>
-                      <Link href={detailLink} style={{ color: '#cfa86e', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {name}
-                        {isWaitingFinal && (
-                          <span style={{ background: '#D4AF37', color: '#000', fontSize: '0.6rem', padding: '2px 8px', borderRadius: 4, fontWeight: 900 }}>
-                            SIGNED
-                          </span>
-                        )}
-                      </Link>
-                    </td>
-                    <td style={{ padding: '20px 24px', color: '#666' }}>{email}</td>
-                    <td style={{ padding: '20px 24px' }}>
-                      <span style={{ 
-                        padding: '4px 12px', borderRadius: 99, fontSize: '0.75rem', fontWeight: 800,
-                        background: status === 'approved' ? '#22c55e22' : '#eab30822',
-                        color: status === 'approved' ? '#22c55e' : '#eab308'
-                      }}>
-                        {status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{date}</td>
-                    <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{updatedDate}</td>
-                  </tr>
-                );
-              }) : (
+              return (
+                <tr key={id} style={{ borderBottom: '1px solid #1a1a1a', background: isWaitingFinal ? 'rgba(212, 175, 55, 0.05)' : 'transparent' }}>
+                  <td style={{ padding: '20px 24px' }}>
+                    <Link href={detailLink} style={{ color: '#cfa86e', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+                      {name}
+                      {isWaitingFinal && (
+                        <span style={{ background: '#D4AF37', color: '#000', fontSize: '0.6rem', padding: '2px 8px', borderRadius: 4, fontWeight: 900 }}>
+                          SIGNED
+                        </span>
+                      )}
+                    </Link>
+                  </td>
+                  <td style={{ padding: '20px 24px', color: '#666' }}>{email}</td>
+                  <td style={{ padding: '20px 24px' }}>
+                    <span style={{ 
+                      padding: '4px 12px', borderRadius: 99, fontSize: '0.75rem', fontWeight: 800,
+                      background: status === 'approved' ? '#22c55e22' : '#eab30822',
+                      color: status === 'approved' ? '#22c55e' : '#eab308'
+                    }}>
+                      {status.toUpperCase()}
+                    </span>
+                  </td>
+                  <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{date}</td>
+                  <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{updatedDate}</td>
+                </tr>
+              );
+            }) : (
               <tr>
                 <td colSpan={5} style={{ textAlign: 'center', padding: '60px', color: '#333' }}>
                   <T en="No applications found." ar="لا توجد طلبات." />
