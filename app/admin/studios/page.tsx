@@ -78,7 +78,8 @@ export default async function AdminStudiosPage({
     photoCount: 0,
     booking_enabled: false,
     price_from: 0,
-    owner_auth_user_id: null
+    owner_auth_user_id: null,
+    completion_score: 0
   }));
 
   const pendingStudios = (approvedLeads || [])
