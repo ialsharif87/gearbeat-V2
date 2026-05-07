@@ -26,54 +26,57 @@ export default function LeadDetailPage() {
   }, [id]);
 
   async function fetchData() {
-    const supabase = createClient();
-    
-    // 1. Try Fetching from provider_leads first (Sellers)
-    const { data: leadData } = await supabase
-      .from("provider_leads")
-      .select("*")
-      .eq("id", id)
-      .single();
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      
+      // 1. Try Fetching Lead (using maybeSingle to avoid crash)
+      const { data: leadData } = await supabase
+        .from("provider_leads")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
-    if (leadData) {
-      setLead(leadData);
-      // If it's a studio lead, try to fetch the app data
-      if (leadData.type === "studio") {
+      if (leadData) {
+        setLead(leadData);
+        if (leadData.type === "studio") {
+          const { data: appData } = await supabase
+            .from("studio_applications")
+            .select("*")
+            .eq("email", leadData.email)
+            .maybeSingle();
+          if (appData) {
+            setStudioApp(appData);
+            setContractDraft(appData.contract_draft || getDefaultContract(appData, leadData));
+          }
+        }
+      } else {
+        // 2. Try Fetching Studio App directly
         const { data: appData } = await supabase
           .from("studio_applications")
           .select("*")
-          .eq("email", leadData.email)
-          .single();
+          .eq("id", id)
+          .maybeSingle();
+        
         if (appData) {
           setStudioApp(appData);
-          setContractDraft(appData.contract_draft || getDefaultContract(appData, leadData));
+          setLead({
+            id: appData.id,
+            full_name: appData.full_name,
+            email: appData.email,
+            phone: appData.phone,
+            status: appData.status || 'pending',
+            created_at: appData.created_at,
+            type: 'studio'
+          });
+          setContractDraft(appData.contract_draft || getDefaultContract(appData, appData));
         }
       }
-    } else {
-      // 2. Try Fetching directly from studio_applications (New Studio Flow)
-      const { data: appData } = await supabase
-        .from("studio_applications")
-        .select("*")
-        .eq("id", id)
-        .single();
-      
-      if (appData) {
-        setStudioApp(appData);
-        // Create a mock lead object for UI compatibility
-        setLead({
-          id: appData.id,
-          full_name: appData.full_name,
-          email: appData.email,
-          phone: appData.phone,
-          status: appData.status || 'pending',
-          created_at: appData.created_at,
-          type: 'studio'
-        });
-        setContractDraft(appData.contract_draft || getDefaultContract(appData, appData));
-      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   function getDefaultContract(app: any, lead: any) {
@@ -161,16 +164,16 @@ Studio Limit: 1
         <Link href="/admin/leads" style={{ color: '#888', textDecoration: 'none' }}>← Back to List</Link>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 16 }}>
           <div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0 }}>{studioApp?.company_name_en || lead.full_name}</h1>
-            <p style={{ color: '#666', marginTop: 8 }}>{lead.email} • {lead.phone}</p>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0 }}>{studioApp?.company_name_en || lead?.full_name}</h1>
+            <p style={{ color: '#666', marginTop: 8 }}>{lead?.email} • {lead?.phone}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
              <div style={{ fontSize: '0.8rem', color: '#444' }}>Status</div>
              <span style={{ 
                padding: '4px 16px', borderRadius: 99, fontWeight: 900, fontSize: '0.9rem',
-               background: lead.status === 'approved' ? '#22c55e' : '#eab308', color: '#000'
+               background: lead?.status === 'approved' ? '#22c55e' : '#eab308', color: '#000'
              }}>
-               {lead.status.toUpperCase()}
+               {lead?.status?.toUpperCase()}
              </span>
           </div>
         </div>
