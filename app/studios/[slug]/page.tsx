@@ -9,6 +9,7 @@ import StudioPhotoGallery from "@/components/studio-photo-gallery";
 import GoogleMapsLink from "@/components/google-maps-link";
 import StudioPhotoRequirements from "@/components/studio-photo-requirements";
 import StudioOwnerTrustCard from "@/components/studio-owner-trust-card";
+import { publishStudioOverride } from "@/app/admin/admin-actions";
 
 function formatSyncDate(value: string | null | undefined) {
   if (!value) return null;
@@ -113,7 +114,18 @@ export default async function StudioDetailsPage({
   const supabase = await createClient();
   const supabaseAdmin = createAdminClient();
 
-  const { data: studio, error } = await supabase
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  let isSuperAdmin = false;
+  if (authUser) {
+    const { data: adminUser } = await supabaseAdmin
+      .from("admin_users")
+      .select("admin_role")
+      .eq("auth_user_id", authUser.id)
+      .maybeSingle();
+    isSuperAdmin = adminUser?.admin_role === "super_admin";
+  }
+
+  let baseQuery = supabase
     .from("studios")
     .select(`
       id,
@@ -159,12 +171,17 @@ export default async function StudioDetailsPage({
         )
       )
     `)
-    .eq("slug", slug)
-    .eq("status", "approved")
-    .eq("verified", true)
-    .eq("booking_enabled", true)
-    .eq("owner_compliance_status", "approved")
-    .single();
+    .eq("slug", slug);
+
+  if (!isSuperAdmin) {
+    baseQuery = baseQuery
+      .eq("status", "approved")
+      .eq("verified", true)
+      .eq("booking_enabled", true)
+      .eq("owner_compliance_status", "approved");
+  }
+
+  const { data: studio, error } = await baseQuery.single();
 
   if (error || !studio) {
     notFound();
@@ -252,6 +269,61 @@ export default async function StudioDetailsPage({
 
   return (
     <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
+      {isSuperAdmin && (
+        <div style={{ 
+          background: 'rgba(212, 175, 55, 0.1)', 
+          border: '1px solid #D4AF37', 
+          padding: '16px 24px', 
+          borderRadius: 12, 
+          marginTop: 24,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div>
+            <div style={{ color: '#D4AF37', fontWeight: 900, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              🛡️ SUPER ADMIN OVERRIDE
+            </div>
+            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#888' }}>
+              You are viewing this profile because of your super admin permissions. This profile might be incomplete or hidden from the public.
+            </p>
+          </div>
+          {(studio.status !== 'approved' || !studio.booking_enabled) && (
+            <form action={async () => {
+              "use server";
+              await publishStudioOverride(studio.id);
+            }}>
+              <button style={{ 
+                background: '#D4AF37', 
+                color: '#000', 
+                border: 'none', 
+                padding: '10px 20px', 
+                borderRadius: 8, 
+                fontWeight: 900, 
+                cursor: 'pointer' 
+              }}>
+                ✅ Admin Override: Publish
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {studio.status === 'approved' && studio.completion_score < 70 && (
+        <div style={{ 
+          background: 'rgba(239, 68, 68, 0.1)', 
+          border: '1px solid #ef4444', 
+          padding: '8px 16px', 
+          borderRadius: 8, 
+          marginTop: 12,
+          fontSize: '0.8rem',
+          color: '#ef4444',
+          fontWeight: 600
+        }}>
+          ⚠️ PUBLISHED VIA OVERRIDE: This studio is live but has a low completion score ({studio.completion_score}%).
+        </div>
+      )}
+
       <section style={{ marginTop: 24 }}>
         <div
           style={{

@@ -34,7 +34,8 @@ export default async function AdminStudiosPage({
     .select(`
       id, name, city, status, verified, booking_enabled, price_from, created_at, owner_auth_user_id, completion_score,
       profiles!studios_owner_auth_user_id_fkey (full_name, email),
-      bookings (id, total_amount)
+      bookings (id, total_amount),
+      studio_images(count)
     `)
     .order("created_at", { ascending: false });
 
@@ -58,7 +59,8 @@ export default async function AdminStudiosPage({
     const ownerEmail = profile?.email || "—";
     const bookingsCount = s.bookings?.length || 0;
     const totalRevenue = (s.bookings as any[])?.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0) || 0;
-    return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue, type: 'active' };
+    const photoCount = (s.studio_images as any)?.[0]?.count || 0;
+    return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue, photoCount, type: 'active' };
   });
 
   const partnerStudios = (finalApprovedApps || []).filter(app => !actualStudios.some(s => s.ownerEmail === app.email)).map(app => ({
@@ -141,6 +143,7 @@ export default async function AdminStudiosPage({
               <th style={thStyle}><T en="Bookings" ar="الحجوزات" /></th>
               <th style={thStyle}><T en="Revenue" ar="الإيراد" /></th>
               <th style={thStyle}><T en="Status" ar="الحالة" /></th>
+              <th style={thStyle}><T en="Photos" ar="الصور" /></th>
               <th style={thStyle}><T en="Completion" ar="اكتمال الملف" /></th>
               <th style={thStyle}><T en="Actions" ar="إجراءات" /></th>
             </tr>
@@ -161,15 +164,18 @@ export default async function AdminStudiosPage({
                 <td style={tdStyle}>
                   {studio.type === 'onboarding' ? (
                     <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: 'rgba(234, 179, 8, 0.15)', color: '#eab308' }}>
-                      ONBOARDING
+                      <T en="ONBOARDING" ar="قيد الانضمام" />
                     </span>
                   ) : studio.type === 'partner' ? (
                     <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
-                      PARTNER
+                      <T en="PARTNER" ar="شريك" />
                     </span>
                   ) : (
                     <StatusBadge status={studio.status} verified={studio.verified} />
                   )}
+                </td>
+                <td style={tdStyle}>
+                  <span style={{ fontWeight: 600 }}>{studio.photoCount}</span>
                 </td>
                 <td style={tdStyle}>
                   <div style={{ width: 100, height: 4, background: '#222', borderRadius: 2 }}>
@@ -229,15 +235,16 @@ function StatCard({ labelEn, labelAr, value, color }: { labelEn: string, labelAr
 function StatusBadge({ status, verified }: { status: string, verified: boolean }) {
   let color = '#888';
   let bg = 'rgba(255,255,255,0.05)';
-  let text = status;
+  let textEn = status;
+  let textAr = status;
 
-  if (status === 'approved' && verified) { color = '#22c55e'; bg = 'rgba(34, 197, 94, 0.15)'; text = "Approved"; }
-  else if (status === 'pending') { color = '#eab308'; bg = 'rgba(234, 179, 8, 0.15)'; text = "Pending"; }
-  else if (status === 'suspended') { color = '#ef4444'; bg = 'rgba(239, 68, 68, 0.15)'; text = "Suspended"; }
+  if (status === 'approved' && verified) { color = '#22c55e'; bg = 'rgba(34, 197, 94, 0.15)'; textEn = "Approved"; textAr = "معتمد"; }
+  else if (status === 'pending') { color = '#eab308'; bg = 'rgba(234, 179, 8, 0.15)'; textEn = "Pending"; textAr = "معلق"; }
+  else if (status === 'suspended') { color = '#ef4444'; bg = 'rgba(239, 68, 68, 0.15)'; textEn = "Suspended"; textAr = "موقوف"; }
 
   return (
     <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: bg, color: color }}>
-      {text?.toUpperCase()}
+      <T en={textEn.toUpperCase()} ar={textAr} />
     </span>
   );
 }

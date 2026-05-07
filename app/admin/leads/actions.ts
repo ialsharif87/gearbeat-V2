@@ -201,40 +201,71 @@ export async function giveFinalApproval(appId: string) {
   const supabase = await createClient();
   const { data: { user: adminUser } } = await supabase.auth.getUser();
 
-  // 1. Get Application to find linked user
+  // 1. Get Application details
   const { data: app } = await supabaseAdmin
     .from("studio_applications")
-    .select("linked_user_id, email")
+    .select("*")
     .eq("id", appId)
     .single();
 
-  // 2. Mark Final Approved
+  if (!app) throw new Error("Application not found");
+
+  // 2. Mark Final Approved and Activated
   const { error } = await supabaseAdmin
     .from("studio_applications")
     .update({
       final_approved_at: new Date().toISOString(),
       final_approved_by: adminUser?.id,
-      status: 'approved'
+      status: 'activated' // Changed from 'approved' to hide it from Join Requests
     })
     .eq("id", appId);
 
   if (error) throw error;
 
-  // 3. Activate User Account
-  if (app?.linked_user_id) {
+  // 3. Create Studio Record if it doesn't exist
+  if (app.linked_user_id) {
+    // Check if studio already exists for this owner
+    const { data: existingStudio } = await supabaseAdmin
+      .from("studios")
+      .select("id")
+      .eq("owner_auth_user_id", app.linked_user_id)
+      .maybeSingle();
+
+    if (!existingStudio) {
+      const { error: studioError } = await supabaseAdmin
+        .from("studios")
+        .insert({
+          owner_auth_user_id: app.linked_user_id,
+          name: app.company_name_en || app.full_name,
+          name_en: app.company_name_en || app.full_name,
+          name_ar: app.company_name_ar || app.full_name,
+          city: app.country || '—',
+          city_name: app.country || '—',
+          status: 'approved',
+          verified: true,
+          booking_enabled: true,
+          completion_score: 10,
+        });
+      
+      if (studioError) console.error("Error creating studio record:", studioError);
+    }
+  }
+
+  // 4. Activate User Account
+  if (app.linked_user_id) {
     await supabaseAdmin
       .from("profiles")
       .update({ account_status: 'active' })
       .or(`auth_user_id.eq.${app.linked_user_id},id.eq.${app.linked_user_id}`);
-  } else if (app?.email) {
+  } else if (app.email) {
     await supabaseAdmin
       .from("profiles")
       .update({ account_status: 'active' })
       .eq("email", app.email);
   }
 
-  // 4. Update Lead Status
-  if (app?.email) {
+  // 5. Update Lead Status
+  if (app.email) {
     await supabaseAdmin
       .from("provider_leads")
       .update({ status: 'approved' })
@@ -242,6 +273,7 @@ export async function giveFinalApproval(appId: string) {
   }
 
   revalidatePath("/admin/leads");
+  revalidatePath("/admin/studios");
   revalidatePath("/portal/studio");
   revalidatePath("/portal/pending");
   return { success: true };

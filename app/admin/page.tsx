@@ -83,7 +83,12 @@ export default async function AdminDashboard() {
               <div key={activity.id} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--gb-border)' }}>
                 <div style={{ background: activity.type === 'seller' ? 'var(--gb-gold)' : 'var(--gb-teal)', width: 4, borderRadius: 2 }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{activity.name} applied as {activity.type}</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                    <T 
+                      en={`${activity.full_name || activity.name} applied as ${activity.type}`} 
+                      ar={`قام ${activity.full_name || activity.name} بالتقديم كـ ${activity.type === 'seller' ? 'تاجر' : 'استوديو'}`} 
+                    />
+                  </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--gb-text-muted)' }}>{new Date(activity.created_at).toLocaleTimeString()}</div>
                 </div>
               </div>

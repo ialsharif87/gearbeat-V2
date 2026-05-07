@@ -40,6 +40,7 @@ export default async function AdminLeadsPage({
   const { data: studioApps } = await supabaseAdmin
     .from("studio_applications")
     .select("*")
+    .neq("status", "activated")
     .order("created_at", { ascending: false });
 
   const stats = {
@@ -110,7 +111,7 @@ export default async function AdminLeadsPage({
                       {name}
                       {isWaitingFinal && (
                         <span style={{ background: '#D4AF37', color: '#000', fontSize: '0.6rem', padding: '2px 8px', borderRadius: 4, fontWeight: 900 }}>
-                          SIGNED
+                          <T en="SIGNED" ar="موقع" />
                         </span>
                       )}
                     </Link>
@@ -122,7 +123,10 @@ export default async function AdminLeadsPage({
                       background: status === 'approved' ? '#22c55e22' : '#eab30822',
                       color: status === 'approved' ? '#22c55e' : '#eab308'
                     }}>
-                      {status.toUpperCase()}
+                      <T 
+                        en={status === 'approved' ? 'APPROVED' : status === 'rejected' ? 'REJECTED' : 'PENDING'} 
+                        ar={status === 'approved' ? 'مقبول' : status === 'rejected' ? 'مرفوض' : 'معلق'} 
+                      />
                     </span>
                   </td>
                   <td style={{ padding: '20px 24px', color: '#444', fontSize: '0.9rem' }}>{date}</td>

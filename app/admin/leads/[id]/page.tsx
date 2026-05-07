@@ -152,41 +152,41 @@ Studio Limit: 1
         {/* Left Column: Data */}
         <div style={{ display: 'grid', gap: 32 }}>
           <section className="admin-section">
-            <h3 style={sectionTitleStyle}>General Information</h3>
+            <h3 style={sectionTitleStyle}><T en="General Information" ar="معلومات عامة" /></h3>
             <div style={dataGridStyle}>
-              <DataItem label="Full Name" value={lead.full_name} />
-              <DataItem label="Applied At" value={new Date(lead.created_at).toLocaleString()} />
-              <DataItem label="City / Country" value={`${lead.city || '—'} / ${studioApp?.country || '—'}`} />
-              <DataItem label="Planned Studios" value={studioApp?.planned_studios_count || 1} />
+              <DataItem label={<T en="Full Name" ar="الاسم الكامل" />} value={lead.full_name} />
+              <DataItem label={<T en="Applied At" ar="تاريخ التقديم" />} value={new Date(lead.created_at).toLocaleString()} />
+              <DataItem label={<T en="City / Country" ar="المدينة / الدولة" />} value={`${lead.city || '—'} / ${studioApp?.country || '—'}`} />
+              <DataItem label={<T en="Planned Studios" ar="الاستوديوهات المخطط لها" />} value={studioApp?.planned_studios_count || 1} />
             </div>
           </section>
 
           {studioApp && (
             <section className="admin-section">
-              <h3 style={sectionTitleStyle}>Business Details</h3>
+              <h3 style={sectionTitleStyle}><T en="Business Details" ar="تفاصيل العمل" /></h3>
               <div style={dataGridStyle}>
-                <DataItem label="Company (AR)" value={studioApp.company_name_ar} />
-                <DataItem label="Company (EN)" value={studioApp.company_name_en} />
-                <DataItem label="CR Number" value={studioApp.commercial_registration} />
-                <DataItem label="VAT Number" value={studioApp.vat_number} />
+                <DataItem label={<T en="Company (AR)" ar="اسم الشركة (عربي)" />} value={studioApp.company_name_ar} />
+                <DataItem label={<T en="Company (EN)" ar="اسم الشركة (إنجليزي)" />} value={studioApp.company_name_en} />
+                <DataItem label={<T en="CR Number" ar="رقم السجل التجاري" />} value={studioApp.commercial_registration} />
+                <DataItem label={<T en="VAT Number" ar="الرقم الضريبي" />} value={studioApp.vat_number} />
               </div>
             </section>
           )}
 
           <section className="admin-section">
-            <h3 style={sectionTitleStyle}>Uploaded Documents</h3>
+            <h3 style={sectionTitleStyle}><T en="Uploaded Documents" ar="المستندات المرفوعة" /></h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <DocCard label="Commercial Reg." url={studioApp?.cr_document_url} />
-              <DocCard label="VAT Certificate" url={studioApp?.vat_certificate_url} />
-              <DocCard label="National Address" url={studioApp?.national_address_url} />
-              <DocCard label="Bank Screenshot" url={studioApp?.bank_document_url} />
+              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={studioApp?.cr_document_url} />
+              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={studioApp?.vat_certificate_url} />
+              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={studioApp?.national_address_url} />
+              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={studioApp?.bank_document_url} />
             </div>
           </section>
 
           <section className="admin-section">
-            <h3 style={sectionTitleStyle}>About the Company</h3>
+            <h3 style={sectionTitleStyle}><T en="About the Company" ar="عن الشركة" /></h3>
             <p style={{ color: '#aaa', lineHeight: 1.6, background: '#111', padding: 20, borderRadius: 12 }}>
-              {studioApp?.about_company || "No description provided."}
+              {studioApp?.about_company || <T en="No description provided." ar="لا يوجد وصف مقدم." />}
             </p>
           </section>
         </div>
@@ -194,9 +194,9 @@ Studio Limit: 1
         {/* Right Column: Contract Draft */}
         <div>
           <div style={{ position: 'sticky', top: 40 }}>
-            <h3 style={sectionTitleStyle}>Contract Draft</h3>
+            <h3 style={sectionTitleStyle}><T en="Contract Draft" ar="مسودة العقد" /></h3>
             <p style={{ color: '#555', fontSize: '0.85rem', marginBottom: 12 }}>
-              Edit the contract before sending it to the client.
+              <T en="Edit the contract before sending it to the client." ar="قم بتعديل العقد قبل إرساله للعميل." />
             </p>
             <textarea 
               style={{ 
@@ -213,26 +213,26 @@ Studio Limit: 1
 
       {/* Action Boxes */}
       <div style={{ marginTop: 60, borderTop: '1px solid #1a1a1a', paddingTop: 60 }}>
-        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 40 }}>Management Actions</h2>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 40 }}><T en="Management Actions" ar="إجراءات الإدارة" /></h2>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
           {/* NEW: Final Activation Box */}
           {studioApp?.contract_url && !studioApp?.final_approved_at && (
             <div style={{ ...boxStyle, border: '1px solid #D4AF37', background: 'rgba(212, 175, 55, 0.08)', gridColumn: '1 / -1' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ color: '#D4AF37', margin: 0, fontSize: '1.2rem' }}>Final Activation Required</h4>
-                <a href={studioApp.contract_url} target="_blank" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}>View Signed Contract</a>
+                <h4 style={{ color: '#D4AF37', margin: 0, fontSize: '1.2rem' }}><T en="Final Activation Required" ar="مطلوب التفعيل النهائي" /></h4>
+                <a href={studioApp.contract_url} target="_blank" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}><T en="View Signed Contract" ar="عرض العقد الموقع" /></a>
               </div>
               <p style={{ fontSize: '0.9rem', color: '#ccc', margin: '8px 0 16px' }}>
-                The client has uploaded the signed contract. Review it and click below to grant full dashboard access and move to the Approved Partners list.
+                <T en="The client has uploaded the signed contract. Review it and click below to grant full dashboard access and move to the Approved Partners list." ar="قام العميل برفع العقد الموقع. يرجى مراجعته والضغط أدناه لمنح الوصول الكامل للوحة التحكم والنقل إلى قائمة الشركاء المعتمدين." />
               </p>
               <button 
                 onClick={async () => {
-                  if(!confirm("Grant final approval and activate this account?")) return;
+                  if(!confirm(lead.language === 'ar' ? "هل أنت متأكد من منح الموافقة النهائية وتفعيل هذا الحساب؟" : "Grant final approval and activate this account?")) return;
                   setActionLoading("final");
                   const res = await giveFinalApproval(studioApp.id);
                   if(res.success) {
-                    alert("Account Activated! The partner now has full access.");
+                    alert(lead.language === 'ar' ? "تم تفعيل الحساب! الشريك لديه الآن وصول كامل." : "Account Activated! The partner now has full access.");
                     fetchData();
                   }
                   setActionLoading(null);
@@ -240,31 +240,35 @@ Studio Limit: 1
                 disabled={!!actionLoading}
                 style={{ ...btnStyle, background: '#D4AF37', color: '#000', width: '100%' }}
               >
-                {actionLoading === 'final' ? 'Activating...' : '✅ Confirm & Activate Account'}
+                {actionLoading === 'final' ? (lead.language === 'ar' ? 'جاري التفعيل...' : 'Activating...') : (
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    ✅ <T en="Confirm & Activate Account" ar="تأكيد وتفعيل الحساب" />
+                  </span>
+                )}
               </button>
             </div>
           )}
 
           {/* Box 1: Approve */}
           <div style={{ ...boxStyle, border: '1px solid #22c55e33', background: '#22c55e05' }}>
-            <h4 style={{ color: '#22c55e', margin: '0 0 12px 0' }}>Approve & Send Contract</h4>
+            <h4 style={{ color: '#22c55e', margin: '0 0 12px 0' }}><T en="Approve & Send Contract" ar="موافقة وإرسال العقد" /></h4>
             <p style={{ fontSize: '0.85rem', color: '#666', flex: 1 }}>
-              Creates credentials, sends welcome email with temp password, and attaches the modified contract draft.
+              <T en="Creates credentials, sends welcome email with temp password, and attaches the modified contract draft." ar="ينشئ بيانات الاعتماد، ويرسل بريد الترحيب مع كلمة مرور مؤقتة، ويرفق مسودة العقد المعدلة." />
             </p>
             <button 
               onClick={handleApprove}
               disabled={!!actionLoading}
               style={{ ...btnStyle, background: '#22c55e', color: '#000' }}
             >
-              {actionLoading === 'approve' ? 'Sending...' : 'Approve & Send'}
+              {actionLoading === 'approve' ? (lead.language === 'ar' ? 'جاري الإرسال...' : 'Sending...') : <T en="Approve & Send" ar="موافقة وإرسال" />}
             </button>
           </div>
 
           {/* Box 2: Update Request */}
           <div style={{ ...boxStyle, border: '1px solid #eab30833', background: '#eab30805' }}>
-            <h4 style={{ color: '#eab308', margin: '0 0 12px 0' }}>Request Modification</h4>
+            <h4 style={{ color: '#eab308', margin: '0 0 12px 0' }}><T en="Request Modification" ar="طلب تعديل" /></h4>
             <textarea 
-              placeholder="e.g. CR file is blurry, please re-upload..."
+              placeholder={lead.language === 'ar' ? "مثال: ملف السجل التجاري غير واضح، يرجى إعادة الرفع..." : "e.g. CR file is blurry, please re-upload..."}
               style={boxInputStyle}
               value={updateMessage}
               onChange={(e) => setUpdateMessage(e.target.value)}
@@ -274,15 +278,15 @@ Studio Limit: 1
               disabled={!!actionLoading}
               style={{ ...btnStyle, background: '#eab308', color: '#000' }}
             >
-              Request Update
+              {actionLoading === 'update' ? (lead.language === 'ar' ? 'جاري الطلب...' : 'Requesting...') : <T en="Request Update" ar="طلب تعديل" />}
             </button>
           </div>
 
           {/* Box 3: Reject */}
           <div style={{ ...boxStyle, border: '1px solid #ef444433', background: '#ef444405' }}>
-            <h4 style={{ color: '#ef4444', margin: '0 0 12px 0' }}>Reject Application</h4>
+            <h4 style={{ color: '#ef4444', margin: '0 0 12px 0' }}><T en="Reject Application" ar="رفض الطلب" /></h4>
             <textarea 
-              placeholder="Reason for rejection..."
+              placeholder={lead.language === 'ar' ? "سبب الرفض..." : "Reason for rejection..."}
               style={boxInputStyle}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
@@ -292,22 +296,22 @@ Studio Limit: 1
               disabled={!!actionLoading}
               style={{ ...btnStyle, background: '#ef4444', color: '#fff' }}
             >
-              Reject & Notify
+              {actionLoading === 'reject' ? (lead.language === 'ar' ? 'جاري الرفض...' : 'Rejecting...') : <T en="Reject & Notify" ar="رفض وإبلاغ" />}
             </button>
           </div>
 
           {/* Box 4: Delete */}
           <div style={{ ...boxStyle, border: '1px solid #333', background: 'rgba(255,255,255,0.02)' }}>
-            <h4 style={{ color: '#888', margin: '0 0 12px 0' }}>Delete Application</h4>
+            <h4 style={{ color: '#888', margin: '0 0 12px 0' }}><T en="Delete Application" ar="حذف الطلب" /></h4>
             <p style={{ fontSize: '0.85rem', color: '#555', flex: 1 }}>
-              Removes all traces from the database. Client will not be notified. Use with caution.
+              <T en="Removes all traces from the database. Client will not be notified. Use with caution." ar="يزيل كل أثر من قاعدة البيانات. لن يتم إبلاغ العميل. استخدم بحذر." />
             </p>
             <button 
               onClick={handleDelete}
               disabled={!!actionLoading}
               style={{ ...btnStyle, background: '#222', color: '#fff' }}
             >
-              Delete Permanently
+              <T en="Delete Permanently" ar="حذف نهائي" />
             </button>
           </div>
         </div>
