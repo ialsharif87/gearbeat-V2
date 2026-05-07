@@ -79,7 +79,7 @@ export default function LeadDetailPage() {
   function getDefaultContract(app: any, lead: any) {
     return `STUDIO MANAGEMENT AGREEMENT
 
-Company: ${app?.company_name_en || lead.full_name}
+Company: ${app?.company_name_en || lead?.full_name || "N/A"}
 Registration: ${app?.commercial_registration || "N/A"}
 VAT: ${app?.vat_number || "N/A"}
 
@@ -144,6 +144,16 @@ Studio Limit: 1
   }
 
   if (loading) return <div style={{ padding: 100, textAlign: 'center', color: '#888' }}>Loading...</div>;
+
+  if (!lead) {
+    return (
+      <main style={{ padding: 100, textAlign: 'center', color: '#fff' }}>
+        <h2>Application Not Found</h2>
+        <p style={{ color: '#666' }}>The requested application ID does not exist in the database.</p>
+        <Link href="/admin/leads" style={{ color: '#cfa86e', marginTop: 20, display: 'inline-block' }}>Return to List</Link>
+      </main>
+    );
+  }
 
   return (
     <main style={{ padding: '40px 20px', maxWidth: 1200, margin: '0 auto', color: '#fff' }}>

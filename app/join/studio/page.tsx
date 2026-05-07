@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { createNotification } from "@/lib/notifications";
 
 const COUNTRY_CODES = [
   { code: "+966", label: "Saudi Arabia", ar: "المملكة العربية السعودية", flag: "🇸🇦" },
@@ -166,6 +167,23 @@ export default function JoinStudioPage() {
       });
 
       if (insertError) throw new Error("Database submission failed: " + insertError.message);
+
+      // Step 3: Notify Admin
+      try {
+        await createNotification(supabase, {
+          audience: "admin",
+          title: `New Studio Application: ${companyNameEn}`,
+          body: `${fullName} has applied for ${companyNameEn}.`,
+          actionUrl: `/admin/leads`, // Redirect to leads list or specific lead detail if we have ID
+          entityType: "studio_application",
+          metadata: {
+            email: email,
+            company: companyNameEn
+          }
+        });
+      } catch (notifyErr) {
+        console.warn("Notification failed, but application was saved.", notifyErr);
+      }
 
       setSuccess(true);
     } catch (err: any) {
