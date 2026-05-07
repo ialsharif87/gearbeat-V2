@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
-import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication } from "../actions";
+import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail } from "../actions";
 
 export default function LeadDetailPage() {
   const { id } = useParams();
@@ -28,48 +28,13 @@ export default function LeadDetailPage() {
   async function fetchData() {
     setLoading(true);
     try {
-      const supabase = createClient();
-      
-      // 1. Try Fetching Lead (using maybeSingle to avoid crash)
-      const { data: leadData } = await supabase
-        .from("provider_leads")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const { lead: leadData, studioApp: appData } = await getLeadOrApplicationDetail(id as string);
 
       if (leadData) {
         setLead(leadData);
-        if (leadData.type === "studio") {
-          const { data: appData } = await supabase
-            .from("studio_applications")
-            .select("*")
-            .eq("email", leadData.email)
-            .maybeSingle();
-          if (appData) {
-            setStudioApp(appData);
-            setContractDraft(appData.contract_draft || getDefaultContract(appData, leadData));
-          }
-        }
-      } else {
-        // 2. Try Fetching Studio App directly
-        const { data: appData } = await supabase
-          .from("studio_applications")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
-        
         if (appData) {
           setStudioApp(appData);
-          setLead({
-            id: appData.id,
-            full_name: appData.full_name,
-            email: appData.email,
-            phone: appData.phone,
-            status: appData.status || 'pending',
-            created_at: appData.created_at,
-            type: 'studio'
-          });
-          setContractDraft(appData.contract_draft || getDefaultContract(appData, appData));
+          setContractDraft(appData.contract_draft || getDefaultContract(appData, leadData));
         }
       }
     } catch (err) {

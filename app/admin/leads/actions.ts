@@ -14,6 +14,52 @@ function generatePassword(length = 12) {
   return retVal;
 }
 
+export async function getLeadOrApplicationDetail(id: string) {
+  const supabaseAdmin = createAdminClient();
+
+  // 1. Try provider_leads
+  const { data: lead } = await supabaseAdmin
+    .from("provider_leads")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (lead) {
+    let studioApp = null;
+    if (lead.type === "studio") {
+      const { data: app } = await supabaseAdmin
+        .from("studio_applications")
+        .select("*")
+        .eq("email", lead.email)
+        .maybeSingle();
+      studioApp = app;
+    }
+    return { lead, studioApp };
+  }
+
+  // 2. Try studio_applications directly
+  const { data: studioApp } = await supabaseAdmin
+    .from("studio_applications")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (studioApp) {
+    const mockLead = {
+      id: studioApp.id,
+      full_name: studioApp.full_name,
+      email: studioApp.email,
+      phone: studioApp.phone,
+      status: studioApp.status || 'pending',
+      created_at: studioApp.created_at,
+      type: 'studio'
+    };
+    return { lead: mockLead, studioApp };
+  }
+
+  return { lead: null, studioApp: null };
+}
+
 export async function approveStudioApplication(appId: string, commissionRate: number, studioLimit: number, contractDraft?: string) {
   const supabaseAdmin = createAdminClient();
   const supabase = await createClient();
