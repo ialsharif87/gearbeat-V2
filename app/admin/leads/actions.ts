@@ -97,7 +97,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       await supabaseAdmin.auth.admin.updateUserById(userId, {
         user_metadata: {
           full_name: app.full_name,
-          role: "studio_owner",
+          role: "owner",
           company_name: app.company_name_en
         }
       });
@@ -108,7 +108,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
         email_confirm: true,
         user_metadata: {
           full_name: app.full_name,
-          role: "studio_owner",
+          role: "owner",
           company_name: app.company_name_en
         }
       });
@@ -125,7 +125,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       full_name: app.full_name,
       email: app.email,
       phone: app.phone,
-      role: "studio_owner",
+      role: "owner",
       updated_at: new Date().toISOString()
     });
 
