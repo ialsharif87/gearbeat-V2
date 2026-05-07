@@ -73,9 +73,12 @@ export default async function AdminStudiosPage({
     totalRevenue: 0,
     status: 'active',
     verified: true,
-    completion_score: 0,
     created_at: app.final_approved_at,
-    type: 'partner'
+    type: 'partner',
+    photoCount: 0,
+    booking_enabled: false,
+    price_from: 0,
+    owner_auth_user_id: null
   }));
 
   const pendingStudios = (approvedLeads || [])
@@ -92,7 +95,11 @@ export default async function AdminStudiosPage({
       verified: false,
       completion_score: 0,
       created_at: l.created_at,
-      type: 'onboarding'
+      type: 'onboarding',
+      photoCount: 0,
+      booking_enabled: false,
+      price_from: 0,
+      owner_auth_user_id: null
     }));
 
   const allStudios = [...actualStudios, ...partnerStudios, ...pendingStudios].filter(s => 
