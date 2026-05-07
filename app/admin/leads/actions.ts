@@ -46,7 +46,6 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
   });
 
   if (authError) {
-    // If user already exists, we might want to just link them or error
     if (authError.message.includes("already registered")) {
         throw new Error("A user with this email already exists.");
     }
@@ -129,32 +128,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
     html: emailHtml
   });
 
-  revalidatePath("/admin/studio-applications");
-  return { success: true };
-}
-
-export async function updateStudioApplicationStatus(appId: string, status: "rejected" | "needs_update", message: string) {
-  const supabaseAdmin = createAdminClient();
-  
-  const payload: any = {
-    status,
-    updated_at: new Date().toISOString()
-  };
-
-  if (status === "rejected") {
-    payload.rejection_reason = message;
-  } else {
-    payload.update_request_message = message;
-  }
-
-  const { error } = await supabaseAdmin
-    .from("studio_applications")
-    .update(payload)
-    .eq("id", appId);
-
-  if (error) throw error;
-
-  revalidatePath("/admin/studio-applications");
+  revalidatePath("/admin/leads");
   return { success: true };
 }
 
@@ -173,6 +147,6 @@ export async function giveFinalApproval(appId: string) {
 
   if (error) throw error;
 
-  revalidatePath("/admin/studio-applications");
+  revalidatePath("/admin/leads");
   return { success: true };
 }
