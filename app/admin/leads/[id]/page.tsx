@@ -62,10 +62,14 @@ Studio Limit: 1
     setActionLoading("approve");
     try {
       if (studioApp) {
-        await approveStudioApplication(studioApp.id, 15, 1, contractDraft);
-        alert("Studio Owner Approved! Credentials and Contract sent.");
+        const result = await approveStudioApplication(studioApp.id, 15, 1, contractDraft);
+        if (result.success) {
+          alert("Studio Owner Approved! Credentials and Contract sent.");
+          router.refresh();
+        } else {
+          alert("Error: " + result.error);
+        }
       }
-      router.refresh();
       fetchData();
     } catch (e: any) {
       alert("Error: " + e.message);
