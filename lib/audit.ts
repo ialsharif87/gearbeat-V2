@@ -1,5 +1,9 @@
 import { createAdminClient } from "./supabase/admin";
 
+if (typeof window !== "undefined") {
+  throw new Error("audit-logs must only be used on the server.");
+}
+
 type AuditLogInput = {
   actorAuthUserId?: string | null;
   actorEmail?: string | null;

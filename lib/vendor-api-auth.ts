@@ -1,6 +1,10 @@
 import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+if (typeof window !== "undefined") {
+  throw new Error("vendor-api-auth must only be used on the server.");
+}
+
 export type VendorApiAuthResult =
   | {
       ok: true;

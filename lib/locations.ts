@@ -1,5 +1,3 @@
-import { createAdminClient } from "@/lib/supabase/admin";
-
 export type CityOption = {
   id: string;
   country_code: string;
@@ -11,43 +9,6 @@ export type Coordinates = {
   latitude: number;
   longitude: number;
 };
-
-export async function getActiveCities(): Promise<CityOption[]> {
-  const supabaseAdmin = createAdminClient();
-
-  const { data, error } = await supabaseAdmin
-    .from("cities")
-    .select("id, country_code, name_en, name_ar")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
-    .order("name_en", { ascending: true });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data || [];
-}
-
-export async function getActiveCitiesByCountry(
-  countryCode: string
-): Promise<CityOption[]> {
-  const supabaseAdmin = createAdminClient();
-
-  const { data, error } = await supabaseAdmin
-    .from("cities")
-    .select("id, country_code, name_en, name_ar")
-    .eq("is_active", true)
-    .eq("country_code", countryCode)
-    .order("sort_order", { ascending: true })
-    .order("name_en", { ascending: true });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data || [];
-}
 
 export function filterCitiesByCountry(
   cities: CityOption[],

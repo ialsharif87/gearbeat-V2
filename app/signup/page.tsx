@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import CountryPhoneFields from "@/components/country-phone-fields";
-import { getActiveCountries } from "@/lib/countries";
+// import { getActiveCountries } from "@/lib/countries"; // Removed server-side import from client component
 import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
 
 type Country = {
@@ -43,8 +43,15 @@ export default function SignupPage() {
 
   useEffect(() => {
     async function fetchCountries() {
-      const data = await getActiveCountries();
-      setCountries(data);
+      try {
+        const res = await fetch("/api/countries");
+        if (!res.ok) throw new Error("Failed to load countries");
+        const data = await res.json();
+        setCountries(data);
+      } catch (err) {
+        console.error(err);
+        setError("Could not load country list. Please refresh.");
+      }
     }
     fetchCountries();
     

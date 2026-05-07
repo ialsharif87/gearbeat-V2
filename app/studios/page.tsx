@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 };
 import T from "@/components/t";
 import StudioFilter from "@/components/studio-filter";
-import { getActiveCountries } from "@/lib/countries";
-import { getActiveCities } from "@/lib/locations";
+import { getActiveCountries } from "@/lib/countries-server";
+import { getActiveCities } from "@/lib/locations-server";
 
 type SearchParams = {
   q?: string;
