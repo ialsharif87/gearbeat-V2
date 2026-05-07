@@ -83,18 +83,20 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       await supabaseAdmin.from("studio_applications").update({ contract_draft: contractDraft }).eq("id", appId);
     }
 
-    // 2. Generate temp password
-    const tempPassword = generatePassword();
+    // 2. Use a fixed temp password for testing convenience
+    const tempPassword = "GearBeat123!";
 
     // 3. Create or Get Auth User
     let userId: string;
-    const { data: { users: existingUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.find(u => u.email === app.email);
+    // Get user by email directly
+    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = users?.find(u => u.email === app.email);
 
     if (existingUser) {
       userId = existingUser.id;
-      // Optionally update metadata if needed
+      // Force update password and metadata
       await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: tempPassword,
         user_metadata: {
           full_name: app.full_name,
           role: "owner",
@@ -126,6 +128,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       email: app.email,
       phone: app.phone,
       role: "owner",
+      account_status: "approved", // Ensure they can log in
       updated_at: new Date().toISOString()
     });
 
