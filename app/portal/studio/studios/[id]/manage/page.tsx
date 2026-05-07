@@ -496,134 +496,149 @@ export default async function ManageStudioPage({
       studioName={studio.name}
     >
       {/* 1. Basic Info */}
-      <div id="basic" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">📝</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Basic Information" ar="المعلومات الأساسية" /></h2>
+      <div id="basic" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>📝</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="Basic Information" ar="المعلومات الأساسية" /></h2>
         </div>
-        <form action={updateStudioBasicInfo} className="space-y-8">
+        <form action={updateStudioBasicInfo} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           <input type="hidden" name="studio_id" value={studio.id} />
-          <div className="grid gap-5">
-            <div className="space-y-2">
-              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Studio Name" ar="اسم الاستوديو" /></label>
-              <input name="name" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.name} required placeholder="e.g. Riyadh Sound Lab" />
+          <div style={{ display: 'grid', gap: '20px' }}>
+            <div>
+              <label className="gb-detail-label"><T en="Studio Name" ar="اسم الاستوديو" /></label>
+              <input name="name" className="gb-input" defaultValue={studio.name} required placeholder="e.g. Riyadh Sound Lab" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="City" ar="المدينة" /></label>
-                <input name="city" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.city} required />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <label className="gb-detail-label"><T en="City" ar="المدينة" /></label>
+                <input name="city" className="gb-input" defaultValue={studio.city} required />
               </div>
-              <div className="space-y-2">
-                <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="District" ar="الحي" /></label>
-                <input name="district" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.district || ""} placeholder="Al Olaya" />
+              <div>
+                <label className="gb-detail-label"><T en="District" ar="الحي" /></label>
+                <input name="district" className="gb-input" defaultValue={studio.district || ""} placeholder="Al Olaya" />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Full Address" ar="العنوان الكامل" /></label>
-              <input name="address" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.address || ""} placeholder="Building 45, King Fahd Road" />
+            <div>
+              <label className="gb-detail-label"><T en="Full Address" ar="العنوان الكامل" /></label>
+              <input name="address" className="gb-input" defaultValue={studio.address || ""} placeholder="Building 45, King Fahd Road" />
             </div>
-            <div className="space-y-2">
-              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Description" ar="الوصف" /></label>
-              <textarea name="description" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" rows={4} defaultValue={studio.description || ""} placeholder="Describe your studio..." />
+            <div>
+              <label className="gb-detail-label"><T en="Description" ar="الوصف" /></label>
+              <textarea name="description" className="gb-input" rows={4} defaultValue={studio.description || ""} placeholder="Describe your studio..." style={{ resize: 'vertical' }} />
             </div>
           </div>
-          <div className="mt-8 flex justify-end">
-            <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Save Basic Info" ar="حفظ المعلومات الأساسية" /></button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="submit" className="gb-button gb-button-primary"><T en="Save Basic Info" ar="حفظ المعلومات الأساسية" /></button>
           </div>
         </form>
       </div>
 
       {/* 2. Availability */}
-      <div id="availability" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">📅</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Availability & Hours" ar="التوافر وساعات العمل" /></h2>
+      <div id="availability" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>📅</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="Availability & Hours" ar="التوافر وساعات العمل" /></h2>
         </div>
-        <div className="space-y-4">
-          <p className="text-[#666] text-sm">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p className="gb-muted-text">
             <T 
               en="Manage your weekly working hours and booking slots." 
               ar="أدر ساعات عملك الأسبوعية وفترات الحجز المتاحة." 
             />
           </p>
-          <div className="rules-summary">
+          <div>
             {availabilityRules && availabilityRules.length > 0 ? (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3 my-6">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', margin: '24px 0' }}>
                 {availabilityRules.sort((a:any,b:any)=>a.day_of_week - b.day_of_week).map((rule: any) => (
-                  <div key={rule.id} className="bg-[rgba(255,255,255,0.02)] p-3 rounded-[12px] text-center border border-[var(--gb-border)]">
-                    <span className="block text-[0.75rem] font-extrabold text-[#555]">
+                  <div key={rule.id} className="gb-card" style={{ padding: '12px', textAlign: 'center', background: 'rgba(255, 255, 255, 0.02)' }}>
+                    <span className="gb-detail-label" style={{ marginBottom: '4px' }}>
                       {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][rule.day_of_week]}
                     </span>
-                    <span className={`text-[0.85rem] font-bold mt-1 block ${rule.is_open ? 'text-white' : 'text-[#ef4444]'}`}>
+                    <span style={{ 
+                      fontSize: '0.85rem', 
+                      fontWeight: 700, 
+                      display: 'block',
+                      color: rule.is_open ? 'var(--gb-text)' : '#ef4444'
+                    }}>
                       {rule.is_open ? `${rule.open_time} - ${rule.close_time}` : "Closed"}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="bg-[rgba(255,255,255,0.02)] p-8 rounded-[12px] text-center border border-dashed border-[var(--gb-border)]">
+              <div className="gb-empty-state" style={{ padding: '40px' }}>
                 <T en="No working hours set yet." ar="لم يتم تحديد ساعات العمل بعد." />
               </div>
             )}
           </div>
-          <Link href={`/portal/studio/availability?studioId=${studio.id}`} className="inline-block text-[var(--gb-teal)] no-underline font-bold text-[0.9rem] hover:opacity-80 transition-opacity">
+          <Link href={`/portal/studio/availability?studioId=${studio.id}`} className="gb-text-link">
             <T en="Open Full Availability Manager" ar="فتح مدير التوافر الكامل" />
           </Link>
         </div>
       </div>
 
       {/* 3. Pricing */}
-      <div id="pricing" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">💰</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Pricing & Rates" ar="الأسعار والتعرفة" /></h2>
+      <div id="pricing" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>💰</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="Pricing & Rates" ar="الأسعار والتعرفة" /></h2>
         </div>
-        <form action={updateStudioPricing} className="space-y-6">
+        <form action={updateStudioPricing} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <input type="hidden" name="studio_id" value={studio.id} />
-          <div className="space-y-2">
-            <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Hourly Rate (SAR)" ar="سعر الساعة (ريال)" /></label>
-            <div className="relative">
-              <input name="price_from" type="number" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.price_from} required />
-              <span className="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-[0.8rem] font-extrabold text-[var(--gb-gold)]">SAR</span>
+          <div>
+            <label className="gb-detail-label"><T en="Hourly Rate (SAR)" ar="سعر الساعة (ريال)" /></label>
+            <div style={{ position: 'relative' }}>
+              <input name="price_from" type="number" className="gb-input" defaultValue={studio.price_from} required />
+              <span style={{ 
+                position: 'absolute', 
+                left: '16px', 
+                top: '50%', 
+                transform: 'translateY(-50%)', 
+                fontSize: '0.8rem', 
+                fontWeight: 800, 
+                color: 'var(--gb-gold)' 
+              }}>SAR</span>
             </div>
           </div>
-          <div className="flex justify-end">
-            <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Save Pricing" ar="حفظ الأسعار" /></button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="submit" className="gb-button gb-button-primary"><T en="Save Pricing" ar="حفظ الأسعار" /></button>
           </div>
         </form>
       </div>
 
       {/* 4. Equipment */}
-      <div id="equipment" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">🎛️</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Studio Equipment" ar="معدات الاستوديو" /></h2>
+      <div id="equipment" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>🎛️</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="Studio Equipment" ar="معدات الاستوديو" /></h2>
         </div>
-        <div className="space-y-6">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse mb-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="gb-table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  <th className="text-left rtl:text-right p-3 text-[0.7rem] text-[#555] uppercase"><T en="Item" ar="القطعة" /></th>
-                  <th className="text-left rtl:text-right p-3 text-[0.7rem] text-[#555] uppercase"><T en="Category" ar="الفئة" /></th>
-                  <th className="text-left rtl:text-right p-3 text-[0.7rem] text-[#555] uppercase"><T en="Qty" ar="الكمية" /></th>
+                  <th style={{ textAlign: 'right', padding: '12px', color: 'var(--gb-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}><T en="Item" ar="القطعة" /></th>
+                  <th style={{ textAlign: 'right', padding: '12px', color: 'var(--gb-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}><T en="Category" ar="الفئة" /></th>
+                  <th style={{ textAlign: 'right', padding: '12px', color: 'var(--gb-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}><T en="Qty" ar="الكمية" /></th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {equipment?.map((item) => (
-                  <tr key={item.id}>
-                    <td className="p-[16px_12px] border-t border-[var(--gb-border)]">
-                      <strong className="text-white">{item.name}</strong>
-                      <div className="text-[0.75rem] text-[#666]">{item.brand} {item.model}</div>
+                  <tr key={item.id} style={{ borderTop: '1px solid var(--gb-border)' }}>
+                    <td style={{ padding: '16px 12px' }}>
+                      <div style={{ fontWeight: 700 }}>{item.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--gb-text-muted)' }}>{item.brand} {item.model}</div>
                     </td>
-                    <td className="p-[16px_12px] border-t border-[var(--gb-border)]"><span className="bg-[rgba(255,255,255,0.05)] px-3 py-1 rounded-full text-[0.75rem] text-white/60">{item.category}</span></td>
-                    <td className="p-[16px_12px] border-t border-[var(--gb-border)] text-white">{item.quantity}</td>
-                    <td className="p-[16px_12px] border-t border-[var(--gb-border)] text-right rtl:text-left">
+                    <td style={{ padding: '16px 12px' }}>
+                      <span className="gb-status-pill" style={{ fontSize: '0.7rem' }}>{item.category}</span>
+                    </td>
+                    <td style={{ padding: '16px 12px' }}>{item.quantity}</td>
+                    <td style={{ padding: '16px 12px', textAlign: 'left' }}>
                       <form action={deleteEquipment}>
                         <input type="hidden" name="equipment_id" value={item.id} />
                         <input type="hidden" name="studio_id" value={studio.id} />
-                        <button type="submit" className="bg-none border-none text-[#ef4444] text-2xl cursor-pointer hover:opacity-70 transition-opacity">×</button>
+                        <button type="submit" style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                       </form>
                     </td>
                   </tr>
@@ -632,37 +647,46 @@ export default async function ManageStudioPage({
             </table>
           </div>
 
-          <form action={addEquipment} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3">
+          <form action={addEquipment} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
             <input type="hidden" name="studio_id" value={studio.id} />
-            <input name="name" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" placeholder="Item Name" required />
-            <input name="brand" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" placeholder="Brand" />
-            <select name="category" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]">
-              <option value="microphone">Microphone</option>
-              <option value="instrument">Instrument</option>
-              <option value="outboard">Outboard</option>
-              <option value="monitoring">Monitoring</option>
-            </select>
-            <button type="submit" className="bg-[var(--gb-teal)] text-white border-none w-11 h-11 rounded-[12px] text-[1.2rem] cursor-pointer flex items-center justify-center hover:opacity-90 transition-opacity">+</button>
+            <div>
+              <label className="gb-detail-label"><T en="Name" ar="الاسم" /></label>
+              <input name="name" className="gb-input" placeholder="Item Name" required />
+            </div>
+            <div>
+              <label className="gb-detail-label"><T en="Brand" ar="الماركة" /></label>
+              <input name="brand" className="gb-input" placeholder="Brand" />
+            </div>
+            <div>
+              <label className="gb-detail-label"><T en="Category" ar="الفئة" /></label>
+              <select name="category" className="gb-input" style={{ height: '45px' }}>
+                <option value="microphone">Microphone</option>
+                <option value="instrument">Instrument</option>
+                <option value="outboard">Outboard</option>
+                <option value="monitoring">Monitoring</option>
+              </select>
+            </div>
+            <button type="submit" className="gb-button gb-button-primary" style={{ height: '45px', width: '45px', padding: 0, justifyContent: 'center', fontSize: '1.5rem' }}>+</button>
           </form>
         </div>
       </div>
 
       {/* 5. Services */}
-      <div id="services" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">🧑‍💻</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Services & Amenities" ar="الخدمات والمميزات" /></h2>
+      <div id="services" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>🧑‍💻</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="Services & Amenities" ar="الخدمات والمميزات" /></h2>
         </div>
-        <div className="space-y-10">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {featureGroups.map((group) => {
             const availableGroup = groupedAvailableFeatures[group.key] || [];
             return (
               <div key={group.key}>
-                <h3 className="text-[0.9rem] font-extrabold text-[#666] mb-4 flex items-center gap-2">
-                  <span>{group.icon}</span> 
+                <h3 className="gb-eyebrow" style={{ marginBottom: '16px', fontSize: '0.85rem' }}>
+                  <span style={{ marginLeft: '8px' }}>{group.icon}</span> 
                   <T en={group.titleEn} ar={group.titleAr} />
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   {availableGroup.map((item) => {
                     const isSelected = selectedFeatureIds.has(item.id);
                     return (
@@ -672,11 +696,15 @@ export default async function ManageStudioPage({
                         <input type="hidden" name="studio_id" value={studio.id} />
                         <button 
                           type="submit" 
-                          className={`px-4 py-1.5 rounded-full text-[0.85rem] font-bold cursor-pointer transition-all border ${
-                            isSelected 
-                              ? 'border-[var(--gb-teal)] text-[var(--gb-teal)] bg-[rgba(15,160,138,0.05)]' 
-                              : 'bg-[rgba(255,255,255,0.03)] border-[var(--gb-border)] text-[#888] hover:border-white/20'
-                          }`}
+                          className="gb-button"
+                          style={{ 
+                            padding: '6px 16px',
+                            borderRadius: '99px',
+                            fontSize: '0.8rem',
+                            background: isSelected ? 'rgba(15, 160, 138, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                            color: isSelected ? 'var(--gb-teal)' : 'var(--gb-text-muted)',
+                            border: `1px solid ${isSelected ? 'var(--gb-teal)' : 'var(--gb-border)'}`
+                          }}
                         >
                           <T en={item.name_en} ar={item.name_ar} />
                         </button>
@@ -691,77 +719,106 @@ export default async function ManageStudioPage({
       </div>
 
       {/* 6. Photo Gallery */}
-      <div id="gallery" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">🎥</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="Photo Gallery" ar="معرض الصور" /></h2>
+      <div id="gallery" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>🎥</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="Photo Gallery" ar="معرض الصور" /></h2>
         </div>
-        <div className="space-y-8">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
             {studioImages?.map((img) => (
-              <div key={img.id} className={`aspect-square rounded-[16px] overflow-hidden relative border-2 transition-all group ${img.is_cover ? 'border-[var(--gb-gold)]' : 'border-transparent'}`}>
-                <img src={img.image_url} alt="Studio" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
+              <div key={img.id} style={{ 
+                aspectRatio: '1/1', 
+                borderRadius: '16px', 
+                overflow: 'hidden', 
+                position: 'relative', 
+                border: `2px solid ${img.is_cover ? 'var(--gb-gold)' : 'transparent'}` 
+              }} className="gallery-item-parent">
+                <img src={img.image_url} alt="Studio" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ 
+                  position: 'absolute', 
+                  inset: 0, 
+                  background: 'rgba(0,0,0,0.6)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '8px', 
+                  opacity: 0, 
+                  transition: 'opacity 0.2s' 
+                }} className="item-overlay">
                   {!img.is_cover && (
                     <form action={setCoverImage}>
                       <input type="hidden" name="image_id" value={img.id} />
                       <input type="hidden" name="studio_id" value={studio.id} />
-                      <button type="submit" className="px-3 py-1.5 rounded-[8px] text-[0.7rem] font-extrabold cursor-pointer border-none transition-all bg-[var(--gb-gold)] text-black hover:scale-105"><T en="Cover" ar="غلاف" /></button>
+                      <button type="submit" className="gb-button-primary gb-button-small" style={{ padding: '4px 8px' }}><T en="Cover" ar="غلاف" /></button>
                     </form>
                   )}
                   <form action={deleteStudioImage}>
                     <input type="hidden" name="image_id" value={img.id} />
                     <input type="hidden" name="studio_id" value={studio.id} />
                     <input type="hidden" name="image_url" value={img.image_url} />
-                    <button type="submit" className="px-3 py-1.5 rounded-[8px] text-[0.7rem] font-extrabold cursor-pointer border-none transition-all bg-[#ef4444] text-white hover:scale-105">×</button>
+                    <button type="submit" style={{ background: '#ef4444', border: 'none', color: '#fff', width: '24px', height: '24px', borderRadius: '50%', cursor: 'pointer' }}>×</button>
                   </form>
                 </div>
               </div>
             ))}
           </div>
-          <form action={uploadStudioImages} className="space-y-6">
+          <form action={uploadStudioImages} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <input type="hidden" name="studio_id" value={studio.id} />
-            <div className="border-2 border-dashed border-[var(--gb-border)] rounded-[16px] p-10 text-center cursor-pointer hover:border-[var(--gb-gold)] transition-colors group">
-              <input type="file" name="images" multiple accept="image/*" id="file-upload" className="hidden" />
-              <label htmlFor="file-upload" className="cursor-pointer text-[#888] font-bold group-hover:text-[var(--gb-gold)] transition-colors">
+            <div style={{ 
+              border: '2px dashed var(--gb-border)', 
+              borderRadius: '16px', 
+              padding: '40px', 
+              textAlign: 'center', 
+              cursor: 'pointer' 
+            }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--gb-gold)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--gb-border)'}>
+              <input type="file" name="images" multiple accept="image/*" id="file-upload" style={{ display: 'none' }} />
+              <label htmlFor="file-upload" style={{ cursor: 'pointer', margin: 0, color: 'var(--gb-text-muted)', fontWeight: 800 }}>
                 <T en="Click to upload images (Max 10)" ar="اضغط لرفع الصور (بحد أقصى 10)" />
               </label>
             </div>
-            <div className="flex justify-end">
-              <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Upload Photos" ar="رفع الصور" /></button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="submit" className="gb-button gb-button-primary"><T en="Upload Photos" ar="رفع الصور" /></button>
             </div>
           </form>
         </div>
       </div>
 
       {/* 7. External Reviews */}
-      <div id="reviews" className="bg-[var(--gb-card-bg)] border border-[var(--gb-border)] rounded-[24px] p-8 transition-transform duration-300 mt-10">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl">⭐</span>
-          <h2 className="text-[1.25rem] font-extrabold m-0"><T en="External Reviews" ar="التقييمات الخارجية" /></h2>
+      <div id="reviews" className="gb-card" style={{ padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '1.5rem' }}>⭐</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}><T en="External Reviews" ar="التقييمات الخارجية" /></h2>
         </div>
-        <form action={updateExternalReviewLinks} className="space-y-8">
+        <form action={updateExternalReviewLinks} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           <input type="hidden" name="studio_id" value={studio.id} />
           <input type="hidden" name="studio_slug" value={studio.slug} />
-          <div className="grid gap-5">
-            <div className="space-y-2">
-              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Google Maps URL" ar="رابط خرائط جوجل" /></label>
-              <input name="google_maps_url" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.google_maps_url || ""} />
+          <div style={{ display: 'grid', gap: '20px' }}>
+            <div>
+              <label className="gb-detail-label"><T en="Google Maps URL" ar="رابط خرائط جوجل" /></label>
+              <input name="google_maps_url" className="gb-input" defaultValue={studio.google_maps_url || ""} />
             </div>
-            <div className="space-y-2">
-              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="TripAdvisor URL" ar="رابط تريب أدفايزر" /></label>
-              <input name="tripadvisor_url" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.tripadvisor_url || ""} />
+            <div>
+              <label className="gb-detail-label"><T en="TripAdvisor URL" ar="رابط تريب أدفايزر" /></label>
+              <input name="tripadvisor_url" className="gb-input" defaultValue={studio.tripadvisor_url || ""} />
             </div>
-            <div className="space-y-2">
-              <label className="block text-[0.8rem] font-bold text-[#666] uppercase tracking-[0.5px]"><T en="Google Place ID" ar="معرف المكان من جوجل" /></label>
-              <input name="google_place_id" className="w-full bg-[rgba(255,255,255,0.02)] border border-[var(--gb-border)] rounded-[12px] px-4 py-3 text-white text-[0.95rem] outline-none transition-colors focus:border-[var(--gb-gold)]" defaultValue={studio.google_place_id || ""} />
+            <div>
+              <label className="gb-detail-label"><T en="Google Place ID" ar="معرف المكان من جوجل" /></label>
+              <input name="google_place_id" className="gb-input" defaultValue={studio.google_place_id || ""} />
             </div>
           </div>
-          <div className="flex justify-end">
-            <button type="submit" className="bg-[var(--gb-gold)] text-[var(--gb-navy)] border-none px-6 py-3 rounded-[12px] font-extrabold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)]"><T en="Save Links" ar="حفظ الروابط" /></button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="submit" className="gb-button gb-button-primary"><T en="Save Links" ar="حفظ الروابط" /></button>
           </div>
         </form>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .gallery-item-parent:hover .item-overlay { opacity: 1 !important; }
+        @media (max-width: 640px) {
+          form[action*="addEquipment"] { grid-template-columns: 1fr !important; }
+        }
+      `}} />
     </StudioManagementLayout>
   );
 }

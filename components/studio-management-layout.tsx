@@ -55,26 +55,39 @@ export default function StudioManagementLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F16] text-white pb-[100px]">
+    <div style={{ minHeight: '100vh', background: 'var(--gb-bg)', color: 'var(--gb-text)', paddingBottom: '100px' }}>
       {/* Top Header with Progress */}
-      <header className="sticky top-0 z-[100] bg-[rgba(11,15,22,0.8)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.08)] py-6">
-        <div className="max-w-[1400px] mx-auto px-5 lg:px-10 flex justify-between items-center gap-10">
-          <div className="studio-info">
-            <h1 className="text-[1.4rem] lg:text-[1.8rem] font-[900] m-0 tracking-[-1px]">{studioName}</h1>
-            <p className="mt-1 mb-0 text-[0.85rem] text-[#666] uppercase tracking-[1px] font-bold">
+      <header style={{ 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 100, 
+        background: 'rgba(11, 15, 22, 0.9)', 
+        backdropFilter: 'blur(20px)', 
+        borderBottom: '1px solid var(--gb-border)', 
+        padding: '24px 0' 
+      }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '40px' }}>
+          <div>
+            <h1 style={{ fontSize: '1.8rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>{studioName}</h1>
+            <div className="gb-eyebrow" style={{ marginTop: '4px', marginBottom: 0 }}>
               <T en="Studio Management" ar="إدارة الاستوديو" />
-            </p>
+            </div>
           </div>
           
-          <div className="hidden lg:block flex-1 max-w-[400px]">
-            <div className="flex justify-between text-[0.85rem] font-bold mb-2.5">
+          <div style={{ flex: 1, maxWidth: '400px' }} className="hidden-mobile">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, marginBottom: '10px' }}>
               <span><T en="Profile Completion" ar="اكتمال الملف" /></span>
-              <span className="text-[#D4AF37]">{completionPercentage}%</span>
+              <span style={{ color: 'var(--gb-gold)' }}>{completionPercentage}%</span>
             </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+            <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '99px', overflow: 'hidden' }}>
               <div 
-                className="h-full bg-gradient-to-r from-[#D4AF37] to-[#0FA08A] rounded-full transition-[width] duration-[0.6s] ease-[cubic-bezier(0.4,0,0.2,1)]" 
-                style={{ width: `${completionPercentage}%` }}
+                style={{ 
+                  height: '100%', 
+                  background: 'linear-gradient(90deg, var(--gb-gold), var(--gb-teal))', 
+                  borderRadius: '99px', 
+                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: `${completionPercentage}%`
+                }}
               ></div>
             </div>
           </div>
@@ -82,42 +95,67 @@ export default function StudioManagementLayout({
       </header>
 
       {/* Mobile Tabs */}
-      <nav className="lg:hidden sticky top-[90px] z-[90] bg-[#0B0F16] border-b border-[rgba(255,255,255,0.08)]">
-        <div className="flex overflow-x-auto p-[12px_20px] gap-3 no-scrollbar">
+      <nav style={{ 
+        display: 'none', 
+        position: 'sticky', 
+        top: '90px', 
+        zIndex: 90, 
+        background: 'var(--gb-bg)', 
+        borderBottom: '1px solid var(--gb-border)' 
+      }} className="show-mobile">
+        <div style={{ display: 'flex', overflowX: 'auto', padding: '12px 20px', gap: '12px' }}>
           {sections.map((s) => (
             <button
               key={s.id}
-              className={`whitespace-nowrap px-4 py-2 rounded-full text-[0.85rem] font-bold flex items-center gap-2 border transition-all ${
-                activeSection === s.id 
-                  ? "bg-[#D4AF37] text-[#0B0F16] border-[#D4AF37]" 
-                  : "bg-white/5 border-[rgba(255,255,255,0.08)] text-[#888]"
-              }`}
+              className="gb-button"
+              style={{ 
+                whiteSpace: 'nowrap',
+                background: activeSection === s.id ? 'var(--gb-gold)' : 'rgba(255,255,255,0.03)',
+                color: activeSection === s.id ? '#000' : 'var(--gb-text-muted)',
+                border: `1px solid ${activeSection === s.id ? 'var(--gb-gold)' : 'var(--gb-border)'}`,
+                padding: '8px 16px',
+                borderRadius: '99px'
+              }}
               onClick={() => scrollToSection(s.id)}
             >
-              <span>{s.icon}</span>
-              <span><T en={s.titleEn} ar={s.titleAr} /></span>
+              <span style={{ marginLeft: '8px' }}>{s.icon}</span>
+              <T en={s.titleEn} ar={s.titleAr} />
             </button>
           ))}
         </div>
       </nav>
 
-      <div className="max-w-[1400px] mx-auto my-10 px-5 lg:px-10 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-[60px]">
+      <div className="container" style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '60px' }} id="manage-grid-layout">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-[140px]">
-            <nav className="flex flex-col gap-2">
+        <aside className="hidden-mobile">
+          <div style={{ position: 'sticky', top: '140px' }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {sections.map((s) => (
                 <button
                   key={s.id}
-                  className={`bg-transparent border-none p-[16px_20px] rounded-[16px] text-start text-[1rem] font-bold cursor-pointer transition-all duration-200 flex items-center gap-4 relative hover:bg-white/5 hover:text-white ${
-                    activeSection === s.id ? "bg-[rgba(212,175,55,0.1)] text-[#D4AF37]" : "text-[#888]"
-                  }`}
+                  className="gb-button"
+                  style={{ 
+                    background: activeSection === s.id ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                    color: activeSection === s.id ? 'var(--gb-gold)' : 'var(--gb-text-muted)',
+                    justifyContent: 'flex-start',
+                    padding: '16px 20px',
+                    width: '100%',
+                    position: 'relative'
+                  }}
                   onClick={() => scrollToSection(s.id)}
                 >
-                  <span className="text-xl">{s.icon}</span>
+                  <span style={{ fontSize: '1.2rem', marginLeft: '16px' }}>{s.icon}</span>
                   <T en={s.titleEn} ar={s.titleAr} />
                   {activeSection === s.id && (
-                    <span className="absolute right-5 rtl:right-auto rtl:left-5 w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_10px_#D4AF37]"></span>
+                    <span style={{ 
+                      position: 'absolute', 
+                      left: '20px', 
+                      width: '6px', 
+                      height: '6px', 
+                      background: 'var(--gb-gold)', 
+                      borderRadius: '50%',
+                      boxShadow: '0 0 10px var(--gb-gold)' 
+                    }}></span>
                   )}
                 </button>
               ))}
@@ -126,10 +164,18 @@ export default function StudioManagementLayout({
         </aside>
 
         {/* Main Content */}
-        <main className="flex flex-col gap-10">
+        <main style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {children}
         </main>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 1024px) {
+          #manage-grid-layout { grid-template-columns: 1fr !important; gap: 20px !important; }
+          .hidden-mobile { display: none !important; }
+          .show-mobile { display: block !important; }
+        }
+      `}} />
     </div>
   );
 }
