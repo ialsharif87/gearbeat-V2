@@ -88,13 +88,11 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
 
     // 3. Create or Get Auth User
     let userId: string;
-    // Get user by email directly
     const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     const existingUser = users?.find(u => u.email === app.email);
 
     if (existingUser) {
       userId = existingUser.id;
-      // Force update password and metadata
       await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: tempPassword,
         user_metadata: {
@@ -128,7 +126,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       email: app.email,
       phone: app.phone,
       role: "owner",
-      account_status: "approved", // Ensure they can log in
+      account_status: "approved", 
       updated_at: new Date().toISOString()
     });
 
@@ -188,7 +186,6 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       });
     } catch (emailErr) {
       console.warn("Email sending failed:", emailErr);
-      // Don't throw here, as the user was created successfully
     }
 
     revalidatePath("/admin/leads");
@@ -204,15 +201,45 @@ export async function giveFinalApproval(appId: string) {
   const supabase = await createClient();
   const { data: { user: adminUser } } = await supabase.auth.getUser();
 
+  // 1. Get Application to find linked user
+  const { data: app } = await supabaseAdmin
+    .from("studio_applications")
+    .select("linked_user_id, email")
+    .eq("id", appId)
+    .single();
+
+  // 2. Mark Final Approved
   const { error } = await supabaseAdmin
     .from("studio_applications")
     .update({
       final_approved_at: new Date().toISOString(),
       final_approved_by: adminUser?.id,
+      status: 'approved'
     })
     .eq("id", appId);
 
   if (error) throw error;
+
+  // 3. Activate User Account
+  if (app?.linked_user_id) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({ account_status: 'active' })
+      .eq("auth_user_id", app.linked_user_id);
+  } else if (app?.email) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({ account_status: 'active' })
+      .eq("email", app.email);
+  }
+
+  // 4. Update Lead Status
+  if (app?.email) {
+    await supabaseAdmin
+      .from("provider_leads")
+      .update({ status: 'approved' })
+      .eq("email", app.email);
+  }
 
   revalidatePath("/admin/leads");
   return { success: true };
@@ -220,14 +247,7 @@ export async function giveFinalApproval(appId: string) {
 
 export async function requestLeadUpdate(leadId: string, message: string) {
   const supabaseAdmin = createAdminClient();
-  
-  // 1. Update status
-  await supabaseAdmin
-    .from("provider_leads")
-    .update({ status: "needs_update" })
-    .eq("id", leadId);
-
-  // 2. Fetch email
+  await supabaseAdmin.from("provider_leads").update({ status: "needs_update" }).eq("id", leadId);
   const { data: lead } = await supabaseAdmin.from("provider_leads").select("email").eq("id", leadId).single();
 
   if (lead) {
@@ -238,9 +258,7 @@ export async function requestLeadUpdate(leadId: string, message: string) {
         <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #cfa86e; border-radius: 20px;">
           <h2 style="color: #cfa86e;">Modification Requested</h2>
           <p>Our team reviewed your application and found some missing or incorrect information:</p>
-          <div style="background: #111; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            ${message}
-          </div>
+          <div style="background: #111; padding: 20px; border-radius: 10px; margin: 20px 0;">${message}</div>
           <p>Please log in or contact support to provide the requested updates.</p>
         </div>
       `
@@ -253,12 +271,7 @@ export async function requestLeadUpdate(leadId: string, message: string) {
 
 export async function rejectLeadApplication(leadId: string, reason: string) {
   const supabaseAdmin = createAdminClient();
-
-  await supabaseAdmin
-    .from("provider_leads")
-    .update({ status: "rejected" })
-    .eq("id", leadId);
-
+  await supabaseAdmin.from("provider_leads").update({ status: "rejected" }).eq("id", leadId);
   const { data: lead } = await supabaseAdmin.from("provider_leads").select("email").eq("id", leadId).single();
 
   if (lead) {

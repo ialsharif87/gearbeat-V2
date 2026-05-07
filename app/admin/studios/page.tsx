@@ -45,6 +45,12 @@ export default async function AdminStudiosPage({
     .eq("status", "approved")
     .eq("type", "studio");
 
+  // Fetch 3: Final Approved Studio Applications (Partners)
+  const { data: finalApprovedApps } = await supabaseAdmin
+    .from("studio_applications")
+    .select("*")
+    .not("final_approved_at", "is", null);
+
   // Combine them
   const actualStudios = (studiosData || []).map(s => {
     const profile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
@@ -55,22 +61,39 @@ export default async function AdminStudiosPage({
     return { ...s, ownerName, ownerEmail, bookingsCount, totalRevenue, type: 'active' };
   });
 
-  const pendingStudios = (approvedLeads || []).filter(l => !actualStudios.some(s => s.ownerEmail === l.email)).map(l => ({
-    id: l.id,
-    name: l.business_name || l.full_name,
-    city: l.city || '—',
-    ownerName: l.full_name,
-    ownerEmail: l.email,
+  const partnerStudios = (finalApprovedApps || []).filter(app => !actualStudios.some(s => s.ownerEmail === app.email)).map(app => ({
+    id: app.id,
+    name: app.company_name_en || app.full_name,
+    city: app.country || '—',
+    ownerName: app.full_name,
+    ownerEmail: app.email,
     bookingsCount: 0,
     totalRevenue: 0,
-    status: 'approved',
-    verified: false,
+    status: 'active',
+    verified: true,
     completion_score: 0,
-    created_at: l.created_at,
-    type: 'onboarding'
+    created_at: app.final_approved_at,
+    type: 'partner'
   }));
 
-  const allStudios = [...actualStudios, ...pendingStudios].filter(s => 
+  const pendingStudios = (approvedLeads || [])
+    .filter(l => !actualStudios.some(s => s.ownerEmail === l.email) && !partnerStudios.some(p => p.ownerEmail === l.email))
+    .map(l => ({
+      id: l.id,
+      name: l.business_name || l.full_name,
+      city: l.city || '—',
+      ownerName: l.full_name,
+      ownerEmail: l.email,
+      bookingsCount: 0,
+      totalRevenue: 0,
+      status: 'approved',
+      verified: false,
+      completion_score: 0,
+      created_at: l.created_at,
+      type: 'onboarding'
+    }));
+
+  const allStudios = [...actualStudios, ...partnerStudios, ...pendingStudios].filter(s => 
     s.name?.toLowerCase().includes(query) || 
     s.ownerName?.toLowerCase().includes(query)
   ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -139,6 +162,10 @@ export default async function AdminStudiosPage({
                   {studio.type === 'onboarding' ? (
                     <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: 'rgba(234, 179, 8, 0.15)', color: '#eab308' }}>
                       ONBOARDING
+                    </span>
+                  ) : studio.type === 'partner' ? (
+                    <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>
+                      PARTNER
                     </span>
                   ) : (
                     <StatusBadge status={studio.status} verified={studio.verified} />

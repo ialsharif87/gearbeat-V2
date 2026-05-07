@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
-import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail } from "../actions";
+import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail, giveFinalApproval } from "../actions";
 
 export default function LeadDetailPage() {
   const { id } = useParams();
@@ -216,6 +216,35 @@ Studio Limit: 1
         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 40 }}>Management Actions</h2>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
+          {/* NEW: Final Activation Box */}
+          {studioApp?.contract_url && !studioApp?.final_approved_at && (
+            <div style={{ ...boxStyle, border: '1px solid #D4AF37', background: 'rgba(212, 175, 55, 0.08)', gridColumn: '1 / -1' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ color: '#D4AF37', margin: 0, fontSize: '1.2rem' }}>Final Activation Required</h4>
+                <a href={studioApp.contract_url} target="_blank" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}>View Signed Contract</a>
+              </div>
+              <p style={{ fontSize: '0.9rem', color: '#ccc', margin: '8px 0 16px' }}>
+                The client has uploaded the signed contract. Review it and click below to grant full dashboard access and move to the Approved Partners list.
+              </p>
+              <button 
+                onClick={async () => {
+                  if(!confirm("Grant final approval and activate this account?")) return;
+                  setActionLoading("final");
+                  const res = await giveFinalApproval(studioApp.id);
+                  if(res.success) {
+                    alert("Account Activated! The partner now has full access.");
+                    fetchData();
+                  }
+                  setActionLoading(null);
+                }}
+                disabled={!!actionLoading}
+                style={{ ...btnStyle, background: '#D4AF37', color: '#000', width: '100%' }}
+              >
+                {actionLoading === 'final' ? 'Activating...' : '✅ Confirm & Activate Account'}
+              </button>
+            </div>
+          )}
+
           {/* Box 1: Approve */}
           <div style={{ ...boxStyle, border: '1px solid #22c55e33', background: '#22c55e05' }}>
             <h4 style={{ color: '#22c55e', margin: '0 0 12px 0' }}>Approve & Send Contract</h4>
