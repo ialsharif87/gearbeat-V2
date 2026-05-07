@@ -64,7 +64,7 @@ Studio Limit: 1
       if (studioApp) {
         const result = await approveStudioApplication(studioApp.id, 15, 1, contractDraft);
         if (result.success) {
-          alert("Studio Owner Approved! Credentials and Contract sent.");
+          alert(`Studio Owner Approved!\n\nCredentials sent to client.\nTemporary Password: ${result.tempPassword}`);
           router.refresh();
         } else {
           alert("Error: " + result.error);

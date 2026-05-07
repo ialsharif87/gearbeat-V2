@@ -13,28 +13,39 @@ type EmailPayload = {
 };
 
 export async function sendEmail({ to, subject, html, text }: EmailPayload) {
-  // TODO: Integrate with Resend API or SendGrid
-  // For now, we log the intent. In production, this will use process.env.RESEND_API_KEY
   console.log(`[EMAIL_SENT] To: ${to}, Subject: ${subject}`);
   
-  // Example implementation structure:
-  /*
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: 'GearBeat <no-reply@gearbeat.com>',
-      to,
-      subject,
-      html,
-    }),
-  });
-  */
-  
-  return { success: true };
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("RESEND_API_KEY not found. Email not sent to provider.");
+    return { success: true, mocked: true };
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'GearBeat <onboarding@gearbeat.app>',
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      console.error("Resend API Error:", data);
+      return { success: false, error: data };
+    }
+
+    return { success: true, id: data.id };
+  } catch (error) {
+    console.error("Fetch error sending email:", error);
+    return { success: false, error };
+  }
 }
 
 /**

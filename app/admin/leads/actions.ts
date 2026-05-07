@@ -189,7 +189,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
     }
 
     revalidatePath("/admin/leads");
-    return { success: true };
+    return { success: true, tempPassword };
   } catch (err: any) {
     console.error("Approve Studio Error:", err);
     return { success: false, error: err.message || "An unexpected error occurred during approval." };
