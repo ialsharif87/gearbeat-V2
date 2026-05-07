@@ -225,7 +225,7 @@ export async function giveFinalApproval(appId: string) {
     await supabaseAdmin
       .from("profiles")
       .update({ account_status: 'active' })
-      .eq("auth_user_id", app.linked_user_id);
+      .or(`auth_user_id.eq.${app.linked_user_id},id.eq.${app.linked_user_id}`);
   } else if (app?.email) {
     await supabaseAdmin
       .from("profiles")
@@ -242,6 +242,8 @@ export async function giveFinalApproval(appId: string) {
   }
 
   revalidatePath("/admin/leads");
+  revalidatePath("/portal/studio");
+  revalidatePath("/portal/pending");
   return { success: true };
 }
 
