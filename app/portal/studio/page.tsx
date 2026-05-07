@@ -118,19 +118,6 @@ export default async function StudioDashboardPage() {
     }
   }
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    });
-  };
-
-  const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const isFinalApproved = !!studioApp?.final_approved_at;
 
@@ -209,8 +196,6 @@ export default async function StudioDashboardPage() {
       recentBookings={recentBookings}
       tier={tier}
       cert={cert}
-      formatDate={formatDate}
-      formatTime={formatTime}
     />
   );
 }

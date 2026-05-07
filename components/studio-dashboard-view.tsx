@@ -12,8 +12,6 @@ interface StudioDashboardViewProps {
   recentBookings: any[];
   tier: any;
   cert: any;
-  formatDate: (d: string) => string;
-  formatTime: (d: string) => string;
 }
 
 export default function StudioDashboardView({
@@ -25,9 +23,19 @@ export default function StudioDashboardView({
   recentBookings,
   tier,
   cert,
-  formatDate,
-  formatTime,
 }: StudioDashboardViewProps) {
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+    });
+
+  const formatTime = (dateStr: string) =>
+    new Date(dateStr).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
   return (
     <main className="studio-dash-root">
       {/* Top Header Section */}
