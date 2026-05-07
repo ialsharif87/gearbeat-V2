@@ -214,16 +214,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const hourlyPrice = exception?.price_per_hour 
-      ? Number(exception.price_per_hour)
-      : (availabilityRule?.price_per_hour ? Number(availabilityRule.price_per_hour) : getStudioHourlyPrice(studio));
-
-    if (hourlyPrice <= 0) {
-      return NextResponse.json(
-        { error: "Studio price is not configured." },
-        { status: 400 }
-      );
-    }
 
     const { data: overlappingBookings, error: overlapError } =
       await supabaseAdmin
@@ -264,6 +254,17 @@ export async function POST(request: Request) {
       .lte("start_date", bookingDate)
       .gte("end_date", bookingDate)
       .maybeSingle();
+
+    const hourlyPrice = exception?.price_per_hour 
+      ? Number(exception.price_per_hour)
+      : (availabilityRule?.price_per_hour ? Number(availabilityRule.price_per_hour) : getStudioHourlyPrice(studio));
+
+    if (hourlyPrice <= 0) {
+      return NextResponse.json(
+        { error: "Studio price is not configured." },
+        { status: 400 }
+      );
+    }
 
     if (exception && exception.is_closed) {
       return NextResponse.json(
