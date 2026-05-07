@@ -127,7 +127,7 @@ export default async function StudioDashboardPage() {
     .eq('email', user.email)
     .maybeSingle();
 
-  const isContractSigned = !!leadData?.signed_contract_url;
+  const isContractSigned = !!(leadData?.signed_contract_url || studioApp?.contract_url);
 
   if (studioApp && !isFinalApproved && !isContractSigned) {
     return (

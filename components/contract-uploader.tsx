@@ -28,6 +28,7 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
         .getPublicUrl(fileName);
 
       // Update database
+      // Update studio_applications
       const { error: updateError } = await supabase
         .from("studio_applications")
         .update({ 
@@ -37,6 +38,19 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
         .eq("id", appId);
 
       if (updateError) throw updateError;
+
+      // Also update provider_leads for compatibility
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("provider_leads")
+          .update({ 
+            signed_contract_url: publicUrl,
+            status: 'approved',
+            approved_at: new Date().toISOString()
+          })
+          .eq("email", user.email);
+      }
 
       setUrl(publicUrl);
       alert("Contract uploaded successfully! Our team will review it and activate your account.");

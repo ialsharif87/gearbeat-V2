@@ -47,11 +47,19 @@ export default function PortalLoginPage() {
 
     const { data: lead } = await supabase
       .from('provider_leads')
-      .select('signed_contract_url, status')
+      .select('signed_contract_url')
       .eq('email', user.email)
       .maybeSingle();
 
-    if (!lead?.signed_contract_url) {
+    const { data: studioApp } = await supabase
+      .from('studio_applications')
+      .select('contract_url')
+      .eq('email', user.email)
+      .maybeSingle();
+
+    const hasContract = !!(lead?.signed_contract_url || studioApp?.contract_url);
+
+    if (!hasContract) {
       router.push('/portal/first-login');
       return;
     }
