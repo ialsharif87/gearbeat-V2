@@ -238,6 +238,9 @@ export default async function StudioDashboardPage() {
           </span>
         </div>
       </section>
+
+      {/* SECTION 2: Stats Row */}
+      <section className="gb-dash-grid-4" style={{ marginBottom: '40px' }}>
         {[
           { icon: "📅", val: totalBookingsMonth, labelEn: "Month Bookings", labelAr: "حجوزات الشهر", color: 'var(--gb-gold)' },
           { icon: "⏳", val: pendingBookings, labelEn: "Action Required", labelAr: "طلبات معلقة", color: 'white' },
