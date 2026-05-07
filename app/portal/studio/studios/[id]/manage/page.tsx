@@ -771,7 +771,7 @@ export default async function ManageStudioPage({
               padding: '40px', 
               textAlign: 'center', 
               cursor: 'pointer' 
-            }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--gb-gold)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--gb-border)'}>
+            }}>
               <input type="file" name="images" multiple accept="image/*" id="file-upload" style={{ display: 'none' }} />
               <label htmlFor="file-upload" style={{ cursor: 'pointer', margin: 0, color: 'var(--gb-text-muted)', fontWeight: 800 }}>
                 <T en="Click to upload images (Max 10)" ar="اضغط لرفع الصور (بحد أقصى 10)" />
@@ -813,12 +813,6 @@ export default async function ManageStudioPage({
         </form>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .gallery-item-parent:hover .item-overlay { opacity: 1 !important; }
-        @media (max-width: 640px) {
-          form[action*="addEquipment"] { grid-template-columns: 1fr !important; }
-        }
-      `}} />
     </StudioManagementLayout>
   );
 }
