@@ -132,7 +132,6 @@ export default async function StudioDashboardPage() {
     });
   };
 
-  const studioApp = studioAppResult.data;
   const isFinalApproved = !!studioApp?.final_approved_at;
 
   // Fix: Check if lead has signed contract to bypass uploader
