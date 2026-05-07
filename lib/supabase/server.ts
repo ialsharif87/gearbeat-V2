@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+if (typeof window !== "undefined") {
+  throw new Error("createClient (server) must only be used on the server.");
+}
+
 export async function createClient() {
   const cookieStore = await cookies();
 

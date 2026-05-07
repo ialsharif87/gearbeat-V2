@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveCountries } from "@/lib/countries";
+import { getActiveCountries } from "@/lib/countries-server";
 import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
 
 function getText(formData: FormData, key: string) {
