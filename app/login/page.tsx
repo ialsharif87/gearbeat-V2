@@ -299,7 +299,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="remember-device-group" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                  <label className="checkbox-container" style={{ display: 'flex', align-items: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: '#64748b' }}>
+                  <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: '#64748b' }}>
                     <input
                       type="checkbox"
                       checked={rememberDevice}
