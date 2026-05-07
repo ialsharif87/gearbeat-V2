@@ -220,6 +220,170 @@ async function updateStudioPricing(formData: FormData) {
   revalidatePath(`/portal/studio/studios/${studioId}/manage`);
 }
 
+async function addEquipment(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  const name = String(formData.get("name") || "").trim();
+  const brand = String(formData.get("brand") || "").trim();
+  const model = String(formData.get("model") || "").trim();
+  const category = String(formData.get("category") || "microphone");
+
+  const { error } = await supabaseAdmin
+    .from("studio_equipment")
+    .insert({
+      studio_id: studioId,
+      name,
+      brand: brand || null,
+      model: model || null,
+      category,
+      quantity: 1
+    });
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function deleteEquipment(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const equipmentId = String(formData.get("equipment_id") || "");
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  const { error } = await supabaseAdmin
+    .from("studio_equipment")
+    .delete()
+    .eq("id", equipmentId)
+    .eq("studio_id", studioId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function addFeature(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const featureId = String(formData.get("feature_id") || "");
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  const { error } = await supabaseAdmin
+    .from("studio_feature_links")
+    .insert({
+      studio_id: studioId,
+      feature_id: featureId
+    });
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function removeFeature(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const linkId = String(formData.get("link_id") || "");
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  const { error } = await supabaseAdmin
+    .from("studio_feature_links")
+    .delete()
+    .eq("id", linkId)
+    .eq("studio_id", studioId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function setCoverImage(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const imageId = String(formData.get("image_id") || "");
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  // 1. Reset all covers
+  await supabaseAdmin
+    .from("studio_images")
+    .update({ is_cover: false })
+    .eq("studio_id", studioId);
+
+  // 2. Set this one as cover
+  const { error } = await supabaseAdmin
+    .from("studio_images")
+    .update({ is_cover: true })
+    .eq("id", imageId)
+    .eq("studio_id", studioId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function deleteStudioImage(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const imageId = String(formData.get("image_id") || "");
+  const studioId = String(formData.get("studio_id") || "");
+  const imageUrl = String(formData.get("image_url") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  // 1. Delete from DB
+  const { error } = await supabaseAdmin
+    .from("studio_images")
+    .delete()
+    .eq("id", imageId)
+    .eq("studio_id", studioId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function uploadStudioImages(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  // Note: Actual upload logic would involve Supabase Storage. 
+  // This is a placeholder that triggers revalidation.
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
+async function updateExternalReviewLinks(formData: FormData) {
+  "use server";
+  const { user } = await requireOwnerOnly();
+  const supabaseAdmin = createAdminClient();
+  const studioId = String(formData.get("studio_id") || "");
+  await verifyStudioOwnership(studioId, user.id);
+
+  const google_maps_url = String(formData.get("google_maps_url") || "").trim();
+  const tripadvisor_url = String(formData.get("tripadvisor_url") || "").trim();
+  const google_place_id = String(formData.get("google_place_id") || "").trim();
+
+  const { error } = await supabaseAdmin
+    .from("studios")
+    .update({
+      google_maps_url: google_maps_url || null,
+      tripadvisor_url: tripadvisor_url || null,
+      google_place_id: google_place_id || null,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", studioId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
+}
+
 export default async function ManageStudioPage({
   params
 }: {
