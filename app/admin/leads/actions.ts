@@ -86,36 +86,42 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
     // 2. Generate temp password
     const tempPassword = generatePassword();
 
-    // 3. Create Auth User
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: app.email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        full_name: app.full_name,
-        role: "studio_owner",
-        company_name: app.company_name_en
-      }
-    });
+    // 3. Create or Get Auth User
+    let userId: string;
+    const { data: { users: existingUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = existingUsers?.find(u => u.email === app.email);
 
-    if (authError) {
-      if (authError.message.includes("already registered") || authError.message.includes("already exists")) {
-        // Find existing user to link instead of failing
-        const { data: existingUser } = await supabaseAdmin.from("profiles").select("id").eq("email", app.email).maybeSingle();
-        if (existingUser) {
-           throw new Error("This email is already registered and linked to a profile.");
+    if (existingUser) {
+      userId = existingUser.id;
+      // Optionally update metadata if needed
+      await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          full_name: app.full_name,
+          role: "studio_owner",
+          company_name: app.company_name_en
         }
-        throw new Error("A user with this email already exists in Auth but has no profile.");
-      }
-      throw new Error(`Auth Error: ${authError.message}`);
-    }
+      });
+    } else {
+      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: app.email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          full_name: app.full_name,
+          role: "studio_owner",
+          company_name: app.company_name_en
+        }
+      });
 
-    if (!authUser.user) throw new Error("Failed to create user object");
+      if (authError) throw new Error(`Auth Error: ${authError.message}`);
+      if (!authUser.user) throw new Error("Failed to create user object");
+      userId = authUser.user.id;
+    }
 
     // 4. Update/Create Profile Role
     const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
-      id: authUser.user.id,
-      auth_user_id: authUser.user.id,
+      id: userId,
+      auth_user_id: userId,
       full_name: app.full_name,
       email: app.email,
       phone: app.phone,
@@ -132,7 +138,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
         status: "approved",
         approved_at: new Date().toISOString(),
         approved_by: adminUser?.id,
-        linked_user_id: authUser.user.id,
+        linked_user_id: userId,
         commission_rate: commissionRate,
         studio_limit: studioLimit,
       })
