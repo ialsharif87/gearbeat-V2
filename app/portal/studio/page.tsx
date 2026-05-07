@@ -120,7 +120,16 @@ export default async function StudioDashboardPage() {
   const studioApp = studioAppResult.data;
   const isFinalApproved = !!studioApp?.final_approved_at;
 
-  if (studioApp && !isFinalApproved) {
+  // Fix: Check if lead has signed contract to bypass uploader
+  const { data: leadData } = await supabase
+    .from('provider_leads')
+    .select('signed_contract_url')
+    .eq('email', user.email)
+    .maybeSingle();
+
+  const isContractSigned = !!leadData?.signed_contract_url;
+
+  if (studioApp && !isFinalApproved && !isContractSigned) {
     return (
       <main className="gb-dashboard-page container" style={{ padding: '80px 20px', textAlign: 'center' }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
@@ -144,9 +153,11 @@ export default async function StudioDashboardPage() {
               <div style={{ background: '#000', padding: 20, borderRadius: 12, fontSize: '0.9rem', color: '#ccc', maxHeight: 200, overflowY: 'auto', marginBottom: 20, whiteSpace: 'pre-wrap', border: '1px solid #1a1a1a' }}>
                 {studioApp.contract_draft || "Your customized contract is being prepared..."}
               </div>
-              <button onClick={() => window.print()} style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem' }}>
-                <T en="Download / Print" ar="تحميل / طباعة" />
-              </button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                 <p style={{ fontSize: '0.85rem', color: '#888' }}>
+                   <T en="Please use your browser's print function (Ctrl+P) to save the contract." ar="يرجى استخدام خاصية الطباعة في المتصفح (Ctrl+P) لحفظ العقد." />
+                 </p>
+              </div>
             </div>
 
             {/* Step 2: Upload */}
