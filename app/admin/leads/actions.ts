@@ -14,7 +14,7 @@ function generatePassword(length = 12) {
   return retVal;
 }
 
-export async function approveStudioApplication(appId: string, commissionRate: number, studioLimit: number) {
+export async function approveStudioApplication(appId: string, commissionRate: number, studioLimit: number, contractDraft?: string) {
   const supabaseAdmin = createAdminClient();
   const supabase = await createClient();
 
@@ -29,6 +29,11 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
     .single();
 
   if (fetchError || !app) throw new Error("Application not found");
+
+  // Update contract draft if provided
+  if (contractDraft) {
+    await supabaseAdmin.from("studio_applications").update({ contract_draft: contractDraft }).eq("id", appId);
+  }
 
   // 2. Generate temp password
   const tempPassword = generatePassword();
@@ -103,20 +108,11 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
 
       <div style="margin-bottom: 30px;">
         <h3 style="color: #D4AF37;">Next Steps / الخطوات القادمة</h3>
-        <ul style="line-height: 1.8;">
-          <li>Download and sign the <a href="https://gearbeat.app/contracts/studio-agreement.pdf" style="color: #D4AF37; font-weight: bold;">Studio Agreement Contract</a></li>
-          <li>Upload the signed contract in your portal under "Contract & Activation"</li>
-          <li>Once verified, you can start adding up to <strong>${studioLimit}</strong> studios.</li>
-        </ul>
-        <p style="text-align: right; direction: rtl; line-height: 1.8;">
-          - قم بتحميل وتوقيع <a href="https://gearbeat.app/contracts/studio-agreement.pdf" style="color: #D4AF37; font-weight: bold;">عقد اتفاقية الاستوديو</a><br>
-          - ارفع العقد الموقع في البوابة الخاصة بك تحت قسم "العقد والتفعيل"<br>
-          - بمجرد التحقق، يمكنك البدء في إضافة ما يصل إلى <strong>${studioLimit}</strong> استوديوهات.
-        </p>
+        <p>Your custom contract is ready for review in your dashboard. Please sign and upload it to activate your account.</p>
+        <p style="text-align: right; direction: rtl;">عقدكم المخصص جاهز للمراجعة في لوحة التحكم الخاصة بكم. يرجى توقيعه ورفعه لتفعيل الحساب.</p>
       </div>
 
       <div style="border-top: 1px solid #1a1a1a; padding-top: 20px; font-size: 0.9rem; color: #666; text-align: center;">
-        <p>Commission Rate: ${commissionRate}% | Studio Limit: ${studioLimit}</p>
         <p>&copy; ${new Date().getFullYear()} GearBeat Ecosystem. All rights reserved.</p>
       </div>
     </div>
@@ -146,6 +142,67 @@ export async function giveFinalApproval(appId: string) {
     .eq("id", appId);
 
   if (error) throw error;
+
+  revalidatePath("/admin/leads");
+  return { success: true };
+}
+
+export async function requestLeadUpdate(leadId: string, message: string) {
+  const supabaseAdmin = createAdminClient();
+  
+  // 1. Update status
+  await supabaseAdmin
+    .from("provider_leads")
+    .update({ status: "needs_update" })
+    .eq("id", leadId);
+
+  // 2. Fetch email
+  const { data: lead } = await supabaseAdmin.from("provider_leads").select("email").eq("id", leadId).single();
+
+  if (lead) {
+    await sendEmail({
+      to: lead.email,
+      subject: "Action Required: Update your GearBeat application",
+      html: `
+        <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #cfa86e; border-radius: 20px;">
+          <h2 style="color: #cfa86e;">Modification Requested</h2>
+          <p>Our team reviewed your application and found some missing or incorrect information:</p>
+          <div style="background: #111; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            ${message}
+          </div>
+          <p>Please log in or contact support to provide the requested updates.</p>
+        </div>
+      `
+    });
+  }
+
+  revalidatePath("/admin/leads");
+  return { success: true };
+}
+
+export async function rejectLeadApplication(leadId: string, reason: string) {
+  const supabaseAdmin = createAdminClient();
+
+  await supabaseAdmin
+    .from("provider_leads")
+    .update({ status: "rejected" })
+    .eq("id", leadId);
+
+  const { data: lead } = await supabaseAdmin.from("provider_leads").select("email").eq("id", leadId).single();
+
+  if (lead) {
+    await sendEmail({
+      to: lead.email,
+      subject: "Update regarding your GearBeat application",
+      html: `
+        <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #ef4444; border-radius: 20px;">
+          <h2 style="color: #ef4444;">Application Declined</h2>
+          <p>Thank you for your interest in GearBeat. Unfortunately, we cannot proceed with your application at this time.</p>
+          <p><strong>Reason:</strong> ${reason}</p>
+        </div>
+      `
+    });
+  }
 
   revalidatePath("/admin/leads");
   return { success: true };

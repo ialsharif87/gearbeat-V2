@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import T from "@/components/t";
+import ContractUploader from "@/components/contract-uploader";
 
 export default async function StudioDashboardPage() {
   const supabase = await createClient();
@@ -19,6 +20,7 @@ export default async function StudioDashboardPage() {
 
   const [
     profileResult,
+    studioAppResult,
     bookingsMonthResult,
     pendingBookingsResult,
     revenueResult,
@@ -31,6 +33,14 @@ export default async function StudioDashboardPage() {
       .select("full_name")
       .eq("id", user.id)
       .maybeSingle(),
+
+    supabase
+      .from("studio_applications")
+      .select("*")
+      .eq("email", user.email)
+      .maybeSingle(),
+
+    // ... rest of queries
 
     supabase
       .from("bookings")
@@ -128,6 +138,77 @@ export default async function StudioDashboardPage() {
     });
   };
 
+  const studioApp = studioAppResult.data;
+  const isFinalApproved = !!studioApp?.final_approved_at;
+
+  if (studioApp && !isFinalApproved) {
+    return (
+      <main className="gb-dashboard-page container" style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 700, margin: '0 auto' }}>
+          <div style={{ fontSize: '4rem', marginBottom: 24 }}>🚀</div>
+          <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: 16 }}>
+            <T en="Almost there!" ar="أوشكنا على الانتهاء!" />
+          </h1>
+          <p style={{ fontSize: '1.2rem', color: '#888', lineHeight: 1.6, marginBottom: 48 }}>
+            <T 
+              en="Your application is approved. Now, please review your customized contract, sign it, and upload it here to activate your full dashboard." 
+              ar="لقد تمت الموافقة على طلبك. الآن، يرجى مراجعة عقدك المخصص، توقيعه، ورفعه هنا لتفعيل لوحة التحكم الخاصة بك." 
+            />
+          </p>
+
+          <div style={{ display: 'grid', gap: 32, textAlign: 'left' }}>
+            {/* Step 1: Review Contract */}
+            <div style={{ background: '#111', padding: 32, borderRadius: 24, border: '1px solid #1e1e1e' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--gb-gold)', marginBottom: 16 }}>
+                1. <T en="Review Your Contract" ar="مراجعة العقد" />
+              </h3>
+              <div style={{ background: '#000', padding: 20, borderRadius: 12, fontSize: '0.9rem', color: '#ccc', maxHeight: 200, overflowY: 'auto', marginBottom: 20, whiteSpace: 'pre-wrap', border: '1px solid #1a1a1a' }}>
+                {studioApp.contract_draft || "Your customized contract is being prepared..."}
+              </div>
+              <button onClick={() => window.print()} style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem' }}>
+                <T en="Download / Print" ar="تحميل / طباعة" />
+              </button>
+            </div>
+
+            {/* Step 2: Upload */}
+            <div style={{ background: '#111', padding: 32, borderRadius: 24, border: '1px solid #1e1e1e' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--gb-gold)', marginBottom: 16 }}>
+                2. <T en="Upload Signed Contract" ar="رفع العقد الموقع" />
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: 20 }}>
+                <T en="Please upload a scanned PDF or high-quality image of the signed contract." ar="يرجى رفع نسخة PDF ممسوحة ضوئياً أو صورة عالية الجودة للعقد الموقع." />
+              </p>
+              
+              <ContractUploader appId={studioApp.id} currentUrl={studioApp.contract_url} />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Original Dashboard Logic continues...
+  const ownerName = profileResult.data?.full_name || user.email?.split("@")[0] || "User";
+  const totalBookingsMonth = bookingsMonthResult.count || 0;
+  const pendingBookings = pendingBookingsResult.count || 0;
+  
+  const totalRevenue = (revenueResult.data || []).reduce(
+    (acc, b) => acc + (b.total_amount || 0), 
+    0
+  );
+
+  const ratings = ratingResult.data || [];
+  const avgRating = ratings.length > 0 
+    ? (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1)
+    : "5.0";
+
+  const recentBookings = recentBookingsResult.data || [];
+  const studioData = studiosResult.data?.[0] as any;
+  const studioScore = studioData?.completion_score || 0;
+  const cert = studioData?.certified_studios?.[0];
+  const tier = cert?.studio_tiers;
+  const kitOrder = studioData?.merch_fulfillment_orders?.[0];
+
   return (
     <main className="gb-dashboard-page container">
       {/* SECTION 1: Welcome Bar */}
@@ -157,9 +238,6 @@ export default async function StudioDashboardPage() {
           </span>
         </div>
       </section>
-
-      {/* SECTION 2: Stats Row */}
-      <section className="gb-dash-grid-4" style={{ marginBottom: '40px' }}>
         {[
           { icon: "📅", val: totalBookingsMonth, labelEn: "Month Bookings", labelAr: "حجوزات الشهر", color: 'var(--gb-gold)' },
           { icon: "⏳", val: pendingBookings, labelEn: "Action Required", labelAr: "طلبات معلقة", color: 'white' },
