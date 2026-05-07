@@ -563,3 +563,26 @@ label {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+/* PORTAL SYSTEM LAYOUT */
+.portal-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--gb-bg);
+}
+
+.portal-main {
+  flex: 1;
+  min-height: 100vh;
+  padding: 0;
+  overflow-y: auto;
+  position: relative;
+}
+
+[dir="rtl"] .portal-layout {
+  flex-direction: row;
+}
+
+/* Ensure the main content doesn't get squeezed */
+.portal-main > main {
+  width: 100%;
+}

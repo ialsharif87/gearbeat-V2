@@ -59,7 +59,7 @@ export default function PortalSidebar({ role }: PortalSidebarProps) {
   }
 
   return (
-    <aside className="portal-sidebar" style={{ background: "var(--gb-bg)", borderRight: "1px solid var(--gb-border)", width: '280px', height: '100vh', position: 'sticky', top: 0, display: 'flex', flexDirection: 'column' }}>
+    <aside className="portal-sidebar" style={{ background: "var(--gb-bg)", borderInlineEnd: "1px solid var(--gb-border)", width: '280px', height: '100vh', position: 'sticky', top: 0, display: 'flex', flexDirection: 'column' }}>
       <div className="portal-sidebar-head" style={{ padding: '32px 24px' }}>
         <Link href="/" className="portal-logo" style={{ fontSize: '1.5rem', fontWeight: 900, color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
           GearBeat
