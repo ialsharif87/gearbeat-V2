@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { isDeviceTrusted, trustDevice } from "@/lib/device-trust";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,8 @@ export default function LoginPage() {
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -66,6 +69,15 @@ export default function LoginPage() {
 
       const user = data.user;
       if (!user) throw new Error("Login failed");
+
+      // TASK 1: Check for trusted device
+      const trusted = await isDeviceTrusted(user.id);
+      if (!trusted) {
+        // Switch to OTP mode automatically
+        setAuthMode("otp");
+        await handleOTPRequest();
+        return;
+      }
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -129,6 +141,11 @@ export default function LoginPage() {
       const user = data.user;
       if (!user) throw new Error("Verification failed");
 
+      // TASK 1: Trust device if requested
+      if (rememberDevice) {
+        await trustDevice(user.id);
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -185,14 +202,28 @@ export default function LoginPage() {
             </div>
             <div className="field">
               <label><T en="Password" ar="كلمة المرور" /></label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="gb-input"
-              />
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="gb-input"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  )}
+                </button>
+              </div>
               <Link 
                 href="/forgot-password" 
                 style={{ 
@@ -266,6 +297,19 @@ export default function LoginPage() {
                     style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '1.5rem' }}
                   />
                 </div>
+
+                <div className="remember-device-group" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+                  <label className="checkbox-container" style={{ display: 'flex', align-items: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: '#64748b' }}>
+                    <input
+                      type="checkbox"
+                      checked={rememberDevice}
+                      onChange={(e) => setRememberDevice(e.target.checked)}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <T en="Remember this device for 30 days" ar="تذكر هذا الجهاز لمدة 30 يوماً" />
+                  </label>
+                </div>
+
                 <button type="submit" disabled={loading} className="gb-button">
                   {loading ? <T en="Verifying..." ar="جاري التحقق..." /> : <T en="Verify & Login" ar="تحقق ودخول" />}
                 </button>
@@ -381,6 +425,50 @@ export default function LoginPage() {
         .gb-input:focus {
           outline: none;
           border-color: #D4AF37;
+        }
+
+        .password-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .password-input-wrapper input {
+          padding-right: 48px;
+          width: 100%;
+        }
+
+        .password-toggle {
+          position: absolute;
+          right: 12px;
+          background: none;
+          border: none;
+          color: #64748b;
+          cursor: pointer;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+          color: #D4AF37;
+        }
+
+        .password-toggle svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        :global(html[dir="rtl"]) .password-input-wrapper input {
+          padding-right: 16px;
+          padding-left: 48px;
+        }
+
+        :global(html[dir="rtl"]) .password-toggle {
+          right: auto;
+          left: 12px;
         }
         .gb-button {
           padding: 14px;

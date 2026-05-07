@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { isDeviceTrusted, trustDevice } from "@/lib/device-trust";
 
 export default function PortalLoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,9 @@ export default function PortalLoginPage() {
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(false);
+  const [pendingUser, setPendingUser] = useState<any>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -82,6 +86,17 @@ export default function PortalLoginPage() {
       const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw new Error("Invalid email or password");
       if (!data.user) throw new Error("Login failed");
+
+      // TASK 1: Check for trusted device
+      const trusted = await isDeviceTrusted(data.user.id);
+      if (!trusted) {
+        setPendingUser(data.user);
+        // Switch to OTP mode automatically
+        setAuthMode("otp");
+        await handleOTPRequest();
+        return;
+      }
+
       await handlePostLogin(data.user);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -121,6 +136,12 @@ export default function PortalLoginPage() {
       });
       if (authError) throw authError;
       if (!data.user) throw new Error("Verification failed");
+
+      // TASK 1: Trust device if requested
+      if (rememberDevice) {
+        await trustDevice(data.user.id);
+      }
+
       await handlePostLogin(data.user);
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
@@ -189,14 +210,28 @@ export default function PortalLoginPage() {
                       <T en="Forgot?" ar="نسيت؟" />
                     </Link>
                   </div>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    autoComplete="current-password"
-                  />
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 
                 <button type="submit" disabled={loading} className="submit-btn primary">
@@ -259,6 +294,19 @@ export default function PortalLoginPage() {
                         className="otp-input"
                       />
                     </div>
+
+                    <div className="remember-device-group">
+                      <label className="checkbox-container">
+                        <input
+                          type="checkbox"
+                          checked={rememberDevice}
+                          onChange={(e) => setRememberDevice(e.target.checked)}
+                        />
+                        <span className="checkmark"></span>
+                        <T en="Remember this device for 30 days" ar="تذكر هذا الجهاز لمدة 30 يوماً" />
+                      </label>
+                    </div>
+
                     <button type="submit" disabled={loading} className="submit-btn primary">
                       {loading ? <span className="loader"></span> : <T en="Verify & Access" ar="تحقق ودخول" />}
                     </button>
@@ -443,6 +491,49 @@ export default function PortalLoginPage() {
           outline: none;
         }
 
+        .password-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .password-input-wrapper input {
+          padding-right: 48px;
+        }
+
+        .password-toggle {
+          position: absolute;
+          right: 12px;
+          background: none;
+          border: none;
+          color: #666;
+          cursor: pointer;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+          color: #D4AF37;
+        }
+
+        .password-toggle svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        :global(html[dir="rtl"]) .password-input-wrapper input {
+          padding-right: 18px;
+          padding-left: 48px;
+        }
+
+        :global(html[dir="rtl"]) .password-toggle {
+          right: auto;
+          left: 12px;
+        }
+
         .input-group input:focus {
           border-color: #D4AF37;
           background: rgba(255, 255, 255, 0.06);
@@ -612,6 +703,28 @@ export default function PortalLoginPage() {
         :global(html[dir="rtl"]) .otp-input {
           text-align: center;
           direction: ltr;
+        }
+
+        .remember-device-group {
+          margin: 16px 0;
+          display: flex;
+          justify-content: center;
+        }
+
+        .checkbox-container {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          color: #aaa;
+          user-select: none;
+        }
+
+        .checkbox-container input {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
         }
       `}</style>
     </main>
