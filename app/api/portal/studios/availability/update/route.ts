@@ -25,6 +25,15 @@ type ExceptionInput = {
   pricePerHour: number | null;
 };
 
+type PricingRuleInput = {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  pricePerHour: number;
+  currency: string;
+  isActive: boolean;
+};
+
 function isValidTime(value: string) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
 }
@@ -116,6 +125,30 @@ function normalizeExceptions(input: unknown): ExceptionInput[] {
     });
 }
 
+function normalizePricingRules(input: unknown): PricingRuleInput[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .map((item) => {
+      const row = item as Partial<PricingRuleInput>;
+
+      return {
+        dayOfWeek: Number(row.dayOfWeek),
+        startTime: typeof row.startTime === "string" ? row.startTime : "",
+        endTime: typeof row.endTime === "string" ? row.endTime : "",
+        pricePerHour: Number(row.pricePerHour || 0),
+        currency: typeof row.currency === "string" ? row.currency.trim() || "SAR" : "SAR",
+        isActive: row.isActive !== false,
+      };
+    })
+    .filter((rule) => {
+      if (rule.dayOfWeek < 0 || rule.dayOfWeek > 6) return false;
+      if (!isValidTime(rule.startTime) || !isValidTime(rule.endTime)) return false;
+      if (rule.pricePerHour < 0) return false;
+      return rule.startTime < rule.endTime;
+    });
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
@@ -153,6 +186,7 @@ export async function POST(request: NextRequest) {
 
   const rules = normalizeRules(body?.rules);
   const exceptions = normalizeExceptions(body?.exceptions);
+  const pricingRules = normalizePricingRules(body?.pricingRules);
 
   if (rules.length !== 7) {
     return NextResponse.json(
@@ -164,6 +198,7 @@ export async function POST(request: NextRequest) {
   const now = new Date().toISOString();
   const supabaseAdmin = createAdminClient();
 
+  // 1. Save Base Rules
   const ruleRows = rules.map((rule) => ({
     studio_id: studioId,
     day_of_week: rule.dayOfWeek,
@@ -176,7 +211,6 @@ export async function POST(request: NextRequest) {
     updated_at: now,
   }));
 
-  // Perform database operations using Admin Client to ensure reliability across all owner types
   const { error: rulesError } = await supabaseAdmin
     .from("studio_availability_rules")
     .upsert(ruleRows, {
@@ -190,6 +224,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // 2. Save Exceptions
   const { error: deleteExceptionsError } = await supabaseAdmin
     .from("studio_availability_exceptions")
     .delete()
@@ -222,6 +257,43 @@ export async function POST(request: NextRequest) {
     if (exceptionsError) {
       return NextResponse.json(
         { error: `Insert Exceptions Error: ${exceptionsError.message}` },
+        { status: 500 }
+      );
+    }
+  }
+
+  // 3. Save Time-based Pricing Rules
+  const { error: deletePricingError } = await supabaseAdmin
+    .from("studio_availability_pricing_rules")
+    .delete()
+    .eq("studio_id", studioId);
+
+  if (deletePricingError) {
+    return NextResponse.json(
+      { error: `Delete Pricing Rules Error: ${deletePricingError.message}` },
+      { status: 500 }
+    );
+  }
+
+  if (pricingRules.length > 0) {
+    const pricingRows = pricingRules.map((rule) => ({
+      studio_id: studioId,
+      day_of_week: rule.dayOfWeek,
+      start_time: rule.startTime,
+      end_time: rule.endTime,
+      price_per_hour: rule.pricePerHour,
+      currency: rule.currency,
+      is_active: rule.isActive,
+      updated_at: now,
+    }));
+
+    const { error: pricingError } = await supabaseAdmin
+      .from("studio_availability_pricing_rules")
+      .insert(pricingRows);
+
+    if (pricingError) {
+      return NextResponse.json(
+        { error: `Insert Pricing Rules Error: ${pricingError.message}` },
         { status: 500 }
       );
     }

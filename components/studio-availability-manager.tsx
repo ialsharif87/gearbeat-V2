@@ -25,11 +25,22 @@ type AvailabilityException = {
   pricePerHour?: number | null;
 };
 
+type PricingRule = {
+  id?: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  pricePerHour: number;
+  currency: string;
+  isActive: boolean;
+};
+
 type StudioAvailabilityManagerProps = {
   studioId: string;
   studioName: string;
   initialRules: AvailabilityRule[];
   initialExceptions: AvailabilityException[];
+  initialPricingRules?: PricingRule[];
 };
 
 const days = [
@@ -67,10 +78,12 @@ export default function StudioAvailabilityManager({
   studioName,
   initialRules,
   initialExceptions,
+  initialPricingRules = [],
 }: StudioAvailabilityManagerProps) {
   const router = useRouter();
   const [rules, setRules] = useState<AvailabilityRule[]>(normalizeRules(initialRules));
   const [exceptions, setExceptions] = useState<AvailabilityException[]>(initialExceptions);
+  const [pricingRules, setPricingRules] = useState<PricingRule[]>(initialPricingRules);
 
   const [newExceptionStartDate, setNewExceptionStartDate] = useState("");
   const [newExceptionEndDate, setNewExceptionEndDate] = useState("");
@@ -80,6 +93,12 @@ export default function StudioAvailabilityManager({
   const [newExceptionCloseTime, setNewExceptionCloseTime] = useState("18:00");
   const [newExceptionPrice, setNewExceptionPrice] = useState<number | "">("");
 
+  // New Pricing Tier State
+  const [newPricingDay, setNewPricingDay] = useState<number>(0);
+  const [newPricingStartTime, setNewPricingStartTime] = useState("09:00");
+  const [newPricingEndTime, setNewPricingEndTime] = useState("18:00");
+  const [newPricingPrice, setNewPricingPrice] = useState<number | "">("");
+
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -88,7 +107,14 @@ export default function StudioAvailabilityManager({
     return [...exceptions].sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [exceptions]);
 
-  function updateRule(dayOfWeek: number, key: keyof AvailabilityRule, value: any) {
+  const sortedPricingRules = useMemo(() => {
+    return [...pricingRules].sort((a, b) => {
+      if (a.dayOfWeek !== b.dayOfWeek) return a.dayOfWeek - b.dayOfWeek;
+      return a.startTime.localeCompare(b.startTime);
+    });
+  }, [pricingRules]);
+
+  function updateRule(dayOfWeek: number, key: keyof AvailabilityRule, value: string | number | boolean) {
     setRules((current) => current.map((rule) => (rule.dayOfWeek === dayOfWeek ? { ...rule, [key]: value } : rule)));
   }
 
@@ -121,6 +147,30 @@ export default function StudioAvailabilityManager({
     setNewExceptionPrice("");
   }
 
+  function addPricingRule() {
+    setErrorMessage("");
+    if (newPricingPrice === "" || Number(newPricingPrice) < 0) {
+      setErrorMessage("Please enter a valid price.");
+      return;
+    }
+    if (newPricingStartTime >= newPricingEndTime) {
+      setErrorMessage("Start time must be before end time.");
+      return;
+    }
+    setPricingRules((curr) => [
+      ...curr,
+      {
+        dayOfWeek: newPricingDay,
+        startTime: newPricingStartTime,
+        endTime: newPricingEndTime,
+        pricePerHour: Number(newPricingPrice),
+        currency: "SAR",
+        isActive: true,
+      },
+    ]);
+    setNewPricingPrice("");
+  }
+
   async function saveAvailability() {
     setIsSaving(true);
     setMessage("");
@@ -129,13 +179,13 @@ export default function StudioAvailabilityManager({
       const res = await fetch("/api/portal/studios/availability/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studioId, rules, exceptions }),
+        body: JSON.stringify({ studioId, rules, exceptions, pricingRules }),
       });
       if (!res.ok) throw new Error("Could not save availability.");
       setMessage("Availability saved successfully.");
       router.refresh();
-    } catch (err: any) {
-      setErrorMessage(err.message);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "An unknown error occurred.");
     } finally {
       setIsSaving(false);
     }
@@ -408,6 +458,136 @@ export default function StudioAvailabilityManager({
               >
                 <T en="Add to Schedule" ar="إضافة للجدول" />
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Time-based Pricing Tiers Section */}
+      <section>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ width: '4px', height: '24px', background: 'var(--gb-gold)', borderRadius: '2px' }} />
+          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'white' }}>
+            <T en="Time-based Pricing Tiers" ar="فئات التسعير حسب الوقت" />
+          </h3>
+        </div>
+
+        <div className="gb-dash-grid-4" style={{ gridTemplateColumns: '1.5fr 1fr', gap: '32px', alignItems: 'start' }}>
+          {/* List of Pricing Tiers */}
+          <div className="gb-card" style={{ padding: '0', overflow: 'hidden' }}>
+            <div className="gb-card-header" style={{ padding: '24px' }}>
+              <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'white', fontWeight: 800 }}>
+                <T en="Configured Pricing Tiers" ar="فئات التسعير المكونة" />
+              </h4>
+            </div>
+            
+            <div style={{ padding: '24px' }}>
+              {sortedPricingRules.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px' }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '16px', opacity: 0.2 }}>🏷️</div>
+                  <p className="gb-muted-text">
+                    <T en="No custom pricing tiers configured." ar="لم يتم تكوين فئات تسعير مخصصة." />
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  {sortedPricingRules.map((pr, idx) => {
+                    const dayLabel = days.find(d => d.value === pr.dayOfWeek)?.label;
+                    return (
+                      <div key={`${pr.dayOfWeek}-${pr.startTime}-${idx}`} className="gb-card" style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        padding: '20px', 
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid var(--gb-border)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                          <div style={{ width: '48px', height: '48px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>💰</div>
+                          <div>
+                            <div style={{ fontWeight: 900, color: 'white', fontSize: '1.1rem' }}>
+                              {dayLabel}: {pr.startTime} - {pr.endTime}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', marginTop: '4px', fontWeight: 700, color: 'var(--gb-gold)' }}>
+                              {pr.pricePerHour} {pr.currency} / <T en="hour" ar="ساعة" />
+                              <span style={{ color: 'var(--gb-text-muted)', marginLeft: '12px' }}>
+                                • {pr.isActive ? <T en="Active" ar="نشط" /> : <T en="Inactive" ar="غير نشط" />}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => setPricingRules(curr => curr.filter((_, i) => i !== idx))}
+                          className="gb-button gb-button-outline"
+                          style={{ border: 'none', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '10px 16px' }}
+                        >
+                          <T en="Remove" ar="إزالة" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Add Pricing Tier Form */}
+          <div className="gb-card" style={{ padding: '32px', position: 'sticky', top: '24px' }}>
+            <h4 style={{ margin: '0 0 24px', fontSize: '1.25rem', color: 'white', fontWeight: 800 }}>
+              <T en="Add Pricing Tier" ar="إضافة فئة تسعير" />
+            </h4>
+            
+            <div className="gb-dashboard-stack" style={{ gap: '24px' }}>
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Day of Week" ar="اليوم" /></label>
+                <select 
+                  className="gb-input" 
+                  value={newPricingDay} 
+                  onChange={(e) => setNewPricingDay(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                >
+                  {days.map(d => (
+                    <option key={d.value} value={d.value}>{d.label as React.ReactNode}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Start Time" ar="وقت البدء" /></label>
+                  <input type="time" className="gb-input" value={newPricingStartTime} onChange={(e) => setNewPricingStartTime(e.target.value)} />
+                </div>
+                <div>
+                  <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="End Time" ar="وقت الانتهاء" /></label>
+                  <input type="time" className="gb-input" value={newPricingEndTime} onChange={(e) => setNewPricingEndTime(e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}><T en="Price (SAR/hr)" ar="السعر (ساعة)" /></label>
+                <input 
+                  type="number" 
+                  className="gb-input" 
+                  value={newPricingPrice} 
+                  onChange={(e) => setNewPricingPrice(e.target.value === "" ? "" : Number(e.target.value))} 
+                  placeholder="e.g. 150" 
+                />
+              </div>
+
+              <button 
+                className="gb-button gb-button-primary" 
+                style={{ width: '100%', justifyContent: 'center', height: '54px', fontSize: '1rem' }} 
+                onClick={addPricingRule}
+              >
+                <T en="Add Tier" ar="إضافة الفئة" />
+              </button>
+              
+              <p style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', textAlign: 'center', margin: 0 }}>
+                <T 
+                  en="Note: Time-based pricing overrides the daily base price for the selected period." 
+                  ar="ملاحظة: التسعير حسب الوقت يتجاوز السعر اليومي الأساسي للفترة المختارة."
+                />
+              </p>
             </div>
           </div>
         </div>
