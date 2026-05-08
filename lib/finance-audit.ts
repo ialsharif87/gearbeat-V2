@@ -1,3 +1,4 @@
+import "server-only";
 type SupabaseAny = any;
 
 export type FinanceAuditActionType =
