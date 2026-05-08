@@ -100,7 +100,7 @@ export default function StudioContractPage() {
             <div style={{ fontSize: "0.85rem", color: "#666" }}>
               {isFinalApproved ? <T en="You can now add studios to your profile." ar="يمكنك الآن إضافة استوديوهات لملفك." /> :
                isUploaded ? <T en="Admin is verifying your signed contract." ar="الإدارة تقوم بالتحقق من عقدك الموقع." /> :
-               <T en="Please download, sign, and upload the contract below." ar="يرجى تحميل العقد، توقيعه، ورفعه أدناه." />}
+               <T en="Please download, sign, and upload the standard agreement below." ar="يرجى تحميل العقد القياسي، توقيعه، ورفعه أدناه." />}
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function StudioContractPage() {
                 className="gb-button gb-button-outline"
                 style={{ display: "inline-flex", gap: 12, alignItems: "center" }}
               >
-                <span>📥</span> <T en="Download Studio Agreement" ar="تحميل اتفاقية الاستوديو" />
+                <span>📥</span> <T en="Download Standard Studio Agreement" ar="تحميل اتفاقية الاستوديو القياسية" />
               </a>
             </section>
 

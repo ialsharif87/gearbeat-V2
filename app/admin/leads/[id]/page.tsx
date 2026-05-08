@@ -194,19 +194,22 @@ Studio Limit: 1
         {/* Right Column: Contract Draft */}
         <div>
           <div style={{ position: 'sticky', top: 40 }}>
-            <h3 style={sectionTitleStyle}><T en="Contract Draft" ar="مسودة العقد" /></h3>
+            <h3 style={sectionTitleStyle}><T en="Internal Contract Reference" ar="مرجع العقد الداخلي" /></h3>
             <p style={{ color: '#555', fontSize: '0.85rem', marginBottom: 12 }}>
-              <T en="Edit the contract before sending it to the client." ar="قم بتعديل العقد قبل إرساله للعميل." />
+              <T en="Review terms for the standard agreement." ar="راجع شروط الاتفاقية القياسية." />
             </p>
-            <textarea 
+            <div 
               style={{ 
-                width: '100%', minHeight: 500, background: '#111', border: '1px solid #222',
-                borderRadius: 12, color: '#ccc', padding: 20, fontSize: '0.9rem', lineHeight: 1.5,
-                outline: 'none'
+                width: '100%', minHeight: 500, background: '#050505', border: '1px solid #222',
+                borderRadius: 12, color: '#666', padding: 20, fontSize: '0.85rem', lineHeight: 1.5,
+                whiteSpace: 'pre-wrap', overflowY: 'auto'
               }}
-              value={contractDraft}
-              onChange={(e) => setContractDraft(e.target.value)}
-            />
+            >
+              {contractDraft}
+            </div>
+            <p style={{ fontSize: '0.7rem', color: '#444', marginTop: 12, fontStyle: 'italic' }}>
+              * Note: Owners currently sign the standard GearBeat Studio Agreement PDF. Custom term persistence requires a future update.
+            </p>
           </div>
         </div>
       </div>

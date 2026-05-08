@@ -209,6 +209,10 @@ export async function giveFinalApproval(appId: string) {
     .single();
 
   if (!app) throw new Error("Application not found");
+  
+  if (!app.contract_url) {
+    throw new Error("Cannot activate: Signed contract has not been uploaded.");
+  }
 
   // 2. Mark Final Approved and Activated
   const { error } = await supabaseAdmin
