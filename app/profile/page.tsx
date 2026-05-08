@@ -39,7 +39,7 @@ function getRole(user: any, profile: any) {
 }
 
 function getRoleLabel(role: string) {
-  if (role === "owner") return "Studio Owner / صاحب استوديو";
+  if (role === "owner" || role === "studio_owner") return "Studio Owner / صاحب استوديو";
   if (role === "customer") return "Customer / عميل";
   return role;
 }
@@ -181,7 +181,7 @@ export default async function ProfilePage() {
       throw new Error("Please enter a valid phone number.");
     }
 
-    const allowedRoles = ["customer", "owner"];
+    const allowedRoles = ["customer", "owner", "studio_owner"];
 
     if (!allowedRoles.includes(existingRole)) {
       throw new Error("Invalid account type.");
@@ -458,7 +458,7 @@ export default async function ProfilePage() {
               <T en="Customer Dashboard" ar="لوحة العميل" />
             </Link>
 
-            {currentRole === "owner" ? (
+            {currentRole === "owner" || currentRole === "studio_owner" ? (
               <Link href="/owner" className="btn btn-secondary">
                 <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
               </Link>
