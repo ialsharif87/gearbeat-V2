@@ -1,5 +1,6 @@
 "use server";
 
+import { getSignedContractUrl } from "@/lib/storage/signed-contracts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/emails";
@@ -340,3 +341,13 @@ export async function rejectLeadApplication(leadId: string, reason: string) {
   revalidatePath("/admin/leads");
   return { success: true };
 }
+
+export async function getSignedContractAction(contractUrl: string) {
+  try {
+    const signedUrl = await getSignedContractUrl(contractUrl);
+    return { success: true, url: signedUrl };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+

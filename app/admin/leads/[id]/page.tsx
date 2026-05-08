@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
-import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail, giveFinalApproval } from "../actions";
+import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail, giveFinalApproval, getSignedContractAction } from "../actions";
 
 export default function LeadDetailPage() {
   const { id } = useParams();
@@ -15,6 +15,8 @@ export default function LeadDetailPage() {
   const [lead, setLead] = useState<any>(null);
   const [studioApp, setStudioApp] = useState<any>(null);
   const [contractDraft, setContractDraft] = useState("");
+  const [signedContractUrl, setSignedContractUrl] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Form states for boxes
@@ -35,6 +37,18 @@ export default function LeadDetailPage() {
         if (appData) {
           setStudioApp(appData);
           setContractDraft(appData.contract_draft || getDefaultContract(appData, leadData));
+
+          // NEW: Fetch signed contract URL if path exists
+          if (appData.contract_url) {
+            setLinkError(false);
+            getSignedContractAction(appData.contract_url).then(res => {
+              if (res.success && res.url) {
+                setSignedContractUrl(res.url);
+              } else {
+                setLinkError(true);
+              }
+            });
+          }
         }
       }
     } catch (err) {
@@ -224,7 +238,22 @@ Studio Limit: 1
             <div style={{ ...boxStyle, border: '1px solid #D4AF37', background: 'rgba(212, 175, 55, 0.08)', gridColumn: '1 / -1' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h4 style={{ color: '#D4AF37', margin: 0, fontSize: '1.2rem' }}><T en="Final Activation Required" ar="مطلوب التفعيل النهائي" /></h4>
-                <a href={studioApp.contract_url} target="_blank" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}><T en="View Signed Contract" ar="عرض العقد الموقع" /></a>
+                {signedContractUrl ? (
+                  <a href={signedContractUrl} target="_blank" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}>
+                    <T en="View Signed Contract" ar="عرض العقد الموقع" />
+                  </a>
+                ) : linkError ? (
+                  <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600 }}>
+                    <T 
+                      en="Unable to generate a secure contract link. Please re-upload the signed contract." 
+                      ar="تعذر إنشاء رابط عقد آمن. يرجى إعادة رفع العقد الموقع." 
+                    />
+                  </span>
+                ) : (
+                  <span style={{ color: '#666', fontSize: '0.8rem' }}>
+                    <T en="Generating access link..." ar="جاري إنشاء رابط الوصول..." />
+                  </span>
+                )}
               </div>
               <p style={{ fontSize: '0.9rem', color: '#ccc', margin: '8px 0 16px' }}>
                 <T en="The client has uploaded the signed contract. Review it and click below to grant full dashboard access and move to the Approved Partners list." ar="قام العميل برفع العقد الموقع. يرجى مراجعته والضغط أدناه لمنح الوصول الكامل للوحة التحكم والنقل إلى قائمة الشركاء المعتمدين." />
