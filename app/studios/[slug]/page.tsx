@@ -10,6 +10,7 @@ import GoogleMapsLink from "@/components/google-maps-link";
 import StudioPhotoRequirements from "@/components/studio-photo-requirements";
 import StudioOwnerTrustCard from "@/components/studio-owner-trust-card";
 import { publishStudioOverride } from "@/app/admin/admin-actions";
+import { sanitizeStudioDetail, sanitizeOwnerProfile } from "@/lib/studios-server";
 
 function formatSyncDate(value: string | null | undefined) {
   if (!value) return null;
@@ -181,19 +182,23 @@ export default async function StudioDetailsPage({
       .eq("owner_compliance_status", "approved");
   }
 
-  const { data: studio, error } = await baseQuery.single();
+  const { data: studioRaw, error } = await baseQuery.single();
 
-  if (error || !studio) {
+  if (error || !studioRaw) {
     notFound();
   }
 
-  const { data: ownerProfile } = studio.owner_auth_user_id 
+  const studio = sanitizeStudioDetail(studioRaw)!;
+
+  const { data: ownerProfileRaw } = studioRaw.owner_auth_user_id 
     ? await supabaseAdmin
       .from("profiles")
       .select("auth_user_id, full_name, email, phone_verified, email_verified, identity_verification_status")
-      .eq("auth_user_id", studio.owner_auth_user_id)
+      .eq("auth_user_id", studioRaw.owner_auth_user_id)
       .maybeSingle()
     : { data: null };
+
+  const ownerProfile = sanitizeOwnerProfile(ownerProfileRaw);
 
   const { data: studioImages } = await supabase
     .from("studio_images")
@@ -288,7 +293,7 @@ export default async function StudioDetailsPage({
               You are viewing this profile because of your super admin permissions. This profile might be incomplete or hidden from the public.
             </p>
           </div>
-          {(studio.status !== 'approved' || !studio.booking_enabled) && (
+          {(studioRaw.status !== 'approved' || !studio.booking_enabled) && (
             <form action={async () => {
               "use server";
               await publishStudioOverride(studio.id);
@@ -309,7 +314,7 @@ export default async function StudioDetailsPage({
         </div>
       )}
 
-      {studio.status === 'approved' && studio.completion_score < 70 && (
+      {studioRaw.status === 'approved' && studioRaw.completion_score < 70 && (
         <div style={{ 
           background: 'rgba(239, 68, 68, 0.1)', 
           border: '1px solid #ef4444', 
@@ -320,7 +325,7 @@ export default async function StudioDetailsPage({
           color: '#ef4444',
           fontWeight: 600
         }}>
-          ⚠️ PUBLISHED VIA OVERRIDE: This studio is live but has a low completion score ({studio.completion_score}%).
+          ⚠️ PUBLISHED VIA OVERRIDE: This studio is live but has a low completion score ({studioRaw.completion_score}%).
         </div>
       )}
 
@@ -568,7 +573,7 @@ export default async function StudioDetailsPage({
 
           <StudioOwnerTrustCard
             ownerName={ownerProfile?.full_name}
-            ownerEmail={ownerProfile?.email}
+            ownerEmail={ownerProfile?.has_email ? "owner@gearbeat.com" : null}
             ownerRole="Studio Owner"
             phoneVerified={ownerProfile?.phone_verified}
             emailVerified={ownerProfile?.email_verified}
@@ -576,8 +581,8 @@ export default async function StudioDetailsPage({
             studioVerified={studio.verified}
             locationVerified={studio.verified_location}
             businessVerified={
-              studio.owner_compliance_status === "approved" ||
-              studio.owner_compliance_status === "verified"
+              studioRaw.owner_compliance_status === "approved" ||
+              studioRaw.owner_compliance_status === "verified"
             }
             ownerTrustSummary={studio.owner_trust_summary}
           />

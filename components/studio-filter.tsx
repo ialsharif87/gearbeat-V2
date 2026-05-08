@@ -56,11 +56,8 @@ type StudioFilterProps = {
 };
 
 export default function StudioFilter({
-  cities,
   districts,
   features,
-  equipmentCategories,
-  equipmentBrands,
   countries = [],
   cityOptions = [],
   selectedCountry = "",
@@ -279,4 +276,3 @@ export default function StudioFilter({
     </form>
   );
 }
-

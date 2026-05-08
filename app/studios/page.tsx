@@ -10,6 +10,7 @@ import T from "@/components/t";
 import StudioFilter from "@/components/studio-filter";
 import { getActiveCountries } from "@/lib/countries-server";
 import { getActiveCities } from "@/lib/locations-server";
+import { sanitizeStudioListing, SanitizedStudioListing } from "@/lib/studios-server";
 
 type SearchParams = {
   q?: string;
@@ -457,7 +458,7 @@ export default async function StudiosPage({
 
     if (queryError) throw queryError;
 
-    let studiosList = (studios || []) as StudioCardRow[];
+    const studiosList = (studios || []) as StudioCardRow[];
 
     const { data: activeBoosts } = (await Promise.race([
       supabase
@@ -492,13 +493,13 @@ export default async function StudiosPage({
       });
     }
 
-    studiosList = studiosList.map((studio) => ({
+    const sanitizedList = (studiosList.map((studio) => sanitizeStudioListing({
       ...studio,
       is_boosted: boostMap.has(studio.id),
       total_boost_commission: boostMap.get(studio.id),
-    }));
+    })).filter(Boolean) as SanitizedStudioListing[]);
 
-    const resultCount = studiosList.length;
+    const resultCount = sanitizedList.length;
 
     const hasFilters =
       queryText ||
@@ -599,8 +600,8 @@ export default async function StudiosPage({
         </div>
 
         <div className="grid">
-          {studiosList.length ? (
-            studiosList.map((studio: StudioCardRow) => {
+          {sanitizedList.length ? (
+            sanitizedList.map((studio: SanitizedStudioListing) => {
               const displayCity = studio.city_name || studio.city;
               const displayDistrict = studio.district;
 
