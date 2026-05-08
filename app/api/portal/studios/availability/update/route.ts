@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 
 type DbRow = Record<string, unknown>;
 
@@ -32,10 +34,10 @@ function isValidDate(value: string) {
 }
 
 async function userOwnsStudio(
-  supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   studioId: string
 ) {
+  const supabaseAdmin = createAdminClient();
   const ownerColumnCandidates = [
     "owner_auth_user_id",
     "owner_id",
@@ -43,7 +45,7 @@ async function userOwnsStudio(
   ];
 
   for (const ownerColumn of ownerColumnCandidates) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("studios")
       .select("id")
       .eq("id", studioId)
@@ -140,7 +142,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const ownsStudio = await userOwnsStudio(supabase, user.id, studioId);
+  const ownsStudio = await userOwnsStudio(user.id, studioId);
 
   if (!ownsStudio) {
     return NextResponse.json(
@@ -160,6 +162,7 @@ export async function POST(request: NextRequest) {
   }
 
   const now = new Date().toISOString();
+  const supabaseAdmin = createAdminClient();
 
   const ruleRows = rules.map((rule) => ({
     studio_id: studioId,
@@ -173,7 +176,8 @@ export async function POST(request: NextRequest) {
     updated_at: now,
   }));
 
-  const { error: rulesError } = await supabase
+  // Perform database operations using Admin Client to ensure reliability across all owner types
+  const { error: rulesError } = await supabaseAdmin
     .from("studio_availability_rules")
     .upsert(ruleRows, {
       onConflict: "studio_id,day_of_week",
@@ -181,19 +185,19 @@ export async function POST(request: NextRequest) {
 
   if (rulesError) {
     return NextResponse.json(
-      { error: rulesError.message },
+      { error: `Rules Error: ${rulesError.message}` },
       { status: 500 }
     );
   }
 
-  const { error: deleteExceptionsError } = await supabase
+  const { error: deleteExceptionsError } = await supabaseAdmin
     .from("studio_availability_exceptions")
     .delete()
     .eq("studio_id", studioId);
 
   if (deleteExceptionsError) {
     return NextResponse.json(
-      { error: deleteExceptionsError.message },
+      { error: `Delete Exceptions Error: ${deleteExceptionsError.message}` },
       { status: 500 }
     );
   }
@@ -211,17 +215,20 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     }));
 
-    const { error: exceptionsError } = await supabase
+    const { error: exceptionsError } = await supabaseAdmin
       .from("studio_availability_exceptions")
       .insert(exceptionRows);
 
     if (exceptionsError) {
       return NextResponse.json(
-        { error: exceptionsError.message },
+        { error: `Insert Exceptions Error: ${exceptionsError.message}` },
         { status: 500 }
       );
     }
   }
+
+  revalidatePath(`/portal/studio/availability`);
+  revalidatePath(`/portal/studio/studios/${studioId}/manage`);
 
   return NextResponse.json({
     ok: true,
