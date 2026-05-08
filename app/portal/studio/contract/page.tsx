@@ -43,17 +43,12 @@ export default function StudioContractPage() {
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("provider-documents")
-        .getPublicUrl(fileName);
-
       const { error: updateError } = await supabase
         .from("studio_applications")
         .update({
-          contract_url: urlData.publicUrl,
+          contract_url: fileName,
           contract_uploaded_at: new Date().toISOString(),
-          status: "approved" // Keep as approved, but maybe add a sub-status if needed.
-          // The PART 4 says admin sees "Contracts Awaiting Second Approval"
+          status: "approved"
         })
         .eq("id", app.id);
 
