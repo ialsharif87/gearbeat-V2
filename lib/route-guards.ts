@@ -2,6 +2,8 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { createClient } from "./supabase/server";
 import { createAdminClient } from "./supabase/admin";
+import { dashboardPathForRole } from "./role-routing";
+import { isOwnerRole, isCustomerRole, isAdminRole, GearBeatRole } from "./auth-guards";
 
 type ProfileRow = {
   id: string;
@@ -94,7 +96,7 @@ export async function requireCustomerLayoutAccess() {
   const context = await getProtectedContext("/login");
 
   if (context.adminUser) {
-    redirect("/admin");
+    redirect(dashboardPathForRole("admin"));
   }
 
   const profile = requireActiveProfile(context.profile, "/login");
@@ -121,20 +123,22 @@ export async function requireOwnerLayoutAccess() {
   const context = await getProtectedContext("/portal/login");
 
   if (context.adminUser) {
-    redirect("/admin");
+    redirect(dashboardPathForRole("admin"));
   }
 
   const profile = requireActiveProfile(context.profile, "/portal/login");
 
-  if (profile.role === "admin") {
-    redirect("/admin");
+  const role = profile.role as GearBeatRole;
+
+  if (isAdminRole(role)) {
+    redirect(dashboardPathForRole(role));
   }
 
-  if (profile.role === "customer") {
-    redirect("/customer");
+  if (isCustomerRole(role)) {
+    redirect(dashboardPathForRole(role));
   }
 
-  if (profile.role !== "owner") {
+  if (!isOwnerRole(role)) {
     redirect("/forbidden");
   }
 
@@ -150,12 +154,10 @@ export async function requireAdminLayoutAccess(
   const context = await getProtectedContext("/staff-access");
 
   if (!context.adminUser) {
-    if (context.profile?.role === "owner") {
-      redirect("/portal/studio");
-    }
-
-    if (context.profile?.role === "customer") {
-      redirect("/customer");
+    const role = context.profile?.role as GearBeatRole;
+    
+    if (role) {
+      redirect(dashboardPathForRole(role));
     }
 
     redirect("/staff-access");
@@ -175,7 +177,7 @@ export async function requireVendorLayoutAccess() {
   const context = await getProtectedContext("/portal/login");
 
   if (context.adminUser) {
-    redirect("/admin");
+    redirect(dashboardPathForRole("admin"));
   }
 
   const profile = requireActiveProfile(context.profile, "/portal/login");
