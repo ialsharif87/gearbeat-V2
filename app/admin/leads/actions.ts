@@ -97,7 +97,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
         password: tempPassword,
         user_metadata: {
           full_name: app.full_name,
-          role: "owner",
+          role: "studio_owner",
           company_name: app.company_name_en
         }
       });
@@ -108,7 +108,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
         email_confirm: true,
         user_metadata: {
           full_name: app.full_name,
-          role: "owner",
+          role: "studio_owner",
           company_name: app.company_name_en
         }
       });
@@ -125,7 +125,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       full_name: app.full_name,
       email: app.email,
       phone: app.phone,
-      role: "owner",
+      role: "studio_owner",
       account_status: "approved", 
       updated_at: new Date().toISOString()
     });
@@ -239,8 +239,9 @@ export async function giveFinalApproval(appId: string) {
           name: app.company_name_en || app.full_name,
           name_en: app.company_name_en || app.full_name,
           name_ar: app.company_name_ar || app.full_name,
-          city: app.country || '—',
-          city_name: app.country || '—',
+          city: app.city || '—',
+          city_name: app.city || '—',
+          description: app.about_company,
           status: 'approved',
           verified: true,
           booking_enabled: true,
@@ -248,6 +249,16 @@ export async function giveFinalApproval(appId: string) {
         });
       
       if (studioError) console.error("Error creating studio record:", studioError);
+    } else {
+      // Prevent duplicates and safely link if needed
+      console.log("Studio already exists for this owner, skipping auto-creation.");
+      
+      // Optional: Update studio status if it was pending
+      await supabaseAdmin
+        .from("studios")
+        .update({ status: 'approved', verified: true })
+        .eq("id", existingStudio.id)
+        .eq("status", "pending");
     }
   }
 
