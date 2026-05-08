@@ -9,13 +9,7 @@ import CountryPhoneFields from "@/components/country-phone-fields";
 // import { getActiveCountries } from "@/lib/countries"; // Removed server-side import from client component
 import { isValidE164, normalizePhoneToE164 } from "@/lib/phone";
 
-type Country = {
-  country_code: string;
-  name_en: string;
-  name_ar: string;
-  phone_code: string;
-  currency_code: string;
-};
+import { CountryOption } from "@/lib/countries";
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState("");
@@ -32,7 +26,7 @@ export default function SignupPage() {
   const [otpCode, setOtpCode] = useState("");
   const [cooldown, setCooldown] = useState(0);
   
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [countries, setCountries] = useState<CountryOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

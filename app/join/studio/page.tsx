@@ -6,70 +6,19 @@ import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { createNotification } from "@/lib/notifications";
 
-const COUNTRY_CODES = [
-  { code: "+966", label: "Saudi Arabia", ar: "المملكة العربية السعودية", flag: "🇸🇦" },
-  { code: "+971", label: "UAE", ar: "الإمارات", flag: "🇦🇪" },
-  { code: "+965", label: "Kuwait", ar: "الكويت", flag: "🇰🇼" },
-  { code: "+974", label: "Qatar", ar: "قطر", flag: "🇶🇦" },
-  { code: "+968", label: "Oman", ar: "عمان", flag: "🇴🇲" },
-  { code: "+973", label: "Bahrain", ar: "البحرين", flag: "🇧🇭" },
-  { code: "+962", label: "Jordan", ar: "الأردن", flag: "🇯🇴" },
-  { code: "+20", label: "Egypt", ar: "مصر", flag: "🇪🇬" },
-  { code: "+1", label: "USA", ar: "الولايات المتحدة", flag: "🇺🇸" },
-  { code: "+44", label: "UK", ar: "المملكة المتحدة", flag: "🇬🇧" },
-  { code: "+49", label: "Germany", ar: "ألمانيا", flag: "🇩🇪" },
-  { code: "+33", label: "France", ar: "فرنسا", flag: "🇫🇷" },
-  { code: "+86", label: "China", ar: "الصين", flag: "🇨🇳" },
-  { code: "+91", label: "India", ar: "الهند", flag: "🇮🇳" },
-  { code: "+81", label: "Japan", ar: "اليابان", flag: "🇯🇵" },
-  { code: "+55", label: "Brazil", ar: "البرازيل", flag: "🇧🇷" },
-  { code: "+7", label: "Russia", ar: "روسيا", flag: "🇷🇺" },
-  { code: "+82", label: "South Korea", ar: "كوريا الجنوبية", flag: "🇰🇷" },
-  { code: "+39", label: "Italy", ar: "إيطاليا", flag: "🇮🇹" },
-  { code: "+34", label: "Spain", ar: "إسبانيا", flag: "🇪🇸" },
-];
-
-const WORLD_COUNTRIES = [
-  { id: "SA", en: "Saudi Arabia", ar: "المملكة العربية السعودية" },
-  { id: "AE", en: "UAE", ar: "الإمارات العربية المتحدة" },
-  { id: "KW", en: "Kuwait", ar: "الكويت" },
-  { id: "QA", en: "Qatar", ar: "قطر" },
-  { id: "BH", en: "Bahrain", ar: "البحرين" },
-  { id: "OM", en: "Oman", ar: "عمان" },
-  { id: "JO", en: "Jordan", ar: "الأردن" },
-  { id: "EG", en: "Egypt", ar: "مصر" },
-  { id: "US", en: "USA", ar: "الولايات المتحدة الأمريكية" },
-  { id: "GB", en: "UK", ar: "المملكة المتحدة" },
-  { id: "DE", en: "Germany", ar: "ألمانيا" },
-  { id: "FR", en: "France", ar: "فرنسا" },
-  { id: "CN", en: "China", ar: "الصين" },
-  { id: "IN", en: "India", ar: "الهند" },
-  { id: "JP", en: "Japan", ar: "اليابان" },
-  { id: "BR", en: "Brazil", ar: "البرازيل" },
-  { id: "RU", en: "Russia", ar: "روسيا" },
-  { id: "KR", en: "South Korea", ar: "كوريا الجنوبية" },
-  { id: "IT", en: "Italy", ar: "إيطاليا" },
-  { id: "ES", en: "Spain", ar: "إسبانيا" },
-];
-
-const CITIES_DATA: Record<string, string[]> = {
-  SA: ["الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "الخبر", "الأحساء", "تبوك", "أبها", "القصيم", "حائل", "نجران", "جازان", "الطائف", "ينبع", "بريدة", "خميس مشيط", "الجبيل", "الخرج", "عرعر"],
-  AE: ["دبي", "أبوظبي", "الشارقة", "عجمان", "رأس الخيمة", "الفجيرة", "أم القيوين"],
-  KW: ["مدينة الكويت", "حولي", "الفروانية", "الأحمدي", "الجهراء", "مبارك الكبير"],
-  QA: ["الدوحة", "الريان", "الوكرة", "أم صلال", "الخور", "الشحانية", "الشمال"],
-  BH: ["المنامة", "المحرق", "الرفاع", "مدينة عيسى", "مدينة حمد", "سترة", "الحد"],
-  OM: ["مسقط", "صلالة", "صحار", "نزوى", "صور", "عبري", "البريمي"],
-  JO: ["عمان", "إربد", "الزرقاء", "العقبة", "السلط", "المفرق", "جرش", "مادبا"],
-  EG: ["القاهرة", "الإسكندرية", "الجيزة", "شرم الشيخ", "الغردقة", "أسوان", "الأقصر", "طنطا", "المنصورة", "الإسماعيلية", "بورسعيد", "السويس"],
-  US: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose", "Austin", "Jacksonville", "Miami", "Seattle", "Denver", "Nashville", "Boston", "Las Vegas", "Portland", "Memphis"],
-  GB: ["London", "Birmingham", "Manchester", "Leeds", "Glasgow", "Liverpool", "Bristol", "Edinburgh", "Sheffield", "Cardiff", "Belfast", "Nottingham"],
-};
+import { CountryOption } from "@/lib/countries";
+import { CityOption } from "@/lib/locations";
 
 export default function JoinStudioPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedOnce, setSubmittedOnce] = useState(false);
+
+  // Data State
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [fetchingData, setFetchingData] = useState(true);
 
   // Form State
   const [fullName, setFullName] = useState("");
@@ -85,6 +34,48 @@ export default function JoinStudioPage() {
   const [plannedStudios, setPlannedStudios] = useState("1");
   const [aboutCompany, setAboutCompany] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // Fetch Countries
+  useEffect(() => {
+    async function fetchCountries() {
+      try {
+        const res = await fetch("/api/countries");
+        if (!res.ok) throw new Error("Failed to load countries");
+        const data = await res.json();
+        setCountries(data);
+        
+        // Update phone code if SA exists
+        const sa = data.find((c: CountryOption) => c.country_code === "SA");
+        if (sa) setPhoneCode(sa.phone_code);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setFetchingData(false);
+      }
+    }
+    fetchCountries();
+  }, []);
+
+  // Fetch Cities when country changes
+  useEffect(() => {
+    if (!country) {
+      setCities([]);
+      return;
+    }
+
+    async function fetchCities() {
+      try {
+        const res = await fetch(`/api/cities?country=${country}`);
+        if (!res.ok) throw new Error("Failed to load cities");
+        const data = await res.json();
+        setCities(data);
+      } catch (err) {
+        console.error(err);
+        setCities([]);
+      }
+    }
+    fetchCities();
+  }, [country]);
 
   // Files State
   const [crFile, setCrFile] = useState<File | null>(null);
@@ -156,8 +147,8 @@ export default function JoinStudioPage() {
         cr_document_url: crUrl,
         national_address_url: nationalAddressUrl,
         bank_document_url: bankUrl,
-        country: WORLD_COUNTRIES.find(c => c.id === country)?.en || country,
-        city,
+        country: countries.find(c => c.country_code === country)?.name_en || country,
+        city: cities.find(c => c.id === city)?.name_en || city,
         planned_studios_count: parseInt(plannedStudios),
         about_company: aboutCompany,
         terms_accepted: termsAccepted,
@@ -213,7 +204,13 @@ export default function JoinStudioPage() {
     );
   }
 
-  const cities = CITIES_DATA[country] || [];
+  if (fetchingData) {
+    return (
+      <main style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <T en="Loading..." ar="جاري التحميل..." />
+      </main>
+    );
+  }
 
   return (
     <main style={{ minHeight: "100vh", background: "#0a0a0a", padding: "60px 20px" }}>
@@ -251,8 +248,8 @@ export default function JoinStudioPage() {
                     value={phoneCode} 
                     onChange={(e) => setPhoneCode(e.target.value)}
                   >
-                    {COUNTRY_CODES.map(c => (
-                      <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                    {countries.map(c => (
+                      <option key={c.country_code} value={c.phone_code}>{c.phone_code}</option>
                     ))}
                   </select>
                   <input className="input" style={{ flex: 1 }} placeholder="5XXXXXXXX" value={mobile} onChange={(e) => setMobile(e.target.value)} required />
@@ -292,9 +289,9 @@ export default function JoinStudioPage() {
                 <div style={{ display: "grid", gap: 8 }}>
                   <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Country" ar="الدولة" /> *</label>
                   <select className="input" value={country} onChange={(e) => { setCountry(e.target.value); setCity(""); }} required>
-                    {WORLD_COUNTRIES.map(c => (
-                      <option key={c.id} value={c.id}>
-                        <T en={c.en} ar={c.ar} />
+                    {countries.map(c => (
+                      <option key={c.country_code} value={c.country_code}>
+                        <T en={c.name_en} ar={c.name_ar} />
                       </option>
                     ))}
                   </select>
@@ -304,7 +301,11 @@ export default function JoinStudioPage() {
                   {cities.length > 0 ? (
                     <select className="input" value={city} onChange={(e) => setCity(e.target.value)} required>
                       <option value=""><T en="Select City" ar="اختر المدينة" /></option>
-                      {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                      {cities.map(c => (
+                        <option key={c.id} value={c.id}>
+                          <T en={c.name_en} ar={c.name_ar} />
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <input 
