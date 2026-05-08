@@ -45,7 +45,7 @@ export function AdminSidebar({
         <NavItem href="/admin" icon="📊" labelEn="Dashboard" labelAr="لوحة التحكم" active={isActive('/admin')} />
         <NavItem href="/admin/accounting" icon="💰" labelEn="Accounting" labelAr="المحاسبة" active={isActive('/admin/accounting')} />
         <NavItem href="/admin/promos" icon="🏷️" labelEn="Promos & Ads" labelAr="العروض والإعلانات" active={isActive('/admin/promos')} />
-        <NavItem href="/admin/roadmap" icon="🗺️" labelEn="Roadmap & PDPL" labelAr="خارطة الطريق والامتثال" active={isActive('/admin/roadmap')} />
+
 
         {/* SECTION 2: Sellers */}
         <div onClick={() => setSellersOpen(!sellersOpen)} style={collapsibleHeaderStyle}>
@@ -83,7 +83,7 @@ export function AdminSidebar({
           <T en="General" ar="عام" />
         </div>
         <NavItem href="/admin/reviews" icon="⭐" labelEn="Reviews" labelAr="التقييمات" active={isActive('/admin/reviews')} />
-        <NavItem href="/admin/onboarding-setup" icon="🧪" labelEn="Test Onboarding" labelAr="اختبار الربط" active={isActive('/admin/onboarding-setup')} />
+
         <NavItem href="/admin/reports" icon="📈" labelEn="Reports" labelAr="التقارير" active={isActive('/admin/reports')} />
         <NavItem href="/admin/settings" icon="⚙️" labelEn="Settings" labelAr="الإعدادات" active={isActive('/admin/settings')} />
       </div>
