@@ -1,3 +1,4 @@
+import "server-only";
 import { redirect } from "next/navigation";
 
 export type DbRow = Record<string, unknown>;

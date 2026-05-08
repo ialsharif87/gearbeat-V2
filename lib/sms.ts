@@ -1,3 +1,4 @@
+import "server-only";
 /**
  * GearBeat SMS & WhatsApp Communication Utility
  * Integration: Twilio / Unifonic
