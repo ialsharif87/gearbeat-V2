@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { CountryOption } from "@/lib/countries";
+import { CityOption } from "@/lib/locations";
 
 export default function StoreOnboardingPage() {
   const [step, setStep] = useState(1);
@@ -13,7 +15,7 @@ export default function StoreOnboardingPage() {
   const [formData, setFormData] = useState({
     nameEn: "",
     nameAr: "",
-    city: "Riyadh",
+    city: "",
     website: "",
     phone: "",
     crNumber: "",
@@ -26,6 +28,11 @@ export default function StoreOnboardingPage() {
     shippingPolicy: "",
     agreed: false
   });
+
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [fetchingLocations, setFetchingLocations] = useState(true);
+  const [country, setCountry] = useState("SA");
 
   useEffect(() => {
     const supabase = createClient();
@@ -47,15 +54,33 @@ export default function StoreOnboardingPage() {
               bankName: profile.metadata?.bank_name || "",
               categories: profile.metadata?.categories || [],
               warrantyPolicy: profile.metadata?.warranty_policy || "",
-              returnPolicy: profile.metadata?.return_policy || "",
-              shippingPolicy: profile.metadata?.shipping_policy || "",
+              return_policy: profile.metadata?.return_policy || "",
+              shipping_policy: profile.metadata?.shipping_policy || "",
               agreed: profile.agreement_status === "signed"
             }));
           }
         });
       }
     });
-  }, []);
+
+    fetch("/api/countries")
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+        setFetchingLocations(false);
+      });
+  }, [userId]);
+
+  useEffect(() => {
+    if (!country) return;
+    setFetchingLocations(true);
+    fetch(`/api/cities?country=${country}`)
+      .then(res => res.json())
+      .then(data => {
+        setCities(data);
+        setFetchingLocations(false);
+      });
+  }, [country]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -107,7 +132,9 @@ export default function StoreOnboardingPage() {
           return_policy: formData.returnPolicy,
           shipping_policy: formData.shippingPolicy,
           iban: formData.iban,
-          bank_name: formData.bankName
+          bank_name: formData.bankName,
+          country: countries.find(c => c.country_code === country)?.name_en || country,
+          city: cities.find(c => c.id === formData.city)?.name_en || formData.city
         }
       });
 
@@ -179,13 +206,26 @@ export default function StoreOnboardingPage() {
             <label><T en="Store Name (Arabic)" ar="اسم المتجر (عربي)" /> *</label>
             <input className="input" name="nameAr" value={formData.nameAr} onChange={handleChange} required />
 
-            <label><T en="City" ar="المدينة" /></label>
-            <select className="input" name="city" value={formData.city} onChange={handleChange}>
-              <option>Riyadh</option>
-              <option>Jeddah</option>
-              <option>Dammam</option>
-              <option>Other</option>
+            <label><T en="Country" ar="الدولة" /></label>
+            <select className="input" value={country} onChange={(e) => { setCountry(e.target.value); setFormData(prev => ({ ...prev, city: "" })); }}>
+              {countries.map(c => (
+                <option key={c.country_code} value={c.country_code}>{c.name_en} / {c.name_ar}</option>
+              ))}
             </select>
+
+            <label><T en="City" ar="المدينة" /></label>
+            {fetchingLocations ? (
+              <div className="input" style={{ opacity: 0.5 }}>Loading...</div>
+            ) : cities.length > 0 ? (
+              <select className="input" name="city" value={formData.city} onChange={handleChange}>
+                <option value="">Select City</option>
+                {cities.map(c => (
+                  <option key={c.id} value={c.id}>{c.name_en} / {c.name_ar}</option>
+                ))}
+              </select>
+            ) : (
+              <input className="input" name="city" value={formData.city} onChange={handleChange} placeholder="Enter city name" />
+            )}
 
             <label><T en="Website URL (Optional)" ar="رابط الموقع (اختياري)" /></label>
             <input className="input" name="website" value={formData.website} onChange={handleChange} placeholder="https://..." />

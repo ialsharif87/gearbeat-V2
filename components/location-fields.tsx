@@ -1,14 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import T from "@/components/t";
 import type { CountryOption } from "@/lib/countries";
 import type { CityOption } from "@/lib/locations";
-import { filterCitiesByCountry } from "@/lib/locations";
 
 type LocationFieldsProps = {
-  countries: CountryOption[];
-  cities: CityOption[];
   defaultCountryCode?: string;
   defaultCityId?: string;
   defaultCityName?: string;
@@ -29,8 +26,6 @@ type LocationFieldsProps = {
 };
 
 export default function LocationFields({
-  countries,
-  cities,
   defaultCountryCode = "SA",
   defaultCityId = "",
   defaultCityName = "",
@@ -49,42 +44,60 @@ export default function LocationFields({
   longitudeName = "longitude",
   requireCoordinates = false,
 }: LocationFieldsProps) {
-  const initialCountryCode = countries.some(
-    (country) => country.country_code === defaultCountryCode
-  )
-    ? defaultCountryCode
-    : countries[0]?.country_code || "SA";
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [selectedCountryCode, setSelectedCountryCode] =
-    useState(initialCountryCode);
-
+  const [selectedCountryCode, setSelectedCountryCode] = useState(defaultCountryCode);
   const [selectedCityId, setSelectedCityId] = useState(defaultCityId);
   const [manualCityName, setManualCityName] = useState(defaultCityName);
 
-  const filteredCities = useMemo(
-    () => filterCitiesByCountry(cities, selectedCountryCode),
-    [cities, selectedCountryCode]
-  );
+  useEffect(() => {
+    fetch("/api/countries")
+      .then((res) => res.json())
+      .then((data) => {
+        setCountries(data);
+        if (!selectedCountryCode && data.length > 0) {
+          setSelectedCountryCode(data[0].country_code);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch countries:", err));
+  }, [selectedCountryCode]);
+
+  useEffect(() => {
+    if (!selectedCountryCode) return;
+    setLoading(true);
+    fetch(`/api/cities?country=${selectedCountryCode}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCities(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch cities:", err);
+        setLoading(false);
+      });
+  }, [selectedCountryCode]);
 
   const selectedCity = useMemo(
-    () => filteredCities.find((city) => city.id === selectedCityId),
-    [filteredCities, selectedCityId]
+    () => cities.find((city) => city.id === selectedCityId),
+    [cities, selectedCityId]
   );
 
   const finalCityName =
     selectedCity?.name_en || manualCityName || defaultCityName || "";
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <div className="grid grid-2">
-        <div>
-          <label>
-            <T en="Country" ar="الدولة" />
+    <div style={{ display: "grid", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ display: "grid", gap: 8 }}>
+          <label className="gb-detail-label">
+            <T en="Country" ar="الدولة" /> *
           </label>
 
           <select
             name={countryName}
-            className="input"
+            className="gb-input"
             value={selectedCountryCode}
             required
             onChange={(event) => {
@@ -101,32 +114,33 @@ export default function LocationFields({
           </select>
         </div>
 
-        <div>
-          <label>
-            <T en="City" ar="المدينة" />
+        <div style={{ display: "grid", gap: 8 }}>
+          <label className="gb-detail-label">
+            <T en="City" ar="المدينة" /> *
           </label>
 
-          {filteredCities.length > 0 ? (
+          {loading ? (
+            <div className="gb-input" style={{ opacity: 0.5, display: "flex", alignItems: "center" }}>
+               <T en="Loading cities..." ar="جاري تحميل المدن..." />
+            </div>
+          ) : cities.length > 0 ? (
             <select
               name={cityIdName}
-              className="input"
+              className="gb-input"
               value={selectedCityId}
               required
               onChange={(event) => {
                 const nextCityId = event.target.value;
-                const nextCity = filteredCities.find(
-                  (city) => city.id === nextCityId
-                );
-
+                const nextCity = cities.find((city) => city.id === nextCityId);
                 setSelectedCityId(nextCityId);
                 setManualCityName(nextCity?.name_en || "");
               }}
             >
               <option value="">
-                Select city
+                <T en="Select City" ar="اختر المدينة" />
               </option>
 
-              {filteredCities.map((city) => (
+              {cities.map((city) => (
                 <option key={city.id} value={city.id}>
                   {city.name_en} / {city.name_ar}
                 </option>
@@ -135,11 +149,11 @@ export default function LocationFields({
           ) : (
             <input
               name={cityNameName}
-              className="input"
+              className="gb-input"
               value={manualCityName}
               required
               onChange={(event) => setManualCityName(event.target.value)}
-              placeholder="City"
+              placeholder="Enter city name"
             />
           )}
 
@@ -152,28 +166,28 @@ export default function LocationFields({
         </div>
       </div>
 
-      <div className="grid grid-2">
-        <div>
-          <label>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ display: "grid", gap: 8 }}>
+          <label className="gb-detail-label">
             <T en="District / Area" ar="الحي / المنطقة" />
           </label>
 
           <input
             name={districtName}
-            className="input"
+            className="gb-input"
             defaultValue={defaultDistrict}
-            placeholder="District or area"
+            placeholder="e.g. Al Olaya"
           />
         </div>
 
-        <div>
-          <label>
-            <T en="Address Line" ar="العنوان" />
+        <div style={{ display: "grid", gap: 8 }}>
+          <label className="gb-detail-label">
+            <T en="Address Line" ar="العنوان" /> *
           </label>
 
           <input
             name={addressLineName}
-            className="input"
+            className="gb-input"
             defaultValue={defaultAddressLine}
             required
             placeholder="Street, building, floor"
@@ -181,42 +195,42 @@ export default function LocationFields({
         </div>
       </div>
 
-      <div>
-        <label>
+      <div style={{ display: "grid", gap: 8 }}>
+        <label className="gb-detail-label">
           <T en="Google Maps URL" ar="رابط Google Maps" />
         </label>
 
         <input
           name={googleMapsUrlName}
-          className="input"
+          className="gb-input"
           defaultValue={defaultGoogleMapsUrl}
           placeholder="https://maps.google.com/..."
         />
       </div>
 
-      <div className="grid grid-2">
-        <div>
-          <label>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ display: "grid", gap: 8 }}>
+          <label className="gb-detail-label">
             <T en="Latitude" ar="خط العرض" />
           </label>
 
           <input
             name={latitudeName}
-            className="input"
+            className="gb-input"
             defaultValue={defaultLatitude || ""}
             required={requireCoordinates}
             placeholder="24.7136"
           />
         </div>
 
-        <div>
-          <label>
+        <div style={{ display: "grid", gap: 8 }}>
+          <label className="gb-detail-label">
             <T en="Longitude" ar="خط الطول" />
           </label>
 
           <input
             name={longitudeName}
-            className="input"
+            className="gb-input"
             defaultValue={defaultLongitude || ""}
             required={requireCoordinates}
             placeholder="46.6753"
@@ -224,10 +238,10 @@ export default function LocationFields({
         </div>
       </div>
 
-      <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.6 }}>
+      <p style={{ color: "#666", fontSize: "0.85rem", lineHeight: 1.6, margin: 0 }}>
         <T
-          en="Tip: Google Maps URL is enough for now. Latitude and longitude will improve nearby studio search later."
-          ar="ملاحظة: رابط Google Maps يكفي حاليًا. خط العرض والطول سيحسنان البحث عن الاستوديوهات القريبة لاحقًا."
+          en="Tip: Google Maps URL is enough for now. Latitude and longitude will improve search results later."
+          ar="ملاحظة: رابط Google Maps يكفي حاليًا. خط العرض والطول سيحسنان نتائج البحث لاحقًا."
         />
       </p>
     </div>
