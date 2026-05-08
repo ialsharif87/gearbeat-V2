@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { PasswordInput } from "@/components/ui/password-input";
+
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
@@ -15,7 +17,7 @@ export default function UpdatePasswordPage() {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+
   const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
@@ -137,53 +139,30 @@ export default function UpdatePasswordPage() {
             <form onSubmit={handleUpdatePassword} className="gb-auth-form">
               <div className="gb-field">
                 <label><T en="New Password" ar="كلمة المرور الجديدة" /></label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    )}
-                  </button>
-                </div>
+                <PasswordInput
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="••••••••"
+                  required
+                  variant="portal"
+                  minLength={8}
+                  autoComplete="new-password"
+                />
               </div>
 
               <div className="gb-field">
                 <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    )}
-                  </button>
-                </div>
+                <PasswordInput
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="••••••••"
+                  required
+                  variant="portal"
+                  minLength={8}
+                  autoComplete="new-password"
+                />
               </div>
+
 
               <button className="gb-submit-btn" type="submit" disabled={loading}>
                 {loading ? (
@@ -275,50 +254,8 @@ export default function UpdatePasswordPage() {
           border-color: #D4AF37;
         }
 
-        .password-input-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .password-input-wrapper input {
-          padding-right: 48px;
-          width: 100%;
-        }
-
-        .password-toggle {
-          position: absolute;
-          right: 12px;
-          background: none;
-          border: none;
-          color: #666;
-          cursor: pointer;
-          padding: 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: color 0.2s;
-        }
-
-        .password-toggle:hover {
-          color: #D4AF37;
-        }
-
-        .password-toggle svg {
-          width: 20px;
-          height: 20px;
-        }
-
-        :global(html[dir="rtl"]) .password-input-wrapper input {
-          padding-right: 16px;
-          padding-left: 48px;
-        }
-
-        :global(html[dir="rtl"]) .password-toggle {
-          right: auto;
-          left: 12px;
-        }
         .gb-submit-btn {
+
           background: linear-gradient(135deg, #D4AF37, #B8923A);
           color: black;
           border: none;
