@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { PasswordInput } from "@/components/ui/password-input";
+
 
 export default function StaffAccessPage() {
   const [email, setEmail] = useState("");
@@ -87,14 +89,15 @@ export default function StaffAccessPage() {
             <label>
               <T en="Password" ar="كلمة المرور" />
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="gb-input"
+              variant="portal"
+              autoComplete="current-password"
             />
+
             <Link 
               href="/forgot-password" 
               style={{ 
