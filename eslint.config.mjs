@@ -9,7 +9,7 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = [
   {
-    ignores: ["fix_colors.js", "scratch/**"]
+    ignores: ["fix_colors.js", "scratch/**", "foundation-temp/**", ".next/**"]
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
