@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { isDeviceTrusted, trustDevice } from "@/lib/device-trust";
 import { PasswordInput } from "@/components/ui/password-input";
+import { dashboardPathForRole } from "@/lib/role-routing";
 
 
 
@@ -45,13 +46,7 @@ export default function LoginPage() {
           .maybeSingle();
         
         const role = profile?.role;
-        if (role === "owner" || role === "studio_owner") {
-          router.replace("/portal/studio");
-        } else if (role === "vendor") {
-          router.replace("/portal/store");
-        } else {
-          router.replace("/customer");
-        }
+        router.replace(dashboardPathForRole(role));
       }
     }
     checkUser();
@@ -89,13 +84,7 @@ export default function LoginPage() {
         .maybeSingle();
 
       const role = profile?.role;
-      if (role === "owner" || role === "studio_owner") {
-        router.push("/portal/studio");
-      } else if (role === "vendor") {
-        router.push("/portal/store");
-      } else {
-        router.push("/customer");
-      }
+      router.push(dashboardPathForRole(role));
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
     } finally {
@@ -156,13 +145,7 @@ export default function LoginPage() {
         .maybeSingle();
 
       const role = profile?.role;
-      if (role === "owner" || role === "studio_owner") {
-        router.push("/portal/studio");
-      } else if (role === "vendor") {
-        router.push("/portal/store");
-      } else {
-        router.push("/customer");
-      }
+      router.push(dashboardPathForRole(role));
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
     } finally {

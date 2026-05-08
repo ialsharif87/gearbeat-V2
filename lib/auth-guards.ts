@@ -1,6 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { isDeviceTrusted } from "@/lib/device-trust";
+import { dashboardPathForRole as getDashboardPath } from "@/lib/role-routing";
 
 export type DbRow = Record<string, unknown>;
 
@@ -265,12 +266,7 @@ export async function requireCustomerOrRedirect(
 }
 
 export function dashboardPathForRole(role: GearBeatRole) {
-  if (isAdminRole(role)) return "/admin";
-  if (isOwnerRole(role)) return "/portal/studio";
-  if (isVendorRole(role)) return "/portal/store";
-
-
-  return "/customer";
+  return getDashboardPath(role);
 }
 
 export type DeviceTrustCheckResult = {
