@@ -29,6 +29,16 @@ type AvailabilityException = {
   pricePerHour?: number | null;
 };
 
+type PricingRule = {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  pricePerHour: number;
+  currency: string;
+  isActive: boolean;
+};
+
 
 
 function readText(row: DbRow | null | undefined, keys: string[], fallback = "") {
@@ -104,6 +114,18 @@ function normalizeException(row: DbRow): AvailabilityException {
   };
 }
 
+function normalizePricingRule(row: DbRow): PricingRule {
+  return {
+    id: readText(row, ["id"]),
+    dayOfWeek: Number(row.day_of_week),
+    startTime: (readText(row, ["start_time"]) || "09:00").slice(0, 5),
+    endTime: (readText(row, ["end_time"]) || "18:00").slice(0, 5),
+    pricePerHour: typeof row.price_per_hour === "number" ? row.price_per_hour : 0,
+    currency: readText(row, ["currency"]) || "SAR",
+    isActive: Boolean(row.is_active),
+  };
+}
+
 export default async function StudioAvailabilityPage({
   searchParams,
 }: {
@@ -142,6 +164,7 @@ export default async function StudioAvailabilityPage({
 
   let initialRules: AvailabilityRule[] = [];
   let initialExceptions: AvailabilityException[] = [];
+  let initialPricingRules: PricingRule[] = [];
 
   if (selectedStudioId) {
     const { data: rules } = await supabase
@@ -156,8 +179,16 @@ export default async function StudioAvailabilityPage({
       .eq("studio_id", selectedStudioId)
       .order("start_date", { ascending: true });
 
+    const { data: pricingRules } = await supabase
+      .from("studio_availability_pricing_rules")
+      .select("*")
+      .eq("studio_id", selectedStudioId)
+      .order("day_of_week", { ascending: true })
+      .order("start_time", { ascending: true });
+
     initialRules = ((rules || []) as DbRow[]).map(normalizeRule);
     initialExceptions = ((exceptions || []) as DbRow[]).map(normalizeException);
+    initialPricingRules = ((pricingRules || []) as DbRow[]).map(normalizePricingRule);
   }
 
   return (
@@ -245,6 +276,7 @@ export default async function StudioAvailabilityPage({
             studioName={selectedStudioName}
             initialRules={initialRules}
             initialExceptions={initialExceptions}
+            initialPricingRules={initialPricingRules}
           />
         </div>
       )}
