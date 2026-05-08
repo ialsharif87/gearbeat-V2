@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { isDeviceTrusted } from "@/lib/device-trust";
 
 export type DbRow = Record<string, unknown>;
 
@@ -260,5 +261,26 @@ export function dashboardPathForRole(role: GearBeatRole) {
   if (isOwnerRole(role)) return "/portal/studio";
   if (isVendorRole(role)) return "/portal/store";
 
+
   return "/customer";
+}
+
+export type DeviceTrustCheckResult = {
+  userId: string;
+  isTrustedDevice: boolean;
+  requiresOtp: boolean;
+};
+
+/**
+ * Checks the device trust status for an authenticated user.
+ * This is a foundation helper and does not perform redirects.
+ * Added in Patch 19.
+ */
+export async function getDeviceTrustStatusForUser(userId: string): Promise<DeviceTrustCheckResult> {
+  const isTrusted = await isDeviceTrusted(userId);
+  return {
+    userId,
+    isTrustedDevice: isTrusted,
+    requiresOtp: !isTrusted,
+  };
 }
