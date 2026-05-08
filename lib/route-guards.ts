@@ -163,7 +163,7 @@ export async function requireAdminLayoutAccess(
     redirect("/staff-access");
   }
 
-  if (!allowedRoles.includes(context.adminUser.admin_role)) {
+  if (context.adminUser.admin_role !== "super_admin" && !allowedRoles.includes(context.adminUser.admin_role)) {
     redirect("/forbidden");
   }
 
