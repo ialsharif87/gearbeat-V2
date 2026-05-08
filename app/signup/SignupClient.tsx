@@ -16,7 +16,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"customer" | "owner">("customer");
+  const [role, setRole] = useState<"customer" | "studio_owner">("customer");
   const [countryCode, setCountryCode] = useState("SA");
   const [phoneE164, setPhoneE164] = useState("");
   
@@ -35,7 +35,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
 
   useEffect(() => {
     const accountParam = searchParams.get("account");
-    if (accountParam === "owner") setRole("owner");
+    if (accountParam === "owner" || accountParam === "studio_owner") setRole("studio_owner");
     
     const errorParam = searchParams.get("error");
     if (errorParam) setError(decodeURIComponent(errorParam));
@@ -156,7 +156,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
       if (!user) throw new Error("Verification failed");
 
       await createProfile(user.id);
-      router.push(role === "owner" ? "/portal/studio" : "/customer");
+      router.push(role === "studio_owner" ? "/portal/studio" : "/customer");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid or expired code.");
     } finally {
@@ -258,10 +258,10 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                 <select
                   className="gb-input"
                   value={role}
-                  onChange={(e) => setRole(e.target.value as "customer" | "owner")}
+                  onChange={(e) => setRole(e.target.value as "customer" | "studio_owner")}
                 >
                   <option value="customer">Customer / مستخدم</option>
-                  <option value="owner">Studio Owner / مالك استوديو</option>
+                  <option value="studio_owner">Studio Owner / صاحب استوديو</option>
                 </select>
               </div>
 

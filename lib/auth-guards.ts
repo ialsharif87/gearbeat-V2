@@ -4,15 +4,21 @@ import { isDeviceTrusted } from "@/lib/device-trust";
 
 export type DbRow = Record<string, unknown>;
 
+/**
+ * GearBeat User Roles
+ * - studio_owner: Canonical role for studio managers (replaces legacy "owner")
+ * - vendor: Canonical role for gear sellers (replaces legacy "seller")
+ * - customer: Canonical role for buyers (replaces legacy "user")
+ */
 export type GearBeatRole =
   | "admin"
   | "super_admin"
-  | "owner"
+  | "owner" // Legacy: use studio_owner for new logic
   | "studio_owner"
   | "vendor"
-  | "seller"
+  | "seller" // Legacy: use vendor for new logic
   | "customer"
-  | "user"
+  | "user" // Legacy: use customer for new logic
   | "";
 
 type SupabaseLikeClient = any;
@@ -181,6 +187,7 @@ export function isAdminRole(role: GearBeatRole) {
 }
 
 export function isOwnerRole(role: GearBeatRole) {
+  // Support both canonical and legacy roles
   return role === "owner" || role === "studio_owner";
 }
 
