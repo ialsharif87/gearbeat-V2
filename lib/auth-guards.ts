@@ -192,6 +192,7 @@ export function isOwnerRole(role: GearBeatRole) {
 }
 
 export function isVendorRole(role: GearBeatRole) {
+  // Support both canonical and legacy roles
   return role === "vendor" || role === "seller";
 }
 
