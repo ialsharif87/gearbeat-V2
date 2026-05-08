@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { useRouter } from "next/navigation";
+import { PasswordInput } from "@/components/ui/password-input";
+
 
 export default function FirstLoginPage() {
   const router = useRouter();
@@ -206,13 +208,31 @@ export default function FirstLoginPage() {
 
               <div className="input-group">
                 <label><T en="New Password" ar="كلمة المرور الجديدة" /></label>
-                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} placeholder="••••••••" />
+                <PasswordInput 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  required 
+                  minLength={8} 
+                  variant="portal"
+                  placeholder="••••••••" 
+                  autoComplete="new-password"
+                />
               </div>
+
 
               <div className="input-group">
                 <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} placeholder="••••••••" />
+                <PasswordInput 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  required 
+                  minLength={8} 
+                  variant="portal"
+                  placeholder="••••••••" 
+                  autoComplete="new-password"
+                />
               </div>
+
 
               {error && <div className="error-msg">{error}</div>}
 

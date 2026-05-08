@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { PasswordInput } from "@/components/ui/password-input";
+
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
@@ -112,25 +114,31 @@ export default function UpdatePasswordPage() {
           <form onSubmit={handleUpdatePassword} className="gb-auth-form">
             <div className="gb-field">
               <label><T en="New Password" ar="كلمة المرور الجديدة" /></label>
-              <input 
-                type="password" 
+              <PasswordInput 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 placeholder="••••••••"
                 required 
+                variant="portal"
+                minLength={6}
+                autoComplete="new-password"
               />
             </div>
 
+
             <div className="gb-field">
               <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
-              <input 
-                type="password" 
+              <PasswordInput 
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 placeholder="••••••••"
                 required 
+                variant="portal"
+                minLength={6}
+                autoComplete="new-password"
               />
             </div>
+
 
             <button type="submit" disabled={loading} className="gb-submit-btn">
               {loading ? <T en="Updating..." ar="جاري التحديث..." /> : <T en="Update Password" ar="تحديث كلمة المرور" />}
