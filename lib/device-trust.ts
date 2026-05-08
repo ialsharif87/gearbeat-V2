@@ -1,28 +1,25 @@
 "use server";
 
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import crypto from "crypto";
 
 const TRUSTED_DEVICE_COOKIE = "gb_trusted_device";
 
 /**
- * Checks if the current device is trusted for the given user.
- * In a real-world scenario, this might involve a database check.
- * For this task, we'll use a simple httpOnly cookie that stores a token.
+ * Checks if a cookie value is in the legacy userId:expiry format.
  */
-export async function isDeviceTrusted(userId: string): Promise<boolean> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(TRUSTED_DEVICE_COOKIE)?.value;
+function isLegacyTrustedDeviceCookie(value: string): boolean {
+  return value.includes(":") && value.split(":").length === 2;
+}
 
-  if (!token) return false;
-
-  // The token should ideally be signed and include the userId.
-  // For simplicity and adherence to the request, we check if it exists.
-  // In a robust implementation, we'd verify the signature and userId.
+/**
+ * Validates a legacy trusted device cookie.
+ */
+function validateLegacyTrustedDeviceCookie(value: string, userId: string): boolean {
   try {
-    const [storedUserId, expiry] = token.split(":");
+    const [storedUserId, expiry] = value.split(":");
     if (storedUserId !== userId) return false;
     if (Date.now() > parseInt(expiry)) return false;
     return true;
@@ -32,17 +29,73 @@ export async function isDeviceTrusted(userId: string): Promise<boolean> {
 }
 
 /**
+ * Parses basic browser and OS information from User-Agent string.
+ */
+function parseUserAgent(ua: string) {
+  const browser = /chrome|firefox|safari|edge|opera|msie|trident/i.exec(ua)?.[0] || "Unknown Browser";
+  const os = /windows|macintosh|linux|android|ios|iphone|ipad/i.exec(ua)?.[0] || "Unknown OS";
+  return { browser, os };
+}
+
+/**
+ * Collects device metadata from request headers.
+ */
+async function getTrustedDeviceMetadata(): Promise<DeviceMetadata> {
+  const headerList = await headers();
+  const ua = headerList.get("user-agent") || "";
+  const ip = headerList.get("x-forwarded-for")?.split(",")[0] || headerList.get("x-real-ip") || "Unknown IP";
+  const { browser, os } = parseUserAgent(ua);
+  
+  return {
+    device_name: `${browser} on ${os}`,
+    browser,
+    os,
+    last_ip: ip
+  };
+}
+
+/**
+ * Checks if the current device is trusted for the given user.
+ * Supports both new database-backed secure tokens and legacy plaintext cookies.
+ */
+export async function isDeviceTrusted(userId: string): Promise<boolean> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(TRUSTED_DEVICE_COOKIE)?.value;
+
+  if (!token) return false;
+
+  // 1. Check if it's a legacy cookie format
+  if (isLegacyTrustedDeviceCookie(token)) {
+    return validateLegacyTrustedDeviceCookie(token, userId);
+  }
+
+  // 2. Otherwise treat as a secure token and verify against database
+  return await verifyTrustedDeviceToken(userId, token);
+}
+
+/**
  * Marks the current device as trusted for the next 30 days.
+ * Uses secure database-backed tokens with a fallback to legacy format on DB failure.
  */
 export async function trustDevice(userId: string): Promise<void> {
   const cookieStore = await cookies();
-  
-  // Create a token: userId:expiryTime
-  // Note: This is a simple implementation. A signed JWT would be better.
-  const expiryTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
-  const token = `${userId}:${expiryTime}`;
+  const token = await generateTrustedDeviceToken();
+  const metadata = await getTrustedDeviceMetadata();
 
-  cookieStore.set(TRUSTED_DEVICE_COOKIE, token, {
+  // 1. Try to register the token in the database
+  const recordId = await registerTrustedDeviceToken(userId, token, metadata);
+
+  let finalToken = token;
+
+  if (!recordId) {
+    // FALLBACK: If database registration fails, use the legacy format to avoid breaking login
+    const expiryTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    finalToken = `${userId}:${expiryTime}`;
+    console.warn("Trusted device database registration failed. Falling back to legacy cookie format.");
+  }
+
+  // 2. Set the cookie (either secure token or legacy fallback)
+  cookieStore.set(TRUSTED_DEVICE_COOKIE, finalToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -53,7 +106,6 @@ export async function trustDevice(userId: string): Promise<void> {
 
 /**
  * NEW UTILITIES (PATCH 17)
- * These will be used in future patches to replace the legacy cookie-only logic.
  */
 
 export async function generateTrustedDeviceToken(): Promise<string> {
@@ -175,4 +227,5 @@ export async function cleanupExpiredTrustedDevices(): Promise<boolean> {
     return false;
   }
 }
+
 
