@@ -22,7 +22,8 @@ interface PasswordInputProps {
  * Reusable Password Input with visibility toggle.
  * Supports GearBeat premium dark UI and RTL/LTR layouts.
  */
-export default function PasswordInput({
+export function PasswordInput({
+
   id,
   name,
   value,
