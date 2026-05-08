@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { CountryOption } from "@/lib/countries";
+import { CityOption } from "@/lib/locations";
 
 export default function StudioOnboardingPage() {
   const [step, setStep] = useState(1);
@@ -14,7 +16,7 @@ export default function StudioOnboardingPage() {
     nameEn: "",
     nameAr: "",
     type: "Recording Studio",
-    city: "Riyadh",
+    city: "",
     district: "",
     address: "",
     crNumber: "",
@@ -31,12 +33,35 @@ export default function StudioOnboardingPage() {
     agreed: false
   });
 
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [fetchingLocations, setFetchingLocations] = useState(true);
+  const [country, setCountry] = useState("SA");
+
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setUserId(data.user.id);
     });
-  }, []);
+
+    fetch("/api/countries")
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+        setFetchingLocations(false);
+      });
+  }, [userId]);
+
+  useEffect(() => {
+    if (!country) return;
+    setFetchingLocations(true);
+    fetch(`/api/cities?country=${country}`)
+      .then(res => res.json())
+      .then(data => {
+        setCities(data);
+        setFetchingLocations(false);
+      });
+  }, [country]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -61,8 +86,9 @@ export default function StudioOnboardingPage() {
         name_ar: formData.nameAr,
         name: formData.nameEn, // Fallback
         type: formData.type,
-        city: formData.city,
-        city_name: formData.city,
+        country: countries.find(c => c.country_code === country)?.name_en || country,
+        city: cities.find(c => c.id === formData.city)?.name_en || formData.city,
+        city_name: cities.find(c => c.id === formData.city)?.name_en || formData.city,
         district: formData.district,
         address_line: formData.address,
         description_en: formData.descriptionEn,
@@ -162,13 +188,28 @@ export default function StudioOnboardingPage() {
             </div>
 
             <div className="gb-input-group">
-              <label className="gb-detail-label"><T en="City" ar="المدينة" /></label>
-              <select className="gb-input" name="city" value={formData.city} onChange={handleChange}>
-                <option>Riyadh</option>
-                <option>Jeddah</option>
-                <option>Dammam</option>
-                <option>Other</option>
+              <label className="gb-detail-label"><T en="Country" ar="الدولة" /></label>
+              <select className="gb-input" value={country} onChange={(e) => { setCountry(e.target.value); setFormData(prev => ({ ...prev, city: "" })); }}>
+                {countries.map(c => (
+                  <option key={c.country_code} value={c.country_code}>{c.name_en} / {c.name_ar}</option>
+                ))}
               </select>
+            </div>
+
+            <div className="gb-input-group">
+              <label className="gb-detail-label"><T en="City" ar="المدينة" /></label>
+              {fetchingLocations ? (
+                <div className="gb-input" style={{ opacity: 0.5 }}>Loading...</div>
+              ) : cities.length > 0 ? (
+                <select className="gb-input" name="city" value={formData.city} onChange={handleChange}>
+                  <option value="">Select City</option>
+                  {cities.map(c => (
+                    <option key={c.id} value={c.id}>{c.name_en} / {c.name_ar}</option>
+                  ))}
+                </select>
+              ) : (
+                <input className="gb-input" name="city" value={formData.city} onChange={handleChange} placeholder="Enter city name" />
+              )}
             </div>
 
             <div className="gb-input-group">

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import T from "@/components/t";
 import StudioPhotoRequirements from "@/components/studio-photo-requirements";
+import LocationFields from "@/components/location-fields";
 
 function slugify(value: string) {
   return value
@@ -75,13 +76,13 @@ export default async function CreateStudioPage() {
   async function createStudio(formData: FormData) {
     "use server";
 
-    const { user, profile } = await requireOwnerOnly();
+    const { user } = await requireOwnerOnly();
     const supabaseAdmin = createAdminClient();
 
     const name = String(formData.get("name") || "").trim();
-    const city = String(formData.get("city") || "").trim();
+    const city = String(formData.get("city_name") || "").trim();
     const district = String(formData.get("district") || "").trim();
-    const address = String(formData.get("address") || "").trim();
+    const address = String(formData.get("address_line") || "").trim();
     const description = String(formData.get("description") || "").trim();
     const priceFrom = Number(formData.get("price_from") || 0);
     const coverImageFile = formData.get("cover_image_file") as File;
@@ -134,6 +135,9 @@ export default async function CreateStudioPage() {
       description,
       price_from: priceFrom,
       cover_image_url: coverImageUrl || null,
+      google_maps_url: String(formData.get("google_maps_url") || "").trim() || null,
+      latitude: formData.get("latitude") ? Number(formData.get("latitude")) : null,
+      longitude: formData.get("longitude") ? Number(formData.get("longitude")) : null,
 
       status: "pending",
       verified: false,
@@ -236,32 +240,11 @@ export default async function CreateStudioPage() {
               </div>
             </div>
 
-            <div className="gb-dash-grid-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
-              <div>
-                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
-                  <T en="City" ar="المدينة" /> *
-                </label>
-                <input className="gb-input" name="city" placeholder="Riyadh" required />
-              </div>
-
-              <div>
-                <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
-                  <T en="District" ar="الحي" />
-                </label>
-                <input className="gb-input" name="district" placeholder="Al Olaya" />
-              </div>
-            </div>
-
-            <div>
-              <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>
-                <T en="Full Address / Location" ar="العنوان الكامل / الموقع" />
-              </label>
-              <input
-                className="gb-input"
-                name="address"
-                placeholder="Detailed location for approved bookings"
-              />
-            </div>
+            <LocationFields 
+              defaultCountryCode="SA"
+              cityNameName="city_name"
+              addressLineName="address_line"
+            />
 
             <div>
               <label className="gb-detail-label" style={{ marginBottom: '8px', display: 'block' }}>

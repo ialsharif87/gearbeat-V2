@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { CountryOption } from "@/lib/countries";
+import { CityOption } from "@/lib/locations";
 
 const CATEGORIES = [
   { id: "mic", en: "Microphones", ar: "ميكروفونات" },
@@ -27,9 +29,38 @@ export default function JoinSellerPage() {
   const [email, setEmail] = useState("");
   const [companyNameAr, setCompanyNameAr] = useState("");
   const [companyNameEn, setCompanyNameEn] = useState("");
+  const [country, setCountry] = useState("SA");
   const [city, setCity] = useState("");
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    fetch("/api/countries")
+      .then(res => res.json())
+      .then(data => {
+        setCountries(data);
+      })
+      .catch(err => {
+        console.error("Failed to fetch countries:", err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!country) {
+      setCities([]);
+      return;
+    }
+    fetch(`/api/cities?country=${country}`)
+      .then(res => res.json())
+      .then(data => {
+        setCities(data);
+      })
+      .catch(err => {
+        console.error("Failed to fetch cities:", err);
+      });
+  }, [country]);
 
   // Files State
   const [crFile, setCrFile] = useState<File | null>(null);
@@ -87,7 +118,8 @@ export default function JoinSellerPage() {
         business_name_ar: companyNameAr,
         email,
         phone: mobile,
-        city,
+        country: countries.find(c => c.country_code === country)?.name_en || country,
+        city: cities.find(c => c.id === city)?.name_en || city,
         product_categories: selectedCategories,
         message: notes,
         type: "seller",
@@ -102,9 +134,10 @@ export default function JoinSellerPage() {
       if (insertError) throw new Error("Database insertion failed");
 
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Submission Error:", err);
-      setError(err.message || "Failed to submit application. Please try again.");
+      const message = err instanceof Error ? err.message : "Failed to submit application. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -182,14 +215,35 @@ export default function JoinSellerPage() {
                 <input className="input" value={companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} required />
               </div>
               <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="City" ar="المدينة" /></label>
-                <select className="input" value={city} onChange={(e) => setCity(e.target.value)} required>
-                  <option value="">Select City</option>
-                  <option value="Riyadh">الرياض / Riyadh</option>
-                  <option value="Jeddah">جدة / Jeddah</option>
-                  <option value="Dammam">الدمام / Dammam</option>
-                  <option value="Other">أخرى / Other</option>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Country" ar="الدولة" /> *</label>
+                <select className="input" value={country} onChange={(e) => { setCountry(e.target.value); setCity(""); }} required>
+                  {countries.map(c => (
+                    <option key={c.country_code} value={c.country_code}>
+                      <T en={c.name_en} ar={c.name_ar} />
+                    </option>
+                  ))}
                 </select>
+              </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="City" ar="المدينة" /> *</label>
+                {cities.length > 0 ? (
+                  <select className="input" value={city} onChange={(e) => setCity(e.target.value)} required>
+                    <option value=""><T en="Select City" ar="اختر المدينة" /></option>
+                    {cities.map(c => (
+                      <option key={c.id} value={c.id}>
+                        <T en={c.name_en} ar={c.name_ar} />
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input 
+                    className="input" 
+                    value={city} 
+                    onChange={(e) => setCity(e.target.value)} 
+                    required 
+                    placeholder={country === "SA" ? "أدخل اسم المدينة" : "Enter city name"}
+                  />
+                )}
               </div>
               <div style={{ display: "grid", gap: 12 }}>
                 <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Product Categories" ar="فئات المنتجات" /></label>
@@ -268,7 +322,14 @@ export default function JoinSellerPage() {
   );
 }
 
-function UploadField({ labelEn, labelAr, file, onChange, required, optional }: any) {
+function UploadField({ labelEn, labelAr, file, onChange, required, optional }: { 
+  labelEn: string; 
+  labelAr: string; 
+  file: File | null; 
+  onChange: (file: File | null) => void; 
+  required?: boolean; 
+  optional?: boolean; 
+}) {
   return (
     <div style={{ display: "grid", gap: 8 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
