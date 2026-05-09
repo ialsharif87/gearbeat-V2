@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUserRole, isAdminRole } from "@/lib/auth-guards";
 
 const BUCKET_NAME = "provider-documents";
 
@@ -116,10 +117,10 @@ export async function getSignedDocumentUrl(documentRef: string | null | undefine
   return data.signedUrl;
 }
 
-export async function getSignedDocumentUrlAction(documentRef: string | null | undefined, appId: string) {
+export async function getSignedDocumentUrlAction(documentRef: string | null | undefined, appId?: string) {
   try {
-    if (!documentRef || !appId) {
-      return { success: false, error: "Missing parameters", url: null };
+    if (!documentRef) {
+      return { success: false, error: "Missing document reference", url: null };
     }
 
     const supabase = await createClient();
@@ -129,56 +130,66 @@ export async function getSignedDocumentUrlAction(documentRef: string | null | un
       return { success: false, error: "Unauthorized", url: null };
     }
 
+    const role = await getCurrentUserRole(supabase, user);
+    const isAdmin = isAdminRole(role);
+
     const requestedPath = await getDocumentStoragePath(documentRef);
     if (!requestedPath) {
       return { success: false, error: "Invalid document reference", url: null };
     }
 
-    // 1. Verify ownership in studio_applications
-    const { data: studioApp } = await supabase
-      .from("studio_applications")
-      .select("contract_url, email, linked_user_id, cr_document_url, vat_certificate_url, national_address_url, bank_document_url")
-      .eq("id", appId)
-      .maybeSingle();
+    let authorized = isAdmin;
 
-    let authorized = false;
+    // Ownership check for non-admins
+    if (!authorized) {
+      if (!appId) {
+        return { success: false, error: "Missing application ID", url: null };
+      }
 
-    if (studioApp) {
-      const docFields = [
-        studioApp.contract_url,
-        studioApp.cr_document_url,
-        studioApp.vat_certificate_url,
-        studioApp.national_address_url,
-        studioApp.bank_document_url
-      ];
+      // 1. Verify ownership in studio_applications
+      const { data: studioApp } = await supabase
+        .from("studio_applications")
+        .select("contract_url, email, linked_user_id, cr_document_url, vat_certificate_url, national_address_url, bank_document_url")
+        .eq("id", appId)
+        .maybeSingle();
 
-      for (const field of docFields) {
-        if (field) {
-          const storedPath = await getDocumentStoragePath(field);
-          if (storedPath === requestedPath && (studioApp.email === user.email || studioApp.linked_user_id === user.id)) {
-            authorized = true;
-            break;
+      if (studioApp) {
+        const docFields = [
+          studioApp.contract_url,
+          studioApp.cr_document_url,
+          studioApp.vat_certificate_url,
+          studioApp.national_address_url,
+          studioApp.bank_document_url
+        ];
+
+        for (const field of docFields) {
+          if (field) {
+            const storedPath = await getDocumentStoragePath(field);
+            if (storedPath === requestedPath && (studioApp.email === user.email || studioApp.linked_user_id === user.id)) {
+              authorized = true;
+              break;
+            }
           }
         }
       }
-    }
 
-    // 2. Fallback: Verify ownership in provider_leads (Onboarding/Seller flow)
-    if (!authorized) {
-      const { data: lead } = await supabase
-        .from("provider_leads")
-        .select("signed_contract_url, vat_document_url")
-        .eq("email", user.email)
-        .maybeSingle();
-      
-      if (lead) {
-        const leadDocs = [lead.signed_contract_url, lead.vat_document_url];
-        for (const field of leadDocs) {
-          if (field) {
-            const leadPath = await getDocumentStoragePath(field);
-            if (leadPath === requestedPath) {
-              authorized = true;
-              break;
+      // 2. Fallback: Verify ownership in provider_leads (Onboarding/Seller flow)
+      if (!authorized) {
+        const { data: lead } = await supabase
+          .from("provider_leads")
+          .select("signed_contract_url, vat_document_url")
+          .eq("email", user.email)
+          .maybeSingle();
+        
+        if (lead) {
+          const leadDocs = [lead.signed_contract_url, lead.vat_document_url];
+          for (const field of leadDocs) {
+            if (field) {
+              const leadPath = await getDocumentStoragePath(field);
+              if (leadPath === requestedPath) {
+                authorized = true;
+                break;
+              }
             }
           }
         }
