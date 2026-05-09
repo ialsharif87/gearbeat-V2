@@ -1,12 +1,65 @@
+"use server";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const BUCKET_NAME = "provider-documents";
 
 /**
+ * Securely uploads a provider document using the admin client.
+ * Validates file type, size, and destination folder.
+ */
+export async function uploadProviderDocumentAction(
+  formData: FormData,
+  folder: string
+) {
+  const file = formData.get("file") as File;
+  if (!file) {
+    throw new Error("No file provided");
+  }
+
+  // 1. Validate File Type
+  const allowedTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Invalid file type. Only PDF, PNG, and JPG are allowed.");
+  }
+
+  // 2. Validate File Size (Max 10MB)
+  const MAX_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    throw new Error("File too large. Maximum size is 10MB.");
+  }
+
+  // 3. Validate Folder
+  const allowedFolders = ["studio-applications", "seller-applications", "contracts"];
+  if (!allowedFolders.includes(folder)) {
+    throw new Error("Invalid destination folder.");
+  }
+
+  const supabaseAdmin = createAdminClient();
+  const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+  const filePath = `${folder}/${fileName}`;
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from(BUCKET_NAME)
+    .upload(filePath, file, {
+      contentType: file.type,
+      upsert: false
+    });
+
+  if (uploadError) {
+    console.error("Upload error details:", uploadError);
+    throw new Error("Upload failed: " + uploadError.message);
+  }
+
+  return { success: true, path: filePath };
+}
+
+
+/**
  * Normalizes a document reference into a storage path.
  * Supports legacy absolute public Supabase storage URLs and future relative storage paths.
  */
-export function getDocumentStoragePath(documentRef: string | null | undefined): string | null {
+export async function getDocumentStoragePath(documentRef: string | null | undefined): Promise<string | null> {
   if (!documentRef) return null;
 
   // If it's already a relative path (doesn't start with http), return it
@@ -43,7 +96,7 @@ export function getDocumentStoragePath(documentRef: string | null | undefined): 
 export async function getSignedDocumentUrl(documentRef: string | null | undefined, expiresIn: number = 3600) {
   if (!documentRef) return null;
 
-  const path = getDocumentStoragePath(documentRef);
+  const path = await getDocumentStoragePath(documentRef);
   if (!path) {
     return null;
   }
