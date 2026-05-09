@@ -94,11 +94,7 @@ export default function JoinStudioPage() {
 
     if (uploadError) throw new Error("File upload failed: " + uploadError.message);
 
-    const { data: urlData } = supabase.storage
-      .from("provider-documents")
-      .getPublicUrl(filePath);
-
-    return urlData.publicUrl;
+    return filePath;
   }
 
   async function handleSubmit(e: React.FormEvent) {
