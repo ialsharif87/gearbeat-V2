@@ -7,14 +7,14 @@ As part of the storage hardening workstream (Patch 48 series), we have transitio
 
 ### A. `studio_applications` (Studio Owners)
 - `cr_document_url`
-- `vat_certificate_url`
+- `vat_certificate_url` (VAT field for Studios)
 - `national_address_url`
 - `bank_document_url`
 - `contract_url` (Signed contracts)
 
 ### B. `provider_leads` (Sellers)
 - `cr_document_url`
-- `vat_document_url`
+- `vat_document_url` (VAT field for Sellers)
 - `national_address_url`
 - `bank_document_url`
 
@@ -45,7 +45,7 @@ Before running updates, use the following queries to count affected records:
 SELECT count(*) 
 FROM studio_applications 
 WHERE cr_document_url LIKE 'http%' 
-   OR vat_certificate_url LIKE 'http%' 
+   OR vat_certificate_url LIKE 'http%' -- Studio VAT
    OR national_address_url LIKE 'http%' 
    OR bank_document_url LIKE 'http%';
 
@@ -53,7 +53,7 @@ WHERE cr_document_url LIKE 'http%'
 SELECT count(*) 
 FROM provider_leads 
 WHERE cr_document_url LIKE 'http%' 
-   OR vat_document_url LIKE 'http%' 
+   OR vat_document_url LIKE 'http%' -- Seller VAT
    OR national_address_url LIKE 'http%' 
    OR bank_document_url LIKE 'http%';
 ```
