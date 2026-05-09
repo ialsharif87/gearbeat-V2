@@ -82,7 +82,7 @@ export default function JoinSellerPage() {
     const res = await uploadProviderDocumentAction(formData, "seller-applications");
 
     if (!res.success || !res.path) {
-      throw new Error(res.error || "File upload failed");
+      throw new Error("File upload failed");
     }
 
     return res.path;
@@ -344,3 +344,4 @@ function UploadField({ labelEn, labelAr, file, onChange, required, optional }: {
     </div>
   );
 }
+
