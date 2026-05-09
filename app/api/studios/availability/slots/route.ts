@@ -218,6 +218,7 @@ export async function GET(request: NextRequest) {
   const bufferMinutes = readNumber(ruleRow, ["buffer_minutes"], 0);
 
   const blockingStatuses = [
+    "pending_payment",
     "pending",
     "pending_review",
     "pending_owner_review",
