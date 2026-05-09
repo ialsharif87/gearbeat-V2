@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/components/ui/password-input";
+import { uploadProviderDocumentAction } from "@/lib/storage/provider-documents";
 
 
 export default function FirstLoginPage() {
@@ -139,26 +140,20 @@ export default function FirstLoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const timestamp = Date.now();
-      const ext = contractFile.name.split('.').pop();
-      const filePath = `contracts/${user.id}-signed-contract-${timestamp}.${ext}`;
+      const formData = new FormData();
+      formData.append("file", contractFile);
 
-      const { error: uploadError } = await supabase.storage
-        .from("provider-documents")
-        .upload(filePath, contractFile);
+      const res = await uploadProviderDocumentAction(formData, "contracts");
+      if (!res.success || !res.path) {
+        throw new Error(res.error || "Upload failed");
+      }
 
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("provider-documents")
-        .getPublicUrl(filePath);
-      
-      const uploadedUrl = urlData.publicUrl;
+      const relativePath = res.path;
 
       await supabase
         .from("provider_leads")
         .update({
-          signed_contract_url: uploadedUrl,
+          signed_contract_url: relativePath,
           status: "approved",
           approved_at: new Date().toISOString()
         })

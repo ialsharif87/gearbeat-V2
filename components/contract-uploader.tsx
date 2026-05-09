@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { uploadProviderDocumentAction, getSignedDocumentUrlAction } from "@/lib/storage/provider-documents";
 
 export default function ContractUploader({ appId, currentUrl }: { appId: string, currentUrl?: string }) {
   const [uploading, setUploading] = useState(false);
   const [url, setUrl] = useState(currentUrl);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (url) {
+      getSignedDocumentUrlAction(url).then(res => {
+        if (res.success) setSignedUrl(res.url);
+      });
+    }
+  }, [url]);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -16,23 +26,23 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
     const supabase = createClient();
     
     try {
-      const fileName = `contracts/${appId}/${Date.now()}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from("provider-documents")
-        .upload(fileName, file);
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      // Use secure server action
+      const uploadRes = await uploadProviderDocumentAction(formData, "contracts");
+      if (!uploadRes.success || !uploadRes.path) {
+        throw new Error(uploadRes.error || "Upload failed");
+      }
 
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("provider-documents")
-        .getPublicUrl(fileName);
+      const relativePath = uploadRes.path;
 
       // Update database
       // Update studio_applications
       const { error: updateError } = await supabase
         .from("studio_applications")
         .update({ 
-          contract_url: publicUrl,
+          contract_url: relativePath,
           updated_at: new Date().toISOString()
         })
         .eq("id", appId);
@@ -45,14 +55,14 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
         await supabase
           .from("provider_leads")
           .update({ 
-            signed_contract_url: publicUrl,
+            signed_contract_url: relativePath,
             status: 'approved',
             approved_at: new Date().toISOString()
           })
           .eq("email", user.email);
       }
 
-      setUrl(publicUrl);
+      setUrl(relativePath);
       alert("Contract uploaded successfully! Our team will review it and activate your account.");
     } catch (err: any) {
       alert("Upload failed: " + err.message);
@@ -68,9 +78,11 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
           <span style={{ color: '#22c55e', fontSize: '0.9rem', fontWeight: 700 }}>
             ✓ <T en="Contract Uploaded" ar="تم رفع العقد بنجاح" />
           </span>
-          <a href={url} target="_blank" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}>
-            <T en="View File" ar="عرض الملف" />
-          </a>
+          {signedUrl && (
+            <a href={signedUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', fontSize: '0.8rem', textDecoration: 'underline' }}>
+              <T en="View File" ar="عرض الملف" />
+            </a>
+          )}
         </div>
       ) : (
         <label style={{ 
@@ -88,3 +100,4 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { uploadProviderDocumentAction } from "@/lib/storage/provider-documents";
 
 export default function StudioContractPage() {
   const [app, setApp] = useState<any>(null);
@@ -36,17 +37,20 @@ export default function StudioContractPage() {
     setUploading(true);
 
     try {
-      const fileName = `contracts/${app.id}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("provider-documents")
-        .upload(fileName, file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (uploadError) throw uploadError;
+      const res = await uploadProviderDocumentAction(formData, "contracts");
+      if (!res.success || !res.path) {
+        throw new Error(res.error || "Upload failed");
+      }
+
+      const relativePath = res.path;
 
       const { error: updateError } = await supabase
         .from("studio_applications")
         .update({
-          contract_url: fileName,
+          contract_url: relativePath,
           contract_uploaded_at: new Date().toISOString(),
           status: "approved"
         })

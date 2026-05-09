@@ -14,25 +14,25 @@ export async function uploadProviderDocumentAction(
 ) {
   const file = formData.get("file") as File;
   if (!file) {
-    throw new Error("No file provided");
+    return { success: false, error: "No file provided" };
   }
 
   // 1. Validate File Type
   const allowedTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
   if (!allowedTypes.includes(file.type)) {
-    throw new Error("Invalid file type. Only PDF, PNG, and JPG are allowed.");
+    return { success: false, error: "Invalid file type. Only PDF, PNG, and JPG are allowed." };
   }
 
   // 2. Validate File Size (Max 10MB)
   const MAX_SIZE = 10 * 1024 * 1024;
   if (file.size > MAX_SIZE) {
-    throw new Error("File too large. Maximum size is 10MB.");
+    return { success: false, error: "File too large. Maximum size is 10MB." };
   }
 
   // 3. Validate Folder
   const allowedFolders = ["studio-applications", "seller-applications", "contracts"];
   if (!allowedFolders.includes(folder)) {
-    throw new Error("Invalid destination folder.");
+    return { success: false, error: "Invalid destination folder." };
   }
 
   const supabaseAdmin = createAdminClient();
@@ -48,11 +48,12 @@ export async function uploadProviderDocumentAction(
 
   if (uploadError) {
     console.error("Upload error details:", uploadError);
-    throw new Error("Upload failed: " + uploadError.message);
+    return { success: false, error: uploadError.message };
   }
 
   return { success: true, path: filePath };
 }
+
 
 
 /**
@@ -113,3 +114,14 @@ export async function getSignedDocumentUrl(documentRef: string | null | undefine
 
   return data.signedUrl;
 }
+
+export async function getSignedDocumentUrlAction(documentRef: string | null | undefined) {
+  try {
+    const url = await getSignedDocumentUrl(documentRef);
+    return { success: true, url };
+  } catch (error: any) {
+    return { success: false, error: error.message, url: null };
+  }
+}
+
+
