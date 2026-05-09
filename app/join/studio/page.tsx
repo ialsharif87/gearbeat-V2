@@ -91,7 +91,7 @@ export default function JoinStudioPage() {
     const res = await uploadProviderDocumentAction(formData, "studio-applications");
 
     if (!res.success || !res.path) {
-      throw new Error(res.error || "File upload failed");
+      throw new Error("File upload failed");
     }
 
     return res.path;
@@ -468,3 +468,4 @@ function UploadField({ labelEn, labelAr, file, onChange, required, showError }: 
     </div>
   );
 }
+
