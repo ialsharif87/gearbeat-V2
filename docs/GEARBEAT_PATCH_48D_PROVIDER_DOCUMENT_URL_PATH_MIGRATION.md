@@ -5,7 +5,10 @@ This patch provides the implementation draft for migrating existing provider doc
 
 ## 2. Implementation Details
 
-### SQL Migration: `supabase/migrations/patch_48d_provider_document_url_path_migration.sql`
+### SQL Migration Draft: `docs/sql-drafts/patch_48d_provider_document_url_path_migration.sql`
+> [!CAUTION]
+> **This SQL is a DRAFT ONLY.** It is intentionally stored in the `docs/sql-drafts/` directory to prevent it from being auto-applied by the GitHub Actions migration workflow. It **must not** be applied automatically and requires a thorough manual review before execution in any environment.
+
 - **Targeting:** Uses PostgreSQL `split_part` to isolate the relative storage path from the legacy public URL prefix.
 - **Safety:** Updates only records that match the standard Supabase public storage URL pattern (`http%/%/provider-documents/%`).
 - **Idempotency:** If a record is already a relative path (does not contain the URL prefix), it will not be modified.
@@ -31,7 +34,8 @@ ROLLBACK; -- or COMMIT;
 ```
 
 ### Step 3: Execution
-Apply the migration using the Supabase CLI or Dashboard SQL Editor.
+This script must be executed **manually** via the Supabase SQL Editor or CLI after verification. It is not part of the automated CI/CD pipeline.
+
 
 ## 4. Verification & Hardening Roadmap
 
