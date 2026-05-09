@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { createNotification } from "@/lib/notifications";
+import { uploadProviderDocumentAction } from "@/lib/storage/provider-documents";
 
 import { CountryOption } from "@/lib/countries";
 import { CityOption } from "@/lib/locations";
@@ -84,17 +85,16 @@ export default function JoinStudioPage() {
   const [bankFile, setBankFile] = useState<File | null>(null);
 
   async function uploadFile(file: File) {
-    const supabase = createClient();
-    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-    const filePath = `studio-applications/${fileName}`;
+    const formData = new FormData();
+    formData.append("file", file);
 
-    const { error: uploadError } = await supabase.storage
-      .from("provider-documents")
-      .upload(filePath, file);
+    const res = await uploadProviderDocumentAction(formData, "studio-applications");
 
-    if (uploadError) throw new Error("File upload failed: " + uploadError.message);
+    if (!res.success || !res.path) {
+      throw new Error(res.error || "File upload failed");
+    }
 
-    return filePath;
+    return res.path;
   }
 
   async function handleSubmit(e: React.FormEvent) {

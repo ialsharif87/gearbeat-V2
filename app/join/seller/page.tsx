@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
+import { uploadProviderDocumentAction } from "@/lib/storage/provider-documents";
 import { CountryOption } from "@/lib/countries";
 import { CityOption } from "@/lib/locations";
 
@@ -75,17 +76,16 @@ export default function JoinSellerPage() {
   };
 
   async function uploadFile(file: File) {
-    const supabase = createClient();
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `seller-applications/${fileName}`;
+    const formData = new FormData();
+    formData.append("file", file);
 
-    const { error: uploadError } = await supabase.storage
-      .from("provider-documents")
-      .upload(filePath, file);
+    const res = await uploadProviderDocumentAction(formData, "seller-applications");
 
-    if (uploadError) throw new Error("File upload failed");
+    if (!res.success || !res.path) {
+      throw new Error(res.error || "File upload failed");
+    }
 
-    return filePath;
+    return res.path;
   }
 
   async function handleSubmit(e: React.FormEvent) {
