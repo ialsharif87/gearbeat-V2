@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -37,11 +37,20 @@ export default function LeadDetailPage() {
   const [updateMessage, setUpdateMessage] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
 
-  useEffect(() => {
-    fetchData();
-  }, [id]);
+  const getDefaultContract = useCallback((app: any, lead: any) => {
+    return `STUDIO MANAGEMENT AGREEMENT
 
-  async function fetchData() {
+Company: ${app?.company_name_en || lead?.full_name || "N/A"}
+Registration: ${app?.commercial_registration || "N/A"}
+VAT: ${app?.vat_number || "N/A"}
+
+This agreement is made between GearBeat and the Company to manage studios on the platform.
+Commission Rate: 15%
+Studio Limit: 1
+... [Rest of contract terms]`;
+  }, []);
+
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const { lead: leadData, studioApp: appData } = await getLeadOrApplicationDetail(id as string);
@@ -84,20 +93,12 @@ export default function LeadDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, getDefaultContract]);
 
-  function getDefaultContract(app: any, lead: any) {
-    return `STUDIO MANAGEMENT AGREEMENT
+  useEffect(() => {
+    fetchData();
+  }, [id, fetchData]);
 
-Company: ${app?.company_name_en || lead?.full_name || "N/A"}
-Registration: ${app?.commercial_registration || "N/A"}
-VAT: ${app?.vat_number || "N/A"}
-
-This agreement is made between GearBeat and the Company to manage studios on the platform.
-Commission Rate: 15%
-Studio Limit: 1
-... [Rest of contract terms]`;
-  }
 
   async function handleApprove() {
     if (!confirm("Are you sure? This will create a user and send the contract email.")) return;
