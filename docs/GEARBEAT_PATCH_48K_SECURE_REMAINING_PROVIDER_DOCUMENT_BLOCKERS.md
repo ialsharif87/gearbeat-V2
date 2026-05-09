@@ -6,7 +6,11 @@ This patch successfully resolves the remaining security blockers identified in P
 ## 2. Changes
 
 ### Infrastructure Update: `lib/storage/provider-documents.ts`
-- **New Action:** Added `getSignedDocumentUrlAction` to provide a secure way for client components to resolve storage paths into short-lived signed URLs.
+- **New Action:** Added `getSignedDocumentUrlAction` with strict ownership validation.
+- **Authorization Hardening:** The action now requires an `appId` and performs server-side verification:
+  - Validates the current session user.
+  - Verifies that the requested document path belongs to the user via `studio_applications` (app ownership) or `provider_leads` (lead ownership).
+  - Normalizes both requested and stored paths to ensure reliable comparison.
 - **Enhanced Normalization:** All storage interactions now utilize the `async getDocumentStoragePath` helper to ensure compatibility with both legacy absolute URLs and new relative paths.
 
 ### Component Refactor: `components/contract-uploader.tsx`

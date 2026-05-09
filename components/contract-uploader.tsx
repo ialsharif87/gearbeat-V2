@@ -12,7 +12,7 @@ export default function ContractUploader({ appId, currentUrl }: { appId: string,
 
   useEffect(() => {
     if (url) {
-      getSignedDocumentUrlAction(url).then(res => {
+      getSignedDocumentUrlAction(url, appId).then(res => {
         if (res.success) setSignedUrl(res.url);
       });
     }
