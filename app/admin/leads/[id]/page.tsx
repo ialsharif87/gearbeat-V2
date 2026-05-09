@@ -6,7 +6,15 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
-import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail, giveFinalApproval, getSignedContractAction } from "../actions";
+import { 
+  approveStudioApplication, 
+  requestLeadUpdate, 
+  rejectLeadApplication, 
+  getLeadOrApplicationDetail, 
+  giveFinalApproval, 
+  getSignedContractAction,
+  getSignedDocumentUrlAction
+} from "../actions";
 
 export default function LeadDetailPage() {
   const { id } = useParams();
@@ -18,6 +26,12 @@ export default function LeadDetailPage() {
   const [signedContractUrl, setSignedContractUrl] = useState<string | null>(null);
   const [linkError, setLinkError] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Document URLs (Secured)
+  const [crUrl, setCrUrl] = useState<string | null>(null);
+  const [vatUrl, setVatUrl] = useState<string | null>(null);
+  const [addressUrl, setAddressUrl] = useState<string | null>(null);
+  const [bankUrl, setBankUrl] = useState<string | null>(null);
 
   // Form states for boxes
   const [updateMessage, setUpdateMessage] = useState("");
@@ -48,6 +62,20 @@ export default function LeadDetailPage() {
                 setLinkError(true);
               }
             });
+          }
+
+          // NEW: Fetch other secured document URLs
+          if (appData.cr_document_url) {
+            getSignedDocumentUrlAction(appData.cr_document_url).then(res => res.success && setCrUrl(res.url ?? null));
+          }
+          if (appData.vat_certificate_url) {
+            getSignedDocumentUrlAction(appData.vat_certificate_url).then(res => res.success && setVatUrl(res.url ?? null));
+          }
+          if (appData.national_address_url) {
+            getSignedDocumentUrlAction(appData.national_address_url).then(res => res.success && setAddressUrl(res.url ?? null));
+          }
+          if (appData.bank_document_url) {
+            getSignedDocumentUrlAction(appData.bank_document_url).then(res => res.success && setBankUrl(res.url ?? null));
           }
         }
       }
@@ -190,10 +218,10 @@ Studio Limit: 1
           <section className="admin-section">
             <h3 style={sectionTitleStyle}><T en="Uploaded Documents" ar="المستندات المرفوعة" /></h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={studioApp?.cr_document_url} />
-              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={studioApp?.vat_certificate_url} />
-              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={studioApp?.national_address_url} />
-              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={studioApp?.bank_document_url} />
+              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={crUrl} />
+              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={vatUrl} />
+              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={addressUrl} />
+              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={bankUrl} />
             </div>
           </section>
 
