@@ -4,13 +4,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
-import { uploadProviderDocumentAction } from "@/lib/storage/provider-documents";
+import { uploadProviderDocumentAction, getSignedDocumentUrlAction } from "@/lib/storage/provider-documents";
 
 export default function StudioContractPage() {
   const [app, setApp] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [signing, setSigning] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [signError, setSignError] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -28,7 +31,21 @@ export default function StudioContractPage() {
       .eq("linked_user_id", user.id)
       .maybeSingle();
 
-    if (!error) setApp(data);
+    if (!error) {
+      setApp(data);
+      if (data?.contract_url) {
+        setSigning(true);
+        setSignError(null);
+        getSignedDocumentUrlAction(data.contract_url, data.id).then(res => {
+          if (res.success) {
+            setSignedUrl(res.url);
+          } else {
+            setSignError(res.error || "Could not generate secure view link.");
+          }
+          setSigning(false);
+        });
+      }
+    }
     setLoading(false);
   }
 
@@ -101,6 +118,28 @@ export default function StudioContractPage() {
                isUploaded ? <T en="Admin is verifying your signed contract." ar="الإدارة تقوم بالتحقق من عقدك الموقع." /> :
                <T en="Please download, sign, and upload the standard agreement below." ar="يرجى تحميل العقد القياسي، توقيعه، ورفعه أدناه." />}
             </div>
+            {isUploaded && (
+              <div style={{ marginTop: 12 }}>
+                {signing ? (
+                  <span style={{ fontSize: '0.8rem', color: '#888' }}>
+                    <T en="Generating secure link..." ar="جاري إنشاء الرابط الآمن..." />
+                  </span>
+                ) : signedUrl ? (
+                  <a 
+                    href={signedUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{ fontSize: '0.85rem', color: 'var(--gb-teal)', textDecoration: 'underline', fontWeight: 700 }}
+                  >
+                    <T en="View Uploaded Contract" ar="عرض العقد المرفوع" />
+                  </a>
+                ) : signError ? (
+                  <span style={{ fontSize: '0.8rem', color: '#ef444499' }}>
+                    {signError}
+                  </span>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
 

@@ -32,6 +32,7 @@ export default function LeadDetailPage() {
   const [vatUrl, setVatUrl] = useState<string | null>(null);
   const [addressUrl, setAddressUrl] = useState<string | null>(null);
   const [bankUrl, setBankUrl] = useState<string | null>(null);
+  const [docLoading, setDocLoading] = useState<Record<string, boolean>>({});
 
   // Form states for boxes
   const [updateMessage, setUpdateMessage] = useState("");
@@ -74,17 +75,39 @@ Studio Limit: 1
           }
 
           // NEW: Fetch other secured document URLs
+          const docKeys = ["cr", "vat", "address", "bank"];
+          docKeys.forEach(key => setDocLoading(prev => ({ ...prev, [key]: true })));
+
           if (appData.cr_document_url) {
-            getSignedDocumentUrlAction(appData.cr_document_url, appData.id).then(res => res.success && setCrUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.cr_document_url, appData.id)
+              .then(res => res.success && setCrUrl(res.url ?? null))
+              .finally(() => setDocLoading(prev => ({ ...prev, cr: false })));
+          } else {
+            setDocLoading(prev => ({ ...prev, cr: false }));
           }
+
           if (appData.vat_certificate_url) {
-            getSignedDocumentUrlAction(appData.vat_certificate_url, appData.id).then(res => res.success && setVatUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.vat_certificate_url, appData.id)
+              .then(res => res.success && setVatUrl(res.url ?? null))
+              .finally(() => setDocLoading(prev => ({ ...prev, vat: false })));
+          } else {
+            setDocLoading(prev => ({ ...prev, vat: false }));
           }
+
           if (appData.national_address_url) {
-            getSignedDocumentUrlAction(appData.national_address_url, appData.id).then(res => res.success && setAddressUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.national_address_url, appData.id)
+              .then(res => res.success && setAddressUrl(res.url ?? null))
+              .finally(() => setDocLoading(prev => ({ ...prev, address: false })));
+          } else {
+            setDocLoading(prev => ({ ...prev, address: false }));
           }
+
           if (appData.bank_document_url) {
-            getSignedDocumentUrlAction(appData.bank_document_url, appData.id).then(res => res.success && setBankUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.bank_document_url, appData.id)
+              .then(res => res.success && setBankUrl(res.url ?? null))
+              .finally(() => setDocLoading(prev => ({ ...prev, bank: false })));
+          } else {
+            setDocLoading(prev => ({ ...prev, bank: false }));
           }
         }
       }
@@ -219,10 +242,10 @@ Studio Limit: 1
           <section className="admin-section">
             <h3 style={sectionTitleStyle}><T en="Uploaded Documents" ar="المستندات المرفوعة" /></h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={crUrl} />
-              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={vatUrl} />
-              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={addressUrl} />
-              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={bankUrl} />
+              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={crUrl} loading={docLoading.cr} />
+              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={vatUrl} loading={docLoading.vat} />
+              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={addressUrl} loading={docLoading.address} />
+              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={bankUrl} loading={docLoading.bank} />
             </div>
           </section>
 
@@ -390,12 +413,14 @@ function DataItem({ label, value }: any) {
   );
 }
 
-function DocCard({ label, url }: any) {
+function DocCard({ label, url, loading }: any) {
   return (
     <div style={{ background: '#111', border: '1px solid #222', padding: 16, borderRadius: 12 }}>
       <div style={{ fontSize: '0.85rem', marginBottom: 12 }}>{label}</div>
-      {url ? (
-        <a href={url} target="_blank" style={{ fontSize: '0.75rem', color: '#cfa86e', textDecoration: 'underline' }}>View Document</a>
+      {loading ? (
+        <span style={{ fontSize: '0.75rem', color: '#666' }}>Signing...</span>
+      ) : url ? (
+        <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#cfa86e', textDecoration: 'underline' }}>View Document</a>
       ) : (
         <span style={{ fontSize: '0.75rem', color: '#444' }}>Not uploaded</span>
       )}
