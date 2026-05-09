@@ -1,5 +1,6 @@
 "use server";
 
+import { getSignedDocumentUrl } from "@/lib/storage/provider-documents";
 import { getSignedContractUrl } from "@/lib/storage/signed-contracts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -351,3 +352,11 @@ export async function getSignedContractAction(contractUrl: string) {
   }
 }
 
+export async function getSignedDocumentUrlAction(documentUrl: string) {
+  try {
+    const signedUrl = await getSignedDocumentUrl(documentUrl);
+    return { success: true, url: signedUrl };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

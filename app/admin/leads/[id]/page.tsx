@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
-import { approveStudioApplication, requestLeadUpdate, rejectLeadApplication, getLeadOrApplicationDetail, giveFinalApproval, getSignedContractAction } from "../actions";
+import { 
+  approveStudioApplication, 
+  requestLeadUpdate, 
+  rejectLeadApplication, 
+  getLeadOrApplicationDetail, 
+  giveFinalApproval, 
+  getSignedContractAction,
+  getSignedDocumentUrlAction
+} from "../actions";
 
 export default function LeadDetailPage() {
   const { id } = useParams();
@@ -18,16 +26,31 @@ export default function LeadDetailPage() {
   const [signedContractUrl, setSignedContractUrl] = useState<string | null>(null);
   const [linkError, setLinkError] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Document URLs (Secured)
+  const [crUrl, setCrUrl] = useState<string | null>(null);
+  const [vatUrl, setVatUrl] = useState<string | null>(null);
+  const [addressUrl, setAddressUrl] = useState<string | null>(null);
+  const [bankUrl, setBankUrl] = useState<string | null>(null);
 
   // Form states for boxes
   const [updateMessage, setUpdateMessage] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
 
-  useEffect(() => {
-    fetchData();
-  }, [id]);
+  const getDefaultContract = useCallback((app: any, lead: any) => {
+    return `STUDIO MANAGEMENT AGREEMENT
 
-  async function fetchData() {
+Company: ${app?.company_name_en || lead?.full_name || "N/A"}
+Registration: ${app?.commercial_registration || "N/A"}
+VAT: ${app?.vat_number || "N/A"}
+
+This agreement is made between GearBeat and the Company to manage studios on the platform.
+Commission Rate: 15%
+Studio Limit: 1
+... [Rest of contract terms]`;
+  }, []);
+
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const { lead: leadData, studioApp: appData } = await getLeadOrApplicationDetail(id as string);
@@ -49,6 +72,20 @@ export default function LeadDetailPage() {
               }
             });
           }
+
+          // NEW: Fetch other secured document URLs
+          if (appData.cr_document_url) {
+            getSignedDocumentUrlAction(appData.cr_document_url).then(res => res.success && setCrUrl(res.url ?? null));
+          }
+          if (appData.vat_certificate_url) {
+            getSignedDocumentUrlAction(appData.vat_certificate_url).then(res => res.success && setVatUrl(res.url ?? null));
+          }
+          if (appData.national_address_url) {
+            getSignedDocumentUrlAction(appData.national_address_url).then(res => res.success && setAddressUrl(res.url ?? null));
+          }
+          if (appData.bank_document_url) {
+            getSignedDocumentUrlAction(appData.bank_document_url).then(res => res.success && setBankUrl(res.url ?? null));
+          }
         }
       }
     } catch (err) {
@@ -56,20 +93,12 @@ export default function LeadDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, getDefaultContract]);
 
-  function getDefaultContract(app: any, lead: any) {
-    return `STUDIO MANAGEMENT AGREEMENT
+  useEffect(() => {
+    fetchData();
+  }, [id, fetchData]);
 
-Company: ${app?.company_name_en || lead?.full_name || "N/A"}
-Registration: ${app?.commercial_registration || "N/A"}
-VAT: ${app?.vat_number || "N/A"}
-
-This agreement is made between GearBeat and the Company to manage studios on the platform.
-Commission Rate: 15%
-Studio Limit: 1
-... [Rest of contract terms]`;
-  }
 
   async function handleApprove() {
     if (!confirm("Are you sure? This will create a user and send the contract email.")) return;
@@ -190,10 +219,10 @@ Studio Limit: 1
           <section className="admin-section">
             <h3 style={sectionTitleStyle}><T en="Uploaded Documents" ar="المستندات المرفوعة" /></h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={studioApp?.cr_document_url} />
-              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={studioApp?.vat_certificate_url} />
-              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={studioApp?.national_address_url} />
-              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={studioApp?.bank_document_url} />
+              <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={crUrl} />
+              <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={vatUrl} />
+              <DocCard label={<T en="National Address" ar="العنوان الوطني" />} url={addressUrl} />
+              <DocCard label={<T en="Bank Screenshot" ar="إثبات الحساب البنكي" />} url={bankUrl} />
             </div>
           </section>
 
