@@ -85,11 +85,7 @@ export default function JoinSellerPage() {
 
     if (uploadError) throw new Error("File upload failed");
 
-    const { data: urlData } = supabase.storage
-      .from("provider-documents")
-      .getPublicUrl(filePath);
-
-    return urlData.publicUrl;
+    return filePath;
   }
 
   async function handleSubmit(e: React.FormEvent) {
