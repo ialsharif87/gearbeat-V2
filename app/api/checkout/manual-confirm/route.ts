@@ -145,7 +145,10 @@ async function linkPaymentToSource({
       tableName: "bookings",
       sourceId,
       authUserId,
-      payload,
+      payload: {
+        ...payload,
+        status: "confirmed",
+      },
     });
   }
 
