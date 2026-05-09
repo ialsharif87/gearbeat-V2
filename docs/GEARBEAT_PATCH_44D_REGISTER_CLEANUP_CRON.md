@@ -1,7 +1,7 @@
 # GEARBEAT PATCH 44D — REGISTER PENDING PAYMENT CLEANUP CRON
 
 ## 1. Overview
-This patch activates the "Stale Booking Cleanup" automated task by registering it with the Vercel Cron scheduler. This ensures that studio slots blocked by abandoned `pending_payment` bookings are automatically released every 15 minutes.
+This patch activates the "Stale Booking Cleanup" automated task by registering it with the Vercel Cron scheduler. This ensures that studio slots blocked by abandoned `pending_payment` bookings are automatically released to maintain inventory integrity.
 
 ## 2. Configuration Changes
 
