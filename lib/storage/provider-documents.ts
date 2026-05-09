@@ -1,6 +1,8 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentUserRole, isAdminRole } from "@/lib/auth-guards";
 
 const BUCKET_NAME = "provider-documents";
 
@@ -14,25 +16,25 @@ export async function uploadProviderDocumentAction(
 ) {
   const file = formData.get("file") as File;
   if (!file) {
-    throw new Error("No file provided");
+    return { success: false, error: "No file provided" };
   }
 
   // 1. Validate File Type
   const allowedTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
   if (!allowedTypes.includes(file.type)) {
-    throw new Error("Invalid file type. Only PDF, PNG, and JPG are allowed.");
+    return { success: false, error: "Invalid file type. Only PDF, PNG, and JPG are allowed." };
   }
 
   // 2. Validate File Size (Max 10MB)
   const MAX_SIZE = 10 * 1024 * 1024;
   if (file.size > MAX_SIZE) {
-    throw new Error("File too large. Maximum size is 10MB.");
+    return { success: false, error: "File too large. Maximum size is 10MB." };
   }
 
   // 3. Validate Folder
   const allowedFolders = ["studio-applications", "seller-applications", "contracts"];
   if (!allowedFolders.includes(folder)) {
-    throw new Error("Invalid destination folder.");
+    return { success: false, error: "Invalid destination folder." };
   }
 
   const supabaseAdmin = createAdminClient();
@@ -48,11 +50,12 @@ export async function uploadProviderDocumentAction(
 
   if (uploadError) {
     console.error("Upload error details:", uploadError);
-    throw new Error("Upload failed: " + uploadError.message);
+    return { success: false, error: uploadError.message };
   }
 
   return { success: true, path: filePath };
 }
+
 
 
 /**
@@ -113,3 +116,95 @@ export async function getSignedDocumentUrl(documentRef: string | null | undefine
 
   return data.signedUrl;
 }
+
+export async function getSignedDocumentUrlAction(documentRef: string | null | undefined, appId?: string) {
+  try {
+    if (!documentRef) {
+      return { success: false, error: "Missing document reference", url: null };
+    }
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "Unauthorized", url: null };
+    }
+
+    const role = await getCurrentUserRole(supabase, user);
+    const isAdmin = isAdminRole(role);
+
+    const requestedPath = await getDocumentStoragePath(documentRef);
+    if (!requestedPath) {
+      return { success: false, error: "Invalid document reference", url: null };
+    }
+
+    let authorized = isAdmin;
+
+    // Ownership check for non-admins
+    if (!authorized) {
+      if (!appId) {
+        return { success: false, error: "Missing application ID", url: null };
+      }
+
+      // 1. Verify ownership in studio_applications
+      const { data: studioApp } = await supabase
+        .from("studio_applications")
+        .select("contract_url, email, linked_user_id, cr_document_url, vat_certificate_url, national_address_url, bank_document_url")
+        .eq("id", appId)
+        .maybeSingle();
+
+      if (studioApp) {
+        const docFields = [
+          studioApp.contract_url,
+          studioApp.cr_document_url,
+          studioApp.vat_certificate_url,
+          studioApp.national_address_url,
+          studioApp.bank_document_url
+        ];
+
+        for (const field of docFields) {
+          if (field) {
+            const storedPath = await getDocumentStoragePath(field);
+            if (storedPath === requestedPath && (studioApp.email === user.email || studioApp.linked_user_id === user.id)) {
+              authorized = true;
+              break;
+            }
+          }
+        }
+      }
+
+      // 2. Fallback: Verify ownership in provider_leads (Onboarding/Seller flow)
+      if (!authorized) {
+        const { data: lead } = await supabase
+          .from("provider_leads")
+          .select("signed_contract_url, vat_document_url")
+          .eq("email", user.email)
+          .maybeSingle();
+        
+        if (lead) {
+          const leadDocs = [lead.signed_contract_url, lead.vat_document_url];
+          for (const field of leadDocs) {
+            if (field) {
+              const leadPath = await getDocumentStoragePath(field);
+              if (leadPath === requestedPath) {
+                authorized = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (!authorized) {
+      return { success: false, error: "Forbidden: Access denied", url: null };
+    }
+
+    const url = await getSignedDocumentUrl(requestedPath);
+    return { success: true, url };
+  } catch (error: any) {
+    return { success: false, error: error.message, url: null };
+  }
+}
+
+

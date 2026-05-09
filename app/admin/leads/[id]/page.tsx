@@ -75,16 +75,16 @@ Studio Limit: 1
 
           // NEW: Fetch other secured document URLs
           if (appData.cr_document_url) {
-            getSignedDocumentUrlAction(appData.cr_document_url).then(res => res.success && setCrUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.cr_document_url, appData.id).then(res => res.success && setCrUrl(res.url ?? null));
           }
           if (appData.vat_certificate_url) {
-            getSignedDocumentUrlAction(appData.vat_certificate_url).then(res => res.success && setVatUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.vat_certificate_url, appData.id).then(res => res.success && setVatUrl(res.url ?? null));
           }
           if (appData.national_address_url) {
-            getSignedDocumentUrlAction(appData.national_address_url).then(res => res.success && setAddressUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.national_address_url, appData.id).then(res => res.success && setAddressUrl(res.url ?? null));
           }
           if (appData.bank_document_url) {
-            getSignedDocumentUrlAction(appData.bank_document_url).then(res => res.success && setBankUrl(res.url ?? null));
+            getSignedDocumentUrlAction(appData.bank_document_url, appData.id).then(res => res.success && setBankUrl(res.url ?? null));
           }
         }
       }

@@ -1,9 +1,10 @@
 "use server";
 
-import { getSignedDocumentUrl } from "@/lib/storage/provider-documents";
+import { getSignedDocumentUrl, getSignedDocumentUrlAction as getSecureSignedUrlAction } from "@/lib/storage/provider-documents";
 import { getSignedContractUrl } from "@/lib/storage/signed-contracts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUserRole, isAdminRole } from "@/lib/auth-guards";
 import { sendEmail } from "@/lib/emails";
 import { revalidatePath } from "next/cache";
 
@@ -345,6 +346,13 @@ export async function rejectLeadApplication(leadId: string, reason: string) {
 
 export async function getSignedContractAction(contractUrl: string) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    const role = await getCurrentUserRole(supabase, user);
+    if (!isAdminRole(role)) throw new Error("Forbidden: Admin access required");
+
     const signedUrl = await getSignedContractUrl(contractUrl);
     return { success: true, url: signedUrl };
   } catch (error: any) {
@@ -352,11 +360,7 @@ export async function getSignedContractAction(contractUrl: string) {
   }
 }
 
-export async function getSignedDocumentUrlAction(documentUrl: string) {
-  try {
-    const signedUrl = await getSignedDocumentUrl(documentUrl);
-    return { success: true, url: signedUrl };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
+export async function getSignedDocumentUrlAction(documentUrl: string, appId?: string) {
+  // Proxy to the hardened general action which handles admin bypass
+  return getSecureSignedUrlAction(documentUrl, appId);
 }
