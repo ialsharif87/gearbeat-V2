@@ -215,27 +215,6 @@ export async function POST(request: Request) {
     }
 
 
-    const { data: overlappingBookings, error: overlapError } =
-      await supabaseAdmin
-        .from("bookings")
-        .select("id")
-        .eq("studio_id", studio.id)
-        .eq("booking_date", bookingDate)
-        .in("status", ["pending_payment", "pending", "confirmed", "paid"])
-        .lt("start_time", endTime)
-        .gt("end_time", startTime)
-        .limit(1);
-
-    if (overlapError) {
-      throw new Error(overlapError.message);
-    }
-
-    if (overlappingBookings && overlappingBookings.length > 0) {
-      return NextResponse.json(
-        { error: "This studio is already booked for the selected time." },
-        { status: 400 }
-      );
-    }
 
     // Availability validation
     const dayOfWeek = new Date(`${bookingDate}T12:00:00`).getDay();
@@ -305,43 +284,62 @@ export async function POST(request: Request) {
     const nowIso = new Date().toISOString();
     const bookingNumber = createBookingNumber();
 
-    const { data: booking, error: bookingError } = await supabaseAdmin
-      .from("bookings")
-      .insert({
-        auth_user_id: user.id,
-        customer_auth_user_id: user.id,
-        studio_id: studio.id,
-        owner_auth_user_id: studio.owner_auth_user_id || null,
-        booking_number: bookingNumber,
-        customer_name: profile?.full_name || null,
-        customer_email: profile?.email || user.email || null,
-        booking_date: bookingDate,
-        start_time: startTime,
-        end_time: endTime,
-        duration_hours: durationHours,
-        status: "pending_payment",
-        payment_status: "unpaid",
-        subtotal_amount: subtotalAmount,
-        discount_amount: 0,
-        coupon_discount_amount: 0,
-        wallet_credit_used: 0,
-        loyalty_points_redeemed: 0,
-        total_amount: totalAmount,
-        currency_code: currencyCode,
-        notes: notes || null,
-        metadata: {
+    const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc(
+      "create_studio_booking_v1",
+      {
+        p_studio_id: studio.id,
+        p_auth_user_id: user.id,
+        p_booking_date: bookingDate,
+        p_start_time: startTime,
+        p_end_time: endTime,
+        p_duration_hours: durationHours,
+        p_hourly_price: hourlyPrice,
+        p_total_amount: totalAmount,
+        p_booking_number: bookingNumber,
+        p_customer_name: profile?.full_name || null,
+        p_customer_email: profile?.email || user.email || null,
+        p_owner_auth_user_id: studio.owner_auth_user_id || null,
+        p_notes: notes || null,
+        p_metadata: {
           source: "studio_booking_checkout",
           studio_name: getStudioName(studio),
           hourly_price: hourlyPrice,
         },
-        created_at: nowIso,
-        updated_at: nowIso,
-      })
+        p_currency_code: currencyCode,
+      }
+    );
+
+    if (rpcError) {
+      throw new Error(rpcError.message);
+    }
+
+    const result =
+      typeof rpcResult === "string" ? JSON.parse(rpcResult) : rpcResult;
+
+    if (!result?.ok) {
+      if (result?.error === "CONFLICT") {
+        return NextResponse.json(
+          {
+            error:
+              result.message ||
+              "This studio is already booked for the selected time.",
+          },
+          { status: 409 }
+        );
+      }
+      throw new Error(result?.message || "Could not create atomic booking.");
+    }
+
+    const bookingId = result.booking_id;
+
+    const { data: booking, error: bookingFetchError } = await supabaseAdmin
+      .from("bookings")
       .select("id, booking_number, total_amount, currency_code")
+      .eq("id", bookingId)
       .single();
 
-    if (bookingError) {
-      throw new Error(bookingError.message);
+    if (bookingFetchError || !booking) {
+      throw new Error("Could not fetch created booking.");
     }
 
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
