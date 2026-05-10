@@ -1,6 +1,7 @@
 import T from "@/components/t";
 import Link from "next/link";
 import StudioTierBadge from "@/components/studio-tier-badge";
+import StatusActionButtons from "./StatusActionButtons";
 
 import { requireAdminLayoutAccess } from "@/lib/route-guards";
 
@@ -119,11 +120,9 @@ export default async function AdminCertifiedStudiosPage() {
                     </td>
                     <td>{new Date(cert.created_at).toLocaleDateString()}</td>
                     <td style={{ textAlign: 'right' }}>
-                      <div className="action-group">
+                      <div className="action-group" style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                         <Link href={`/gearbeat-certified/${cert.studio?.slug}`} target="_blank" className="btn-icon" title="View Certificate">👁️</Link>
-                        <button className="btn-icon" title="Review" disabled>📝</button>
-                        <button className="btn-icon" title="Approve" disabled>✅</button>
-                        <button className="btn-icon" title="Suspend" disabled>🚫</button>
+                        <StatusActionButtons certId={cert.id} currentStatus={cert.status} />
                       </div>
                     </td>
                   </tr>
