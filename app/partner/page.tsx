@@ -137,6 +137,32 @@ export default function PartnerPortalFoundationPage() {
                 </p>
               </div>
             </div>
+            
+            <div className="grid grid-2 gap-24" style={{ marginTop: 24 }}>
+              <div style={{ padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span>🔔</span> <T en="Push Notifications" ar="إشعارات الدفع" />
+                </h4>
+                <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                  <T 
+                    en="Future native push notification infrastructure for instant booking requests, new marketplace orders, and customer messages." 
+                    ar="البنية التحتية المستقبلية لإشعارات الدفع الأصلية لطلبات الحجز الفورية، وطلبات السوق الجديدة، ورسائل العملاء." 
+                  />
+                </p>
+              </div>
+
+              <div style={{ padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span>🔗</span> <T en="External Integrations" ar="تكاملات خارجية" />
+                </h4>
+                <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                  <T 
+                    en="API webhook foundation allowing Pro vendors to sync inventory with third-party logistics and CRM tools." 
+                    ar="أساس واجهة برمجة التطبيقات (API webhook) الذي يسمح للبائعين المحترفين بمزامنة المخزون مع أدوات اللوجستيات وإدارة علاقات العملاء الخارجية." 
+                  />
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 

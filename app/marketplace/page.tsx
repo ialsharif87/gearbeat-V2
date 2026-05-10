@@ -695,6 +695,24 @@ export default async function MarketplacePage({
           </div>
         )}
       </section>
+
+      {/* MARKETPLACE MOBILE READINESS */}
+      <section style={{ marginTop: 60, marginBottom: 40 }}>
+        <div className="card-premium" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(212,175,55,0.03))', border: '1px dashed rgba(212,175,55,0.3)' }}>
+          <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ fontSize: "3rem" }}>🛍️</div>
+            <div>
+              <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="Mobile Shopping Experience" ar="تجربة التسوق عبر الجوال" /> <span className="badge badge-warning" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>PLANNING PHASE</span></h3>
+              <p style={{ color: 'var(--muted)', maxWidth: 700, lineHeight: 1.6 }}>
+                <T 
+                  en="We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse gear, securely checkout with Apple Pay / Google Pay, and receive real-time push notifications for order updates and outbid alerts." 
+                  ar="نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات، والدفع الآمن باستخدام Apple Pay / Google Pay، وتلقي إشعارات فورية لتحديثات الطلبات وتنبيهات المزايدة." 
+                />
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 } catch (err: any) {
