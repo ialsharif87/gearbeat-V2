@@ -133,6 +133,34 @@ export default function TicketingPartnerFoundationPage() {
           </div>
         </section>
 
+        <section className="section-container" style={{ marginTop: 60 }}>
+          <div className="section-header">
+            <h2><T en="Partner Mobile Operations" ar="عمليات الشركاء عبر المحمول" /></h2>
+            <span className="badge badge-warning" style={{ marginLeft: 16 }}><T en="PLANNING PHASE" ar="مرحلة التخطيط" /></span>
+          </div>
+          <div className="card-premium" style={{ background: 'linear-gradient(135deg, rgba(207,167,98,0.05), transparent)' }}>
+            <div className="flex-between" style={{ flexWrap: 'wrap', gap: 20 }}>
+              <div>
+                <h3 style={{ fontSize: "1.2rem", marginBottom: 12 }}><T en="GearBeat Pro Scanner App" ar="تطبيق ماسح جيربيت برو" /></h3>
+                <p style={{ color: 'var(--muted)', maxWidth: 600, lineHeight: 1.6 }}>
+                  <T 
+                    en="We are planning native iOS and Android tools for event partners. The upcoming GearBeat Pro app will allow staff to scan QR tickets instantly, view live capacity, and manage door operations in real-time." 
+                    ar="نحن نخطط لأدوات iOS و Android أصلية لشركاء الفعاليات. سيتيح تطبيق جيربيت برو القادم للموظفين مسح تذاكر QR على الفور، وعرض السعة المباشرة، وإدارة عمليات الدخول في الوقت الفعلي." 
+                  />
+                </p>
+              </div>
+              <div style={{ display: 'grid', gap: 8, minWidth: 200 }}>
+                <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span>📸</span> <span style={{ fontSize: '0.85rem' }}><T en="Native Camera Scanner" ar="ماسح الكاميرا الأصلي" /></span>
+                </div>
+                <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span>📶</span> <span style={{ fontSize: '0.85rem' }}><T en="Offline Mode Support" ar="دعم وضع عدم الاتصال" /></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="section-container" style={{ marginTop: 60, paddingBottom: 100 }}>
           <div className="section-header">
             <h2><T en="QA & Compliance Roadmap" ar="خارطة طريق الجودة والامتثال" /></h2>
