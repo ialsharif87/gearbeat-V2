@@ -163,11 +163,40 @@ export default function AdminRewardsKitsPage() {
           </div>
         </div>
 
+        {/* PHASE 53 CLOSEOUT / QA SUMMARY */}
+        <div className="card-premium closeout-summary" style={{ marginTop: 40, border: '1px solid rgba(45, 212, 191, 0.2)' }}>
+          <div className="flex-between">
+            <h3 className="success-text">✅ <T en="Phase 53 Rewards Foundation Complete" ar="اكتمال تأسيس الجوائز المرحلة 53" /></h3>
+            <span className="badge success"><T en="QA READINESS" ar="جاهزية الجودة" /></span>
+          </div>
+          <div className="closeout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, marginTop: 24 }}>
+            <div className="closeout-column">
+              <h4 style={{ fontSize: '0.9rem', marginBottom: 16, color: '#fff' }}><T en="Integrated Features" ar="الميزات المتكاملة" /></h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li style={{ fontSize: '0.8rem', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Admin Rewards Hub</li>
+                <li style={{ fontSize: '0.8rem', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Customer Reward Status Model</li>
+                <li style={{ fontSize: '0.8rem', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Partner Kit Status Model</li>
+                <li style={{ fontSize: '0.8rem', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Merch Hierarchy Defined</li>
+                <li style={{ fontSize: '0.8rem', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Fulfillment Lifecycle Prototype</li>
+              </ul>
+            </div>
+            <div className="closeout-column">
+              <h4 style={{ fontSize: '0.9rem', marginBottom: 16, color: '#fff' }}><T en="Deferred / Future Roadmap" ar="خارطة الطريق المؤجلة" /></h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li style={{ fontSize: '0.8rem', color: '#666', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• SQL Tables (Rewards/Inventory)</li>
+                <li style={{ fontSize: '0.8rem', color: '#666', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Real-time Reward Automation</li>
+                <li style={{ fontSize: '0.8rem', color: '#666', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Shipping/Logistic API Sync</li>
+                <li style={{ fontSize: '0.8rem', color: '#666', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>• Server-side Mutations (CRUD)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div className="disclaimer-box" style={{ marginTop: 40 }}>
           <p className="text-muted">
             <T 
-              en="Safety Note: No live inventory or real-time fulfillment logic is active. This foundation establishes the UI and fulfillment lifecycle model for future implementation."
-              ar="ملاحظة أمان: لا يوجد مخزون مباشر أو منطق تنفيذ في الوقت الفعلي. يؤسس هذا التأسيس لواجهة المستخدم ونموذج دورة حياة التنفيذ للتنفيذ المستقبلي."
+              en="Phase 53 Closing: Rewards and Welcome Kit foundations are established across Admin, Customer, and Partner zones. Next: Partner Portal Integration or Core Fulfillment SQL."
+              ar="إغلاق المرحلة 53: تم تأسيس قواعد الجوائز وحقائب الترحيب عبر مناطق المسؤول والعميل والشريك. الخطوة التالية: ربط بوابة الشريك أو قواعد بيانات التنفيذ."
             />
           </p>
         </div>

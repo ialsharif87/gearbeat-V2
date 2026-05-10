@@ -161,6 +161,26 @@ export default function StudioDashboardView({
             </div>
           </div>
 
+          <div className="side-card rewards-status">
+            <h3><T en="Rewards & Kits" ar="الجوائز والحقائب" /></h3>
+            <div className="kit-progress">
+               <div className="flex-between" style={{ marginBottom: 8 }}>
+                 <span style={{ fontSize: '0.8rem', color: '#888' }}><T en="Studio Welcome Kit" ar="حقيبة ترحيب الاستوديو" /></span>
+                 <span style={{ fontSize: '0.8rem', color: 'var(--gb-gold)' }}>40%</span>
+               </div>
+               <div style={{ height: 6, background: '#222', borderRadius: 3, overflow: 'hidden' }}>
+                 <div style={{ width: '40%', height: '100%', background: 'var(--gb-gold)' }} />
+               </div>
+               
+               <ul className="eligibility-list" style={{ marginTop: 20, listStyle: 'none', padding: 0, fontSize: '0.75rem', color: '#555' }}>
+                 <li style={{ display: 'flex', gap: 8, marginBottom: 6 }}>✅ <T en="Approved" ar="تمت الموافقة" /></li>
+                 <li style={{ display: 'flex', gap: 8, marginBottom: 6 }}>⏳ <T en="Profile Completion" ar="إكمال الملف" /></li>
+                 <li style={{ display: 'flex', gap: 8, marginBottom: 6 }}>⏳ <T en="Documents Verified" ar="توثيق المستندات" /></li>
+                 <li style={{ display: 'flex', gap: 8 }}>⏳ <T en="Certified Status" ar="الحصول على التوثيق" /></li>
+               </ul>
+            </div>
+          </div>
+
           <div className="side-card quick-manage">
             <h3><T en="Management" ar="الإدارة" /></h3>
             <div className="action-links">
