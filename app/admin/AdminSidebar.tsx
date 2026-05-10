@@ -43,6 +43,7 @@ export function AdminSidebar({
           <T en="Overview" ar="نظرة عامة" />
         </div>
         <NavItem href="/admin" icon="📊" labelEn="Dashboard" labelAr="لوحة التحكم" active={isActive('/admin')} />
+        <NavItem href="/admin/operations-crm" icon="🤝" labelEn="Operations CRM" labelAr="إدارة العمليات" active={isActive('/admin/operations-crm')} />
         <NavItem href="/admin/accounting" icon="💰" labelEn="Accounting" labelAr="المحاسبة" active={isActive('/admin/accounting')} />
         <NavItem href="/admin/promos" icon="🏷️" labelEn="Promos & Ads" labelAr="العروض والإعلانات" active={isActive('/admin/promos')} />
 
