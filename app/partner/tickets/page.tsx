@@ -91,19 +91,61 @@ export default function TicketingPartnerFoundationPage() {
           </div>
         </section>
 
+        <section className="section-container" style={{ marginTop: 60 }}>
+          <div className="section-header">
+            <h2><T en="Event Lifecycle Management" ar="إدارة دورة حياة الفعاليات" /></h2>
+          </div>
+          <div className="grid grid-3 gap-24">
+            {[
+              { titleEn: 'Event Setup', titleAr: 'إعداد الفعالية', icon: '📝', statusEn: 'Foundational', statusAr: 'تأسيسي' },
+              { titleEn: 'Venue Readiness', titleAr: 'جاهزية المكان', icon: '🏢', statusEn: 'Architectural', statusAr: 'معماري' },
+              { titleEn: 'Ticket Planning', titleAr: 'تخطيط التذاكر', icon: '🎫', statusEn: 'Prototyped', statusAr: 'نموذج أولي' }
+            ].map(item => (
+              <div key={item.titleEn} className="card-premium">
+                <div style={{ fontSize: '2rem', marginBottom: 16 }}>{item.icon}</div>
+                <h3><T en={item.titleEn} ar={item.titleAr} /></h3>
+                <span className="badge" style={{ marginTop: 12, borderColor: '#ec4899', color: '#ec4899' }}>
+                  <T en={item.statusEn} ar={item.statusAr} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="section-container" style={{ marginTop: 60 }}>
+          <div className="section-header">
+            <h2><T en="Operational Controls" ar="الضوابط التشغيلية" /></h2>
+          </div>
+          <div className="grid grid-3 gap-24">
+            {[
+              { titleEn: 'Attendee Ops', titleAr: 'عمليات الحضور', icon: '👥', statusEn: 'Future Track', statusAr: 'مسار مستقبلي' },
+              { titleEn: 'QR & Check-in', titleAr: 'QR وتسجيل الدخول', icon: '📱', statusEn: 'Future Track', statusAr: 'مسار مستقبلي' },
+              { titleEn: 'Sales Tracking', titleAr: 'تتبع المبيعات', icon: '📊', statusEn: 'Future Track', statusAr: 'مسار مستقبلي' }
+            ].map(item => (
+              <div key={item.titleEn} className="card-premium">
+                <div style={{ fontSize: '2rem', marginBottom: 16 }}>{item.icon}</div>
+                <h3><T en={item.titleEn} ar={item.titleAr} /></h3>
+                <span className="badge" style={{ marginTop: 12 }}>
+                  <T en={item.statusEn} ar={item.statusAr} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="section-container" style={{ marginTop: 60, paddingBottom: 100 }}>
           <div className="section-header">
-            <h2><T en="Extranet Readiness" ar="جاهزية الإكسترانت" /></h2>
+            <h2><T en="QA & Compliance Roadmap" ar="خارطة طريق الجودة والامتثال" /></h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 24 }}>
             <div className="card-premium">
                {[
-                 { label: 'Event Profile', status: '✅ READY' },
-                 { label: 'Ticket Model', status: '✅ READY' },
-                 { label: 'Capacity Model', status: '⏳ PENDING' },
-                 { label: 'QR Check-in', status: '⏳ PENDING' },
-                 { label: 'Refund Rules', status: '⏳ PENDING' },
-                 { label: 'Payout Setup', status: '⏳ PENDING' },
+                 { label: 'Organizer Verification', status: '✅ READY' },
+                 { label: 'Safety Standards', status: '✅ READY' },
+                 { label: 'Event Licensing', status: '⏳ PENDING' },
+                 { label: 'Insurance Validation', status: '⏳ PENDING' },
+                 { label: 'Tax Compliance', status: '⏳ PENDING' },
+                 { label: 'Payout Security', status: '⏳ PENDING' },
                ].map(item => (
                  <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #111', fontSize: '0.85rem' }}>
                    <span style={{ color: '#888' }}>{item.label}</span>
@@ -112,27 +154,22 @@ export default function TicketingPartnerFoundationPage() {
                ))}
             </div>
             <div className="card-premium" style={{ background: 'rgba(236, 72, 153, 0.02)', border: '1px dashed rgba(236, 72, 153, 0.2)' }}>
-              <h3><T en="Partner Event Compliance" ar="امتثال فعاليات الشركاء" /></h3>
+              <h3><T en="Sales Readiness" ar="جاهزية المبيعات" /></h3>
               <p style={{ fontSize: '0.85rem', color: '#888', marginTop: 12, lineHeight: 1.6 }}>
                 <T 
-                  en="Ticketing partners must verify venue safety, event licensing, and capacity standards before publishing tickets on GearBeat."
-                  ar="يجب على شركاء التذاكر التحقق من سلامة المكان، وتراخيص الفعاليات، ومعايير السعة قبل نشر التذاكر على جيربيت."
+                  en="Before ticketing goes live, partners must complete the GearBeat Sales Readiness Audit to ensure secure transaction flows and attendee protection."
+                  ar="قبل تفعيل حجز التذاكر، يجب على الشركاء إكمال تدقيق جاهزية المبيعات من GearBeat لضمان تدفق المعاملات الآمنة وحماية الحضور."
                 />
               </p>
-              <ul style={{ paddingInlineStart: 20, color: '#ec4899', fontSize: '0.8rem', marginTop: 16 }}>
-                <li><T en="Verified Organizers Only" ar="المنظمون الموثقون فقط" /></li>
-                <li><T en="Secure QR Scanning" ar="مسح QR آمن" /></li>
-                <li><T en="Automated Payouts" ar="مدفوعات آلية" /></li>
-              </ul>
+              <div style={{ marginTop: 24, padding: 16, background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
+                <p className="text-muted" style={{ fontSize: '0.75rem', margin: 0 }}>
+                  <T 
+                    en="Note: No real event inventory, ticket sales, QR scanning, or payout logic is active in this foundation patch." 
+                    ar="ملاحظة: لا يوجد مخزون فعاليات حقيقي أو مبيعات تذاكر أو مسح QR أو منطق مدفوعات في هذا المسار التأسيسي." 
+                  />
+                </p>
+              </div>
             </div>
-          </div>
-          <div style={{ marginTop: 32, padding: 20, background: 'rgba(0,0,0,0.3)', border: '1px dashed #222', borderRadius: 12, textAlign: 'center' }}>
-            <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>
-              <T 
-                en="Note: No live ticketing logic, payment logic, database writes, or SQL changes are active in this foundation patch." 
-                ar="ملاحظة: لا يوجد منطق تذاكر حي أو منطق دفع أو كتابة في قاعدة البيانات أو تغييرات SQL في هذا المسار التأسيسي." 
-              />
-            </p>
           </div>
         </section>
       </main>
