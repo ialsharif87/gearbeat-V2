@@ -294,6 +294,36 @@ export default async function MarketplacePage({
             </p>
           </div>
 
+          {/* MARKETPLACE TRUST LAYER */}
+          <div className="marketplace-trust-grid" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gap: 16,
+            marginBottom: 8 
+          }}>
+            {[
+              { icon: '🛡️', en: 'Authentic Gear', ar: 'معدات أصلية' },
+              { icon: '💳', en: 'Secure Payment', ar: 'دفع آمن' },
+              { icon: '🤝', en: 'Trusted Seller', ar: 'بائع موثوق' },
+              { icon: '⚡', en: 'Fast Shipping', ar: 'شحن سريع' },
+            ].map(item => (
+              <div key={item.en} style={{ 
+                padding: '16px', 
+                background: 'rgba(212, 175, 55, 0.03)', 
+                border: '1px solid rgba(212, 175, 55, 0.08)', 
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12
+              }}>
+                <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>
+                  <T en={item.en} ar={item.ar} />
+                </span>
+              </div>
+            ))}
+          </div>
+
           <form
             action="/marketplace"
             className="filter-panel animate-up"
