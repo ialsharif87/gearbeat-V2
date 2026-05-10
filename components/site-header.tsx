@@ -73,6 +73,9 @@ export default function SiteHeader({
           <Link href="/how-it-works" className="nav-link">
             <T en="How it Works" ar="كيف يعمل" />
           </Link>
+          <Link href="/partner" className="nav-link">
+            <T en="Partner Portal" ar="بوابة الشركاء" />
+          </Link>
           <Link href="/support" className="nav-link">
             <T en="Contact" ar="اتصل بنا" />
           </Link>
