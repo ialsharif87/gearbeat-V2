@@ -154,11 +154,98 @@ export default function AdminOperationsCrmPage() {
           </table>
         </div>
 
+        {/* EXPORT FOUNDATION */}
+        <div className="card-premium export-box" style={{ marginTop: 40 }}>
+          <div className="flex-between">
+            <div>
+              <h3><T en="Data Export Foundation" ar="تأسيس تصدير البيانات" /></h3>
+              <p className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Field mapping for external CRM & Reporting workflows." ar="رسم الخرائط لتدفقات العمل الخارجية للتقارير." /></p>
+            </div>
+            <div className="btn-group">
+              <button className="btn btn-outline" disabled><T en="Export CSV — Coming Soon" ar="تصدير CSV - قريباً" /></button>
+              <button className="btn btn-outline" style={{ marginLeft: 10 }} disabled><T en="Google Sheets Sync — Future" ar="مزامنة Google Sheets - مستقبلاً" /></button>
+            </div>
+          </div>
+          <div className="export-preview">
+            <span className="label"><T en="Mapped Fields:" ar="الحقول المرسومة:" /></span>
+            <div className="field-tags">
+              {['relationship_name', 'partner_type', 'source', 'pipeline_stage', 'priority', 'follow_up_status', 'portal_readiness', 'assigned_to', 'last_contacted', 'next_follow_up', 'notes'].map(f => (
+                <span key={f} className="field-tag">{f}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* OPERATIONS NOTES & FOLLOW-UP */}
+        <div className="card-premium notes-container" style={{ marginTop: 40 }}>
+          <div className="table-header">
+            <h3><T en="Internal Operations Notes" ar="ملاحظات العمليات الداخلية" /></h3>
+          </div>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th><T en="Entity" ar="الجهة" /></th>
+                <th><T en="Latest Note" ar="آخر ملاحظة" /></th>
+                <th><T en="Next Follow-up" ar="المتابعة القادمة" /></th>
+                <th><T en="Owner" ar="المسؤول" /></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Sound Horizon</strong></td>
+                <td><span className="text-muted italic">&quot;Awaiting electrical safety certificates for Studio A.&quot;</span></td>
+                <td><span className="text-gold">May 15, 2026</span></td>
+                <td>Sarah</td>
+              </tr>
+              <tr>
+                <td><strong>Blue Note Gear</strong></td>
+                <td><span className="text-muted italic">&quot;Draft contract sent to legal team for final review.&quot;</span></td>
+                <td>May 20, 2026</td>
+                <td>Omar</td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="internal-reminder">
+            <span className="icon">📝</span>
+            <p><T en="Internal-only: Notes are only visible to GearBeat admins. Partners do not see these audits." ar="للإدارة فقط: الملاحظات مرئية فقط لمسؤولي GearBeat. الشركاء لا يرون هذه التدقيقات." /></p>
+          </div>
+        </div>
+
+        {/* PHASE 52 CLOSEOUT / QA SUMMARY */}
+        <div className="card-premium closeout-summary" style={{ marginTop: 40, border: '1px solid rgba(45, 212, 191, 0.2)' }}>
+          <div className="flex-between">
+            <h3 className="success-text">✅ <T en="Phase 52 CRM Foundation Complete" ar="اكتمال تأسيس CRM المرحلة 52" /></h3>
+            <span className="badge success"><T en="QA READINESS" ar="جاهزية الجودة" /></span>
+          </div>
+          <div className="closeout-grid">
+            <div className="closeout-column">
+              <h4><T en="Integrated Features" ar="الميزات المتكاملة" /></h4>
+              <ul>
+                <li>Dashboard Overview & Stats</li>
+                <li>Pipeline Stage Visualization</li>
+                <li>Multi-type Partner Mapping</li>
+                <li>Portal Readiness Tracking</li>
+                <li>Export Field Model</li>
+                <li>Notes/Follow-up Model</li>
+              </ul>
+            </div>
+            <div className="closeout-column">
+              <h4><T en="Deferred / Future Roadmap" ar="خارطة الطريق المؤجلة" /></h4>
+              <ul className="text-muted">
+                <li>Live Data Integration (SQL/RPC)</li>
+                <li>Real CSV/Sheets Export</li>
+                <li>Status Mutations (UI Actions)</li>
+                <li>CRM Audit Event Persistence</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div className="disclaimer-box" style={{ marginTop: 40 }}>
           <p className="text-muted">
             <T 
-              en="Note: This is a UI foundation. Real-time data integration for lead pipelines and relationship assignments will be enabled in future patches."
-              ar="ملاحظة: هذه واجهة تأسيسية. سيتم تفعيل ربط البيانات المباشر لتدفقات العملاء وتعيينات العلاقات في التحديثات القادمة."
+              en="Phase 52 Closing: This dashboard serves as the operational prototype for GearBeat relationship management. Next Phase: CRM Data Integration or Partner Portal Activation."
+              ar="إغلاق المرحلة 52: تخدم لوحة التحكم هذه كنموذج أولي لعمليات إدارة العلاقات في GearBeat. المرحلة القادمة: ربط بيانات CRM أو تفعيل بوابة الشركاء."
             />
           </p>
         </div>
@@ -237,6 +324,24 @@ export default function AdminOperationsCrmPage() {
         .priority-label.high { color: #ef4444; }
         .priority-label.medium { color: #f59e0b; }
         .priority-label.low { color: #444; }
+
+        .export-preview { margin-top: 20px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .export-preview .label { font-size: 0.7rem; color: #555; text-transform: uppercase; margin-bottom: 12px; display: block; }
+        .field-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .field-tag { font-size: 0.7rem; color: #888; background: #111; padding: 4px 8px; border: 1px solid #222; border-radius: 4px; font-family: monospace; }
+
+        .internal-reminder { display: flex; gap: 12px; padding: 16px; background: rgba(207, 168, 110, 0.05); margin-top: 20px; border-radius: 8px; align-items: center; }
+        .internal-reminder p { font-size: 0.75rem; color: #888; margin: 0; }
+        .italic { font-style: italic; }
+        .text-gold { color: var(--gb-gold); }
+
+        .closeout-summary { padding: 32px; }
+        .success-text { color: #2dd4bf; margin: 0; }
+        .closeout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 24px; }
+        .closeout-column h4 { font-size: 0.9rem; margin-bottom: 16px; color: #fff; }
+        .closeout-column ul { list-style: none; padding: 0; margin: 0; }
+        .closeout-column li { font-size: 0.8rem; color: #888; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .closeout-column li::before { content: '•'; color: var(--gb-gold); }
 
         .action-group { display: flex; gap: 8px; justify-content: flex-end; }
         .btn-icon { background: transparent; border: 1px solid #222; color: #aaa; padding: 6px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
