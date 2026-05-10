@@ -2,14 +2,43 @@ import T from "@/components/t";
 import Link from "next/link";
 import StudioTierBadge from "@/components/studio-tier-badge";
 
-export default function AdminCertifiedStudiosPage() {
-  const sampleStudios = [
-    { id: 1, name: "Desert Sound Studio", slug: "desert-sound", tier: "flagship", status: "approved", date: "2026-05-01" },
-    { id: 2, name: "Skyline Audio", slug: "skyline-audio", tier: "elite", status: "pending", date: "2026-05-08" },
-    { id: 3, name: "Echo Chamber", slug: "echo-chamber", tier: "premium", status: "suspended", date: "2026-04-15" },
-    { id: 4, name: "Vocal Haven", slug: "vocal-haven", tier: "trusted", status: "approved", date: "2026-05-05" },
-    { id: 5, name: "Beat Lab", slug: "beat-lab", tier: "verified", status: "expired", date: "2025-05-10" },
-  ];
+import { requireAdminLayoutAccess } from "@/lib/route-guards";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminCertifiedStudiosPage() {
+  const { supabaseAdmin } = await requireAdminLayoutAccess();
+
+  // Fetch certified studios with related studio and tier data
+  const { data: certifiedData, error } = await supabaseAdmin
+    .from("certified_studios")
+    .select(`
+      id,
+      status,
+      created_at,
+      studio:studios (
+        name_en,
+        name_ar,
+        slug
+      ),
+      tier:studio_tiers (
+        level,
+        name_en,
+        name_ar
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  const mapLevelToTier = (level: number): any => {
+    switch (level) {
+      case 1: return 'verified';
+      case 2: return 'trusted';
+      case 3: return 'premium';
+      case 4: return 'elite';
+      case 5: return 'flagship';
+      default: return 'verified';
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -41,15 +70,15 @@ export default function AdminCertifiedStudiosPage() {
         <div className="card-premium stats-row">
           <div className="stat-item">
             <span className="label"><T en="Total Certified" ar="إجمالي الموثقين" /></span>
-            <strong className="value">42</strong>
+            <strong className="value">{(certifiedData || []).filter(c => c.status === 'approved').length}</strong>
           </div>
           <div className="stat-item">
             <span className="label"><T en="Pending Review" ar="في انتظار المراجعة" /></span>
-            <strong className="value text-gold">8</strong>
+            <strong className="value text-gold">{(certifiedData || []).filter(c => c.status === 'pending').length}</strong>
           </div>
           <div className="stat-item">
-            <span className="label"><T en="Expiring Soon" ar="تنتهي قريباً" /></span>
-            <strong className="value" style={{ color: '#ef4444' }}>3</strong>
+            <span className="label"><T en="Issues/Expired" ar="مشاكل / منتهي" /></span>
+            <strong className="value" style={{ color: '#ef4444' }}>{(certifiedData || []).filter(c => c.status === 'suspended' || c.status === 'expired').length}</strong>
           </div>
         </div>
 
@@ -65,33 +94,47 @@ export default function AdminCertifiedStudiosPage() {
               </tr>
             </thead>
             <tbody>
-              {sampleStudios.map((studio) => (
-                <tr key={studio.id}>
-                  <td>
-                    <div className="studio-info">
-                      <strong>{studio.name}</strong>
-                      <span className="slug-text">/{studio.slug}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <StudioTierBadge tier={studio.tier as any} showIcon={false} />
-                  </td>
-                  <td>
-                    <span className="status-pill" style={{ borderColor: getStatusColor(studio.status), color: getStatusColor(studio.status) }}>
-                      <T en={studio.status.toUpperCase()} ar={studio.status === 'approved' ? 'مقبول' : studio.status === 'pending' ? 'معلق' : studio.status === 'suspended' ? 'موقوف' : 'منتهي'} />
-                    </span>
-                  </td>
-                  <td>{studio.date}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div className="action-group">
-                      <Link href={`/gearbeat-certified/${studio.slug}`} target="_blank" className="btn-icon" title="View Certificate">👁️</Link>
-                      <button className="btn-icon" title="Review">📝</button>
-                      <button className="btn-icon" title="Approve">✅</button>
-                      <button className="btn-icon" title="Suspend">🚫</button>
-                    </div>
+              {error ? (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '60px', color: '#ef4444' }}>
+                    <T en="Error loading certification data." ar="خطأ في تحميل بيانات التوثيق." />
                   </td>
                 </tr>
-              ))}
+              ) : certifiedData && certifiedData.length > 0 ? (
+                certifiedData.map((cert: any) => (
+                  <tr key={cert.id}>
+                    <td>
+                      <div className="studio-info">
+                        <strong>{cert.studio?.name_en || cert.studio?.name_ar || '—'}</strong>
+                        <span className="slug-text">/{cert.studio?.slug || '—'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <StudioTierBadge tier={mapLevelToTier(cert.tier?.level || 1)} showIcon={false} />
+                    </td>
+                    <td>
+                      <span className="status-pill" style={{ borderColor: getStatusColor(cert.status), color: getStatusColor(cert.status) }}>
+                        <T en={cert.status.toUpperCase()} ar={cert.status === 'approved' ? 'مقبول' : cert.status === 'pending' ? 'معلق' : cert.status === 'suspended' ? 'موقوف' : 'منتهي'} />
+                      </span>
+                    </td>
+                    <td>{new Date(cert.created_at).toLocaleDateString()}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="action-group">
+                        <Link href={`/gearbeat-certified/${cert.studio?.slug}`} target="_blank" className="btn-icon" title="View Certificate">👁️</Link>
+                        <button className="btn-icon" title="Review" disabled>📝</button>
+                        <button className="btn-icon" title="Approve" disabled>✅</button>
+                        <button className="btn-icon" title="Suspend" disabled>🚫</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '60px', color: '#555' }}>
+                    <T en="No certified studios found." ar="لم يتم العثور على استوديوهات موثقة." />
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
