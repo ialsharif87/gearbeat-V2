@@ -88,6 +88,24 @@ export default function GearBeatCertifiedPage() {
               </div>
             ))}
           </div>
+
+          <div style={{ marginTop: 60, textAlign: 'center' }}>
+            <Link href="/gearbeat-certified/sample-studio" className="card-premium animate-up" style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 20, 
+              padding: '24px 40px', 
+              textDecoration: 'none',
+              border: '1px dashed rgba(201, 162, 77, 0.4)'
+            }}>
+              <div style={{ fontSize: '2rem' }}>🔍</div>
+              <div style={{ textAlign: 'left' }}>
+                <h4 style={{ margin: 0, color: '#fff' }}><T en="See it in action" ar="شاهدها في الواقع" /></h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#888' }}><T en="View a sample studio verification certificate." ar="اعرض نموذجاً لشهادة توثيق استوديو." /></p>
+              </div>
+              <span style={{ fontSize: '1.2rem', color: 'var(--gb-gold)' }}>→</span>
+            </Link>
+          </div>
         </div>
       </section>
 

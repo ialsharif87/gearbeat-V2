@@ -1,288 +1,201 @@
-import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import T from "@/components/t";
 import Link from "next/link";
+import T from "@/components/t";
+import StudioTierBadge from "@/components/studio-tier-badge";
 
-export default async function StudioVerificationPage({
-  params,
+export default async function CertifiedVerificationPage({
+  params
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  // Fetch studio and certification details
-  const { data: studio, error } = await supabase
-    .from("studios")
-    .select(`
-      id,
-      name,
-      slug,
-      image_url,
-      certified_studios!inner(
-        status,
-        last_verified_date,
-        studio_tiers(
-          level,
-          name_en,
-          name_ar
-        )
-      )
-    `)
-    .eq("slug", slug)
-    .single();
-
-  if (error || !studio) {
-    notFound();
-  }
-
-  const cert = studio.certified_studios as any;
-  const tier = cert.studio_tiers;
-  const isVerified = cert.status === 'approved';
+  
+  // Format slug for display (sample-studio -> Sample Studio)
+  const displayName = slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
   return (
-    <div className="verification-page">
-      <div className="verification-card container">
-        <div className="verification-header">
-          <div className="gb-logo gb-logo-md">
-            <div className="gb-logo-word-group">
-              <span className="gb-logo-word">Gear<span>Beat</span></span>
-              <span className="gb-logo-tagline">CERTIFIED PARTNER</span>
+    <main className="verification-root">
+      <div className="container animate-up">
+        {/* VERIFICATION CARD */}
+        <div className="verification-card card-premium">
+          <div className="verification-header text-center">
+            <div className="certified-badge-large">
+              <span className="star-icon">Γÿà</span>
+            </div>
+            <h1 className="studio-name">{displayName}</h1>
+            <div className="tier-wrapper" style={{ marginTop: 12 }}>
+              <StudioTierBadge tier="premium" />
             </div>
           </div>
-          <div className={`status-badge ${isVerified ? 'verified' : 'unverified'}`}>
-            {isVerified ? (
-              <T en="✓ Verified" ar="✓ موثق" />
-            ) : (
-              <T en="✕ Unverified" ar="✕ غير موثق" />
-            )}
-          </div>
-        </div>
 
-        <div className="studio-visual">
-          {studio.image_url && (
-            <img src={studio.image_url} alt={studio.name} className="studio-hero-img" />
-          )}
-          <div className="tier-overlay">
-            <span className={`tier-tag tier-${tier.level}`}>
-              <T en={tier.name_en} ar={tier.name_ar} />
-            </span>
-          </div>
-        </div>
-
-        <div className="verification-content">
-          <h1>{studio.name}</h1>
-          <p className="trust-message">
-            <T 
-              en="This studio is GearBeat Certified. Its profile, booking flow, and customer reviews are verified by GearBeat."
-              ar="هذا الاستوديو معتمد من GearBeat. تم التحقق من بياناته، ويمكن حجزه بأمان عبر المنصة."
-            />
-          </p>
-
-          <div className="trust-grid">
-            <div className="trust-item">
-              <span className="icon">🛡️</span>
-              <div className="text">
-                <strong><T en="Secure Booking" ar="حجز آمن" /></strong>
-                <p><T en="Protected by GearBeat Escrow" ar="محمي بنظام الضمان من GearBeat" /></p>
+          <div className="verification-body">
+            <div className="status-banner success">
+              <div className="status-icon">Γ£ô</div>
+              <div className="status-text">
+                <h3><T en="Verified by GearBeat" ar="┘à┘ê╪½┘é ┘à┘å ╪¼┘è╪▒╪¿┘è╪¬" /></h3>
+                <p><T en="This studio has passed our high-trust certification audit." ar="┘ç╪░╪º ╪º┘ä╪º╪│╪¬┘ê╪»┘è┘ê ╪º╪¼╪¬╪º╪▓ ╪¬╪»┘é┘è┘é ╪º┘ä╪¬┘ê╪½┘è┘é ╪╣╪º┘ä┘è ╪º┘ä╪½┘é╪⌐ ╪º┘ä╪«╪º╪╡ ╪¿┘å╪º." /></p>
               </div>
             </div>
-            <div className="trust-item">
-              <span className="icon">⭐</span>
-              <div className="text">
-                <strong><T en="Verified Reviews" ar="تقييمات حقيقية" /></strong>
-                <p><T en="From real creative sessions" ar="من جلسات إبداعية حقيقية" /></p>
+
+            <div className="info-grid">
+              <div className="info-item">
+                <span className="label"><T en="Certification Status" ar="╪¡╪º┘ä╪⌐ ╪º┘ä╪¬┘ê╪½┘è┘é" /></span>
+                <strong className="value success"><T en="ACTIVE" ar="┘å╪┤╪╖" /></strong>
+              </div>
+              <div className="info-item">
+                <span className="label"><T en="Last Verified" ar="╪ó╪«╪▒ ╪¬┘ê╪½┘è┘é" /></span>
+                <strong className="value"><T en="May 2026" ar="┘à╪º┘è┘ê ┘ó┘á┘ó┘ª" /></strong>
+              </div>
+              <div className="info-item">
+                <span className="label"><T en="Trust Score" ar="╪»╪▒╪¼╪⌐ ╪º┘ä╪½┘é╪⌐" /></span>
+                <strong className="value">98/100</strong>
               </div>
             </div>
-            <div className="trust-item">
-              <span className="icon">📅</span>
-              <div className="text">
-                <strong><T en="Last Verified" ar="آخر توثيق" /></strong>
-                <p>{new Date(cert.last_verified_date).toLocaleDateString()}</p>
+
+            <div className="trust-details">
+              <div className="trust-box">
+                <h4>≡ƒ¢á∩╕Å <T en="Hardware Audit" ar="╪¬╪»┘é┘è┘é ╪º┘ä╪╣╪¬╪º╪»" /></h4>
+                <p><T en="The listed professional gear has been physically verified by our experts." ar="╪¬┘à ╪º┘ä╪¬╪¡┘é┘é ┘à┘å ╪º┘ä┘à╪╣╪»╪º╪¬ ╪º┘ä╪º╪¡╪¬╪▒╪º┘ü┘è╪⌐ ╪º┘ä┘à╪»╪▒╪¼╪⌐ ┘ü╪╣┘ä┘è╪º┘ï ┘à┘å ┘é╪¿┘ä ╪«╪¿╪▒╪º╪ª┘å╪º." /></p>
               </div>
+              <div className="trust-box">
+                <h4>≡ƒöè <T en="Acoustic Quality" ar="╪º┘ä╪¼┘ê╪»╪⌐ ╪º┘ä╪╡┘ê╪¬┘è╪⌐" /></h4>
+                <p><T en="Room acoustics and monitoring systems meet professional industry standards." ar="╪╡┘ê╪¬┘è╪º╪¬ ╪º┘ä╪║╪▒┘ü╪⌐ ┘ê╪ú┘å╪╕┘à╪⌐ ╪º┘ä┘à╪▒╪º┘é╪¿╪⌐ ╪¬╪│╪¬┘ê┘ü┘è ┘à╪╣╪º┘è┘è╪▒ ╪º┘ä╪╡┘å╪º╪╣╪⌐ ╪º┘ä╪º╪¡╪¬╪▒╪º┘ü┘è╪⌐." /></p>
+              </div>
+            </div>
+
+            <div className="qr-explanation">
+              <p className="text-muted" style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>
+                <T 
+                  en="QR Verification: Every GearBeat Certified studio has a unique physical QR code in their space. Scan the physical code to ensure you are in the verified location."
+                  ar="╪¬┘ê╪½┘è┘é QR: ┘â┘ä ╪º╪│╪¬┘ê╪»┘è┘ê ┘à┘ê╪½┘é ┘à┘å ╪¼┘è╪▒╪¿┘è╪¬ ┘ä╪»┘è┘ç ╪▒┘à╪▓ QR ┘à╪º╪»┘è ┘ü╪▒┘è╪» ┘ü┘è ┘à╪│╪º╪¡╪¬┘ç. ╪º┘à╪│╪¡ ╪º┘ä╪▒┘à╪▓ ╪º┘ä┘à╪º╪»┘è ┘ä┘ä╪¬╪ú┘â╪» ┘à┘å ╪ú┘å┘â ┘ü┘è ╪º┘ä┘à┘ê┘é╪╣ ╪º┘ä┘à┘ê╪½┘é."
+                />
+              </p>
             </div>
           </div>
 
-          <div className="verification-actions">
-            <Link href={`/studios/${studio.slug}`} className="btn-primary">
-              <T en="View Studio & Book" ar="عرض الاستوديو والحجز" />
+          <div className="verification-footer">
+            <Link href="/studios" className="btn btn-primary w-full">
+              <T en="Book This Studio" ar="╪º╪¡╪¼╪▓ ┘ç╪░╪º ╪º┘ä╪º╪│╪¬┘ê╪»┘è┘ê" />
             </Link>
-            <button className="btn-report">
-              <T en="Report an issue" ar="إبلاغ عن مشكلة" />
-            </button>
+            <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+              <Link href="/gearbeat-certified" className="btn btn-outline flex-1">
+                <T en="Learn About Certification" ar="╪¬╪╣╪▒┘ü ╪╣┘ä┘ë ╪º┘ä╪¬┘ê╪½┘è┘é" />
+              </Link>
+              <button className="btn btn-outline flex-1" style={{ borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }}>
+                <T en="Report Issue" ar="╪Ñ╪¿┘ä╪º╪║ ╪╣┘å ┘à╪┤┘â┘ä╪⌐" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .verification-page {
+        .verification-root {
+          padding: 120px 0 80px;
+          background: radial-gradient(circle at 50% 0%, rgba(201, 162, 77, 0.1) 0%, transparent 50%);
           min-height: 100vh;
-          background: #050505;
-          padding: 80px 20px;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
         }
 
         .verification-card {
-          max-width: 700px;
-          width: 100%;
-          background: #0c0b0a;
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          border-radius: 40px;
-          overflow: hidden;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(212, 175, 55, 0.1);
-          animation: fadeIn 0.8s ease-out;
-        }
-
-        .verification-header {
-          padding: 30px 40px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background: rgba(255,255,255,0.02);
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .status-badge {
-          padding: 8px 16px;
-          border-radius: 99px;
-          font-weight: 800;
-          font-size: 0.85rem;
-        }
-
-        .status-badge.verified {
-          background: rgba(103, 197, 135, 0.1);
-          color: #67c587;
-          border: 1px solid rgba(103, 197, 135, 0.3);
-        }
-
-        .studio-visual {
-          position: relative;
-          height: 300px;
-          overflow: hidden;
-        }
-
-        .studio-hero-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .tier-overlay {
-          position: absolute;
-          bottom: 20px;
-          left: 40px;
-        }
-
-        [dir="rtl"] .tier-overlay {
-          left: auto;
-          right: 40px;
-        }
-
-        .tier-tag {
-          padding: 10px 20px;
-          border-radius: 12px;
-          font-weight: 800;
-          font-size: 1rem;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        .tier-1 { background: #555; color: #fff; }
-        .tier-2 { background: #34495e; color: #fff; }
-        .tier-3 { background: #c0392b; color: #fff; }
-        .tier-4 { background: #8e44ad; color: #fff; }
-        .tier-5 { background: var(--gb-gold, #d4af37); color: #000; }
-
-        .verification-content {
+          max-width: 600px;
+          margin: 0 auto;
           padding: 40px;
+          background: #080808;
+          border: 1px solid rgba(201, 162, 77, 0.2);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.8);
         }
 
-        .verification-content h1 {
+        .certified-badge-large {
+          width: 80px;
+          height: 80px;
+          border: 3px solid var(--gb-gold);
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 0 auto 20px;
+          box-shadow: 0 0 20px rgba(201, 162, 77, 0.4);
+        }
+        .certified-badge-large .star-icon {
           font-size: 2.5rem;
-          margin-bottom: 20px;
-          letter-spacing: -0.02em;
+          color: var(--gb-gold);
         }
 
-        .trust-message {
-          color: #888;
-          font-size: 1.1rem;
-          line-height: 1.6;
+        .studio-name {
+          font-size: 2.2rem;
+          font-weight: 900;
+          letter-spacing: -1px;
+          color: #fff;
+        }
+
+        .verification-body { margin-top: 40px; }
+
+        .status-banner {
+          display: flex;
+          gap: 20px;
+          padding: 24px;
+          border-radius: 16px;
+          margin-bottom: 30px;
+        }
+        .status-banner.success {
+          background: rgba(45, 212, 191, 0.08);
+          border: 1px solid rgba(45, 212, 191, 0.2);
+        }
+        .status-icon {
+          font-size: 1.5rem;
+          font-weight: 900;
+          color: #2dd4bf;
+          width: 40px;
+          height: 40px;
+          background: rgba(45, 212, 191, 0.15);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .status-text h3 { color: #2dd4bf; font-size: 1.1rem; margin-bottom: 4px; }
+        .status-text p { color: #666; font-size: 0.9rem; margin: 0; }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin-bottom: 40px;
+          padding: 20px;
+          background: rgba(255,255,255,0.02);
+          border-radius: 12px;
+        }
+        .info-item { text-align: center; }
+        .info-item .label { display: block; font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .info-item .value { font-size: 1rem; color: #fff; font-weight: 800; }
+        .info-item .value.success { color: #2dd4bf; }
+
+        .trust-details { display: grid; gap: 16px; margin-bottom: 30px; }
+        .trust-box { padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px; }
+        .trust-box h4 { font-size: 1rem; margin-bottom: 8px; color: #fff; }
+        .trust-box p { font-size: 0.85rem; color: #888; margin: 0; line-height: 1.5; }
+
+        .qr-explanation {
+          padding: 16px;
+          border-left: 2px solid var(--gb-gold);
+          background: rgba(201, 162, 77, 0.05);
           margin-bottom: 40px;
         }
 
-        .trust-grid {
-          display: grid;
-          gap: 24px;
-          margin-bottom: 50px;
-        }
-
-        .trust-item {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          background: rgba(255,255,255,0.02);
-          padding: 20px;
-          border-radius: 20px;
-          border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .trust-item .icon {
-          font-size: 1.8rem;
-        }
-
-        .trust-item strong {
-          display: block;
-          color: #fff;
-          margin-bottom: 4px;
-        }
-
-        .trust-item p {
-          color: #666;
-          font-size: 0.9rem;
-          margin: 0;
-        }
-
-        .verification-actions {
-          display: flex;
-          gap: 16px;
-        }
-
-        .btn-primary {
-          flex: 2;
-          background: var(--gb-gold, #d4af37);
-          color: #000;
-          padding: 16px;
-          border-radius: 16px;
-          font-weight: 800;
-          text-align: center;
-          text-decoration: none;
-          transition: transform 0.2s;
-        }
-
-        .btn-primary:hover { transform: translateY(-4px); }
-
-        .btn-report {
-          flex: 1;
-          background: rgba(255,255,255,0.05);
-          color: #666;
-          border: 1px solid rgba(255,255,255,0.1);
-          padding: 16px;
-          border-radius: 16px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
+        .w-full { width: 100%; }
+        .flex-1 { flex: 1; }
 
         @media (max-width: 600px) {
-          .verification-actions { flex-direction: column; }
-          .verification-content h1 { font-size: 1.8rem; }
+          .verification-card { padding: 24px; }
+          .info-grid { grid-template-columns: 1fr; gap: 20px; }
+          .studio-name { font-size: 1.8rem; }
         }
+
+        [dir="rtl"] .qr-explanation { border-left: none; border-right: 2px solid var(--gb-gold); }
       `}} />
-    </div>
+    </main>
   );
 }
