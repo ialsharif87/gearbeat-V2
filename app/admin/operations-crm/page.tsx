@@ -3,10 +3,20 @@ import Link from "next/link";
 
 export default function AdminOperationsCrmPage() {
   const sampleLeads = [
-    { id: 1, name: "Sound Horizon Studio", type: "Studio", stage: "Vetting", priority: "High", assigned: "Sarah" },
-    { id: 2, name: "Blue Note Gear", type: "Vendor", stage: "Contracting", priority: "Medium", assigned: "Omar" },
-    { id: 3, name: "Aria Heights", type: "Studio", stage: "New", priority: "Low", assigned: "Unassigned" },
-    { id: 4, name: "Melody Merchants", type: "Vendor", stage: "Activated", priority: "High", assigned: "Sarah" },
+    { id: 1, name: "Sound Horizon Studio", type: "Studio Owner", stage: "Vetting", priority: "High", assigned: "Sarah", source: "Studio App", followUp: "Contacted", portalStatus: "Documents pending" },
+    { id: 2, name: "Blue Note Gear", type: "Vendor", stage: "Legal", priority: "Medium", assigned: "Omar", source: "Seller App", followUp: "Waiting", portalStatus: "Contract pending" },
+    { id: 3, name: "Aria Heights", type: "Studio Owner", stage: "Inbound", priority: "Low", assigned: "Unassigned", source: "Manual", followUp: "Not Contacted", portalStatus: "Not invited" },
+    { id: 4, name: "Melody Merchants", type: "Vendor", stage: "Activated", priority: "High", assigned: "Sarah", source: "Seller App", followUp: "Closed", portalStatus: "Active partner" },
+    { id: 5, name: "Desert Sound", type: "Studio Owner", stage: "Vetting", priority: "High", assigned: "Sarah", source: "Certified Studio", followUp: "Follow-up Due", portalStatus: "Profile pending" },
+    { id: 6, name: "Event Horizon", type: "Event Partner", stage: "Inbound", priority: "Medium", assigned: "Omar", source: "Manual", followUp: "Contacted", portalStatus: "Invited" },
+    { id: 7, name: "Pro Audio Services", type: "Service Provider", stage: "Vetting", priority: "Medium", assigned: "Sarah", source: "Manual", followUp: "Contacted", portalStatus: "Ready for approval" },
+  ];
+
+  const pipelineStages = [
+    { key: 'Inbound', en: 'Inbound', ar: 'وارد' },
+    { key: 'Vetting', en: 'Vetting', ar: 'تدقيق' },
+    { key: 'Legal', en: 'Legal', ar: 'قانوني' },
+    { key: 'Activated', en: 'Activated', ar: 'مفعل' },
   ];
 
   return (
@@ -35,30 +45,63 @@ export default function AdminOperationsCrmPage() {
             <strong className="value text-gold">12</strong>
           </div>
           <div className="card-premium stat-box">
-            <span className="label"><T en="Contracts Pending" ar="عقود معلقة" /></span>
+            <span className="label"><T en="Partner Readiness" ar="جاهزية الشركاء" /></span>
             <strong className="value">8</strong>
           </div>
           <div className="card-premium stat-box">
-            <span className="label"><T en="Recent Approvals" ar="موافقات حديثة" /></span>
+            <span className="label"><T en="Active Partners" ar="شركاء نشطون" /></span>
             <strong className="value success">5</strong>
+          </div>
+        </div>
+
+        {/* ARCHITECTURE CLARITY SECTION */}
+        <div className="architecture-box card-premium">
+          <div className="arch-item">
+            <div className="arch-icon">⚙️</div>
+            <div className="arch-text">
+              <h4><T en="Internal CRM Pipeline" ar="خط العمليات الداخلي" /></h4>
+              <p><T en="The administrative relationship pipeline for internal GearBeat operations and relationship management." ar="خط علاقات إداري لعمليات GearBeat الداخلية وإدارة العلاقات." /></p>
+            </div>
+          </div>
+          <div className="arch-divider" />
+          <div className="arch-item">
+            <div className="arch-icon">🌐</div>
+            <div className="arch-text">
+              <h4><T en="Partner Portal / Extranet" ar="بوابة الشركاء / إكسترانت" /></h4>
+              <p><T en="FUTURE: External-facing dashboard for partners to manage their own profiles, gear, and bookings." ar="مستقبلاً: لوحة تحكم خارجية للشركاء لإدارة ملفاتهم الشخصية ومعداتهم وحجوزاتهم." /></p>
+            </div>
           </div>
         </div>
 
         {/* PIPELINE VIEW */}
         <h2 className="section-title"><T en="Pipeline Stages" ar="مراحل التدفق" /></h2>
         <div className="pipeline-grid">
-          {['Inbound', 'Vetting', 'Legal', 'Activated'].map((stage, idx) => (
-            <div key={stage} className="pipeline-card">
-              <div className="stage-header">
-                <span>{stage}</span>
-                <span className="count">{idx * 3 + 2}</span>
+          {pipelineStages.map((stage) => {
+            const stageLeads = sampleLeads.filter(l => l.stage === stage.key);
+            return (
+              <div key={stage.key} className="pipeline-card">
+                <div className="stage-header">
+                  <T en={stage.en} ar={stage.ar} />
+                  <span className="count">{stageLeads.length}</span>
+                </div>
+                <div className="stage-body">
+                  {stageLeads.length > 0 ? stageLeads.map(lead => (
+                    <div key={lead.id} className="lead-mini-card">
+                      <div className="flex-between">
+                        <span className="lead-name">{lead.name}</span>
+                        <span className={`priority-dot ${lead.priority.toLowerCase()}`} />
+                      </div>
+                      <div className="lead-meta">
+                        <span className="source-label">{lead.source}</span>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="placeholder-card" />
+                  )}
+                </div>
               </div>
-              <div className="stage-body">
-                <div className="placeholder-card" />
-                <div className="placeholder-card" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* RECENT ACTIVITY TABLE */}
@@ -69,29 +112,41 @@ export default function AdminOperationsCrmPage() {
           </div>
           <table className="admin-table">
             <thead>
-              <tr>
+                <tr>
                 <th><T en="Entity Name" ar="اسم الجهة" /></th>
                 <th><T en="Type" ar="النوع" /></th>
                 <th><T en="Stage" ar="المرحلة" /></th>
+                <th><T en="Portal Readiness" ar="جاهزية البوابة" /></th>
                 <th><T en="Priority" ar="الأولوية" /></th>
-                <th><T en="Assigned" ar="المسؤول" /></th>
                 <th style={{ textAlign: 'right' }}><T en="Actions" ar="الإجراءات" /></th>
               </tr>
             </thead>
             <tbody>
               {sampleLeads.map((lead) => (
                 <tr key={lead.id}>
-                  <td><strong>{lead.name}</strong></td>
-                  <td>{lead.type}</td>
+                  <td>
+                    <div className="entity-info">
+                      <strong>{lead.name}</strong>
+                      <span className="type-subtext">{lead.source}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="type-pill">{lead.type}</span>
+                  </td>
                   <td>
                     <span className={`pill stage-${lead.stage.toLowerCase()}`}>{lead.stage}</span>
                   </td>
                   <td>
-                    <span className={`priority-${lead.priority.toLowerCase()}`}>{lead.priority}</span>
+                    <span className={`pill portal-${lead.portalStatus.toLowerCase().replace(/ /g, '-')}`}>{lead.portalStatus}</span>
                   </td>
-                  <td>{lead.assigned}</td>
+                  <td>
+                    <span className={`priority-label ${lead.priority.toLowerCase()}`}>{lead.priority}</span>
+                  </td>
                   <td style={{ textAlign: 'right' }}>
-                    <button className="btn-icon" title="View Details">👁️</button>
+                    <div className="action-group">
+                      <button className="btn-icon" title="View Details">👁️</button>
+                      <button className="btn-icon" title="Edit" disabled>📝</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -134,29 +189,63 @@ export default function AdminOperationsCrmPage() {
         .section-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; color: #cfa86e; }
 
         .pipeline-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        .pipeline-card { background: #111; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; }
-        .stage-header { padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #888; }
-        .stage-body { padding: 12px; display: grid; gap: 8px; }
+        .architecture-box { display: flex; gap: 40px; padding: 24px; background: rgba(255,255,255,0.02); margin-bottom: 40px; align-items: center; }
+        .arch-item { display: flex; gap: 16px; flex: 1; }
+        .arch-icon { font-size: 1.5rem; opacity: 0.5; }
+        .arch-text h4 { font-size: 0.9rem; color: #fff; margin-bottom: 4px; }
+        .arch-text p { font-size: 0.75rem; color: #666; margin: 0; line-height: 1.4; }
+        .arch-divider { width: 1px; height: 40px; background: #222; }
+
+        .pipeline-card { background: #111; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; min-height: 250px; }
+        .stage-header { padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stage-body { padding: 12px; display: grid; gap: 10px; align-content: start; }
         .placeholder-card { height: 60px; background: rgba(255,255,255,0.01); border: 1px dashed #222; border-radius: 8px; }
+
+        .lead-mini-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; }
+        .lead-name { font-size: 0.85rem; font-weight: 600; color: #fff; }
+        .priority-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .priority-dot.high { background: #ef4444; box-shadow: 0 0 5px #ef4444; }
+        .priority-dot.medium { background: #f59e0b; }
+        .priority-dot.low { background: #444; }
+        .lead-meta { margin-top: 8px; display: flex; gap: 6px; }
+        .source-label { font-size: 0.6rem; color: #555; text-transform: uppercase; border: 1px solid #222; padding: 1px 4px; border-radius: 2px; }
 
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .admin-table th { text-align: left; padding: 16px; border-bottom: 2px solid #1a1a1a; color: #555; font-size: 0.8rem; text-transform: uppercase; }
         .admin-table td { padding: 16px; border-bottom: 1px solid #111; font-size: 0.9rem; color: #aaa; }
         
-        .pill { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; }
+        .entity-info strong { display: block; color: #fff; }
+        .type-subtext { font-size: 0.75rem; color: #555; }
+
+        .pill { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .type-pill { font-size: 0.7rem; color: #aaa; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; }
+
         .stage-vetting { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-        .stage-contracting { background: rgba(207, 168, 110, 0.1); color: #cfa86e; }
+        .stage-legal { background: rgba(207, 168, 11, 0.1); color: #cfa86e; }
         .stage-activated { background: rgba(45, 212, 191, 0.1); color: #2dd4bf; }
-        .stage-new { background: rgba(255,255,255,0.05); color: #888; }
+        .stage-inbound { background: rgba(255,255,255,0.05); color: #888; }
 
-        .priority-high { color: #ef4444; font-weight: 800; }
-        .priority-medium { color: #f59e0b; }
-        .priority-low { color: #555; }
+        .portal-not-invited { border: 1px solid #444; color: #555; }
+        .portal-invited { border: 1px solid #3b82f6; color: #3b82f6; }
+        .portal-profile-pending { border: 1px solid #f59e0b; color: #f59e0b; }
+        .portal-documents-pending { border: 1px solid #ef4444; color: #ef4444; }
+        .portal-contract-pending { border: 1px solid #cfa86e; color: #cfa86e; }
+        .portal-ready-for-approval { border: 1px solid #2dd4bf; color: #2dd4bf; }
+        .portal-active-partner { background: rgba(45, 212, 191, 0.1); color: #2dd4bf; border: 1px solid transparent; }
 
-        .btn-icon { background: transparent; border: 1px solid #222; color: #fff; padding: 6px; border-radius: 4px; cursor: pointer; }
+        .priority-label { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; }
+        .priority-label.high { color: #ef4444; }
+        .priority-label.medium { color: #f59e0b; }
+        .priority-label.low { color: #444; }
+
+        .action-group { display: flex; gap: 8px; justify-content: flex-end; }
+        .btn-icon { background: transparent; border: 1px solid #222; color: #aaa; padding: 6px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .btn-icon:hover { border-color: var(--gb-gold); color: #fff; }
+        .btn-icon:disabled { opacity: 0.3; cursor: not-allowed; }
         .disclaimer-box { padding: 24px; border: 1px dashed #222; border-radius: 12px; text-align: center; }
 
         [dir="rtl"] .admin-table th { text-align: right; }
+        [dir="rtl"] .action-group { justify-content: flex-start; }
       `}} />
     </div>
   );
