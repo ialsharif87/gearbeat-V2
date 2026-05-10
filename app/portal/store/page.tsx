@@ -374,52 +374,81 @@ export default async function VendorDashboardPage() {
         </section>
 
         {/* Right: Quick Actions */}
-        <section 
-          className="gb-card" 
-          style={{ 
-            background: '#111', 
-            borderRadius: '20px', 
-            border: '1px solid #1e1e1e', 
-            padding: '24px' 
-          }}
-        >
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '24px' }}>
-            <T en="Quick Actions" ar="إجراءات سريعة" />
-          </h2>
-          
-          <div style={{ display: 'grid', gap: '12px' }}>
-            {[
-              { href: "/portal/store/products", icon: "📦", label: "Products", label_ar: "المنتجات" },
-              { href: "/portal/store/orders", icon: "🧾", label: "Orders", label_ar: "الطلبات" },
-              { href: "/portal/store/inventory", icon: "🏭", label: "Inventory", label_ar: "المخزون" },
-              { href: "/portal/store/payouts", icon: "💰", label: "Payouts", label_ar: "المستحقات" },
-              { href: "/portal/store/returns", icon: "↩️", label: "Returns", label_ar: "الإرجاعات" },
-              { href: "/portal/store/reviews", icon: "⭐", label: "Reviews", label_ar: "التقييمات" },
-            ].map(btn => (
-              <Link 
-                key={btn.href}
-                href={btn.href}
-                className="gb-dash-quick-btn"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '16px',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid #222',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                  transition: 'all 0.2s'
-                }}
-              >
-                <span style={{ fontSize: '1.2rem' }}>{btn.icon}</span>
-                <T en={btn.label} ar={btn.label_ar} />
-              </Link>
-            ))}
-          </div>
-        </section>
+          <section 
+            className="gb-card" 
+            style={{ 
+              background: '#111', 
+              borderRadius: '20px', 
+              border: '1px solid #1e1e1e', 
+              padding: '24px' 
+            }}
+          >
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '24px' }}>
+              <T en="Quick Actions" ar="إجراءات سريعة" />
+            </h2>
+            
+            <div style={{ display: 'grid', gap: '12px' }}>
+              {[
+                { href: "/portal/store/products", icon: "📦", label: "Products", label_ar: "المنتجات" },
+                { href: "/portal/store/orders", icon: "🧾", label: "Orders", label_ar: "الطلبات" },
+                { href: "/portal/store/inventory", icon: "🏭", label: "Inventory", label_ar: "المخزون" },
+                { href: "/portal/store/payouts", icon: "💰", label: "Payouts", label_ar: "المستحقات" },
+                { href: "/portal/store/returns", icon: "↩️", label: "Returns", label_ar: "الإرجاعات" },
+                { href: "/portal/store/reviews", icon: "⭐", label: "Reviews", label_ar: "التقييمات" },
+              ].map(btn => (
+                <Link 
+                  key={btn.href}
+                  href={btn.href}
+                  className="gb-dash-quick-btn"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '16px',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid #222',
+                    borderRadius: '12px',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>{btn.icon}</span>
+                  <T en={btn.label} ar={btn.label_ar} />
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section 
+            className="gb-card" 
+            style={{ 
+              background: '#111', 
+              borderRadius: '20px', 
+              border: '1px solid #1e1e1e', 
+              padding: '24px',
+              marginTop: '24px'
+            }}
+          >
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '24px' }}>
+              <T en="Rewards & Kits" ar="الجوائز والحقائب" />
+            </h2>
+            <div className="kit-progress">
+               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: '0.85rem' }}>
+                 <span style={{ color: '#888' }}><T en="Vendor Welcome Kit" ar="حقيبة ترحيب البائع" /></span>
+                 <span style={{ color: 'var(--gb-gold)' }}>50%</span>
+               </div>
+               <div style={{ height: 6, background: '#222', borderRadius: 3, overflow: 'hidden' }}>
+                 <div style={{ width: '50%', height: '100%', background: 'var(--gb-gold)' }} />
+               </div>
+               
+               <ul style={{ marginTop: 20, listStyle: 'none', padding: 0, fontSize: '0.8rem', color: '#666' }}>
+                 <li style={{ display: 'flex', gap: 8, marginBottom: 8 }}>✅ <T en="Agreement Signed" ar="توقيع الاتفاقية" /></li>
+                 <li style={{ display: 'flex', gap: 8 }}>⏳ <T en="First 3 Products Approved" ar="اعتماد أول 3 منتجات" /></li>
+               </ul>
+            </div>
+          </section>
       </div>
 
       {/* SECTION 5: Stock Alert */}
