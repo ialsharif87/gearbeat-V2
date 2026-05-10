@@ -95,20 +95,36 @@ export default function TicketingPartnerFoundationPage() {
           <div className="section-header">
             <h2><T en="Extranet Readiness" ar="جاهزية الإكسترانت" /></h2>
           </div>
-          <div className="card-premium" style={{ maxWidth: 400 }}>
-             {[
-               { label: 'Event Profile', status: '✅ READY' },
-               { label: 'Ticket Model', status: '✅ READY' },
-               { label: 'Capacity Model', status: '⏳ PENDING' },
-               { label: 'QR Check-in', status: '⏳ PENDING' },
-               { label: 'Refund Rules', status: '⏳ PENDING' },
-               { label: 'Payout Setup', status: '⏳ PENDING' },
-             ].map(item => (
-               <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #111', fontSize: '0.85rem' }}>
-                 <span style={{ color: '#888' }}>{item.label}</span>
-                 <span style={{ fontWeight: 700, color: item.status.includes('READY') ? '#10b981' : '#f59e0b' }}>{item.status}</span>
-               </div>
-             ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 24 }}>
+            <div className="card-premium">
+               {[
+                 { label: 'Event Profile', status: '✅ READY' },
+                 { label: 'Ticket Model', status: '✅ READY' },
+                 { label: 'Capacity Model', status: '⏳ PENDING' },
+                 { label: 'QR Check-in', status: '⏳ PENDING' },
+                 { label: 'Refund Rules', status: '⏳ PENDING' },
+                 { label: 'Payout Setup', status: '⏳ PENDING' },
+               ].map(item => (
+                 <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #111', fontSize: '0.85rem' }}>
+                   <span style={{ color: '#888' }}>{item.label}</span>
+                   <span style={{ fontWeight: 700, color: item.status.includes('READY') ? '#10b981' : '#f59e0b' }}>{item.status}</span>
+                 </div>
+               ))}
+            </div>
+            <div className="card-premium" style={{ background: 'rgba(236, 72, 153, 0.02)', border: '1px dashed rgba(236, 72, 153, 0.2)' }}>
+              <h3><T en="Partner Event Compliance" ar="امتثال فعاليات الشركاء" /></h3>
+              <p style={{ fontSize: '0.85rem', color: '#888', marginTop: 12, lineHeight: 1.6 }}>
+                <T 
+                  en="Ticketing partners must verify venue safety, event licensing, and capacity standards before publishing tickets on GearBeat."
+                  ar="يجب على شركاء التذاكر التحقق من سلامة المكان، وتراخيص الفعاليات، ومعايير السعة قبل نشر التذاكر على جيربيت."
+                />
+              </p>
+              <ul style={{ paddingInlineStart: 20, color: '#ec4899', fontSize: '0.8rem', marginTop: 16 }}>
+                <li><T en="Verified Organizers Only" ar="المنظمون الموثقون فقط" /></li>
+                <li><T en="Secure QR Scanning" ar="مسح QR آمن" /></li>
+                <li><T en="Automated Payouts" ar="مدفوعات آلية" /></li>
+              </ul>
+            </div>
           </div>
           <div style={{ marginTop: 32, padding: 20, background: 'rgba(0,0,0,0.3)', border: '1px dashed #222', borderRadius: 12, textAlign: 'center' }}>
             <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>

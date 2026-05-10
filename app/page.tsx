@@ -176,8 +176,44 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* 6. FINAL CTA */}
+ 
+       {/* 5B. EXPERIENCES & TICKETING PREVIEW */}
+       <section className="section-padding bg-darker">
+         <div className="container">
+           <div className="grid grid-2 items-center">
+             <div className="experience-content">
+               <span className="badge-gold"><T en="New Track" ar="مسار جديد" /></span>
+               <h2 style={{ fontSize: '3rem', margin: '24px 0' }}>
+                 <T en="Unforgettable audio experiences." ar="تجارب صوتية لا تُنسى." />
+               </h2>
+               <p className="text-muted" style={{ marginBottom: 32, fontSize: '1.1rem' }}>
+                 <T 
+                   en="Access exclusive studio workshops, live concerts, and creative activations through the GearBeat Ticketing engine."
+                   ar="احصل على ورش عمل حصرية، حفلات مباشرة، وتنشيطات إبداعية من خلال محرك جيربيت لحجز التذاكر."
+                 />
+               </p>
+               <Link href="/tickets" className="btn btn-primary">
+                 <T en="Explore Experiences" ar="استكشف التجارب" />
+               </Link>
+             </div>
+             <div className="experience-visual" style={{ 
+               height: 300, 
+               background: 'rgba(212, 175, 55, 0.05)', 
+               borderRadius: 30, 
+               border: '1px dashed rgba(212, 175, 55, 0.2)',
+               display: 'grid',
+               placeItems: 'center'
+             }}>
+               <div style={{ textAlign: 'center' }}>
+                 <span style={{ fontSize: '4rem', display: 'block', marginBottom: 16 }}>🎟️</span>
+                 <span className="badge"><T en="Ticketing Engine — Coming Soon" ar="محرك التذاكر — قريباً" /></span>
+               </div>
+             </div>
+           </div>
+         </div>
+       </section>
+ 
+       {/* 6. FINAL CTA */}
       <section className="section-padding final-cta">
         <div className="container text-center animate-up">
           <h2><T en="Ready to create your next masterpiece?" ar="جاهز لصناعة تحفتك الفنية القادمة؟" /></h2>
