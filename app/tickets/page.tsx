@@ -23,64 +23,99 @@ export default function TicketsLandingPage() {
         </p>
       </section>
 
-      {/* EVENT CATEGORIES */}
-      <section style={{ marginTop: 60 }}>
+      {/* FEATURED EXPERIENCES GRID */}
+      <section style={{ marginTop: 80 }}>
+        <div className="flex-between" style={{ marginBottom: 32 }}>
+          <div>
+            <h2 style={{ fontSize: '2.2rem' }}>
+              <T en="Featured Experiences" ar="تجارب مميزة" />
+            </h2>
+            <p style={{ color: 'var(--muted)', marginTop: 8 }}>
+              <T en="Hand-picked events from the world's elite creators." ar="فعاليات مختارة بعناية من نخبة المبدعين في العالم." />
+            </p>
+          </div>
+          <div className="badge-gold">
+            <T en="6 Events Found" ar="تم العثور على 6 فعاليات" />
+          </div>
+        </div>
+
         <div className="grid grid-3 gap-24">
           {[
-            { 
-              icon: '🎸', 
-              en: 'Concerts & Live', 
-              ar: 'حفلات وعروض مباشرة', 
-              descEn: 'Experience elite performances in verified venues.', 
-              descAr: 'استمتع بعروض مميزة في أماكن موثقة.'
-            },
-            { 
-              icon: '🎙️', 
-              en: 'Studio Workshops', 
-              ar: 'ورش عمل استوديو', 
-              descEn: 'Master your craft with pro audio sessions.', 
-              descAr: 'احترف مهنتك مع جلسات صوتية احترافية.'
-            },
-            { 
-              icon: '🎟️', 
-              en: 'Creator Events', 
-              ar: 'فعاليات المبدعين', 
-              descEn: 'Exclusive meetups and creative activations.', 
-              descAr: 'لقاءات حصرية وتنشيطات إبداعية.'
-            }
-          ].map(item => (
-            <div key={item.en} className="card-premium" style={{ padding: 32 }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: 20 }}>{item.icon}</div>
-              <h3 style={{ marginBottom: 12 }}><T en={item.en} ar={item.ar} /></h3>
-              <p style={{ color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                <T en={item.descEn} ar={item.descAr} />
-              </p>
+            { titleEn: 'Studio Sessions', titleAr: 'جلسات استوديو', tagEn: 'Recording', tagAr: 'تسجيل', icon: '🎙️', locationEn: 'Riyadh Hub', locationAr: 'مركز الرياض' },
+            { titleEn: 'Creator Workshops', titleAr: 'ورش عمل المبدعين', tagEn: 'Education', tagAr: 'تعليم', icon: '🎹', locationEn: 'Dubai Creative', locationAr: 'دبي الإبداعية' },
+            { titleEn: 'Listening Events', titleAr: 'فعاليات الاستماع', tagEn: 'Social', tagAr: 'اجتماعي', icon: '🎧', locationEn: 'London Gallery', locationAr: 'معرض لندن' },
+            { titleEn: 'Product Launches', titleAr: 'إطلاق منتجات', tagEn: 'Gear', tagAr: 'معدات', icon: '🚀', locationEn: 'Berlin Lab', locationAr: 'مختبر برلين' },
+            { titleEn: 'Live Performances', titleAr: 'عروض مباشرة', tagEn: 'Concert', tagAr: 'حفلة', icon: '🎸', locationEn: 'NY Stage', locationAr: 'مسرح نيويورك' },
+            { titleEn: 'Private Industry Events', titleAr: 'فعاليات صناعة خاصة', tagEn: 'VIP', tagAr: 'كبار الشخصيات', icon: '👔', locationEn: 'Paris Lounge', locationAr: 'لاونج باريس' }
+          ].map(event => (
+            <div key={event.titleEn} className="card-premium" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ height: 160, background: 'linear-gradient(45deg, #111, #1a1a1a)', display: 'grid', placeItems: 'center', fontSize: '3rem' }}>
+                {event.icon}
+              </div>
+              <div style={{ padding: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span className="badge"><T en={event.tagEn} ar={event.tagAr} /></span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--gb-gold)', fontWeight: 800 }}>🛡️ VERIFIED</span>
+                </div>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: 8 }}><T en={event.titleEn} ar={event.titleAr} /></h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--muted)', fontSize: '0.8rem' }}>
+                  <span>📍</span>
+                  <T en={event.locationEn} ar={event.locationAr} />
+                </div>
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--gb-gold)' }}>TBA</span>
+                  <span className="btn btn-outline btn-sm" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>
+                    <T en="View Event" ar="عرض الفعالية" />
+                  </span>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* TRUST LAYER */}
-      <section className="card" style={{ marginTop: 60, background: 'rgba(212, 175, 55, 0.03)', border: '1px solid rgba(212, 175, 55, 0.1)' }}>
-        <div className="grid grid-4 gap-16">
-          {[
-            { icon: '🛡️', en: 'Verified Organizers', ar: 'منظمون موثقون' },
-            { icon: '🔒', en: 'Secure Ticketing', ar: 'حجز تذاكر آمن' },
-            { icon: '🤝', en: 'Partner Approved', ar: 'معتمد من الشركاء' },
-            { icon: '✨', en: 'Event Readiness', ar: 'جاهزية الفعاليات' },
-          ].map(trust => (
-            <div key={trust.en} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: '1.2rem' }}>{trust.icon}</span>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>
-                <T en={trust.en} ar={trust.ar} />
-              </span>
+      {/* DISCOVERY TRUST & READINESS */}
+      <section style={{ marginTop: 80 }}>
+        <div className="card-premium" style={{ background: 'rgba(0,0,0,0.4)', padding: 40, border: '1px dashed rgba(212, 175, 55, 0.2)' }}>
+          <div className="grid grid-2 gap-40 items-center">
+            <div>
+              <h2 style={{ marginBottom: 16 }}><T en="Secure Experience Discovery" ar="اكتشاف تجارب آمن" /></h2>
+              <p style={{ color: 'var(--muted)', lineHeight: 1.6 }}>
+                <T 
+                  en="Every experience on GearBeat is verified for safety, quality, and technical readiness. Our ticketing engine ensures secure access for creators and fans alike."
+                  ar="تتم مراجعة كل تجربة على جيربيت للتأكد من السلامة والجودة والجاهزية الفنية. يضمن محرك حجز التذاكر لدينا وصولاً آمناً للمبدعين والمعجبين على حد سواء."
+                />
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 24 }}>
+                <div className="badge-gold" style={{ fontSize: '0.7rem' }}>✅ Verified Organizer</div>
+                <div className="badge-gold" style={{ fontSize: '0.7rem' }}>✅ Secure Ticketing</div>
+                <div className="badge-gold" style={{ fontSize: '0.7rem' }}>✅ Event Readiness</div>
+                <div className="badge-gold" style={{ fontSize: '0.7rem' }}>✅ Future QR Check-in</div>
+              </div>
             </div>
-          ))}
+            <div style={{ textAlign: 'center', padding: 32, background: 'rgba(212, 175, 55, 0.03)', borderRadius: 20 }}>
+               <h4 style={{ marginBottom: 12 }}><T en="Public Readiness Status" ar="حالة الجاهزية العامة" /></h4>
+               <div style={{ display: 'grid', gap: 10 }}>
+                 {[
+                   { label: 'Discovery Grid', status: '✅ READY' },
+                   { label: 'Experience Cards', status: '✅ READY' },
+                   { label: 'Trust Integration', status: '✅ READY' },
+                   { label: 'Mobile Optimization', status: '✅ READY' },
+                   { label: 'Checkout Flow', status: '⏳ DEFERRED' },
+                 ].map(i => (
+                   <div key={i.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                     <span style={{ color: '#888' }}>{i.label}</span>
+                     <span style={{ fontWeight: 800, color: i.status === '✅ READY' ? '#10b981' : '#888' }}>{i.status}</span>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* CALL TO ACTION */}
-      <section style={{ marginTop: 80, textAlign: 'center' }}>
+      <section style={{ marginTop: 100, textAlign: 'center', paddingBottom: 100 }}>
         <div className="card-premium" style={{ padding: '60px 20px', background: 'linear-gradient(to bottom, rgba(212, 175, 55, 0.05), transparent)' }}>
           <h2 style={{ fontSize: '2.5rem', marginBottom: 20 }}>
             <T en="Coming Soon to GearBeat" ar="قريباً على جيربيت" />
