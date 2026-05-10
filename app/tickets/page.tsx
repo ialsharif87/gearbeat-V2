@@ -114,6 +114,32 @@ export default function TicketsLandingPage() {
         </div>
       </section>
 
+      {/* MOBILE EXPERIENCE READINESS */}
+      <section style={{ marginTop: 40 }}>
+        <div className="card-premium" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.4), rgba(212, 175, 55, 0.02))', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="flex-between" style={{ flexWrap: 'wrap', gap: 20 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <span style={{ fontSize: "1.8rem" }}>📲</span>
+                <h3 style={{ fontSize: "1.3rem" }}><T en="Native Mobile Access" ar="وصول عبر تطبيق المحمول الأصلي" /></h3>
+                <span className="badge badge-warning" style={{ fontSize: '0.65rem' }}>PLANNING PHASE</span>
+              </div>
+              <p style={{ color: 'var(--muted)', maxWidth: 600, lineHeight: 1.6 }}>
+                <T 
+                  en="The future GearBeat mobile app will feature native Apple/Google Wallet integration for digital tickets and rapid QR code entry at events." 
+                  ar="سيتميز تطبيق جيربيت المستقبلي للهواتف المحمولة بدمج محفظة Apple/Google الأصلية للتذاكر الرقمية والدخول السريع عبر رمز الاستجابة السريعة (QR) في الفعاليات." 
+                />
+              </p>
+            </div>
+            <div style={{ padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px dashed rgba(212,175,55,0.3)', textAlign: 'center', minWidth: 200 }}>
+              <div style={{ fontSize: '2rem', marginBottom: 8 }}>🎫</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--gb-gold)', fontWeight: 800 }}><T en="Digital Pass Sync" ar="مزامنة التذاكر الرقمية" /></div>
+              <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 4 }}>Coming Phase 59+</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CALL TO ACTION */}
       <section style={{ marginTop: 100, textAlign: 'center', paddingBottom: 100 }}>
         <div className="card-premium" style={{ padding: '60px 20px', background: 'linear-gradient(to bottom, rgba(212, 175, 55, 0.05), transparent)' }}>

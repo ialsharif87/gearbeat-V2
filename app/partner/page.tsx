@@ -118,6 +118,28 @@ export default function PartnerPortalFoundationPage() {
           </div>
         </section>
 
+        {/* MOBILE EXTRANET READINESS */}
+        <section className="section-container" style={{ marginTop: 60 }}>
+          <div className="section-header">
+            <h2><T en="Mobile Extranet App" ar="تطبيق الإكسترانت للمحمول" /></h2>
+            <p className="text-muted"><T en="Foundation for the upcoming native GearBeat Pro application." ar="أساس لتطبيق جيربيت برو الأصلي القادم." /></p>
+          </div>
+          <div className="card-premium" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(212,175,55,0.03))', border: '1px dashed rgba(212,175,55,0.3)' }}>
+            <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ fontSize: "3rem" }}>📱</div>
+              <div>
+                <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="GearBeat Pro" ar="جيربيت برو" /> <span className="badge badge-warning" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>PLANNING PHASE</span></h3>
+                <p style={{ color: 'var(--muted)', maxWidth: 650, lineHeight: 1.6 }}>
+                  <T 
+                    en="We are architecting a dedicated React Native companion app for Partners. Manage studio calendar blocks, accept bookings, fulfill marketplace orders, and chat with customers on the go." 
+                    ar="نحن نقوم بتصميم تطبيق مرافق مخصص لـ React Native للشركاء. يمكنك إدارة حظر تقويم الاستوديو، وقبول الحجوزات، وتنفيذ طلبات السوق، والدردشة مع العملاء أثناء التنقل." 
+                  />
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* PORTAL ALIGNMENT */}
         <section className="section-container" style={{ marginTop: 60 }}>
           <div className="section-header">
