@@ -38,6 +38,9 @@ export default function PartnerPortalFoundationPage() {
             <div className="foundation-tag">
               <T en="Official Extranet Foundation — Prototype V1" ar="تأسيس الإكسترانت الرسمي — النموذج الأولي V1" />
             </div>
+            <div style={{ marginTop: 12, opacity: 0.4, fontSize: '0.65rem', fontWeight: 700, letterSpacing: 1 }}>
+              <T en="PHASE 54 ARCHITECTURAL FOUNDATION: COMPLETE" ar="اكتمال التأسيس المعماري للمرحلة 54" />
+            </div>
           </div>
         </div>
       </header>
