@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "@/components/t";
+import StudioTierBadge from "@/components/studio-tier-badge";
 
 export default function GearBeatCertifiedPage() {
   return (
@@ -56,6 +57,36 @@ export default function GearBeatCertifiedPage() {
               <h3><T en="Business Legitimacy" ar="شرعية العمل" /></h3>
               <p><T en="Verification of commercial licenses, professional insurance, and secure operations." ar="التحقق من التراخيص التجارية، التأمين المهني، والعمليات الآمنة." /></p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TIER BADGES PREVIEW */}
+      <section className="section-padding">
+        <div className="container">
+          <div className="section-head text-center">
+            <span className="badge-gold"><T en="Tier System" ar="نظام الفئات" /></span>
+            <h2><T en="Certification Tiers" ar="فئات التوثيق" /></h2>
+            <p className="text-muted"><T en="From entry-level verification to flagship status." ar="من التوثيق الأساسي إلى الحالة الرئيسية المعتمدة." /></p>
+          </div>
+
+          <div className="grid grid-5 gap-20">
+            {[
+              { tier: 'verified', desc_en: "Identity and business license verified.", desc_ar: "تم التحقق من الهوية والسجل التجاري." },
+              { tier: 'trusted', desc_en: "Proven track record and creator feedback.", desc_ar: "سجل حافل وتقييمات إيجابية من المبدعين." },
+              { tier: 'premium', desc_en: "Professional acoustics and elite hardware.", desc_ar: "صوتيات احترافية وعتاد من الفئة النخبة." },
+              { tier: 'elite', desc_en: "Top-tier specs and world-class engineers.", desc_ar: "مواصفات عالمية ومهندسون من الطراز الأول." },
+              { tier: 'flagship', desc_en: "Industry benchmarks and ultimate acoustics.", desc_ar: "معايير الصناعة والكمال الصوتي." }
+            ].map((item, i) => (
+              <div key={i} className="card-premium tier-preview-card text-center">
+                <div style={{ marginBottom: 20 }}>
+                  <StudioTierBadge tier={item.tier as any} />
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#666', lineHeight: 1.5 }}>
+                  <T en={item.desc_en} ar={item.desc_ar} />
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -189,6 +220,21 @@ export default function GearBeatCertifiedPage() {
         .bg-darker { background: #050505; }
 
         .pillar-card { text-align: center; padding: 40px 30px; }
+        .cat-icon { font-size: 2rem; margin-bottom: 12px; color: var(--gb-gold); }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+
+        @media (max-width: 1200px) {
+          .grid-5 { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 800px) {
+          .grid-5 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 500px) {
+          .grid-5 { grid-template-columns: 1fr; }
+        }
+
         .pillar-icon { font-size: 3rem; margin-bottom: 24px; }
         .pillar-card h3 { color: var(--gb-gold); margin-bottom: 16px; }
 
