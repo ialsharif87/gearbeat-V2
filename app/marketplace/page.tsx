@@ -532,7 +532,9 @@ export default async function MarketplacePage({
                   <Link
                     href={getProductUrl(product)}
                     style={{
-                      display: "block",
+                      display: "flex",
+                      flexDirection: "column",
+                      flex: 1,
                       color: "inherit",
                       textDecoration: "none",
                     }}
@@ -546,6 +548,7 @@ export default async function MarketplacePage({
                         alignItems: "center",
                         justifyContent: "center",
                         overflow: "hidden",
+                        position: "relative"
                       }}
                     >
                       {image ? (
@@ -557,6 +560,23 @@ export default async function MarketplacePage({
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                             style={{ objectFit: "cover" }}
                           />
+                          <div style={{ 
+                            position: 'absolute', 
+                            top: 10, 
+                            right: 10, 
+                            background: 'rgba(212, 175, 55, 0.95)', 
+                            color: '#000', 
+                            padding: '4px 8px', 
+                            borderRadius: '6px', 
+                            fontSize: '0.6rem', 
+                            fontWeight: 800,
+                            letterSpacing: 0.5,
+                            backdropFilter: 'blur(4px)',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                            zIndex: 2
+                          }}>
+                            <T en="CERTIFIED VENDOR" ar="تاجر معتمد" />
+                          </div>
                         </div>
                       ) : (
                         <div
@@ -582,7 +602,7 @@ export default async function MarketplacePage({
                       )}
                     </div>
 
-                    <div style={{ padding: 16, display: "grid", gap: 10 }}>
+                    <div style={{ padding: 16, display: "grid", gap: 10, flex: 1, flexDirection: 'column' }}>
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                         <span className="badge">
                           {getCategoryName(product.category)}
@@ -592,7 +612,7 @@ export default async function MarketplacePage({
                         </span>
                       </div>
 
-                      <h3 style={{ margin: 0, lineHeight: 1.35 }}>
+                      <h3 style={{ margin: 0, lineHeight: 1.35, fontSize: '1rem' }}>
                         {getProductName(product)}
                       </h3>
 
@@ -602,6 +622,7 @@ export default async function MarketplacePage({
                             color: "var(--muted)",
                             lineHeight: 1.6,
                             margin: 0,
+                            fontSize: '0.85rem',
                             display: "-webkit-box",
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: "vertical",
@@ -640,21 +661,31 @@ export default async function MarketplacePage({
                           justifyContent: "space-between",
                           gap: 10,
                           alignItems: "center",
+                          marginTop: 'auto',
+                          paddingTop: 10,
+                          borderTop: '1px solid rgba(255,255,255,0.05)'
                         }}
                       >
-                        <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                          {getVendorName(product.vendor)}
-                        </span>
+                        <div style={{ display: 'grid' }}>
+                          <span style={{ color: "var(--muted)", fontSize: "0.75rem", fontWeight: 600 }}>
+                            {getVendorName(product.vendor)}
+                          </span>
+                          {Number(product.stock_quantity || 0) > 0 ? (
+                            <span style={{ color: "var(--gb-success)", fontSize: "0.65rem", fontWeight: 700 }}>
+                              <T en="In Stock" ar="متوفر" />
+                            </span>
+                          ) : (
+                            <span style={{ color: "var(--gb-danger)", fontSize: "0.65rem", fontWeight: 700 }}>
+                              <T en="Out of Stock" ar="غير متوفر" />
+                            </span>
+                          )}
+                        </div>
 
-                        {Number(product.stock_quantity || 0) > 0 ? (
-                          <span className="badge badge-success">
-                            <T en="In stock" ar="متوفر" />
-                          </span>
-                        ) : (
-                          <span className="badge badge-danger">
-                            <T en="Out of stock" ar="غير متوفر" />
-                          </span>
-                        )}
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <span title="Authentic Gear">🛡️</span>
+                          <span title="Studio Tested">🎙️</span>
+                          <span title="Secure Payment">💳</span>
+                        </div>
                       </div>
                     </div>
                   </Link>
