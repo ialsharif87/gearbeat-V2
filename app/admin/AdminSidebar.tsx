@@ -72,6 +72,7 @@ export function AdminSidebar({
           <div style={{ display: 'grid', gap: 2 }}>
             <NavItem href="/admin/leads?type=studio" icon="📝" labelEn="Applications" labelAr="طلبات الانضمام" active={pathname.includes('/leads') && pathname.includes('type=studio')} badge={studioLeadCount} />
             <NavItem href="/admin/studios" icon="🏢" labelEn="Approved Studios" labelAr="الاستوديوهات المعتمدة" active={isActive('/admin/studios')} />
+            <NavItem href="/admin/certified-studios" icon="🛡️" labelEn="Certified Studios" labelAr="الاستوديوهات الموثقة" active={isActive('/admin/certified-studios')} />
             <NavItem href="/admin/bookings" icon="📅" labelEn="Bookings" labelAr="الحجوزات" active={isActive('/admin/bookings')} />
             <NavItem href="/admin/studio-payments" icon="💳" labelEn="Payments" labelAr="المدفوعات" active={isActive('/admin/studio-payments')} />
             <NavItem href="/admin/studio-settlements" icon="⚖️" labelEn="Settlements" labelAr="التسويات" active={isActive('/admin/studio-settlements')} />
