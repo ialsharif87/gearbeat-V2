@@ -221,6 +221,62 @@ export default async function AdminLoyaltyPage() {
         </div>
       </div>
 
+      {/* LOYALTY ENGINE PLANNING - UI ONLY */}
+      <section className="card" style={{ marginTop: 30, border: "1px dashed rgba(207,167,98,0.5)", background: "rgba(207,167,98,0.03)" }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2><T en="Loyalty Engine Planning" ar="تخطيط محرك الولاء" /></h2>
+          <span className="badge badge-warning"><T en="PLANNING PHASE" ar="مرحلة التخطيط" /></span>
+        </div>
+        <p style={{ color: "var(--muted)", marginTop: 8 }}>
+          <T 
+            en="Foundation UI for the upcoming GearBeat Loyalty Engine across Bookings, Marketplace, and Ticketing." 
+            ar="واجهة مستخدم تأسيسية لمحرك ولاء جيربيت القادم عبر الحجوزات، السوق، وحجز التذاكر." 
+          />
+        </p>
+
+        <div className="grid grid-3 gap-24" style={{ marginTop: 24 }}>
+          <div className="card-premium">
+            <h3><T en="Points Ledger" ar="سجل النقاط" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Immutable append-only ledger tracking all point transactions." ar="سجل ثابت وغير قابل للتعديل يتتبع جميع معاملات النقاط." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Mocked</span>
+          </div>
+          
+          <div className="card-premium">
+            <h3><T en="Tier Rules" ar="قواعد المستويات" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Dynamic calculation of Bronze, Silver, Gold, and Elite tiers." ar="حساب ديناميكي لمستويات البرونزي، الفضي، الذهبي، والنخبة." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Static</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="Earn Rules" ar="قواعد الاكتساب" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Logic for Booking Earn, Ticketing Earn, and Marketplace Earn." ar="منطق اكتساب النقاط للحجوزات، التذاكر، والسوق." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Pending Approval</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="Redemption Rules" ar="قواعد الاستبدال" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Conversion logic for discounts at checkout." ar="منطق التحويل للحصول على خصومات عند الدفع." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Pending Approval</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="Manual Adjustment" ar="تعديل يدوي" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Governance module for CRM admins to adjust points." ar="وحدة حوكمة لمسؤولي إدارة علاقات العملاء لتعديل النقاط." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: UI Only</span>
+          </div>
+        </div>
+      </section>
+
       <section className="card" style={{ marginTop: 30 }}>
         <h2>
           <T en="Loyalty tiers" ar="مستويات الولاء" />

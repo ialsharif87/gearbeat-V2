@@ -224,6 +224,24 @@ export default function CustomerRewardsPage() {
                 <T en="Referral rewards will be activated in a later phase." ar="سيتم تفعيل مكافآت الإحالة في مرحلة لاحقة." />
               </p>
             </div>
+
+            <div className="card" style={{ border: "1px dashed rgba(207,167,98,0.4)", background: "rgba(207,167,98,0.02)" }}>
+              <h2><T en="Future Loyalty Engine" ar="محرك الولاء المستقبلي" /></h2>
+              <span className="badge badge-warning" style={{ marginTop: 8, display: 'inline-block', fontSize: '0.65rem' }}>
+                <T en="PLANNING PHASE" ar="مرحلة التخطيط" />
+              </span>
+              <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginTop: 16, lineHeight: 1.6 }}>
+                <T 
+                  en="The unified GearBeat Loyalty Engine will soon allow you to earn and redeem points across the entire ecosystem:" 
+                  ar="سيتيح لك محرك ولاء جيربيت الموحد قريباً اكتساب واستبدال النقاط عبر النظام البيئي بأكمله:" 
+                />
+              </p>
+              <ul style={{ paddingInlineStart: 20, color: "var(--muted)", fontSize: "0.85rem", marginTop: 12, lineHeight: 1.6 }}>
+                <li><strong style={{ color: 'var(--gb-gold)' }}><T en="Studios:" ar="الاستوديوهات:" /></strong> <T en="Earn on completed bookings." ar="اكتسب من الحجوزات المكتملة." /></li>
+                <li><strong style={{ color: 'var(--gb-gold)' }}><T en="Marketplace:" ar="السوق:" /></strong> <T en="Earn on verified gear purchases." ar="اكتسب من مشتريات المعدات الموثقة." /></li>
+                <li><strong style={{ color: 'var(--gb-gold)' }}><T en="Ticketing:" ar="التذاكر:" /></strong> <T en="Earn on event check-ins." ar="اكتسب من تسجيل الدخول للفعاليات." /></li>
+              </ul>
+            </div>
           </aside>
         </section>
       </div>
