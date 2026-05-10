@@ -540,6 +540,37 @@ export default async function StudiosPage({
             />
           </p>
 
+          {/* STUDIO TRUST LAYER */}
+          <div className="studio-trust-grid" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gap: 16,
+            marginTop: 32,
+            marginBottom: 8 
+          }}>
+            {[
+              { icon: '🎙️', en: 'Studio Tested', ar: 'مختبر في الاستوديو' },
+              { icon: '🎚️', en: 'Pro Audio Grade', ar: 'جودة صوت احترافية' },
+              { icon: '⭐', en: 'Top Rated', ar: 'الأعلى تقييماً' },
+              { icon: '💎', en: 'Premium Quality', ar: 'جودة ممتازة' },
+            ].map(item => (
+              <div key={item.en} style={{ 
+                padding: '16px', 
+                background: 'rgba(212, 175, 55, 0.03)', 
+                border: '1px solid rgba(212, 175, 55, 0.08)', 
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12
+              }}>
+                <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>
+                  <T en={item.en} ar={item.ar} />
+                </span>
+              </div>
+            ))}
+          </div>
+
           <div style={{ marginTop: 24 }}>
             <Link href="/studios/near-me" className="btn btn-secondary">
               <T en="Studios near me" ar="استوديوهات قريبة مني" />
