@@ -274,6 +274,46 @@ export default async function AdminLoyaltyPage() {
             </p>
             <span className="badge" style={{ marginTop: 12 }}>Status: UI Only</span>
           </div>
+
+          <div className="card-premium">
+            <h3><T en="Referral Rules" ar="قواعد الإحالة" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Incentive structures for referring new customers and studios." ar="هياكل الحوافز لإحالة عملاء واستوديوهات جديدة." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Pending Approval</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="Admin Controls" ar="ضوابط الإدارة" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Workflows for Manual Approvals and Fraud / Abuse Review." ar="مسارات عمل للموافقات اليدوية ومراجعة الاحتيال / الإساءة." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Planning</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="Campaign Eligibility" ar="أهلية الحملات" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Rules for targeting promotions based on loyalty tiers." ar="قواعد استهداف العروض الترويجية بناءً على مستويات الولاء." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Deferred</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="Mobile Loyalty" ar="ولاء الهاتف المحمول" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="API readiness for native iOS/Android wallet integration." ar="جاهزية واجهة برمجة التطبيقات لدمج محفظة iOS/Android الأصلية." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Architecting</span>
+          </div>
+
+          <div className="card-premium">
+            <h3><T en="External Integration" ar="التكامل الخارجي" /></h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: 8 }}>
+              <T en="Webhook foundations for third-party marketing and fulfillment." ar="أسس خطاف الويب للتسويق والتنفيذ من جهات خارجية." />
+            </p>
+            <span className="badge" style={{ marginTop: 12 }}>Status: Architecting</span>
+          </div>
         </div>
       </section>
 
