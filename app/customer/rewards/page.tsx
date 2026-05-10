@@ -242,6 +242,19 @@ export default function CustomerRewardsPage() {
                 <li><strong style={{ color: 'var(--gb-gold)' }}><T en="Ticketing:" ar="التذاكر:" /></strong> <T en="Earn on event check-ins." ar="اكتسب من تسجيل الدخول للفعاليات." /></li>
               </ul>
             </div>
+
+            <div className="card" style={{ border: "1px solid rgba(255,255,255,0.05)", background: "linear-gradient(135deg, rgba(207,167,98,0.05), transparent)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                <span style={{ fontSize: "1.5rem" }}>📱</span>
+                <h3 style={{ fontSize: "1.1rem" }}><T en="Mobile App Readiness" ar="جاهزية تطبيق الجوال" /></h3>
+              </div>
+              <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.6 }}>
+                <T 
+                  en="GearBeat is preparing native iOS and Android wallet integration. Soon, you'll be able to tap to redeem points and scan QR codes for event entry directly from your phone." 
+                  ar="تقوم جيربيت بإعداد دمج محافظ iOS و Android الأصلية. قريباً، ستتمكن من النقر لاستبدال النقاط ومسح رموز QR لدخول الفعاليات مباشرة من هاتفك." 
+                />
+              </p>
+            </div>
           </aside>
         </section>
       </div>
