@@ -324,6 +324,22 @@ export default async function MarketplacePage({
             ))}
           </div>
 
+          {/* ADVANCED FILTERS READINESS */}
+          <div style={{ marginTop: 24, marginBottom: 24 }}>
+            <div className="card-premium" style={{ padding: 16, background: 'rgba(212,175,55,0.05)', border: '1px dashed rgba(212,175,55,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: '1.5rem' }}>🎛️</span>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '0.9rem' }}><T en="Advanced Filtering & Mobile Drawer" ar="تصفية متقدمة ودرج الهاتف المحمول" /></h4>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
+                    <T en="Unified category, brand, and condition filters are being prepared for Phase 59+." ar="يتم إعداد فلاتر موحدة للتصنيف والعلامة التجارية والحالة للمرحلة 59+." />
+                  </p>
+                </div>
+              </div>
+              <span className="badge badge-warning" style={{ fontSize: '0.6rem' }}>PLANNING PHASE</span>
+            </div>
+          </div>
+
           <form
             action="/marketplace"
             className="filter-panel animate-up"
