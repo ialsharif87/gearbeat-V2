@@ -1,6 +1,9 @@
 import Link from "next/link";
 import T from "@/components/t";
 import StudioTierBadge from "@/components/studio-tier-badge";
+import { createClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 export default async function CertifiedVerificationPage({
   params
@@ -8,12 +11,76 @@ export default async function CertifiedVerificationPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  
-  // Format slug for display (sample-studio -> Sample Studio)
-  const displayName = slug
+  const supabase = await createClient();
+
+  // Fetch approved certification by studio slug
+  const { data: cert } = await supabase
+    .from("certified_studios")
+    .select(`
+      id,
+      status,
+      trust_score,
+      created_at,
+      studio:studios!inner (
+        name_en,
+        name_ar,
+        slug
+      ),
+      tier:studio_tiers (
+        level,
+        name_en,
+        name_ar
+      )
+    `)
+    .eq("studio.slug", slug)
+    .eq("status", "approved") // RLS also handles this, but explicit is better
+    .maybeSingle();
+
+  const mapLevelToTier = (level: number): any => {
+    switch (level) {
+      case 1: return 'verified';
+      case 2: return 'trusted';
+      case 3: return 'premium';
+      case 4: return 'elite';
+      case 5: return 'flagship';
+      default: return 'verified';
+    }
+  };
+
+  const studioData = Array.isArray(cert?.studio) ? cert.studio[0] : cert?.studio;
+  const tierData = Array.isArray(cert?.tier) ? cert.tier[0] : cert?.tier;
+  const displayName = studioData?.name_en || studioData?.name_ar || slug
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+
+  if (!cert) {
+    return (
+      <main className="verification-root">
+        <div className="container animate-up">
+          <div className="verification-card card-premium text-center">
+            <div className="certified-badge-large" style={{ borderColor: '#333', opacity: 0.3 }}>
+              <span className="star-icon">✕</span>
+            </div>
+            <h1 className="studio-name">{displayName}</h1>
+            <div className="status-banner" style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', marginTop: 30 }}>
+              <div className="status-icon" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>!</div>
+              <div className="status-text">
+                <h3 style={{ color: '#ef4444' }}><T en="Not Verified" ar="غير موثق" /></h3>
+                <p><T en="This studio does not currently have an active GearBeat Certification." ar="هذا الاستوديو ليس لديه حالياً توثيق نشط من GearBeat." /></p>
+              </div>
+            </div>
+            <div style={{ marginTop: 40 }}>
+              <Link href="/studios" className="btn btn-outline w-full">
+                <T en="Browse Verified Studios" ar="تصفح الاستوديوهات الموثقة" />
+              </Link>
+            </div>
+          </div>
+        </div>
+        <style dangerouslySetInnerHTML={{ __html: `.verification-root { padding: 120px 0 80px; min-height: 100vh; } .verification-card { max-width: 600px; margin: 0 auto; padding: 40px; background: #080808; border: 1px solid #111; } .studio-name { font-size: 2.2rem; color: #fff; }` }} />
+      </main>
+    );
+  }
 
   return (
     <main className="verification-root">
@@ -26,7 +93,7 @@ export default async function CertifiedVerificationPage({
             </div>
             <h1 className="studio-name">{displayName}</h1>
             <div className="tier-wrapper" style={{ marginTop: 12 }}>
-              <StudioTierBadge tier="premium" />
+              <StudioTierBadge tier={mapLevelToTier(tierData?.level || 1)} />
             </div>
           </div>
 
@@ -45,12 +112,12 @@ export default async function CertifiedVerificationPage({
                 <strong className="value success"><T en="ACTIVE" ar="┘å╪┤╪╖" /></strong>
               </div>
               <div className="info-item">
-                <span className="label"><T en="Last Verified" ar="╪ó╪«╪▒ ╪¬┘ê╪½┘è┘é" /></span>
-                <strong className="value"><T en="May 2026" ar="┘à╪º┘è┘ê ┘ó┘á┘ó┘ª" /></strong>
+                <span className="label"><T en="Last Verified" ar="آخر توثيق" /></span>
+                <strong className="value">{new Date(cert.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</strong>
               </div>
               <div className="info-item">
-                <span className="label"><T en="Trust Score" ar="╪»╪▒╪¼╪⌐ ╪º┘ä╪½┘é╪⌐" /></span>
-                <strong className="value">98/100</strong>
+                <span className="label"><T en="Trust Score" ar="درجة الثقة" /></span>
+                <strong className="value">{cert.trust_score}/100</strong>
               </div>
             </div>
 
@@ -76,8 +143,8 @@ export default async function CertifiedVerificationPage({
           </div>
 
           <div className="verification-footer">
-            <Link href="/studios" className="btn btn-primary w-full">
-              <T en="Book This Studio" ar="╪º╪¡╪¼╪▓ ┘ç╪░╪º ╪º┘ä╪º╪│╪¬┘ê╪»┘è┘ê" />
+            <Link href={`/studios/${studioData?.slug}`} className="btn btn-primary w-full">
+              <T en="Book This Studio" ar="احجز هذا الاستوديو" />
             </Link>
             <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
               <Link href="/gearbeat-certified" className="btn btn-outline flex-1">
