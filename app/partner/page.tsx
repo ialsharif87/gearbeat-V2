@@ -115,6 +115,26 @@ export default function PartnerPortalFoundationPage() {
           </div>
         </section>
 
+        {/* PORTAL ALIGNMENT */}
+        <section className="section-container" style={{ marginTop: 60 }}>
+          <div className="section-header">
+            <h2><T en="Current Portal Alignment" ar="محاذاة البوابة الحالية" /></h2>
+            <p className="text-muted"><T en="Existing operational portals and their alignment with the future unified Partner Portal." ar="البوابات التشغيلية الحالية ومحاذاتها مع بوابة الشركاء الموحدة المستقبلية." /></p>
+          </div>
+          <div className="architecture-grid">
+            <div className="arch-card card-premium">
+              <h3><T en="Studio Portal" ar="بوابة الاستوديو" /></h3>
+              <p className="text-muted"><T en="Active route for studio owner operations, sessions, and availability." ar="المسار النشط لعمليات مالك الاستوديو والجلسات والتوافر." /></p>
+              <code className="text-gold">/portal/studio</code>
+            </div>
+            <div className="arch-card card-premium">
+              <h3><T en="Vendor Portal" ar="بوابة البائع" /></h3>
+              <p className="text-muted"><T en="Active route for marketplace vendors, products, and order fulfillment." ar="المسار النشط لبائعي المتجر والمنتجات وتنفيذ الطلبات." /></p>
+              <code className="text-gold">/portal/store</code>
+            </div>
+          </div>
+        </section>
+
         {/* ROUTE MAP */}
         <section className="section-container" style={{ marginTop: 60, paddingBottom: 100 }}>
           <div className="section-header">

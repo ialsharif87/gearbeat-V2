@@ -181,6 +181,31 @@ export default function StudioDashboardView({
             </div>
           </div>
 
+          <div className="side-card extranet-readiness">
+            <h3><T en="Portal Readiness" ar="جاهزية البوابة" /></h3>
+            <div className="readiness-list" style={{ marginTop: 12 }}>
+              {[
+                { label: 'Studio Profile', status: '✅' },
+                { label: 'Documents', status: '✅' },
+                { label: 'Contract', status: '✅' },
+                { label: 'Certified Status', status: '⏳' },
+                { label: 'Rewards/Kits', status: '⏳' },
+                { label: 'Payouts', status: '⏳' },
+                { label: 'Support', status: '⏳' },
+              ].map(item => (
+                <div key={item.label} className="flex-between" style={{ padding: '8px 0', borderBottom: '1px solid #111', fontSize: '0.8rem' }}>
+                  <span style={{ color: '#888' }}>{item.label}</span>
+                  <span>{item.status}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 16, padding: 12, background: 'rgba(212, 175, 55, 0.05)', borderRadius: 8, border: '1px solid rgba(212, 175, 55, 0.1)' }}>
+              <p style={{ fontSize: '0.65rem', color: 'var(--gb-gold)', margin: 0, textAlign: 'center' }}>
+                <T en="EXTRANET ALIGNMENT: READY" ar="محاذاة الإكسترانت: جاهز" />
+              </p>
+            </div>
+          </div>
+
           <div className="side-card quick-manage">
             <h3><T en="Management" ar="الإدارة" /></h3>
             <div className="action-links">

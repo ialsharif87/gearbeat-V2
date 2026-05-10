@@ -449,6 +449,43 @@ export default async function VendorDashboardPage() {
                </ul>
             </div>
           </section>
+
+          <section 
+            className="gb-card" 
+            style={{ 
+              background: '#111', 
+              borderRadius: '20px', 
+              border: '1px solid #1e1e1e', 
+              padding: '24px',
+              marginTop: '24px'
+            }}
+          >
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '24px' }}>
+              <T en="Portal Readiness" ar="جاهزية البوابة" />
+            </h2>
+            <div className="readiness-list">
+              {[
+                { label: 'Store Profile', status: '✅' },
+                { label: 'Products', status: '✅' },
+                { label: 'Orders', status: '✅' },
+                { label: 'Documents', status: '✅' },
+                { label: 'Trusted Seller', status: '⏳' },
+                { label: 'Rewards/Kits', status: '⏳' },
+                { label: 'Payouts', status: '⏳' },
+                { label: 'Support', status: '⏳' },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #1a1a1a', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#888' }}>{item.label}</span>
+                  <span>{item.status}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 20, padding: 12, background: 'rgba(212, 175, 55, 0.05)', borderRadius: 12, border: '1px solid rgba(212, 175, 55, 0.1)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--gb-gold)', fontWeight: 800, letterSpacing: 1 }}>
+                <T en="EXTRANET ALIGNMENT: READY" ar="محاذاة الإكسترانت: جاهز" />
+              </span>
+            </div>
+          </section>
       </div>
 
       {/* SECTION 5: Stock Alert */}
