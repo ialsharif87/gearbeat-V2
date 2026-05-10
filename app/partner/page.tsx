@@ -135,6 +135,28 @@ export default function PartnerPortalFoundationPage() {
           </div>
         </section>
 
+        {/* FUTURE PARTNER TRACKS */}
+        <section className="section-container" style={{ marginTop: 60 }}>
+          <div className="section-header">
+            <h2><T en="Future Partner Tracks" ar="مسارات الشركاء المستقبلية" /></h2>
+            <p className="text-muted"><T en="Specialized extranet layers for non-studio and non-vendor partners." ar="طبقات إكسترانت متخصصة للشركاء من غير أصحاب الاستوديوهات والبائعين." /></p>
+          </div>
+          <div className="architecture-grid">
+            <Link href="/partner/services" className="arch-card card-premium">
+              <div className="badge-type external" style={{ background: '#a855f7' }}><T en="SERVICES" ar="خدمات" /></div>
+              <h3><T en="Service Provider Portal" ar="بوابة مزود الخدمة" /></h3>
+              <p className="text-muted"><T en="Foundation for Producers, Engineers, and specialized music professionals." ar="تأسيس للمنتجين والمهندسين والمحترفين الموسيقيين المتخصصين." /></p>
+              <span className="text-gold"><T en="Explore Track" ar="استكشاف المسار" /> →</span>
+            </Link>
+            <Link href="/partner/tickets" className="arch-card card-premium">
+              <div className="badge-type external" style={{ background: '#ec4899' }}><T en="TICKETING" ar="تذاكر" /></div>
+              <h3><T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" /></h3>
+              <p className="text-muted"><T en="Foundation for Event Organizers, Venues, and Workshop hosts." ar="تأسيس لمنظمي الفعاليات والمرافق ومستضيفي ورش العمل." /></p>
+              <span className="text-gold"><T en="Explore Track" ar="استكشاف المسار" /> →</span>
+            </Link>
+          </div>
+        </section>
+
         {/* ROUTE MAP */}
         <section className="section-container" style={{ marginTop: 60, paddingBottom: 100 }}>
           <div className="section-header">
