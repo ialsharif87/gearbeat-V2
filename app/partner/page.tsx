@@ -25,44 +25,47 @@ export default function PartnerPortalFoundationPage() {
       <header className="portal-hero">
         <div className="container">
           <div className="hero-content">
-            <span className="eyebrow"><T en="THE GLOBAL MUSIC ECOSYSTEM" ar="النظام الموسيقي العالمي" /></span>
+            <span className="badge-gold"><T en="GLOBAL PARTNER NETWORK" ar="شبكة الشركاء العالمية" /></span>
             <h1 className="hero-title">
-              <T en="GearBeat Partner Portal" ar="بوابة شركاء GearBeat" />
+              <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>
             <p className="hero-desc">
               <T 
-                en="Empowering studio owners, vendors, and service providers with professional extranet tools to manage their music business globally." 
-                ar="تمكين أصحاب الاستوديوهات والبائعين ومزودي الخدمات بأدوات إكسترانت احترافية لإدارة أعمالهم الموسيقية عالمياً." 
+                en="Join the elite network of music studios, equipment vendors, and service providers. Reach a global audience of creators and manage your business with professional tools." 
+                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. صل إلى جمهور عالمي من المبدعين وأدر عملك بأدوات احترافية." 
               />
             </p>
-            <div className="foundation-tag">
-              <T en="Official Extranet Foundation — Prototype V1" ar="تأسيس الإكسترانت الرسمي — النموذج الأولي V1" />
-            </div>
-            <div style={{ marginTop: 12, opacity: 0.4, fontSize: '0.65rem', fontWeight: 700, letterSpacing: 1 }}>
-              <T en="PHASE 54 ARCHITECTURAL FOUNDATION: COMPLETE" ar="اكتمال التأسيس المعماري للمرحلة 54" />
+            <div className="hero-actions" style={{ marginTop: 48, display: 'flex', gap: 24 }}>
+              <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
+                 <T en="Join as Studio" ar="انضم كاستوديو" />
+              </Link>
+              <Link href="/join/seller" className="btn btn-outline btn-lg">
+                 <T en="Sell Professional Gear" ar="بع معدات احترافية" />
+              </Link>
             </div>
           </div>
         </div>
       </header>
 
       <main className="container main-layout">
-        {/* ARCHITECTURE SECTION */}
+        {/* VALUE PROPOSITION */}
         <section className="section-container">
-          <div className="section-header">
-            <h2><T en="Platform Architecture" ar="بنية المنصة" /></h2>
+          <div className="section-header text-center">
+            <span className="badge-gold"><T en="The Advantage" ar="المميزات" /></span>
+            <h2 className="mt-16"><T en="Why Partner with GearBeat?" ar="لماذا تنضم كشريك لـ GearBeat؟" /></h2>
           </div>
           <div className="architecture-grid">
             <div className="arch-card card-premium">
-              <div className="badge-type internal"><T en="INTERNAL" ar="داخلي" /></div>
-              <h3><T en="Admin Operations CRM" ar="إدارة العمليات CRM" /></h3>
-              <p className="text-muted"><T en="Used by GearBeat admins to manage leads, approvals, and internal relationships." ar="يستخدمه مسؤولو GearBeat لإدارة العملاء والموافقات والعلاقات الداخلية." /></p>
-              <Link href="/admin/operations-crm" className="text-gold"><T en="View Internal Hub" ar="عرض المركز الداخلي" /> →</Link>
+              <div className="badge-type external"><T en="GLOBAL TRUST" ar="ثقة عالمية" /></div>
+              <h3><T en="Verified Authority" ar="سلطة موثقة" /></h3>
+              <p className="text-muted"><T en="Leverage the GearBeat Certified badge to signal premium quality and build instant trust with international creators." ar="استفد من شارة 'موثق من جيربيت' للإشارة إلى الجودة العالية وبناء ثقة فورية مع المبدعين العالميين." /></p>
+              <Link href="/gearbeat-certified" className="text-gold"><T en="Learn About Certification" ar="تعرف على التوثيق" /> →</Link>
             </div>
-            <div className="arch-card card-premium active-border">
-              <div className="badge-type external"><T en="EXTERNAL" ar="خارجي" /></div>
-              <h3><T en="Partner Portal (Extranet)" ar="بوابة الشركاء (إكسترانت)" /></h3>
-              <p className="text-muted"><T en="Used by partners to manage their own business profiles, data, and bookings." ar="يستخدمه الشركاء لإدارة ملفاتهم الشخصية وبياناتهم وحجوزاتهم الخاصة." /></p>
-              <span className="text-gold font-bold"><T en="YOU ARE HERE" ar="أنت هنا" /></span>
+            <div className="arch-card card-premium">
+              <div className="badge-type external"><T en="OPERATIONS" ar="العمليات" /></div>
+              <h3><T en="Professional Tools" ar="أدوات احترافية" /></h3>
+              <p className="text-muted"><T en="Access unified extranet tools for bookings, inventory, and analytics. Simplified business management for creative professionals." ar="احصل على أدوات إكسترانت موحدة للحجوزات، المخزون، والتحليلات. إدارة أعمال مبسطة للمحترفين المبدعين." /></p>
+              <span className="text-gold font-bold"><T en="READY FOR LAUNCH" ar="جاهز للإطلاق" /></span>
             </div>
           </div>
         </section>
@@ -166,70 +169,17 @@ export default function PartnerPortalFoundationPage() {
           </div>
         </section>
 
-        {/* PORTAL ALIGNMENT */}
-        <section className="section-container" style={{ marginTop: 60 }}>
-          <div className="section-header">
-            <h2><T en="Current Portal Alignment" ar="محاذاة البوابة الحالية" /></h2>
-            <p className="text-muted"><T en="Existing operational portals and their alignment with the future unified Partner Portal." ar="البوابات التشغيلية الحالية ومحاذاتها مع بوابة الشركاء الموحدة المستقبلية." /></p>
-          </div>
-          <div className="architecture-grid">
-            <div className="arch-card card-premium">
-              <h3><T en="Studio Portal" ar="بوابة الاستوديو" /></h3>
-              <p className="text-muted"><T en="Active route for studio owner operations, sessions, and availability." ar="المسار النشط لعمليات مالك الاستوديو والجلسات والتوافر." /></p>
-              <code className="text-gold">/portal/studio</code>
-            </div>
-            <div className="arch-card card-premium">
-              <h3><T en="Vendor Portal" ar="بوابة البائع" /></h3>
-              <p className="text-muted"><T en="Active route for marketplace vendors, products, and order fulfillment." ar="المسار النشط لبائعي المتجر والمنتجات وتنفيذ الطلبات." /></p>
-              <code className="text-gold">/portal/store</code>
-            </div>
-          </div>
-        </section>
-
-        {/* FUTURE PARTNER TRACKS */}
-        <section className="section-container" style={{ marginTop: 60 }}>
-          <div className="section-header">
-            <h2><T en="Future Partner Tracks" ar="مسارات الشركاء المستقبلية" /></h2>
-            <p className="text-muted"><T en="Specialized extranet layers for non-studio and non-vendor partners." ar="طبقات إكسترانت متخصصة للشركاء من غير أصحاب الاستوديوهات والبائعين." /></p>
-          </div>
-          <div className="architecture-grid">
-            <Link href="/partner/services" className="arch-card card-premium">
-              <div className="badge-type external" style={{ background: '#a855f7' }}><T en="SERVICES" ar="خدمات" /></div>
-              <h3><T en="Service Provider Portal" ar="بوابة مزود الخدمة" /></h3>
-              <p className="text-muted"><T en="Foundation for Producers, Engineers, and specialized music professionals." ar="تأسيس للمنتجين والمهندسين والمحترفين الموسيقيين المتخصصين." /></p>
-              <span className="text-gold"><T en="Explore Track" ar="استكشاف المسار" /> →</span>
+        {/* FINAL CTA */}
+        <section className="section-container text-center" style={{ marginTop: 100, paddingBottom: 120 }}>
+          <span className="badge-gold mb-24"><T en="Take the Leap" ar="خذ الخطوة" /></span>
+          <h2 className="mb-40" style={{ fontSize: '3rem' }}><T en="Join the Pulse of Music Innovation." ar="انضم إلى نبض الابتكار الموسيقي." /></h2>
+          <div className="hero-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
+            <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
+               <T en="Start Your Application" ar="ابدأ طلبك" />
             </Link>
-            <Link href="/partner/tickets" className="arch-card card-premium">
-              <div className="badge-type external" style={{ background: '#ec4899' }}><T en="TICKETING" ar="تذاكر" /></div>
-              <h3><T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" /></h3>
-              <p className="text-muted"><T en="Foundation for Event Organizers, Venues, and Workshop hosts." ar="تأسيس لمنظمي الفعاليات والمرافق ومستضيفي ورش العمل." /></p>
-              <span className="text-gold"><T en="Explore Track" ar="استكشاف المسار" /> →</span>
+            <Link href="/support" className="btn btn-outline btn-lg">
+               <T en="Partner Support" ar="دعم الشركاء" />
             </Link>
-          </div>
-        </section>
-
-        {/* ROUTE MAP */}
-        <section className="section-container" style={{ marginTop: 60, paddingBottom: 100 }}>
-          <div className="section-header">
-            <h2><T en="Future Route Map" ar="خريطة المسارات المستقبلية" /></h2>
-          </div>
-          <div className="route-map card-premium">
-            <div className="route-list">
-              {['/partner/dashboard', '/partner/profile', '/partner/documents', '/partner/contracts', '/partner/support', '/partner/notifications'].map(r => (
-                <div key={r} className="route-item">
-                  <span className="route-path">{r}</span>
-                  <span className="route-status"><T en="Foundation Only" ar="تأسيس فقط" /></span>
-                </div>
-              ))}
-            </div>
-            <div className="disclaimer-note">
-              <p className="text-muted">
-                <T 
-                  en="Note: Existing /portal/studio and /portal/store routes remain the current operational workflows. The /partner extranet will eventually unify these experiences." 
-                  ar="ملاحظة: تظل مسارات /portal/studio و /portal/store هي تدفقات العمل التشغيلية الحالية. ستقوم بوابة /partner بتوحيد هذه التجارب في النهاية."
-                />
-              </p>
-            </div>
           </div>
         </section>
       </main>
