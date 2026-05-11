@@ -10,23 +10,26 @@ export default function GearBeatCertifiedPage() {
         <div className="container animate-up">
           <div className="hero-content text-center">
             <span className="badge-gold">
-              <T en="GearBeat Certified" ar="موثق من جيربيت" />
+              <T en="GEARBEAT CERTIFIED — OFFICIAL" ar="موثق من جيربيت — رسمي" />
             </span>
-            <h1>
+            <h1 style={{ lineHeight: 1.1 }}>
               <T
-                en="The New Gold Standard of Creative Trust."
-                ar="المعيار الذهبي الجديد للثقة الإبداعية."
+                en="The global benchmark for studio integrity."
+                ar="المعيار العالمي لنزاهة الاستوديوهات."
               />
             </h1>
             <p className="lead">
               <T
-                en="GearBeat Certified is more than a badge. It's a commitment to quality, verified hardware, and acoustic excellence."
-                ar="موثق من جيربيت هو أكثر من مجرد شارة. إنه التزام بالجودة، والعتاد الموثق، والتميز الصوتي."
+                en="GearBeat Certified is the most rigorous audit in the music industry. We verify every signal chain, room treatment, and hardware asset to ensure absolute session reliability."
+                ar="موثق من جيربيت هو التدقيق الأكثر صرامة في صناعة الموسيقى. نحن نتحقق من كل سلسلة إشارة، معالجة غرف، وأصول العتاد لضمان موثوقية الجلسة المطلقة."
               />
             </p>
-            <div className="hero-actions" style={{ justifyContent: 'center' }}>
-              <Link href="/join/studio" className="btn btn-primary btn-lg">
-                <T en="Get Your Studio Certified" ar="وثق استوديوك الآن" />
+            <div className="hero-actions" style={{ justifyContent: 'center', gap: 24 }}>
+              <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
+                <T en="Get Certified" ar="احصل على التوثيق" />
+              </Link>
+              <Link href="/studios" className="btn btn-outline btn-lg">
+                <T en="Find Certified Studios" ar="ابحث عن استوديو موثق" />
               </Link>
             </div>
           </div>
