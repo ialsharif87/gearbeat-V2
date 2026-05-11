@@ -1,3 +1,0 @@
--- GearBeat local development seed file
--- Fill this only after the real schema has been pulled into supabase/migrations.
--- Do not add production user data here.
