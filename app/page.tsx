@@ -9,32 +9,34 @@ export default function HomePage() {
         <div className="container hero-container animate-up">
           <div className="hero-content">
             <span className="badge-gold">
-              <T en="Premium Creator Marketplace" ar="المنصة الفاخرة لصناع الصوت" />
+              <T en="Official Phase 60 — Launch Readiness" ar="المرحلة 60 الرسمية — جاهزية الإطلاق" />
             </span>
-            <h1>
+            <h1 style={{ fontWeight: 900 }}>
               <T
-                en="Book the right studio for your next sound."
-                ar="احجز الاستوديو المناسب لصوتك القادم."
+                en="The global pulse of studio sound."
+                ar="النبض العالمي لصوت الاستوديوهات."
               />
             </h1>
             <p className="lead">
               <T
-                en="GearBeat connects you with top studios, elite gear, and verified audio services in a trusted, seamless experience."
-                ar="GearBeat يربطك بأفضل الاستوديوهات، المعدات، والخدمات الصوتية في تجربة موثوقة وسهلة."
+                en="GearBeat is the ultimate ecosystem for audio professionals. Discover world-class studios, shop elite verified gear, and secure tickets to exclusive industry experiences."
+                ar="GearBeat هو النظام البيئي الأمثل لمحترفي الصوت. اكتشف استوديوهات عالمية، تسوق معدات موثقة، واحجز تذاكر لتجارب حصرية في الصناعة."
               />
             </p>
             <div className="hero-actions">
-              <Link href="/studios" className="btn btn-primary btn-lg">
-                <T en="Explore Studios" ar="استكشف الاستوديوهات" />
+              <Link href="/studios" className="btn btn-primary btn-lg shadow-gold">
+                <T en="Find a Studio" ar="ابحث عن استوديو" />
               </Link>
-              <Link href="/join/studio" className="btn btn-outline btn-lg">
-                <T en="List Your Studio" ar="اعرض استوديوك" />
+              <Link href="/marketplace" className="btn btn-outline btn-lg">
+                <T en="Shop Verified Gear" ar="تسوق معدات موثقة" />
               </Link>
             </div>
           </div>
           <div className="hero-visual">
-            <div className="sound-wave-glow"></div>
-            <div className="abstract-orb"></div>
+            <div className="sound-wave-glow shadow-gold"></div>
+            <div className="abstract-orb">
+              <div className="inner-orb"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -43,12 +45,12 @@ export default function HomePage() {
       <section className="section-padding">
         <div className="container">
           <div className="section-head text-center">
-            <span className="badge-gold"><T en="Partner Ecosystem" ar="منظومة الشركاء" /></span>
-            <h2><T en="Choose your path" ar="اختر مسارك في GearBeat" /></h2>
+            <span className="badge-gold"><T en="Network Status: Operational" ar="حالة الشبكة: تعمل" /></span>
+            <h2><T en="Join the Ecosystem" ar="انضم إلى النظام البيئي" /></h2>
           </div>
 
           <div className="grid grid-3 path-grid">
-            <Link href="/signup" className="card-premium path-card">
+            <Link href="/signup" className="card-premium path-card hover-lift">
               <div className="path-icon">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
@@ -56,69 +58,69 @@ export default function HomePage() {
                   <line x1="12" y1="19" x2="12" y2="22"></line>
                 </svg>
               </div>
-              <h3><T en="I am a Creator" ar="أنا مبدع" /></h3>
-              <p><T en="Book world-class studios and buy elite gear for your next project." ar="احجز استوديوهات عالمية واشترِ معدات احترافية لمشروعك القادم." /></p>
-              <span className="path-cta"><T en="Get Started" ar="ابدأ الآن" /> →</span>
+              <h3><T en="Creators & Artists" ar="المبدعون والفنانون" /></h3>
+              <p><T en="Book legendary spaces, buy certified equipment, and attend exclusive workshops." ar="احجز مساحات أسطورية، اشترِ معدات معتمدة، واحضر ورش عمل حصرية." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Start Creating" ar="ابدأ الإبداع" /> →</span>
             </Link>
 
-            <Link href="/join/studio" className="card-premium path-card active-border">
-              <div className="path-icon">
+            <Link href="/join/studio" className="card-premium path-card active-border hover-lift">
+              <div className="path-icon text-gold">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2v-6H5v-3a7 7 0 0 1 14 0v3h-2v6h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/>
                 </svg>
               </div>
-              <h3><T en="Studio Owner" ar="صاحب استوديو" /></h3>
-              <p><T en="List your space, manage bookings, and join a verified network." ar="اعرض مساحتك، أدر حجوزاتك، وانضم لشبكة موثقة من المحترفين." /></p>
-              <span className="path-cta"><T en="Join as Owner" ar="انضم كصاحب استوديو" /> →</span>
+              <h3><T en="Studio Owners" ar="أصحاب الاستوديوهات" /></h3>
+              <p><T en="Monetize your space, simplify bookings, and gain 'GearBeat Certified' status." ar="استثمر مساحتك، بسط حجوزاتك، واحصل على حالة 'GearBeat Certified'." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Get Certified" ar="احصل على التوثيق" /> →</span>
             </Link>
 
-            <Link href="/join/seller" className="card-premium path-card">
+            <Link href="/join/seller" className="card-premium path-card hover-lift">
               <div className="path-icon">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                 </svg>
               </div>
-              <h3><T en="Gear Vendor" ar="تاجر معدات" /></h3>
-              <p><T en="Sell your professional audio gear to a targeted creative audience." ar="بع معداتك الصوتية المحترفة لجمهور مبدع ومستهدف." /></p>
-              <span className="path-cta"><T en="Start Selling" ar="ابدأ البيع" /> →</span>
+              <h3><T en="Certified Vendors" ar="التجار المعتمدون" /></h3>
+              <p><T en="Reach professional buyers and list gear with integrated global shipping support." ar="صل إلى مشترين محترفين واعرض معداتك مع دعم شحن عالمي مدمج." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Open Store" ar="افتح متجرك" /> →</span>
             </Link>
           </div>
         </div>
       </section>
 
       {/* 3. TRUST / WHY GEARBEAT */}
-      <section className="section-padding trust-section">
+      <section className="section-padding trust-section border-y border-white/5">
         <div className="container">
           <div className="grid grid-2 items-center">
             <div className="trust-text">
-              <span className="badge-gold"><T en="Why GearBeat" ar="لماذا GearBeat؟" /></span>
-              <h2><T en="Built for real sessions and clear accountability." ar="مبنية لجلسات حقيقية ومسؤولية واضحة." /></h2>
-              <p className="text-muted">
+              <span className="badge-gold"><T en="Verified Integrity" ar="نزاهة موثقة" /></span>
+              <h2 className="mb-24"><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
+              <p className="text-muted leading-relaxed" style={{ maxWidth: 500 }}>
                 <T 
-                  en="GearBeat is designed to support a trusted marketplace with verified profiles, secure payments, and honest feedback."
-                  ar="جيربيت مصممة لدعم ماركت بليس موثوق بملفات موثقة، مدفوعات آمنة، وتقييمات حقيقية."
+                  en="Every studio is vetted, every piece of gear is verified, and every transaction is secured. No more session friction, just pure sound."
+                  ar="كل استوديو يتم فحصه، كل قطعة معدات يتم توثيقها، وكل عملية شراء مؤمنة. لا مزيد من معوقات الجلسات، فقط صوت نقي."
                 />
               </p>
             </div>
-            <div className="grid grid-3 gap-20">
+            <div className="grid grid-3 gap-16">
               {[
-                { icon: '🛡️', en: 'Authentic Gear', ar: 'معدات أصلية' },
-                { icon: '🎚️', en: 'Pro Audio Grade', ar: 'جودة صوت احترافية' },
-                { icon: '⭐', en: 'Top Rated', ar: 'الأعلى تقييماً' },
-                { icon: '💎', en: 'Premium Quality', ar: 'جودة ممتازة' },
-                { icon: '💳', en: 'Secure Payments', ar: 'مدفوعات آمنة' },
-                { icon: '🏛️', en: 'Verified Studios', ar: 'استوديوهات موثقة' },
+                { icon: '🛡️', en: 'Verified Gear', ar: 'معدات موثقة' },
+                { icon: '🎚️', en: 'Studio Grade', ar: 'جودة استوديو' },
+                { icon: '⭐', en: 'Top Talent', ar: 'مواهب متميزة' },
+                { icon: '🔒', en: 'Secure Escrow', ar: 'ضمان آمن' },
+                { icon: '🌍', en: 'Global Reach', ar: 'وصول عالمي' },
+                { icon: '🏛️', en: 'Certified Network', ar: 'شبكة معتمدة' },
               ].map(item => (
                 <div key={item.en} className="card-premium trust-item" style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
                   padding: '24px 16px',
-                  background: 'rgba(212, 175, 55, 0.03)',
-                  border: '1px solid rgba(212, 175, 55, 0.08)'
+                  background: 'rgba(212, 175, 55, 0.02)',
+                  border: '1px solid rgba(212, 175, 55, 0.1)'
                 }}>
                   <div className="trust-icon" style={{ fontSize: '1.5rem', marginBottom: 12 }}>{item.icon}</div>
-                  <h4 style={{ fontSize: '0.85rem', margin: 0, fontWeight: 700 }}>
+                  <h4 style={{ fontSize: '0.8rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     <T en={item.en} ar={item.ar} />
                   </h4>
                 </div>
@@ -129,24 +131,31 @@ export default function HomePage() {
       </section>
 
       {/* 4. FEATURED STUDIOS PREVIEW */}
-      <section className="section-padding bg-darker">
+      <section className="section-padding bg-darker overflow-hidden">
         <div className="container">
-          <div className="flex-between section-head">
-            <h2><T en="Featured Studios" ar="استوديوهات مميزة" /></h2>
-            <Link href="/studios" className="text-gold"><T en="View all" ar="عرض الكل" /> →</Link>
+          <div className="flex-between section-head items-center mb-60">
+            <div>
+              <span className="badge-gold"><T en="Curated Selection" ar="مختارات مختارة" /></span>
+              <h2 className="mt-8"><T en="Elite Studios" ar="استوديوهات النخبة" /></h2>
+            </div>
+            <Link href="/studios" className="btn btn-outline btn-sm"><T en="View All Studios" ar="عرض كل الاستوديوهات" /> →</Link>
           </div>
-          <div className="grid grid-3">
+          <div className="grid grid-3 gap-32">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="card-premium studio-preview-card">
-                <div className="studio-thumb-placeholder"></div>
-                <div style={{ marginTop: 20 }}>
-                  <div className="flex-between">
-                    <h4>Studio Space {i}</h4>
-                    <span className="text-gold">4.9 ★</span>
+              <div key={i} className="card-premium studio-preview-card hover-lift p-0 overflow-hidden">
+                <div className="studio-thumb-placeholder relative" style={{ height: 250, background: '#111' }}>
+                   <div className="absolute top-16 right-16">
+                     <span className="badge badge-gold">Certified</span>
+                   </div>
+                </div>
+                <div style={{ padding: 24 }}>
+                  <div className="flex-between mb-8">
+                    <h4 className="m-0">Global Sound Station {i}</h4>
+                    <span className="text-gold font-bold">5.0 ★</span>
                   </div>
-                  <p className="text-muted">Riyadh, Saudi Arabia</p>
-                  <Link href="/studios" className="btn btn-outline btn-sm w-full mt-20">
-                    <T en="View Details" ar="عرض التفاصيل" />
+                  <p className="text-muted text-sm mb-20">Verified Partner • Riyadh</p>
+                  <Link href="/studios" className="btn btn-outline btn-sm w-full">
+                    <T en="Check Availability" ar="تحقق من التوفر" />
                   </Link>
                 </div>
               </div>
@@ -158,19 +167,25 @@ export default function HomePage() {
       {/* 5. GEAR MARKETPLACE PREVIEW */}
       <section className="section-padding">
         <div className="container">
-          <div className="flex-between section-head">
-            <h2><T en="Marketplace" ar="سوق المعدات" /></h2>
-            <Link href="/marketplace" className="text-gold"><T en="Shop Gear" ar="تسوق المعدات" /> →</Link>
+          <div className="flex-between section-head items-center mb-60">
+             <div>
+               <span className="badge-gold"><T en="Boutique Inventory" ar="مخزون فاخر" /></span>
+               <h2 className="mt-8"><T en="Verified Marketplace" ar="سوق موثق" /></h2>
+             </div>
+             <Link href="/marketplace" className="btn btn-outline btn-sm"><T en="Browse All Gear" ar="تصفح كل المعدات" /> →</Link>
           </div>
-          <div className="grid grid-4 category-grid">
-            {['Microphones', 'Monitors', 'Interfaces', 'Controllers'].map((cat) => (
-              <div key={cat} className="card-premium cat-card">
-                <div className="cat-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                  </svg>
+          <div className="grid grid-4 category-grid gap-24">
+            {[
+              { name: 'Microphones', ar: 'ميكروفونات', icon: '🎙️' },
+              { name: 'Analog Outboard', ar: 'أجهزة تماثلية', icon: '🎛️' },
+              { name: 'Studio Monitors', ar: 'سماعات استوديو', icon: '🔊' },
+              { name: 'Instruments', ar: 'آلات موسيقية', icon: '🎸' }
+            ].map((cat) => (
+              <div key={cat.name} className="card-premium cat-card hover-lift text-center" style={{ padding: 40 }}>
+                <div className="cat-icon" style={{ fontSize: '2.5rem', marginBottom: 20 }}>
+                  {cat.icon}
                 </div>
-                <h4>{cat}</h4>
+                <h4 className="m-0"><T en={cat.name} ar={cat.ar} /></h4>
               </div>
             ))}
           </div>
@@ -178,55 +193,67 @@ export default function HomePage() {
       </section>
  
        {/* 5B. EXPERIENCES & TICKETING PREVIEW */}
-       <section className="section-padding bg-darker">
-         <div className="container">
-           <div className="grid grid-2 items-center">
+       <section className="section-padding bg-darker relative overflow-hidden">
+         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--gb-gold) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+         <div className="container relative z-10">
+           <div className="grid grid-2 items-center gap-60">
              <div className="experience-content">
-               <span className="badge-gold"><T en="New Track" ar="مسار جديد" /></span>
-               <h2 style={{ fontSize: '3rem', margin: '24px 0' }}>
-                 <T en="Unforgettable audio experiences." ar="تجارب صوتية لا تُنسى." />
+               <span className="badge-gold"><T en="Live Access" ar="وصول مباشر" /></span>
+               <h2 style={{ fontSize: '3.5rem', margin: '24px 0', lineHeight: 1.1 }}>
+                 <T en="Beyond the studio walls." ar="خلف جدران الاستوديو." />
                </h2>
-               <p className="text-muted" style={{ marginBottom: 32, fontSize: '1.1rem' }}>
+               <p className="text-muted" style={{ marginBottom: 40, fontSize: '1.2rem', lineHeight: 1.6 }}>
                  <T 
-                   en="Access exclusive studio workshops, live concerts, and creative activations through the GearBeat Ticketing engine."
-                   ar="احصل على ورش عمل حصرية، حفلات مباشرة، وتنشيطات إبداعية من خلال محرك جيربيت لحجز التذاكر."
+                   en="GearBeat Ticketing connects you to masterclasses, product launches, and exclusive studio sessions. Experience the industry, live."
+                   ar="تذاكر جيربيت تربطك بالدورات التدريبية المتقدمة، إطلاق المنتجات، وجلسات الاستوديو الحصرية. اختبر الصناعة، مباشرة."
                  />
                </p>
-               <Link href="/tickets" className="btn btn-primary">
-                 <T en="Explore Experiences" ar="استكشف التجارب" />
-               </Link>
+               <div className="flex gap-16">
+                 <Link href="/tickets" className="btn btn-primary btn-lg shadow-gold">
+                   <T en="Explore Tickets" ar="استكشف التذاكر" />
+                 </Link>
+                 <Link href="/partner" className="btn btn-outline btn-lg">
+                   <T en="Host an Event" ar="استضف فعالية" />
+                 </Link>
+               </div>
              </div>
-             <div className="experience-visual" style={{ 
-               height: 300, 
-               background: 'rgba(212, 175, 55, 0.05)', 
-               borderRadius: 30, 
-               border: '1px dashed rgba(212, 175, 55, 0.2)',
+             <div className="experience-visual shadow-gold-lg" style={{ 
+               height: 400, 
+               background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)', 
+               borderRadius: 40, 
+               border: '1px solid rgba(212, 175, 55, 0.15)',
                display: 'grid',
-               placeItems: 'center'
+               placeItems: 'center',
+               position: 'relative'
              }}>
                <div style={{ textAlign: 'center' }}>
-                 <span style={{ fontSize: '4rem', display: 'block', marginBottom: 16 }}>🎟️</span>
-                 <span className="badge"><T en="Ticketing Engine — Coming Soon" ar="محرك التذاكر — قريباً" /></span>
+                 <span style={{ fontSize: '6rem', display: 'block', marginBottom: 24, filter: 'drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))' }}>🎫</span>
+                 <span className="badge badge-warning" style={{ padding: '8px 24px', fontSize: '0.9rem' }}>
+                   <T en="TICKETING HUB — COMING SOON" ar="مركز التذاكر — قريباً" />
+                 </span>
                </div>
+               <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gold rounded-full blur-3xl opacity-10"></div>
              </div>
            </div>
          </div>
        </section>
  
        {/* 6. FINAL CTA */}
-      <section className="section-padding final-cta">
-        <div className="container text-center animate-up">
-          <h2><T en="Ready to create your next masterpiece?" ar="جاهز لصناعة تحفتك الفنية القادمة؟" /></h2>
-          <div className="cta-actions" style={{ marginTop: 40, display: 'flex', gap: 20, justifyContent: 'center' }}>
-            <Link href="/studios" className="btn btn-primary btn-lg">
-              <T en="Book Your Session" ar="احجز جلستك القادمة" />
+      <section className="section-padding final-cta text-center py-120">
+        <div className="container animate-up">
+          <span className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></span>
+          <h2 className="mb-60"><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
+          <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
+            <Link href="/signup" className="btn btn-primary btn-lg shadow-gold">
+              <T en="Create Your Account" ar="أنشئ حسابك" />
             </Link>
-            <Link href="/join/studio" className="btn btn-outline btn-lg">
-              <T en="Join as Partner" ar="انضم كاستوديو معتمد" />
+            <Link href="/support" className="btn btn-outline btn-lg">
+               <T en="Speak to an Expert" ar="تحدث مع خبير" />
             </Link>
           </div>
         </div>
       </section>
+
 
       <style dangerouslySetInnerHTML={{ __html: `
         .home-root { overflow-x: hidden; }
