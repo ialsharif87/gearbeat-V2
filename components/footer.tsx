@@ -32,34 +32,31 @@ export default function Footer() {
 
           <div className="footer-col">
             <h4><T en="Platform" ar="المنصة" /></h4>
-            <Link href="/studios"><T en="Studios" ar="الاستوديوهات" /></Link>
-            <Link href="/gear"><T en="Gear" ar="المعدات" /></Link>
+            <Link href="/studios"><T en="Discovery" ar="الاكتشاف" /></Link>
+            <Link href="/marketplace"><T en="Marketplace" ar="السوق" /></Link>
+            <Link href="/tickets"><T en="Tickets" ar="التذاكر" /></Link>
             <Link href="/how-it-works"><T en="How it Works" ar="كيف يعمل" /></Link>
-            <Link href="/support"><T en="Contact" ar="اتصل بنا" /></Link>
           </div>
 
           <div className="footer-col">
-            <h4><T en="Partners" ar="الشركاء" /></h4>
+            <h4><T en="Partner Network" ar="شبكة الشركاء" /></h4>
             <Link href="/join/studio"><T en="List Your Studio" ar="أضف استوديوك" /></Link>
             <Link href="/join/seller"><T en="Sell Gear" ar="بع معداتك" /></Link>
-            <Link href="/login?account=owner"><T en="Partner Login" ar="دخول الشركاء" /></Link>
+            <Link href="/partner"><T en="Partner Portal" ar="بوابة الشركاء" /></Link>
+            <Link href="/support"><T en="Partner Support" ar="دعم الشركاء" /></Link>
           </div>
 
           <div className="footer-col">
-            <h4><T en="Account" ar="الحساب" /></h4>
-            <Link href="/login"><T en="Login" ar="تسجيل الدخول" /></Link>
-            <Link href="/signup"><T en="Sign Up" ar="إنشاء حساب" /></Link>
-            <Link href="/portal"><T en="Dashboard" ar="لوحة التحكم" /></Link>
+            <h4><T en="Legal & Trust" ar="القانونية والثقة" /></h4>
+            <Link href="/legal"><T en="Legal Hub" ar="المركز القانوني" /></Link>
+            <Link href="/legal/terms"><T en="Terms of Service" ar="شروط الخدمة" /></Link>
+            <Link href="/legal/privacy"><T en="Privacy Policy" ar="سياسة الخصوصية" /></Link>
+            <Link href="/gearbeat-certified"><T en="GearBeat Certified" ar="جيربيت المعتمد" /></Link>
           </div>
         </div>
 
         <div className="footer-bottom">
           <p>© {currentYear} GearBeat. <T en="All rights reserved." ar="جميع الحقوق محفوظة." /></p>
-          <div className="footer-legal">
-            <Link href="/legal"><T en="Legal Hub" ar="المركز القانوني" /></Link>
-            <Link href="/terms"><T en="Terms" ar="الشروط" /></Link>
-            <Link href="/privacy"><T en="Privacy" ar="الخصوصية" /></Link>
-          </div>
         </div>
       </div>
 

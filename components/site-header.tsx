@@ -61,23 +61,20 @@ export default function SiteHeader({
           <Link href="/studios" className="nav-link">
             <T en="Studios" ar="الاستوديوهات" />
           </Link>
-          <Link href="/gear" className="nav-link">
-            <T en="Gear" ar="المعدات" />
+          <Link href="/marketplace" className="nav-link">
+            <T en="Marketplace" ar="السوق" />
+          </Link>
+          <Link href="/tickets" className="nav-link">
+            <T en="Tickets" ar="التذاكر" />
           </Link>
           <Link href="/services" className="nav-link">
             <T en="Services" ar="الخدمات" />
-          </Link>
-          <Link href="/about" className="nav-link">
-            <T en="About GearBeat" ar="عن GearBeat" />
-          </Link>
-          <Link href="/how-it-works" className="nav-link">
-            <T en="How it Works" ar="كيف يعمل" />
           </Link>
           <Link href="/partner" className="nav-link">
             <T en="Partner Portal" ar="بوابة الشركاء" />
           </Link>
           <Link href="/support" className="nav-link">
-            <T en="Contact" ar="اتصل بنا" />
+            <T en="Support" ar="الدعم" />
           </Link>
         </nav>
 
