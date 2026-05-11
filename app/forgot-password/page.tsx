@@ -20,8 +20,9 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gearbeat.app';
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://gearbeat.app/update-password'
+        redirectTo: `${origin}/update-password`
       });
       
       if (error) throw error;
