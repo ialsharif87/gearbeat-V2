@@ -56,6 +56,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <p>© {currentYear} GearBeat. <T en="All rights reserved." ar="جميع الحقوق محفوظة." /></p>
           <div className="footer-legal">
+            <Link href="/legal"><T en="Legal Hub" ar="المركز القانوني" /></Link>
             <Link href="/terms"><T en="Terms" ar="الشروط" /></Link>
             <Link href="/privacy"><T en="Privacy" ar="الخصوصية" /></Link>
           </div>
