@@ -57,7 +57,7 @@ export default async function AdminDashboard() {
       <div className="stats-row" style={{ marginBottom: 48 }}>
         <MetricCard labelEn="Total Studios" labelAr="إجمالي الاستوديوهات" value={totalStudios.count || 0} icon="🎙️" href="/admin/studios" />
         <MetricCard labelEn="Total Sellers" labelAr="إجمالي التجار" value={totalSellers.count || 0} icon="🏪" href="/admin/sellers" />
-        <MetricCard labelEn="Total Customers" labelAr="إجمالي العملاء" value={totalCustomers.count || 0} icon="👥" href="/admin/customers" />
+        <MetricCard labelEn="Total Customers" labelAr="إجمالي العملاء" value={totalCustomers.count || 0} icon="👥" href="/admin/users" />
         <MetricCard labelEn="Platform Revenue" labelAr="إيرادات المنصة" value="SAR 0" icon="💰" href="/admin/reports" />
       </div>
 

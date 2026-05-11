@@ -31,7 +31,7 @@ export default function JoinPage() {
         </Link>
 
         {/* OWNER */}
-        <Link href="/owner/onboarding" className="card join-card" style={{ textAlign: 'center', padding: 50, textDecoration: 'none', border: '1px solid var(--gb-gold)', background: 'rgba(199,164,93,0.03)' }}>
+        <Link href="/portal/studio/onboarding" className="card join-card" style={{ textAlign: 'center', padding: 50, textDecoration: 'none', border: '1px solid var(--gb-gold)', background: 'rgba(199,164,93,0.03)' }}>
            <div style={{ fontSize: '4rem', marginBottom: 20 }}>🎧</div>
            <h3><T en="I own a Studio" ar="أملك استديو" /></h3>
            <p><T en="List your studio and manage your bookings effortlessly." ar="اعرض الاستديو الخاص بك وأدر حجوزاتك بكل سهولة." /></p>

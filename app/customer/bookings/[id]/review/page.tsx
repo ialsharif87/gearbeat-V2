@@ -102,7 +102,7 @@ async function requireCustomerAccess() {
   }
 
   if (role === "owner") {
-    redirect("/owner");
+    redirect("/portal/studio");
   }
 
   if (role !== "customer") {

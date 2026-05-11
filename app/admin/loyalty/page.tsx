@@ -571,7 +571,7 @@ export default async function AdminLoyaltyPage() {
             <T en="Payments" ar="المدفوعات" />
           </Link>
 
-          <Link href="/admin/coupons" className="btn">
+          <Link href="/admin/promos" className="btn">
             <T en="Coupons" ar="القسائم" />
           </Link>
 

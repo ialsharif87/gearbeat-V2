@@ -257,7 +257,7 @@ export default async function ProfilePage() {
     }
 
     revalidatePath("/profile");
-    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/owner-bank-accounts");
     revalidatePath("/admin");
 
     redirect("/profile");
@@ -459,7 +459,7 @@ export default async function ProfilePage() {
             </Link>
 
             {currentRole === "owner" || currentRole === "studio_owner" ? (
-              <Link href="/owner" className="btn btn-secondary">
+              <Link href="/portal/studio" className="btn btn-secondary">
                 <T en="Owner Dashboard" ar="لوحة صاحب الاستوديو" />
               </Link>
             ) : null}

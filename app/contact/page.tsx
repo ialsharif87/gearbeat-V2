@@ -246,7 +246,7 @@ export default function ContactPage() {
             <T en="Browse Studios" ar="تصفح الاستوديوهات" />
           </Link>
 
-          <Link href="/owner" className="btn btn-secondary">
+          <Link href="/portal/studio" className="btn btn-secondary">
             <T en="List Your Studio" ar="أضف استوديوك" />
           </Link>
         </div>

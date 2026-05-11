@@ -392,8 +392,8 @@ export default async function AdminStudioPayoutsPage() {
 
     revalidatePath("/admin/studio-payouts");
     revalidatePath("/admin/studio-payments");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function approvePayout(formData: FormData) {
@@ -465,8 +465,8 @@ export default async function AdminStudioPayoutsPage() {
     });
 
     revalidatePath("/admin/studio-payouts");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function markPayoutPaid(formData: FormData) {
@@ -593,8 +593,8 @@ export default async function AdminStudioPayoutsPage() {
 
     revalidatePath("/admin/studio-payouts");
     revalidatePath("/admin/studio-payments");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function cancelPayout(formData: FormData) {
@@ -723,8 +723,8 @@ export default async function AdminStudioPayoutsPage() {
 
     revalidatePath("/admin/studio-payouts");
     revalidatePath("/admin/studio-payments");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function markPayoutFailed(formData: FormData) {
@@ -857,8 +857,8 @@ export default async function AdminStudioPayoutsPage() {
 
     revalidatePath("/admin/studio-payouts");
     revalidatePath("/admin/studio-payments");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   const { data: settlementsData, error: settlementsError } = await supabaseAdmin

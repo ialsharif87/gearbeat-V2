@@ -223,7 +223,7 @@ export default async function AdminOwnerCompliancePage() {
     revalidatePath("/admin/owner-compliance");
     revalidatePath("/admin/studios");
     revalidatePath("/admin");
-    revalidatePath("/owner/onboarding");
+    revalidatePath("/portal/studio/onboarding");
   }
 
   const { data: complianceProfiles, error } = await supabaseAdmin

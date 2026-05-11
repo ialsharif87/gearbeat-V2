@@ -150,7 +150,7 @@ export default function StudioContractPage() {
                 <T en="1. Download Contract" ar="١. تحميل العقد" />
               </h3>
               <a 
-                href="/contracts/studio-agreement.pdf" 
+                href="/legal/terms" 
                 target="_blank" 
                 className="gb-button gb-button-outline"
                 style={{ display: "inline-flex", gap: 12, alignItems: "center" }}
