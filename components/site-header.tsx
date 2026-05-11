@@ -24,12 +24,14 @@ export default function SiteHeader({
   logoutAction,
 }: SiteHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
-  // Close dropdown on route change
+  // Close menus on route change
   useEffect(() => {
     setIsUserMenuOpen(false);
+    setIsMobileMenuOpen(false);
   }, [pathname]);
 
   // Close dropdown on outside click
@@ -43,39 +45,51 @@ export default function SiteHeader({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const navLinks = [
+    { href: "/studios", en: "Studios", ar: "الاستوديوهات" },
+    { href: "/marketplace", en: "Marketplace", ar: "السوق" },
+    { href: "/tickets", en: "Tickets", ar: "التذاكر" },
+    { href: "/services", en: "Services", ar: "الخدمات" },
+    { href: "/partner", en: "Partner Portal", ar: "بوابة الشركاء" },
+    { href: "/support", en: "Support", ar: "الدعم" },
+  ];
+
   return (
     <header className="site-header glass">
       <div className="container header-shell">
-        <Link href="/" className="header-logo">
-          <Image
-            src="/brand/logo-horizontal.svg"
-            alt="GearBeat"
-            width={120}
-            height={32}
-            className="logo-img"
-            priority
-          />
-        </Link>
+        <div className="header-left">
+          <button 
+            className="mobile-menu-toggle"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {isMobileMenuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              )}
+            </svg>
+          </button>
+          
+          <Link href="/" className="header-logo">
+            <Image
+              src="/brand/logo-horizontal.svg"
+              alt="GearBeat"
+              width={120}
+              height={32}
+              className="logo-img"
+              priority
+            />
+          </Link>
+        </div>
 
         <nav className="header-nav">
-          <Link href="/studios" className="nav-link">
-            <T en="Studios" ar="الاستوديوهات" />
-          </Link>
-          <Link href="/marketplace" className="nav-link">
-            <T en="Marketplace" ar="السوق" />
-          </Link>
-          <Link href="/tickets" className="nav-link">
-            <T en="Tickets" ar="التذاكر" />
-          </Link>
-          <Link href="/services" className="nav-link">
-            <T en="Services" ar="الخدمات" />
-          </Link>
-          <Link href="/partner" className="nav-link">
-            <T en="Partner Portal" ar="بوابة الشركاء" />
-          </Link>
-          <Link href="/support" className="nav-link">
-            <T en="Support" ar="الدعم" />
-          </Link>
+          {navLinks.map(link => (
+            <Link key={link.href} href={link.href} className="nav-link">
+              <T en={link.en} ar={link.ar} />
+            </Link>
+          ))}
         </nav>
 
         <div className="header-actions">
@@ -114,7 +128,7 @@ export default function SiteHeader({
             </div>
           ) : (
             <div className="auth-group">
-              <Link href="/login" className="nav-link">
+              <Link href="/login" className="nav-link hide-mobile">
                 <T en="Login" ar="دخول" />
               </Link>
               <Link href="/signup" className="btn btn-primary btn-sm">
@@ -124,6 +138,24 @@ export default function SiteHeader({
           )}
         </div>
       </div>
+
+      {/* MOBILE DRAWER */}
+      {isMobileMenuOpen && (
+        <div className="mobile-drawer glass animate-fade-in">
+          <nav className="mobile-nav">
+            {navLinks.map(link => (
+              <Link key={link.href} href={link.href} className="mobile-nav-link">
+                <T en={link.en} ar={link.ar} />
+              </Link>
+            ))}
+            {!isLoggedIn && (
+              <Link href="/login" className="mobile-nav-link text-gold">
+                <T en="Login" ar="دخول" />
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{ __html: `
         .site-header {
@@ -204,13 +236,68 @@ export default function SiteHeader({
         }
 
         [dir="rtl"] .header-nav {
-          order: 1;
-        }
-        [dir="rtl"] .header-actions {
           order: 2;
         }
-        [dir="rtl"] .header-logo {
+        [dir="rtl"] .header-actions {
+          order: 1;
+        }
+        [dir="rtl"] .header-left {
           order: 3;
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .mobile-menu-toggle {
+          display: none;
+          background: none;
+          border: none;
+          color: #fff;
+          cursor: pointer;
+          padding: 8px;
+          border-radius: 8px;
+          transition: var(--transition);
+        }
+
+        .mobile-menu-toggle:hover {
+          background: rgba(255,255,255,0.05);
+          color: var(--gb-gold);
+        }
+
+        .mobile-drawer {
+          position: absolute;
+          top: 80px;
+          left: 0;
+          width: 100%;
+          background: rgba(11, 15, 22, 0.98);
+          border-bottom: 1px solid var(--gb-border);
+          padding: 24px;
+          z-index: 999;
+        }
+
+        .mobile-nav {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .mobile-nav-link {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #fff;
+          text-decoration: none;
+          padding: 12px 16px;
+          background: rgba(255,255,255,0.03);
+          border-radius: 12px;
+          transition: var(--transition);
+        }
+
+        .mobile-nav-link:hover {
+          background: rgba(201, 162, 77, 0.1);
+          color: var(--gb-gold);
         }
 
         .user-dropdown-container {
@@ -308,8 +395,12 @@ export default function SiteHeader({
           to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
           .header-nav { display: none; }
+          .mobile-menu-toggle { display: block; }
+          .hide-mobile { display: none; }
+          .site-header { height: 70px; }
+          .mobile-drawer { top: 70px; }
         }
       `}} />
     </header>

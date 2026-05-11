@@ -9,22 +9,22 @@ export default function GearBeatCertifiedPage() {
       <section className="certified-hero">
         <div className="container animate-up">
           <div className="hero-content text-center">
-            <span className="badge-gold">
+            <div className="badge-gold mb-24 ms-auto me-auto">
               <T en="GEARBEAT CERTIFIED — OFFICIAL" ar="موثق من جيربيت — رسمي" />
-            </span>
-            <h1 style={{ lineHeight: 1.1 }}>
+            </div>
+            <h1 className="text-balance" style={{ lineHeight: 1.1, fontWeight: 900 }}>
               <T
                 en="The global benchmark for studio integrity."
                 ar="المعيار العالمي لنزاهة الاستوديوهات."
               />
             </h1>
-            <p className="lead">
+            <p className="lead text-balance mb-48">
               <T
                 en="GearBeat Certified is the most rigorous audit in the music industry. We verify every signal chain, room treatment, and hardware asset to ensure absolute session reliability."
                 ar="موثق من جيربيت هو التدقيق الأكثر صرامة في صناعة الموسيقى. نحن نتحقق من كل سلسلة إشارة، معالجة غرف، وأصول العتاد لضمان موثوقية الجلسة المطلقة."
               />
             </p>
-            <div className="hero-actions" style={{ justifyContent: 'center', gap: 24 }}>
+            <div className="hero-actions" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
               <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
                 <T en="Get Certified" ar="احصل على التوثيق" />
               </Link>
@@ -199,12 +199,12 @@ export default function GearBeatCertifiedPage() {
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="section-padding final-cta">
-        <div className="container text-center">
-          <h2><T en="Ready to raise the volume on trust?" ar="جاهز لرفع مستوى الثقة؟" /></h2>
-          <div className="hero-actions" style={{ justifyContent: 'center', marginTop: 40 }}>
-            <Link href="/join/studio" className="btn btn-primary btn-lg">
+      <section className="section-padding final-cta text-center py-120">
+        <div className="container animate-up">
+          <div className="badge-gold mb-24 ms-auto me-auto"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></div>
+          <h2 className="mb-40 text-balance" style={{ marginInline: 'auto' }}><T en="Ready to raise the volume on trust?" ar="جاهز لرفع مستوى الثقة؟" /></h2>
+          <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
               <T en="Apply for Certification" ar="قدم لطلب التوثيق" />
             </Link>
             <Link href="/studios" className="btn btn-outline btn-lg">

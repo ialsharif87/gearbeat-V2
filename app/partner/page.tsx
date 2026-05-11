@@ -25,17 +25,17 @@ export default function PartnerPortalFoundationPage() {
       <header className="portal-hero">
         <div className="container">
           <div className="hero-content">
-            <span className="badge-gold"><T en="GLOBAL PARTNER NETWORK" ar="شبكة الشركاء العالمية" /></span>
-            <h1 className="hero-title">
+            <div className="badge-gold mb-24 ms-auto me-auto"><T en="GLOBAL PARTNER NETWORK" ar="شبكة الشركاء العالمية" /></div>
+            <h1 className="hero-title text-balance">
               <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>
-            <p className="hero-desc">
+            <p className="hero-desc text-balance mb-40">
               <T 
                 en="Join the elite network of music studios, equipment vendors, and service providers. Reach a global audience of creators and manage your business with professional tools." 
                 ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. صل إلى جمهور عالمي من المبدعين وأدر عملك بأدوات احترافية." 
               />
             </p>
-            <div className="hero-actions" style={{ marginTop: 48, display: 'flex', gap: 24 }}>
+            <div className="hero-actions" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
               <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
                  <T en="Join as Studio" ar="انضم كاستوديو" />
               </Link>
@@ -169,11 +169,10 @@ export default function PartnerPortalFoundationPage() {
           </div>
         </section>
 
-        {/* FINAL CTA */}
         <section className="section-container text-center" style={{ marginTop: 100, paddingBottom: 120 }}>
-          <span className="badge-gold mb-24"><T en="Take the Leap" ar="خذ الخطوة" /></span>
-          <h2 className="mb-40" style={{ fontSize: '3rem' }}><T en="Join the Pulse of Music Innovation." ar="انضم إلى نبض الابتكار الموسيقي." /></h2>
-          <div className="hero-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
+          <div className="badge-gold mb-24 ms-auto me-auto"><T en="Take the Leap" ar="خذ الخطوة" /></div>
+          <h2 className="mb-40 text-balance" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginInline: 'auto' }}><T en="Join the Pulse of Music Innovation." ar="انضم إلى نبض الابتكار الموسيقي." /></h2>
+          <div className="hero-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
                <T en="Start Your Application" ar="ابدأ طلبك" />
             </Link>

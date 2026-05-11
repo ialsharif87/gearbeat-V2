@@ -116,11 +116,11 @@ export default function Footer() {
 
         .footer-col a:hover {
           color: var(--gb-gold);
-          transform: translateX(5px);
+          transform: translateX(var(--hover-translate, 5px));
         }
 
         [dir="rtl"] .footer-col a:hover {
-          transform: translateX(-5px);
+          --hover-translate: -5px;
         }
 
         .footer-bottom {
@@ -133,24 +133,14 @@ export default function Footer() {
           font-size: 0.85rem;
         }
 
-        .footer-legal {
-          display: flex;
-          gap: 24px;
-        }
-
-        .footer-legal a {
-          color: #555;
-          text-decoration: none;
-        }
-
         @media (max-width: 1000px) {
           .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
         }
 
         @media (max-width: 600px) {
           .footer-grid { grid-template-columns: 1fr; text-align: center; }
-          .logo-img-sm { margin: 0 auto 16px; }
-          .footer-bottom { flex-direction: column; gap: 20px; }
+          .logo-img-sm { margin-inline: auto; margin-bottom: 16px; }
+          .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
         }
       `}} />
     </footer>

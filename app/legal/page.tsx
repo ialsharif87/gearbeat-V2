@@ -11,15 +11,15 @@ export default function LegalHubPage() {
   ];
 
   return (
-    <main className="dashboard-page" style={{ maxWidth: 1000, margin: "0 auto", padding: "60px 20px" }}>
+    <main className="dashboard-page" style={{ maxWidth: 1000, margin: "0 auto", padding: "100px 24px" }}>
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
-        <span className="badge badge-warning" style={{ marginBottom: 16 }}>
+        <div className="badge-gold mb-16 ms-auto me-auto">
           <T en="DRAFT / PLANNING PHASE" ar="مسودة / مرحلة التخطيط" />
-        </span>
-        <h1 style={{ fontSize: "3rem", marginBottom: 16 }}>
+        </div>
+        <h1 className="text-balance" style={{ fontSize: "clamp(2.5rem, 5vw, 3.5rem)", fontWeight: 900, marginBottom: 24 }}>
           <T en="Legal & Policies" ar="الشؤون القانونية والسياسات" />
         </h1>
-        <p style={{ color: 'var(--muted)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
+        <p className="text-muted text-balance" style={{ maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
           <T 
             en="These documents are currently in draft form for architectural planning. They do not constitute final legal advice and are pending review by legal counsel before the official launch."
             ar="هذه الوثائق حالياً بصيغة مسودة للتخطيط المعماري. وهي لا تشكل استشارة قانونية نهائية وبانتظار مراجعة المستشار القانوني قبل الإطلاق الرسمي."
@@ -29,12 +29,12 @@ export default function LegalHubPage() {
 
       <div className="grid grid-2 gap-24">
         {policies.map(p => (
-          <Link key={p.path} href={p.path} className="card-premium" style={{ display: 'flex', alignItems: 'center', gap: 20, padding: 32, textDecoration: 'none', color: 'inherit' }}>
+          <Link key={p.path} href={p.path} className="card-premium animate-up" style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '32px 40px', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--gb-radius-md)' }}>
             <div style={{ fontSize: '2.5rem' }}>{p.icon}</div>
-            <div>
-              <h2 style={{ fontSize: '1.2rem', marginBottom: 4 }}><T en={p.titleEn} ar={p.titleAr} /></h2>
-              <span className="text-gold" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                <T en="View Draft" ar="عرض المسودة" /> →
+            <div style={{ flex: 1 }}>
+              <h2 style={{ fontSize: '1.25rem', marginBottom: 4, fontWeight: 800 }}><T en={p.titleEn} ar={p.titleAr} /></h2>
+              <span className="text-gold" style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: 0.5 }}>
+                <T en="VIEW DRAFT" ar="عرض المسودة" /> →
               </span>
             </div>
           </Link>
