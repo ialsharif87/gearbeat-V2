@@ -8,16 +8,16 @@ export default function HomePage() {
       <section className="hero-section">
         <div className="container hero-container animate-up">
           <div className="hero-content">
-            <span className="badge-gold">
-              <T en="Official Phase 60 — Launch Readiness" ar="المرحلة 60 الرسمية — جاهزية الإطلاق" />
-            </span>
-            <h1 style={{ fontWeight: 900 }}>
+            <div className="badge-gold mb-16">
+              <T en="Official Phase 61 — Launch Operations" ar="المرحلة 61 الرسمية — عمليات الإطلاق" />
+            </div>
+            <h1 className="text-balance" style={{ fontWeight: 900 }}>
               <T
                 en="The global pulse of studio sound."
                 ar="النبض العالمي لصوت الاستوديوهات."
               />
             </h1>
-            <p className="lead">
+            <p className="lead mb-40">
               <T
                 en="GearBeat is the ultimate ecosystem for audio professionals. Discover world-class studios, shop elite verified gear, and secure tickets to exclusive industry experiences."
                 ar="GearBeat هو النظام البيئي الأمثل لمحترفي الصوت. اكتشف استوديوهات عالمية، تسوق معدات موثقة، واحجز تذاكر لتجارب حصرية في الصناعة."
@@ -91,10 +91,10 @@ export default function HomePage() {
       {/* 3. TRUST / WHY GEARBEAT */}
       <section className="section-padding trust-section border-y border-white/5">
         <div className="container">
-          <div className="grid grid-2 items-center">
+          <div className="grid grid-2 items-center gap-60">
             <div className="trust-text">
-              <span className="badge-gold"><T en="Verified Integrity" ar="نزاهة موثقة" /></span>
-              <h2 className="mb-24"><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
+              <div className="badge-gold mb-16"><T en="Verified Integrity" ar="نزاهة موثقة" /></div>
+              <h2 className="mb-24 text-balance"><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
               <p className="text-muted leading-relaxed" style={{ maxWidth: 500 }}>
                 <T 
                   en="Every studio is vetted, every piece of gear is verified, and every transaction is secured. No more session friction, just pure sound."
@@ -117,10 +117,11 @@ export default function HomePage() {
                   alignItems: 'center', 
                   padding: '24px 16px',
                   background: 'rgba(212, 175, 55, 0.02)',
-                  border: '1px solid rgba(212, 175, 55, 0.1)'
+                  border: '1px solid rgba(212, 175, 55, 0.1)',
+                  borderRadius: 'var(--gb-radius-md)'
                 }}>
                   <div className="trust-icon" style={{ fontSize: '1.5rem', marginBottom: 12 }}>{item.icon}</div>
-                  <h4 style={{ fontSize: '0.8rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  <h4 style={{ fontSize: '0.75rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     <T en={item.en} ar={item.ar} />
                   </h4>
                 </div>
@@ -198,17 +199,17 @@ export default function HomePage() {
          <div className="container relative z-10">
            <div className="grid grid-2 items-center gap-60">
              <div className="experience-content">
-               <span className="badge-gold"><T en="Live Access" ar="وصول مباشر" /></span>
-               <h2 style={{ fontSize: '3.5rem', margin: '24px 0', lineHeight: 1.1 }}>
+               <div className="badge-gold mb-16"><T en="Live Access" ar="وصول مباشر" /></div>
+               <h2 className="text-balance" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', margin: '24px 0', lineHeight: 1.1 }}>
                  <T en="Beyond the studio walls." ar="خلف جدران الاستوديو." />
                </h2>
-               <p className="text-muted" style={{ marginBottom: 40, fontSize: '1.2rem', lineHeight: 1.6 }}>
+               <p className="text-muted mb-40" style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
                  <T 
                    en="GearBeat Ticketing connects you to masterclasses, product launches, and exclusive studio sessions. Experience the industry, live."
                    ar="تذاكر جيربيت تربطك بالدورات التدريبية المتقدمة، إطلاق المنتجات، وجلسات الاستوديو الحصرية. اختبر الصناعة، مباشرة."
                  />
                </p>
-               <div className="flex gap-16">
+               <div className="hero-actions">
                  <Link href="/tickets" className="btn btn-primary btn-lg shadow-gold">
                    <T en="Explore Tickets" ar="استكشف التذاكر" />
                  </Link>
@@ -220,7 +221,7 @@ export default function HomePage() {
              <div className="experience-visual shadow-gold-lg" style={{ 
                height: 400, 
                background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)', 
-               borderRadius: 40, 
+               borderRadius: 'var(--gb-radius-lg)', 
                border: '1px solid rgba(212, 175, 55, 0.15)',
                display: 'grid',
                placeItems: 'center',
@@ -228,9 +229,9 @@ export default function HomePage() {
              }}>
                <div style={{ textAlign: 'center' }}>
                  <span style={{ fontSize: '6rem', display: 'block', marginBottom: 24, filter: 'drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))' }}>🎫</span>
-                 <span className="badge badge-warning" style={{ padding: '8px 24px', fontSize: '0.9rem' }}>
+                 <div className="badge badge-gold" style={{ padding: '10px 24px', fontSize: '0.8rem' }}>
                    <T en="TICKETING HUB — COMING SOON" ar="مركز التذاكر — قريباً" />
-                 </span>
+                 </div>
                </div>
                <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gold rounded-full blur-3xl opacity-10"></div>
              </div>
@@ -238,11 +239,10 @@ export default function HomePage() {
          </div>
        </section>
  
-       {/* 6. FINAL CTA */}
       <section className="section-padding final-cta text-center py-120">
         <div className="container animate-up">
-          <span className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></span>
-          <h2 className="mb-60"><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
+          <div className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></div>
+          <h2 className="mb-60 text-balance" style={{ marginInline: 'auto' }}><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
           <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
             <Link href="/signup" className="btn btn-primary btn-lg shadow-gold">
               <T en="Create Your Account" ar="أنشئ حسابك" />

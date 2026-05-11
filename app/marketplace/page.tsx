@@ -297,7 +297,7 @@ export default async function MarketplacePage({
           {/* MARKETPLACE TRUST LAYER */}
           <div className="marketplace-trust-grid" style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
             gap: 16,
             marginBottom: 8 
           }}>
@@ -308,16 +308,16 @@ export default async function MarketplacePage({
               { icon: '⚡', en: 'Fast Shipping', ar: 'شحن سريع' },
             ].map(item => (
               <div key={item.en} style={{ 
-                padding: '16px', 
-                background: 'rgba(212, 175, 55, 0.03)', 
-                border: '1px solid rgba(212, 175, 55, 0.08)', 
-                borderRadius: '12px',
+                padding: '16px 20px', 
+                background: 'rgba(212, 175, 55, 0.04)', 
+                border: '1px solid rgba(212, 175, 55, 0.12)', 
+                borderRadius: 'var(--gb-radius-md)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12
               }}>
-                <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>
+                <span style={{ fontSize: '1.4rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
                   <T en={item.en} ar={item.ar} />
                 </span>
               </div>
@@ -440,7 +440,8 @@ export default async function MarketplacePage({
                   borderRadius: '10px',
                   border: '1px solid var(--gb-border)',
                   cursor: 'pointer',
-                  margin: 0
+                  margin: 0,
+                  width: 'fit-content'
                 }}
               >
                 <input

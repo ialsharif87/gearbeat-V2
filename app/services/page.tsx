@@ -144,22 +144,25 @@ export default async function ServicesPage({
     <div className="services-page">
       {/* HERO SECTION */}
       <section 
-        className="section-padding" 
+        className="section-padding hero-section" 
         style={{ 
-          background: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop') center/cover",
+          background: "linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop') center/cover",
           textAlign: "center",
-          padding: "100px 20px"
+          padding: "120px 20px"
         }}
       >
-        <h1 style={{ fontSize: "3.5rem", fontWeight: 800, marginBottom: 20 }}>
-          <T en="Book Creative Services" ar="احجز الخدمات الإبداعية" />
-        </h1>
-        <p style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.7)", maxWidth: 700, margin: "0 auto" }}>
-          <T 
-            en="Mixing, mastering, production, voiceover and more from verified providers." 
-            ar="مكس، ماستر، إنتاج، تعليق صوتي والمزيد من مزودين موثقين." 
-          />
-        </p>
+        <div className="container">
+          <div className="badge-gold mb-24 ms-auto me-auto"><T en="Professional Audio Services" ar="خدمات الصوت الاحترافية" /></div>
+          <h1 className="text-balance" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 900, marginBottom: 24 }}>
+            <T en="Book Creative Services" ar="احجز الخدمات الإبداعية" />
+          </h1>
+          <p className="text-balance" style={{ fontSize: "1.2rem", color: "var(--gb-text-muted)", maxWidth: 700, marginInline: "auto" }}>
+            <T 
+              en="Mixing, mastering, production, voiceover and more from verified providers who meet the GearBeat standard of excellence." 
+              ar="مكس، ماستر، إنتاج، تعليق صوتي والمزيد من مزودين موثقين يستوفون معايير التميز في GearBeat." 
+            />
+          </p>
+        </div>
       </section>
 
       <div className="section-padding" style={{ maxWidth: 1240, margin: "0 auto" }}>
@@ -211,7 +214,7 @@ export default async function ServicesPage({
                     alt={studio.name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: "cover", borderRadius: 'var(--gb-radius-md) var(--gb-radius-md) 0 0' }}
                   />
                   {studio.verified && (
                     <div style={{ position: "absolute", top: 12, left: 12, zIndex: 1 }} className="badge badge-success">

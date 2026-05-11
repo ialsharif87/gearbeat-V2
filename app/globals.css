@@ -15,6 +15,9 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.4);
   --shadow-gold: 0 0 30px rgba(212, 175, 55, 0.1);
+  --gb-radius-sm: 8px;
+  --gb-radius-md: 12px;
+  --gb-radius-lg: 24px;
 }
 
 * {
@@ -66,6 +69,21 @@ h1, h2, h3, h4 {
 
 .text-gold { color: var(--gb-gold); }
 .text-muted { color: var(--gb-text-muted); }
+.text-center { text-align: center; }
+.text-balance { text-wrap: balance; }
+
+/* SPACING UTILS */
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-32 { margin-bottom: 32px; }
+.mb-40 { margin-bottom: 40px; }
+.mb-60 { margin-bottom: 60px; }
+
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
 
 /* GLASSMORPHISM */
 .glass {
@@ -156,6 +174,12 @@ label {
 [dir="rtl"] label {
   text-align: right;
 }
+
+/* LOGICAL PROPERTIES FOR RTL */
+.ms-auto { margin-inline-start: auto; }
+.me-auto { margin-inline-end: auto; }
+.ps-0 { padding-inline-start: 0; }
+.pe-0 { padding-inline-end: 0; }
 
 /* FILTER PANEL */
 .filter-panel {

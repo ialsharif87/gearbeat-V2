@@ -533,7 +533,7 @@ export default async function StudiosPage({
             </span>
           </h1>
 
-          <p>
+          <p className="text-balance" style={{ maxWidth: 700, marginInline: 'auto' }}>
             <T
               en="Search, filter, and compare premium recording rooms, podcast spaces, rehearsal studios, and production suites."
               ar="ابحث، فلتر، وقارن بين غرف التسجيل، مساحات البودكاست، استوديوهات التدريب، وغرف الإنتاج."
@@ -543,9 +543,9 @@ export default async function StudiosPage({
           {/* STUDIO TRUST LAYER */}
           <div className="studio-trust-grid" style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
             gap: 16,
-            marginTop: 32,
+            marginTop: 40,
             marginBottom: 8 
           }}>
             {[
@@ -555,16 +555,16 @@ export default async function StudiosPage({
               { icon: '💎', en: 'Premium Quality', ar: 'جودة ممتازة' },
             ].map(item => (
               <div key={item.en} style={{ 
-                padding: '16px', 
-                background: 'rgba(212, 175, 55, 0.03)', 
-                border: '1px solid rgba(212, 175, 55, 0.08)', 
-                borderRadius: '12px',
+                padding: '16px 20px', 
+                background: 'rgba(212, 175, 55, 0.04)', 
+                border: '1px solid rgba(212, 175, 55, 0.12)', 
+                borderRadius: 'var(--gb-radius-md)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12
               }}>
-                <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>
+                <span style={{ fontSize: '1.4rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
                   <T en={item.en} ar={item.ar} />
                 </span>
               </div>
@@ -662,7 +662,7 @@ export default async function StudiosPage({
                           alt={studio.name}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{ objectFit: "cover" }}
+                          style={{ objectFit: "cover", borderRadius: 'var(--gb-radius-md) var(--gb-radius-md) 0 0' }}
                         />
                       </div>
                     ) : (
