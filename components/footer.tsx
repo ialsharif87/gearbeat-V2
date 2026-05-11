@@ -51,6 +51,7 @@ export default function Footer() {
             <Link href="/legal"><T en="Legal Hub" ar="المركز القانوني" /></Link>
             <Link href="/legal/terms"><T en="Terms of Service" ar="شروط الخدمة" /></Link>
             <Link href="/legal/privacy"><T en="Privacy Policy" ar="سياسة الخصوصية" /></Link>
+            <Link href="/legal/booking-policy"><T en="Booking Policy" ar="سياسة الحجز" /></Link>
             <Link href="/gearbeat-certified"><T en="GearBeat Certified" ar="جيربيت المعتمد" /></Link>
           </div>
         </div>
