@@ -411,7 +411,7 @@ export async function POST(request: Request) {
         notificationType: "booking_created",
         entityType: "booking",
         entityId: booking.id,
-        actionUrl: "/portal/studio/bookings",
+        actionUrl: "/owner/bookings",
       });
     }
 
