@@ -550,7 +550,7 @@ export default async function CustomerDashboardPage() {
               </div>
 
               <Link
-                href="/customer/verification"
+                href="/profile"
                 className="btn btn-primary"
                 style={{ marginTop: 18 }}
               >

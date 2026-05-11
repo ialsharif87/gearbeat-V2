@@ -186,9 +186,9 @@ export default async function AdminOwnerBankAccountsPage() {
     });
 
     revalidatePath("/admin/owner-bank-accounts");
-    revalidatePath("/owner/bank");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/bank");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function rejectBankAccount(formData: FormData) {
@@ -263,9 +263,9 @@ export default async function AdminOwnerBankAccountsPage() {
     });
 
     revalidatePath("/admin/owner-bank-accounts");
-    revalidatePath("/owner/bank");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/bank");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function disableBankAccount(formData: FormData) {
@@ -332,9 +332,9 @@ export default async function AdminOwnerBankAccountsPage() {
     });
 
     revalidatePath("/admin/owner-bank-accounts");
-    revalidatePath("/owner/bank");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/bank");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   async function markPendingReview(formData: FormData) {
@@ -404,9 +404,9 @@ export default async function AdminOwnerBankAccountsPage() {
     });
 
     revalidatePath("/admin/owner-bank-accounts");
-    revalidatePath("/owner/bank");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/bank");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
   }
 
   const { data: bankAccountsData, error } = await supabaseAdmin

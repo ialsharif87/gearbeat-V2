@@ -501,9 +501,9 @@ export default async function AdminBookingDetailsPage({
     revalidatePath("/admin/bookings");
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
-    revalidatePath("/owner/bookings");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/bookings");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
     revalidatePath("/admin/studio-payments");
     revalidatePath("/admin/studio-payouts");
 
@@ -875,9 +875,9 @@ export default async function AdminBookingDetailsPage({
     revalidatePath("/admin/bookings");
     revalidatePath("/admin");
     revalidatePath("/customer/bookings");
-    revalidatePath("/owner/bookings");
-    revalidatePath("/owner/finance");
-    revalidatePath("/owner/payouts");
+    revalidatePath("/portal/studio/bookings");
+    revalidatePath("/portal/studio/payouts");
+    revalidatePath("/portal/studio/payouts");
     revalidatePath("/admin/studio-payments");
     revalidatePath("/admin/studio-payouts");
 

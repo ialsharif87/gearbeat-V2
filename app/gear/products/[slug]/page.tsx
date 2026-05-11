@@ -39,7 +39,7 @@ export default async function ProductDetailsPage({
       <nav className="breadcrumb">
         <Link href="/gear"><T en="Marketplace" ar="السوق" /></Link>
         <span>/</span>
-        <Link href={`/gear/categories/${product.category?.slug}`}>
+        <Link href={`/marketplace/products?category=${product.category?.slug}`}>
           <T en={product.category?.name_en} ar={product.category?.name_ar} />
         </Link>
         <span>/</span>

@@ -50,7 +50,7 @@ export default async function GearMarketplacePage() {
             <Link href="/gear/products" className="btn btn-primary btn-large">
               <T en="Shop All Gear" ar="تسوق كل المعدات" />
             </Link>
-            <Link href="/gear/categories" className="btn btn-secondary btn-large">
+            <Link href="/marketplace" className="btn btn-secondary btn-large">
               <T en="Browse Categories" ar="تصفح التصنيفات" />
             </Link>
           </div>
@@ -64,7 +64,7 @@ export default async function GearMarketplacePage() {
         </div>
         <div className="categories-grid">
           {categories?.map((cat) => (
-            <Link key={cat.id} href={`/gear/categories/${cat.slug}`} className="card category-card">
+            <Link key={cat.id} href={`/marketplace/products?category=${cat.slug}`} className="card category-card">
               <div className="cat-icon">{cat.icon_url || "🎧"}</div>
               <h3><T en={cat.name_en} ar={cat.name_ar} /></h3>
             </Link>
