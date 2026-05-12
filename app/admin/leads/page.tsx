@@ -51,15 +51,18 @@ export default async function AdminLeadsPage({
   const tableData = activeTab === 'seller' ? (leads || []) : (studioApps || []);
 
   return (
-    <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 8 }}>
-          <T en="Onboarding Management" ar="إدارة طلبات الانضمام" />
-        </h1>
-        <p style={{ color: '#666' }}>
-          <T en="Manage and review all incoming provider applications." ar="إدارة ومراجعة كافة طلبات الموردين والاستوديوهات." />
-        </p>
-      </div>
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
+        <div className="animate-up">
+          <p className="gb-eyebrow"><T en="Onboarding Management" ar="إدارة طلبات الانضمام" /></p>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, marginBottom: 8, letterSpacing: '-1.5px' }}>
+            <T en="Partner Applications" ar="طلبات الشركاء" />
+          </h1>
+          <p className="text-muted" style={{ fontSize: '1.1rem' }}>
+            <T en="Manage and review all incoming provider and studio applications." ar="إدارة ومراجعة كافة طلبات الموردين والاستوديوهات." />
+          </p>
+        </div>
+      </section>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 32, borderBottom: '1px solid #1a1a1a', marginBottom: 32 }}>

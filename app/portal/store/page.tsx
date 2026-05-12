@@ -106,40 +106,28 @@ export default async function VendorDashboardPage() {
       }}
     >
       {/* SECTION 1: Welcome Header */}
-      <section 
-        className="gb-dashboard-header" 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '40px' 
-        }}
-      >
-        <div>
-          <span className="gb-dash-badge" style={{ background: 'rgba(207, 168, 110, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)', marginBottom: '12px' }}>
-            <T en="Seller Portal" ar="بوابة التاجر" />
-          </span>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '8px 0 0', color: 'white' }}>
+      <section className="gb-dashboard-header">
+        <div className="animate-up">
+          <p className="gb-eyebrow"><T en="Seller Portal" ar="بوابة التاجر" /></p>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: '8px 0 0', letterSpacing: '-1.5px', color: 'white' }}>
             <T en={`Welcome, ${businessNameEn}`} ar={`مرحباً، ${businessNameAr}`} />
           </h1>
-          <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '4px' }}>
+          <p className="text-muted" style={{ fontSize: '1.1rem', marginTop: '8px' }}>
             {new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="flex gap-12" style={{ flexWrap: 'wrap' }}>
           <Link 
             href="/portal/store/products/new"
-            className="gb-button gb-button-primary"
-            style={{ padding: '12px 24px' }}
+            className="btn btn-primary shadow-gold"
           >
             <span>➕</span>
             <T en="Add Product" ar="إضافة منتج" />
           </Link>
           <Link 
             href="/portal/store/orders"
-            className="gb-button gb-button-outline"
-            style={{ padding: '12px 24px' }}
+            className="btn btn-outline"
           >
             <span>🧾</span>
             <T en="View Orders" ar="عرض الطلبات" />
@@ -148,144 +136,98 @@ export default async function VendorDashboardPage() {
       </section>
 
       {/* SECTION 2: KPI Cards */}
-      <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
+      <section className="gb-dash-grid animate-up" style={{ animationDelay: '0.1s', marginBottom: '32px' }}>
         {/* Revenue Card */}
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #cfa86e'
-          }}
-        >
+        <div className="gb-dash-card" style={{ borderTop: '3px solid var(--gb-gold)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+            <p className="gb-eyebrow" style={{ fontSize: '0.7rem' }}>
               <T en="Revenue This Month" ar="إيراد هذا الشهر" />
-            </span>
+            </p>
           </div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>
             {totalRevenue.toLocaleString()} <small style={{ fontSize: '1rem', fontWeight: 400, color: '#888' }}>SAR</small>
           </div>
-          <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>
+          <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>
             <T en="From completed orders" ar="من الطلبات المكتملة" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>💰</span>
         </div>
 
         {/* Orders Card */}
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid var(--gb-border)', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid var(--gb-teal)'
-          }}
-        >
+        <div className="gb-dash-card" style={{ borderTop: '3px solid var(--gb-teal)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+            <p className="gb-eyebrow" style={{ fontSize: '0.7rem' }}>
               <T en="Orders This Month" ar="طلبات هذا الشهر" />
-            </span>
+            </p>
           </div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{totalOrders}</div>
-          <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{totalOrders}</div>
+          <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>
             {pendingOrders} <T en="pending" ar="معلقة" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>🧾</span>
         </div>
 
         {/* Products Card */}
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #22c55e'
-          }}
-        >
+        <div className="gb-dash-card" style={{ borderTop: '3px solid #22c55e' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+            <p className="gb-eyebrow" style={{ fontSize: '0.7rem' }}>
               <T en="Active Products" ar="منتجات نشطة" />
-            </span>
+            </p>
           </div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{activeProducts}</div>
-          <p style={{ color: outOfStock > 0 ? '#f97316' : '#666', fontSize: '0.75rem', margin: 0 }}>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{activeProducts}</div>
+          <p style={{ color: outOfStock > 0 ? '#f97316' : 'var(--gb-text-muted)', fontSize: '0.8rem', margin: 0 }}>
             {outOfStock} <T en="out of stock" ar="نفد مخزونها" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>📦</span>
         </div>
 
         {/* Rating Card */}
-        <div 
-          className="gb-card" 
-          style={{ 
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)', 
-            border: '1px solid #1e1e1e', 
-            borderRadius: '20px', 
-            padding: '24px', 
-            position: 'relative', 
-            overflow: 'hidden',
-            borderTop: '3px solid #a855f7'
-          }}
-        >
+        <div className="gb-dash-card" style={{ borderTop: '3px solid #a855f7' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 500 }}>
+            <p className="gb-eyebrow" style={{ fontSize: '0.7rem' }}>
               <T en="Avg Rating" ar="متوسط التقييم" />
-            </span>
+            </p>
           </div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', marginBottom: '8px' }}>{avgRating || "—"}</div>
-          <p style={{ color: '#666', fontSize: '0.75rem', margin: 0 }}>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '8px' }}>{avgRating || "—"}</div>
+          <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>
             <T en="out of 5" ar="من 5" />
           </p>
-          <span style={{ position: 'absolute', bottom: '-10px', right: '-10px', fontSize: '5rem', opacity: 0.05 }}>⭐</span>
         </div>
       </section>
 
       {/* SECTION 3: Summary Strip */}
       <section 
+        className="animate-up"
         style={{ 
-          background: '#111', 
-          borderRadius: '16px',
-          border: '1px solid #1e1e1e', 
-          padding: '20px 28px', 
+          background: 'rgba(255,255,255,0.02)', 
+          borderRadius: 'var(--gb-radius-md)',
+          border: '1px solid var(--gb-border)', 
+          padding: '24px', 
           display: 'grid', 
-          gridTemplateColumns: '1fr 1fr 1fr', 
-          gap: '0', 
-          marginBottom: '32px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          gap: '24px', 
+          marginBottom: '32px',
+          animationDelay: '0.2s'
         }}
       >
-        <div style={{ textAlign: 'center', borderRight: '1px solid var(--gb-border)' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}>
+        <div style={{ textAlign: 'center', borderInlineEnd: '1px solid var(--gb-border)' }} className="pe-24">
+          <div className="gb-eyebrow" style={{ fontSize: '0.65rem', marginBottom: '8px' }}>
             <T en="Avg Order Value" ar="متوسط قيمة الطلب" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
-            {totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0} <small style={{ fontSize: '0.8rem' }}>SAR</small>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'white' }}>
+            {totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0} <small style={{ fontSize: '0.9rem', color: 'var(--gb-text-muted)' }}>SAR</small>
           </div>
         </div>
-        <div style={{ textAlign: 'center', borderRight: '1px solid var(--gb-border)' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}>
+        <div style={{ textAlign: 'center', borderInlineEnd: '1px solid var(--gb-border)' }} className="pe-24">
+          <div className="gb-eyebrow" style={{ fontSize: '0.65rem', marginBottom: '8px' }}>
             <T en="Completion Rate" ar="معدل الإكمال" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'white' }}>
             {totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0}%
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)', marginBottom: '4px' }}>
+          <div className="gb-eyebrow" style={{ fontSize: '0.65rem', marginBottom: '8px' }}>
             <T en="Total Products" ar="إجمالي المنتجات" />
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gb-gold)' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'white' }}>
             {totalProducts}
           </div>
         </div>

@@ -32,29 +32,30 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <main className="gb-dashboard-page container" style={{ minHeight: '100vh' }}>
+    <main className="gb-dashboard-page">
       {/* Header */}
-      <div className="gb-dashboard-header" style={{ marginBottom: 40 }}>
-        <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>
-            <T en="GearBeat Command Center" ar="مركز تحكم GearBeat" />
+      <section className="gb-dashboard-header">
+        <div className="animate-up">
+          <p className="gb-eyebrow"><T en="Admin Command Center" ar="مركز التحكم الإداري" /></p>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: 0, letterSpacing: '-1.5px' }}>
+            <T en="Platform Operations" ar="عمليات المنصة" />
           </h1>
-          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-            <span className="badge-gold">
+          <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
+            <span className="badge-gold" style={{ letterSpacing: 1 }}>
               {isSuperAdmin ? "SUPER_ADMIN" : "STAFF"}
             </span>
-            <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.85rem' }}>{adminUserAuth.email}</span>
+            <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.9rem', borderLeft: '1px solid var(--gb-border)', paddingLeft: 12, marginLeft: 0 }} className="ps-12 ms-0">{adminUserAuth.email}</span>
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gb-gold)' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--gb-text-muted)' }}>{new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}</div>
+        <div className="text-end animate-up">
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--gb-gold)', letterSpacing: -1 }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          <div className="gb-eyebrow" style={{ marginTop: 4 }}>{new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</div>
         </div>
-      </div>
+      </section>
 
       {/* SECTION 1: GLOBAL OVERVIEW */}
       <h2 style={sectionTitleStyle}><T en="Global Overview" ar="نظرة عامة" /></h2>
-      <div className="stats-row" style={{ marginBottom: 48 }}>
+      <div className="gb-dash-grid animate-up" style={{ marginBottom: 48, animationDelay: '0.1s' }}>
         <MetricCard labelEn="Total Studios" labelAr="إجمالي الاستوديوهات" value={totalStudios.count || 0} icon="🎙️" href="/admin/studios" />
         <MetricCard labelEn="Total Sellers" labelAr="إجمالي التجار" value={totalSellers.count || 0} icon="🏪" href="/admin/sellers" />
         <MetricCard labelEn="Total Customers" labelAr="إجمالي العملاء" value={totalCustomers.count || 0} icon="👥" href="/admin/users" />
@@ -123,14 +124,14 @@ export default async function AdminDashboard() {
 function MetricCard({ labelEn, labelAr, value, icon, href }: { labelEn: string, labelAr: string, value: string | number, icon: string, href: string }) {
   return (
     <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div className="stat-card" style={{ cursor: 'pointer' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, width: '100%' }}>
-          <span className="stat-icon">{icon}</span>
-          <span className="gb-text-link">→</span>
+      <div className="gb-dash-card" style={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <span style={{ fontSize: '2rem' }}>{icon}</span>
+          <span className="text-gold" style={{ fontSize: '1.2rem' }}>→</span>
         </div>
         <div>
-          <div className="stat-number">{value}</div>
-          <div className="stat-label"><T en={labelEn} ar={labelAr} /></div>
+          <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white', marginBottom: 4 }}>{value}</div>
+          <div className="gb-eyebrow" style={{ fontSize: '0.65rem', margin: 0 }}><T en={labelEn} ar={labelAr} /></div>
         </div>
       </div>
     </Link>

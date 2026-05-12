@@ -41,55 +41,55 @@ export default function StudioDashboardView({
   return (
     <main className="studio-dash-root">
       {/* Top Header Section */}
-      <header className="dash-welcome-section">
-        <div className="welcome-text">
-          <span className="eyebrow"><T en="PARTNER DASHBOARD" ar="لوحة تحكم الشريك" /></span>
-          <h1>
+      <header className="dash-welcome-section gb-dashboard-header">
+        <div className="welcome-text animate-up">
+          <p className="gb-eyebrow"><T en="PARTNER DASHBOARD" ar="لوحة تحكم الشريك" /></p>
+          <h1 style={{ fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '-1.5px' }}>
             <T en="Welcome Back," ar="مرحباً بعودتك،" /> 
-            <span className="owner-name"> {ownerName}</span>
+            <span className="owner-name" style={{ color: 'var(--gb-gold)' }}> {ownerName}</span>
           </h1>
-          <p className="current-date">
+          <p className="current-date text-muted" style={{ fontSize: '1.1rem' }}>
             {new Date().toLocaleDateString("ar-SA", { 
               weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
             })}
           </p>
         </div>
-        <div className="header-actions">
-          <div className="status-badge">
-            <span className="dot"></span>
+        <div className="header-actions animate-up">
+          <div className="status-badge" style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '8px 16px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="dot" style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' }}></span>
             <T en="Live Status" ar="الحالة: مباشر" />
           </div>
         </div>
       </header>
 
       {/* Main Grid: Stats */}
-      <section className="stats-grid">
-        <div className="stat-card gold">
-          <div className="stat-icon">📅</div>
-          <div className="stat-info">
-            <span className="stat-value">{totalBookingsMonth}</span>
-            <span className="stat-label"><T en="Bookings this month" ar="حجوزات الشهر" /></span>
+      <section className="gb-dash-grid animate-up" style={{ animationDelay: '0.1s', marginBottom: 48 }}>
+        <div className="gb-dash-card">
+          <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>📅</div>
+          <div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--gb-gold)' }}>{totalBookingsMonth}</div>
+            <div className="gb-eyebrow" style={{ fontSize: '0.7rem', margin: 0 }}><T en="Bookings this month" ar="حجوزات الشهر" /></div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-info">
-            <span className="stat-value">{pendingBookings}</span>
-            <span className="stat-label"><T en="Pending Requests" ar="طلبات معلقة" /></span>
+        <div className="gb-dash-card">
+          <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>⏳</div>
+          <div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white' }}>{pendingBookings}</div>
+            <div className="gb-eyebrow" style={{ fontSize: '0.7rem', margin: 0 }}><T en="Pending Requests" ar="طلبات معلقة" /></div>
           </div>
         </div>
-        <div className="stat-card teal">
-          <div className="stat-icon">💰</div>
-          <div className="stat-info">
-            <span className="stat-value">{totalRevenue.toLocaleString()} <small>SAR</small></span>
-            <span className="stat-label"><T en="Net Revenue" ar="صافي الأرباح" /></span>
+        <div className="gb-dash-card">
+          <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>💰</div>
+          <div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--gb-teal)' }}>{totalRevenue.toLocaleString()} <small style={{ fontSize: '0.9rem' }}>SAR</small></div>
+            <div className="gb-eyebrow" style={{ fontSize: '0.7rem', margin: 0 }}><T en="Net Revenue" ar="صافي الأرباح" /></div>
           </div>
         </div>
-        <div className="stat-card gold">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-info">
-            <span className="stat-value">{avgRating}</span>
-            <span className="stat-label"><T en="Average Rating" ar="تقييم الاستوديو" /></span>
+        <div className="gb-dash-card">
+          <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>⭐</div>
+          <div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white' }}>{avgRating}</div>
+            <div className="gb-eyebrow" style={{ fontSize: '0.7rem', margin: 0 }}><T en="Average Rating" ar="تقييم الاستوديو" /></div>
           </div>
         </div>
       </section>
