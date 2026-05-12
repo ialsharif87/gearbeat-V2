@@ -18,17 +18,22 @@ export default function TermsPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This document is a structural placeholder for Phase 59 architecture. It is NOT finalized legal text and lacks actual enforcement logic." ar="هذه الوثيقة هي عنصر نائب هيكلي لبنية المرحلة 59. وهي ليست نصاً قانونياً نهائياً وتفتقر إلى منطق التنفيذ الفعلي." />
+            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This document is a structural draft. It is NOT finalized legal text and is pending final review by GearBeat legal counsel before the official platform launch." ar="هذه الوثيقة هي مسودة هيكلية. وهي ليست نصاً قانونياً نهائياً وبانتظار المراجعة النهائية من قبل المستشار القانوني لـ GearBeat قبل الإطلاق الرسمي للمنصة." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Acceptance of Terms" ar="1. قبول الشروط" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder for user agreement to platform rules, arbitration clauses, and account creation terms." ar="عنصر نائب لمسودة موافقة المستخدم على قواعد المنصة، وبنود التحكيم، وشروط إنشاء الحساب." />
+            <T en="By accessing the GearBeat platform, creating an account, or listing a studio, you agree to be bound by these Terms of Service. These terms govern your use of our discovery, booking, and marketplace ecosystems." ar="من خلال الوصول إلى منصة GearBeat، أو إنشاء حساب، أو إدراج استوديو، فإنك توافق على الالتزام بشروط الخدمة هذه. تحكم هذه الشروط استخدامك لأنظمة الاكتشاف والحجز والمتجر الخاصة بنا." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Account Responsibilities" ar="2. مسؤوليات الحساب" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder for user liability, credential security, and prohibited activities on the GearBeat ecosystem." ar="عنصر نائب لمسودة مسؤولية المستخدم، وأمن بيانات الاعتماد، والأنشطة المحظورة على نظام جيربيت البيئي." />
+            <T en="Users are responsible for maintaining the confidentiality of their credentials. You agree to provide accurate identification and to notify GearBeat immediately of any unauthorized access. Prohibited activities include fraudulent listings, unauthorized reselling, and platform bypass." ar="يتحمل المستخدمون مسؤولية الحفاظ على سرية بيانات اعتمادهم. أنت توافق على تقديم تعريف دقيق وإخطار GearBeat فوراً بأي وصول غير مصرح به. تشمل الأنشطة المحظورة القوائم الاحتيالية، وإعادة البيع غير المصرح بها، وتجاوز المنصة." />
+          </p>
+
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="3. Intellectual Property" ar="3. الملكية الفكرية" /></h3>
+          <p style={{ marginBottom: 16 }}>
+            <T en="All platform design, code, and GearBeat Certified branding are the exclusive property of GearBeat. Users retain ownership of their uploaded content but grant GearBeat a license to display such content for discovery and marketing purposes." ar="جميع تصميمات المنصة والتعليمات البرمجية وعلامة GearBeat Certified هي ملكية حصرية لـ GearBeat. يحتفظ المستخدمون بملكية محتواهم المرفوع ولكنهم يمنحون GearBeat ترخيصاً لعرض هذا المحتوى لأغراض الاكتشاف والتسويق." />
           </p>
         </div>
       </div>

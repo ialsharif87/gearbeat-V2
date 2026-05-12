@@ -235,8 +235,8 @@ export default function SupportPage() {
 
           <p>
             <T
-              en="GearBeat uses required customer profiles, identity details, booking-linked reviews, admin monitoring, and internal audit logs to help keep the platform safer and more transparent."
-              ar="GearBeat تستخدم ملفات العملاء الإلزامية، بيانات الهوية، التقييمات المرتبطة بالحجز، متابعة الإدارة، وسجلات التغيير الداخلية لجعل المنصة أكثر أمانًا وشفافية."
+              en="Trust is the foundation of our community. GearBeat ensures session reliability through mandatory identity verification, secure escrow payment protection, booking-linked reviews, and proactive administrative oversight to maintain the highest industry standards."
+              ar="الثقة هي أساس مجتمعنا. تضمن GearBeat موثوقية الجلسات من خلال التحقق الإلزامي من الهوية، وحماية المدفوعات عبر حساب الضمان الآمن، والتقييمات المرتبطة بالحجوزات، والرقابة الإدارية الاستباقية للحفاظ على أعلى معايير الصناعة."
             />
           </p>
         </div>
@@ -245,28 +245,28 @@ export default function SupportPage() {
           <div>
             <strong>01</strong>
             <span>
-              <T en="Verified profiles" ar="ملفات موثقة" />
+              <T en="Identity Verification" ar="التحقق من الهوية" />
             </span>
           </div>
 
           <div>
             <strong>02</strong>
             <span>
-              <T en="Booking-linked reviews" ar="تقييمات مرتبطة بالحجز" />
+              <T en="Escrow Protection" ar="حماية حساب الضمان" />
             </span>
           </div>
 
           <div>
             <strong>03</strong>
             <span>
-              <T en="Admin monitoring" ar="متابعة إدارية" />
+              <T en="Linked Reviews" ar="تقييمات موثقة" />
             </span>
           </div>
 
           <div>
             <strong>04</strong>
             <span>
-              <T en="Internal audit logs" ar="سجلات تغيير داخلية" />
+              <T en="Platform Oversight" ar="الرقابة على المنصة" />
             </span>
           </div>
         </div>

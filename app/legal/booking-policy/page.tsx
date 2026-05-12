@@ -18,17 +18,22 @@ export default function BookingPolicyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This document is a structural placeholder. It is NOT finalized legal text." ar="هذه الوثيقة هي عنصر نائب هيكلي. وهي ليست نصاً قانونياً نهائياً." />
+            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This booking policy is a structural draft. It is NOT finalized and is pending review by GearBeat and its legal partners." ar="سياسة الحجز هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة من قبل GearBeat وشركائها القانونيين." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Cancellation & Refunds" ar="1. الإلغاء والاسترداد" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder outlining standard 24h/48h cancellation rules, partial refund structures, and no-show penalties for studio bookings." ar="عنصر نائب لمسودة توضح القواعد القياسية للإلغاء خلال 24/48 ساعة، وهياكل الاسترداد الجزئي، وغرامات عدم الحضور لحجوزات الاستوديو." />
+            <T en="GearBeat supports standardized cancellation windows. Bookings cancelled 48+ hours in advance are eligible for a full refund. Cancellations between 24-48 hours incur a partial penalty. Bookings cancelled less than 24 hours before the session start time are non-refundable." ar="تدعم GearBeat نوافذ إلغاء موحدة. الحجوزات الملغاة قبل 48 ساعة أو أكثر مؤهلة لاسترداد كامل المبلغ. الإلغاء بين 24-48 ساعة يترتب عليه غرامة جزئية. الحجوزات الملغاة قبل أقل من 24 ساعة من موعد بدء الجلسة غير قابلة للاسترداد." />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Studio Liability" ar="2. مسؤولية الاستوديو" /></h3>
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Studio Liability & Damage" ar="2. مسؤولية الاستوديو والتلف" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder detailing studio owner rights regarding equipment damage, overstaying time slots, and inappropriate behavior." ar="عنصر نائب لمسودة تفصل حقوق مالك الاستوديو فيما يتعلق بتلف المعدات وتجاوز الخانات الزمنية والسلوك غير اللائق." />
+            <T en="Creators are liable for any physical damage to studio equipment or premises during their session. Studio owners must provide a damage report within 24 hours of the session end. GearBeat acts as a facilitator and monitor for dispute resolution in these cases." ar="يتحمل المبدعون المسؤولية عن أي تلف مادي لمعدات الاستوديو أو المباني خلال جلستهم. يجب على أصحاب الاستوديوهات تقديم تقرير تلف خلال 24 ساعة من انتهاء الجلسة. تعمل GearBeat كميسر ومراقب لحل النزاعات في هذه الحالات." />
+          </p>
+
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="3. Overstaying & Session Time" ar="3. تجاوز الوقت ووقت الجلسة" /></h3>
+          <p style={{ marginBottom: 16 }}>
+            <T en="Sessions must end promptly at the scheduled time to respect the next booking. Overstaying may result in additional hourly charges at the studio's standard rate plus a platform administrative fee." ar="يجب أن تنتهي الجلسات فوراً في الوقت المحدد لاحترام الحجز التالي. قد يؤدي تجاوز الوقت إلى رسوم إضافية بالساعة بسعر الاستوديو القياسي بالإضافة إلى رسوم إدارية للمنصة." />
           </p>
         </div>
       </div>

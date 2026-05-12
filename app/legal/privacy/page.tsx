@@ -18,17 +18,22 @@ export default function PrivacyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This document is a structural placeholder. It is NOT finalized legal text." ar="هذه الوثيقة هي عنصر نائب هيكلي. وهي ليست نصاً قانونياً نهائياً." />
+            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This privacy policy is a structural draft. It is NOT finalized and is pending review for compliance with regional data protection regulations." ar="سياسة الخصوصية هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة للامتثال للوائح حماية البيانات الإقليمية." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Data Collection" ar="1. جمع البيانات" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder detailing what PII (Personally Identifiable Information) GearBeat collects, including names, emails, payment methods, and location data." ar="عنصر نائب لمسودة تفصل معلومات التعريف الشخصية (PII) التي يجمعها جيربيت، بما في ذلك الأسماء ورسائل البريد الإلكتروني وطرق الدفع وبيانات الموقع." />
+            <T en="GearBeat collects information necessary to provide booking and marketplace services, including name, email, phone number, and professional studio details. We also collect transaction metadata to ensure secure payment processing." ar="تجمع GearBeat المعلومات اللازمة لتقديم خدمات الحجز والمتجر، بما في ذلك الاسم والبريد الإلكتروني ورقم الهاتف وتفاصيل الاستوديو المهني. كما نجمع البيانات الوصفية للمعاملات لضمان معالجة الدفع الآمنة." />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. PDPL Readiness (Saudi Arabia)" ar="2. جاهزية نظام حماية البيانات الشخصية (السعودية)" /></h3>
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Usage & Sharing" ar="2. الاستخدام والمشاركة" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Future clauses addressing compliance with the Saudi Personal Data Protection Law (PDPL), data residency, and user rights to access/delete data." ar="بنود مستقبلية تتناول الامتثال لنظام حماية البيانات الشخصية السعودي (PDPL)، ومكان إقامة البيانات، وحقوق المستخدم في الوصول إلى البيانات أو حذفها." />
+            <T en="Your data is used to manage bookings, verify identity for GearBeat Certified status, and communicate platform updates. We do not sell PII to third parties. Data is shared with payment providers only as required for transaction fulfillment." ar="تُستخدم بياناتك لإدارة الحجوزات، والتحقق من الهوية لحالة GearBeat Certified، وإرسال تحديثات المنصة. نحن لا نبيع معلومات التعريف الشخصية لأطراف ثالثة. يتم مشاركة البيانات مع مزودي الدفع فقط حسب الضرورة لإتمام المعاملات." />
+          </p>
+
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="3. PDPL Compliance (KSA)" ar="3. الامتثال لنظام حماية البيانات الشخصية (السعودية)" /></h3>
+          <p style={{ marginBottom: 16 }}>
+            <T en="GearBeat is designed with Saudi Personal Data Protection Law (PDPL) principles in mind, focusing on data residency requirements, user consent, and the right to access or rectify personal information." ar="تم تصميم GearBeat مع مراعاة مبادئ نظام حماية البيانات الشخصية السعودي (PDPL)، مع التركيز على متطلبات إقامة البيانات، وموافقة المستخدم، والحق في الوصول إلى المعلومات الشخصية أو تصحيحها." />
           </p>
         </div>
       </div>
