@@ -21,8 +21,39 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "GearBeat",
-  description: "Book premium music and audio studios across Saudi Arabia and the GCC.",
+  title: {
+    default: "GearBeat | The Global Pulse of Studio Sound",
+    template: "%s | GearBeat"
+  },
+  description: "GearBeat is the ultimate ecosystem for audio professionals. Discover world-class studios, shop elite verified gear, and secure tickets to exclusive industry experiences across Saudi Arabia and the GCC.",
+  keywords: ["music studio", "recording studio", "audio gear", "music production", "Saudi Arabia", "GCC", "GearBeat"],
+  authors: [{ name: "GearBeat Team" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://gearbeat.com",
+    siteName: "GearBeat",
+    title: "GearBeat | The Global Pulse of Studio Sound",
+    description: "Book premium music and audio studios across Saudi Arabia and the GCC.",
+    images: [
+      {
+        url: "/brand/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "GearBeat - Studio. Sound. Connected."
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GearBeat | The Global Pulse of Studio Sound",
+    description: "Book premium music and audio studios across Saudi Arabia and the GCC.",
+    images: ["/brand/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 type ProfileRow = {

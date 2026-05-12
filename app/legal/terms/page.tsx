@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Read GearBeat's Terms of Service. Learn about platform rules, account responsibilities, and intellectual property rights.",
+};
 
 export default function TermsPage() {
   return (

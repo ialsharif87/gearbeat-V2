@@ -4,7 +4,8 @@ import { Metadata } from "next";
 import T from "@/components/t";
 
 export const metadata: Metadata = {
-  title: "المعدات | GearBeat",
+  title: "Shop Elite Audio Gear",
+  description: "Discover verified music production equipment, analog outboard gear, and professional studio monitors from trusted vendors on the GearBeat Marketplace.",
 };
 import { createAdminClient } from "@/lib/supabase/admin";
 

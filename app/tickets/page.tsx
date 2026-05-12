@@ -1,5 +1,11 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Audio Events & Masterclasses",
+  description: "Secure your tickets to exclusive studio workshops, music masterclasses, and elite audio industry events on GearBeat.",
+};
 
 export default function TicketsLandingPage() {
   return (

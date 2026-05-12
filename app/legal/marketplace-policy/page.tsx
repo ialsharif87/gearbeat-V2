@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Marketplace Policy",
+  description: "Review the GearBeat Marketplace Policy. Learn about buyer protections, seller obligations, and gear verification standards.",
+};
 
 export default function MarketplacePolicyPage() {
   return (

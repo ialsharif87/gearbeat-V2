@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Booking Policy",
+  description: "Understand GearBeat's studio booking rules, cancellation policies, and refund procedures for creators and studio owners.",
+};
 
 export default function BookingPolicyPage() {
   return (
