@@ -496,19 +496,22 @@ export default async function MarketplacePage({
             <div
               className="card"
               style={{
-                padding: "60px 20px",
+                padding: "80px 20px",
                 textAlign: "center",
-                background: "rgba(255,255,255,0.035)",
+                background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
+                border: "1px dashed rgba(212,175,55,0.2)",
+                borderRadius: 24
               }}
             >
-              <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
-                <T en="No products available" ar="لا توجد منتجات" />
+              <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
+              <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
+                <T en="Marketplace is being prepared for pilot launch" ar="المتجر قيد التجهيز للمرحلة التجريبية" />
               </h2>
 
-              <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
+              <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
                 <T
-                  en="Be the first to list your gear on GearBeat!"
-                  ar="كن أول من يعرض معداته على GearBeat!"
+                  en="We are preparing GearBeat Marketplace products and operations for a controlled pilot experience. Please check back soon."
+                  ar="نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا."
                 />
               </p>
 
@@ -733,41 +736,39 @@ export default async function MarketplacePage({
       </section>
     </main>
   );
-} catch (err: any) {
-  const isTimeout = err.message === "TIMEOUT";
+  } catch (err: any) {
+    return (
+      <main
+        className="dashboard-page"
+        style={{ maxWidth: 1240, margin: "0 auto", padding: "60px 20px" }}
+      >
+        <div
+          className="card"
+          style={{
+            padding: "80px 20px",
+            textAlign: "center",
+            background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
+            border: "1px dashed rgba(212,175,55,0.2)",
+            borderRadius: 24
+          }}
+        >
+          <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
+          <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
+            <T en="Marketplace is being prepared for pilot launch" ar="المتجر قيد التجهيز للمرحلة التجريبية" />
+          </h2>
 
-  return (
-    <main
-      className="dashboard-page"
-      style={{ maxWidth: 1240, margin: "0 auto", padding: "60px 20px" }}
-    >
-      <div className="card" style={{ textAlign: "center", padding: "60px 20px" }}>
-        <h2 style={{ color: "var(--gb-gold)", marginBottom: "1rem" }}>
-          {isTimeout ? (
-            <T en="Connection Timeout" ar="انتهت مهلة الاتصال" />
-          ) : (
-            <T en="Unexpected Error" ar="حدث خطأ غير متوقع" />
-          )}
-        </h2>
-        <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
-          {isTimeout ? (
+          <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
             <T
-              en="The server is taking too long to respond. Please try again."
-              ar="استغرق الخادم وقتاً طويلاً للرد. يرجى المحاولة مرة أخرى."
+              en="We are preparing GearBeat Marketplace products and operations for a controlled pilot experience. Please check back soon."
+              ar="نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا."
             />
-          ) : (
-            <T
-              en="Something went wrong while fetching marketplace items. Please try again later."
-              ar="حدث خطأ ما أثناء جلب منتجات المتجر. يرجى المحاولة مرة أخرى لاحقاً."
-            />
-          )}
-        </p>
+          </p>
 
-        <Link href="/marketplace" className="btn btn-primary">
-          <T en="Try Again" ar="حاول مرة أخرى" />
-        </Link>
-      </div>
-    </main>
-  );
-}
+          <Link href="/join/seller" className="btn btn-primary">
+            <T en="Join as Seller" ar="انضم كتاجر" />
+          </Link>
+        </div>
+      </main>
+    );
+  }
 }
