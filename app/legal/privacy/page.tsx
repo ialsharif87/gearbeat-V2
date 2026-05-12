@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "Review GearBeat's Privacy Policy. Learn how we collect, protect, and use your data in compliance with Saudi PDPL standards.",
+};
 
 export default function PrivacyPage() {
   return (

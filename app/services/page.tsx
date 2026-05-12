@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import T from "@/components/t";
 
 export const metadata: Metadata = {
-  title: "الخدمات | GearBeat",
+  title: "Creative Audio Services",
+  description: "Book professional mixing, mastering, production, and voiceover services from GearBeat verified providers and top-tier music studios.",
 };
 
 export const dynamic = "force-dynamic";

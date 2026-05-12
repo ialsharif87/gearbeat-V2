@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Ticketing Policy",
+  description: "Read the GearBeat Ticketing Policy. Understand ticket validity, event entry requirements, and cancellation rules.",
+};
 
 export default function TicketingPolicyPage() {
   return (

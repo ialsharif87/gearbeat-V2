@@ -1,5 +1,11 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import T from "../../components/t";
+
+export const metadata: Metadata = {
+  title: "Support Center",
+  description: "Get help with GearBeat bookings, accounts, payments, and studio listings. Our support team is here to assist audio professionals and studios.",
+};
 
 export default function SupportPage() {
   return (

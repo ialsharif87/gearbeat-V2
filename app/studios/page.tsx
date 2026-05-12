@@ -4,7 +4,8 @@ import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "الاستوديوهات | GearBeat",
+  title: "Discover Elite Studios",
+  description: "Browse and book world-class music and recording studios. Filter by equipment, rating, and location across Saudi Arabia and the GCC.",
 };
 import T from "@/components/t";
 import StudioFilter from "@/components/studio-filter";

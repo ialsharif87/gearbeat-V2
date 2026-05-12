@@ -1,6 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import T from "@/components/t";
 import StudioTierBadge from "@/components/studio-tier-badge";
+
+export const metadata: Metadata = {
+  title: "GearBeat Certified | The Benchmark for Studio Integrity",
+  description: "Learn about GearBeat Certified standards. We verify hardware, acoustic integrity, and business legitimacy to ensure absolute session reliability for audio creators.",
+};
 
 export default function GearBeatCertifiedPage() {
   return (

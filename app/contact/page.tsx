@@ -1,6 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import T from "../../components/t";
 import SocialLinks from "../../components/social-links";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description: "Get in touch with GearBeat. Reach out for support, partnerships, studio onboarding, or business inquiries.",
+};
 
 export default function ContactPage() {
   return (
@@ -200,7 +206,7 @@ export default function ContactPage() {
             </span>
           </Link>
 
-          <Link href="/terms">
+          <Link href="/legal/terms">
             <strong>
               <T en="Terms & Conditions" ar="الشروط والأحكام" />
             </strong>
@@ -209,7 +215,7 @@ export default function ContactPage() {
             </span>
           </Link>
 
-          <Link href="/privacy">
+          <Link href="/legal/privacy">
             <strong>
               <T en="Privacy Policy" ar="سياسة الخصوصية" />
             </strong>

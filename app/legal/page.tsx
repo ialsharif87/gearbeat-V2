@@ -1,5 +1,11 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import T from "@/components/t";
+
+export const metadata: Metadata = {
+  title: "Legal & Policies Hub",
+  description: "Access GearBeat's terms of service, privacy policy, and marketplace rules. Stay informed about our platform standards and user protections.",
+};
 
 export default function LegalHubPage() {
   const policies = [

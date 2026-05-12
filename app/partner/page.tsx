@@ -1,5 +1,11 @@
+import { Metadata } from "next";
 import T from "@/components/t";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Partner Network & Studio Onboarding",
+  description: "Join the elite network of GearBeat partners. Monetize your music studio, sell professional audio gear, and reach a global audience of creators.",
+};
 
 export default function PartnerPortalFoundationPage() {
   const partnerTypes = [
