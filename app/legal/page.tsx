@@ -21,8 +21,8 @@ export default function LegalHubPage() {
         </h1>
         <p className="text-muted text-balance" style={{ maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
           <T 
-            en="These documents are currently in draft form for architectural planning. They do not constitute final legal advice and are pending review by legal counsel before the official launch."
-            ar="هذه الوثائق حالياً بصيغة مسودة للتخطيط المعماري. وهي لا تشكل استشارة قانونية نهائية وبانتظار مراجعة المستشار القانوني قبل الإطلاق الرسمي."
+            en="GearBeat is committed to transparency and compliance. The following documents are currently structural drafts undergoing final review by legal counsel. They provide a framework for platform rules and user protection before the official launch."
+            ar="تلتزم GearBeat بالشفافية والامتثال. الوثائق التالية هي حالياً مسودات هيكلية تخضع للمراجعة النهائية من قبل المستشار القانوني. وهي توفر إطاراً لقواعد المنصة وحماية المستخدم قبل الإطلاق الرسمي."
           />
         </p>
       </div>

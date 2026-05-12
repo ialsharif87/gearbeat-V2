@@ -18,17 +18,22 @@ export default function TicketingPolicyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This document is a structural placeholder. It is NOT finalized legal text." ar="هذه الوثيقة هي عنصر نائب هيكلي. وهي ليست نصاً قانونياً نهائياً." />
+            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This ticketing policy is a structural draft. It is NOT finalized and is pending review by event organizers and legal counsel." ar="سياسة التذاكر هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة من قبل منظمي الفعاليات والمستشار القانوني." />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Non-Transferable Tickets" ar="1. تذاكر غير قابلة للتحويل" /></h3>
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Non-Transferable Tickets & ID" ar="1. تذاكر غير قابلة للتحويل والهوية" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder outlining rules against unauthorized ticket reselling, ID verification requirements at the door, and digital pass syncing limitations." ar="عنصر نائب لمسودة توضح القواعد المناهضة لإعادة بيع التذاكر غير المصرح بها، ومتطلبات التحقق من الهوية عند الباب، وقيود مزامنة التصاريح الرقمية." />
+            <T en="To prevent fraud, GearBeat digital tickets are non-transferable unless specified otherwise for a specific event. Buyers may be required to present a matching ID at the door. Unauthorized reselling is strictly prohibited and will void the ticket." ar="لمنع الاحتيال، تذاكر GearBeat الرقمية غير قابلة للتحويل ما لم ينص على خلاف ذلك لفعالية محددة. قد يُطلب من المشترين تقديم هوية مطابقة عند الباب. يمنع منعاً باتاً إعادة البيع غير المصرح بها وسيؤدي ذلك إلى إلغاء التذكرة." />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Event Cancellation" ar="2. إلغاء الفعالية" /></h3>
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Event Cancellation & Postponement" ar="2. إلغاء الفعالية وتأجيلها" /></h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Draft placeholder detailing automatic refund processes for organizer-canceled events versus standard no-refund policies for buyer-initiated dropouts." ar="عنصر نائب لمسودة تفصل عمليات الاسترداد التلقائي للأحداث التي يلغيها المنظم مقابل سياسات عدم الاسترداد القياسية للمنسحبين بمبادرة من المشتري." />
+            <T en="If an event is canceled by the organizer, automatic refunds will be processed via GearBeat. In case of postponement, tickets remain valid for the new date. Refunds for postponement are at the discretion of the event organizer." ar="إذا تم إلغاء فعالية من قبل المنظم، فسيتم معالجة المبالغ المستردة تلقائياً عبر GearBeat. في حالة التأجيل، تظل التذاكر صالحة للتاريخ الجديد. المبالغ المستردة للتأجيل تكون وفقاً لتقدير منظم الفعالية." />
+          </p>
+
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="3. Entry Rules & Security" ar="3. قواعد الدخول والأمن" /></h3>
+          <p style={{ marginBottom: 16 }}>
+            <T en="Organizers reserve the right to refuse entry for security reasons or violation of event-specific rules. GearBeat is not responsible for entry denials related to behavior or prohibited items." ar="يحتفظ المنظمون بالحق في رفض الدخول لأسباب أمنية أو انتهاك القواعد الخاصة بالفعالية. GearBeat ليست مسؤولة عن حالات رفض الدخول المتعلقة بالسلوك أو المواد المحظورة." />
           </p>
         </div>
       </div>
