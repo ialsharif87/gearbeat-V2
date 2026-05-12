@@ -296,11 +296,11 @@ export default async function MarketplacePage({
           </div>
 
           {/* MARKETPLACE TRUST LAYER */}
-          <div className="marketplace-trust-grid" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+          <div className="marketplace-trust-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: 16,
-            marginBottom: 8 
+            marginBottom: 8
           }}>
             {[
               { icon: '🛡️', en: 'Authentic Gear', ar: 'معدات أصلية' },
@@ -308,10 +308,10 @@ export default async function MarketplacePage({
               { icon: '🤝', en: 'Trusted Seller', ar: 'بائع موثوق' },
               { icon: '⚡', en: 'Fast Shipping', ar: 'شحن سريع' },
             ].map(item => (
-              <div key={item.en} style={{ 
-                padding: '16px 20px', 
-                background: 'rgba(212, 175, 55, 0.04)', 
-                border: '1px solid rgba(212, 175, 55, 0.12)', 
+              <div key={item.en} style={{
+                padding: '16px 20px',
+                background: 'rgba(212, 175, 55, 0.04)',
+                border: '1px solid rgba(212, 175, 55, 0.12)',
                 borderRadius: 'var(--gb-radius-md)',
                 display: 'flex',
                 alignItems: 'center',
@@ -333,11 +333,11 @@ export default async function MarketplacePage({
                 <div>
                   <h4 style={{ margin: 0, fontSize: '0.9rem' }}><T en="Advanced Filtering & Mobile Drawer" ar="تصفية متقدمة ودرج الهاتف المحمول" /></h4>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
-                    <T en="Unified category, brand, and condition filters are being prepared for Phase 59+." ar="يتم إعداد فلاتر موحدة للتصنيف والعلامة التجارية والحالة للمرحلة 59+." />
+                    <T en="Enhanced search and filtering capabilities are being optimized to improve your shopping experience." ar="يتم تحسين قدرات البحث والتصفية المتقدمة لتحسين تجربة التسوق الخاصة بك." />
                   </p>
                 </div>
               </div>
-              <span className="badge badge-warning" style={{ fontSize: '0.6rem' }}>PLANNING PHASE</span>
+              <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>ENHANCED SEARCH</span>
             </div>
           </div>
 
@@ -581,15 +581,15 @@ export default async function MarketplacePage({
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                             style={{ objectFit: "cover" }}
                           />
-                          <div style={{ 
-                            position: 'absolute', 
-                            top: 10, 
-                            right: 10, 
-                            background: 'rgba(212, 175, 55, 0.95)', 
-                            color: '#000', 
-                            padding: '4px 8px', 
-                            borderRadius: '6px', 
-                            fontSize: '0.6rem', 
+                          <div style={{
+                            position: 'absolute',
+                            top: 10,
+                            right: 10,
+                            background: 'rgba(212, 175, 55, 0.95)',
+                            color: '#000',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.6rem',
                             fontWeight: 800,
                             letterSpacing: 0.5,
                             backdropFilter: 'blur(4px)',
@@ -723,11 +723,11 @@ export default async function MarketplacePage({
           <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ fontSize: "3rem" }}>🛍️</div>
             <div>
-              <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="Mobile Shopping Experience" ar="تجربة التسوق عبر الجوال" /> <span className="badge badge-warning" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>PLANNING PHASE</span></h3>
+              <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="Mobile Shopping Experience" ar="تجربة التسوق عبر الجوال" /> <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>COMING SOON</span></h3>
               <p style={{ color: 'var(--muted)', maxWidth: 700, lineHeight: 1.6 }}>
-                <T 
-                  en="We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse gear, securely checkout with Apple Pay / Google Pay, and receive real-time push notifications for order updates and outbid alerts." 
-                  ar="نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات، والدفع الآمن باستخدام Apple Pay / Google Pay، وتلقي إشعارات فورية لتحديثات الطلبات وتنبيهات المزايدة." 
+                <T
+                  en="We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse verified gear and manage your studio equipment on the go."
+                  ar="نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات المعتمدة وإدارة معدات الاستوديو الخاصة بك أثناء التنقل."
                 />
               </p>
             </div>

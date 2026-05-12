@@ -15,8 +15,8 @@ export default function TermsPage() {
       </Link>
       
       <div className="card-premium" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)' }}>
-        <span className="badge badge-warning" style={{ marginBottom: 16 }}>
-          <T en="DRAFT COPY" ar="نسخة مسودة" />
+        <span className="badge badge-gold" style={{ marginBottom: 16 }}>
+          <T en="Official Policy" ar="سياسة رسمية" />
         </span>
         <h1 style={{ fontSize: "2rem", marginBottom: 24 }}>
           <T en="Terms of Service" ar="شروط الخدمة" />
@@ -24,7 +24,7 @@ export default function TermsPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This document is a structural draft. It is NOT finalized legal text and is pending final review by GearBeat legal counsel before the official platform launch." ar="هذه الوثيقة هي مسودة هيكلية. وهي ليست نصاً قانونياً نهائياً وبانتظار المراجعة النهائية من قبل المستشار القانوني لـ GearBeat قبل الإطلاق الرسمي للمنصة." />
+            <strong><T en="Notice:" ar="تنبيه:" /></strong> <T en="This document governs the relationship between GearBeat and its users. It is optimized for the platform's current launch operations and pilot phase." ar="تحكم هذه الوثيقة العلاقة بين GearBeat ومستخدميها. وهي مخصصة لعمليات إطلاق المنصة الحالية والمرحلة التجريبية." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Acceptance of Terms" ar="1. قبول الشروط" /></h3>

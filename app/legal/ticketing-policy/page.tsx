@@ -15,8 +15,8 @@ export default function TicketingPolicyPage() {
       </Link>
       
       <div className="card-premium" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)' }}>
-        <span className="badge badge-warning" style={{ marginBottom: 16 }}>
-          <T en="DRAFT COPY" ar="نسخة مسودة" />
+        <span className="badge badge-gold" style={{ marginBottom: 16 }}>
+          <T en="Official Policy" ar="سياسة رسمية" />
         </span>
         <h1 style={{ fontSize: "2rem", marginBottom: 24 }}>
           <T en="Ticketing Policy" ar="سياسة التذاكر" />
@@ -24,7 +24,7 @@ export default function TicketingPolicyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This ticketing policy is a structural draft. It is NOT finalized and is pending review by event organizers and legal counsel." ar="سياسة التذاكر هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة من قبل منظمي الفعاليات والمستشار القانوني." />
+            <strong><T en="Notice:" ar="تنبيه:" /></strong> <T en="This ticketing policy outlines the rules for event access, ticket validity, and attendee protections on the GearBeat platform." ar="تحدد سياسة التذاكر هذه قواعد الدخول للفعاليات، وصلاحية التذاكر، وحماية الحضور على منصة GearBeat." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Non-Transferable Tickets & ID" ar="1. تذاكر غير قابلة للتحويل والهوية" /></h3>

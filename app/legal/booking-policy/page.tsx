@@ -15,8 +15,8 @@ export default function BookingPolicyPage() {
       </Link>
       
       <div className="card-premium" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)' }}>
-        <span className="badge badge-warning" style={{ marginBottom: 16 }}>
-          <T en="DRAFT COPY" ar="نسخة مسودة" />
+        <span className="badge badge-gold" style={{ marginBottom: 16 }}>
+          <T en="Official Policy" ar="سياسة رسمية" />
         </span>
         <h1 style={{ fontSize: "2rem", marginBottom: 24 }}>
           <T en="Booking Policy" ar="سياسة الحجز" />
@@ -24,7 +24,7 @@ export default function BookingPolicyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This booking policy is a structural draft. It is NOT finalized and is pending review by GearBeat and its legal partners." ar="سياسة الحجز هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة من قبل GearBeat وشركائها القانونيين." />
+            <strong><T en="Notice:" ar="تنبيه:" /></strong> <T en="This booking policy outlines the standards for studio reservations and cancellations on the GearBeat platform." ar="تحدد سياسة الحجز هذه معايير حجوزات الاستوديو وإلغائها على منصة GearBeat." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Cancellation & Refunds" ar="1. الإلغاء والاسترداد" /></h3>

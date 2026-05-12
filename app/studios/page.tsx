@@ -587,11 +587,11 @@ export default async function StudiosPage({
               <div>
                 <h4 style={{ margin: 0, fontSize: '0.9rem' }}><T en="Advanced Filtering & Mobile Drawer" ar="تصفية متقدمة ودرج الهاتف المحمول" /></h4>
                 <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
-                  <T en="Unified gear, rating, and availability filters are being prepared for Phase 59+." ar="يتم إعداد فلاتر موحدة للمعدات والتقييم والتوافر للمرحلة 59+." />
+                  <T en="Advanced equipment, rating, and real-time availability filters are being optimized." ar="يتم تحسين فلاتر المعدات المتقدمة والتقييم والتوافر في الوقت الفعلي." />
                 </p>
               </div>
             </div>
-            <span className="badge badge-warning" style={{ fontSize: '0.6rem' }}>PLANNING PHASE</span>
+            <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>ENHANCED SEARCH</span>
           </div>
         </div>
 
