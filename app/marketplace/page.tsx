@@ -127,24 +127,24 @@ export default async function MarketplacePage({
     sort?: string;
   }>;
 }) {
-  const params = await searchParams || {};
-
-  const q = cleanText(params.q);
-  const category = cleanText(params.category);
-  const brand = cleanText(params.brand);
-  const minPrice = cleanNumber(params.min_price);
-  const maxPrice = cleanNumber(params.max_price);
-  const inStock = cleanText(params.in_stock) === "1";
-  const sort = cleanText(params.sort) || "newest";
-
-  const supabaseAdmin = createAdminClient();
-
-  // FIX 0A: Loading timeout logic (8 seconds)
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("TIMEOUT")), 8000)
-  );
-
   try {
+    const params = await searchParams || {};
+
+    const q = cleanText(params.q);
+    const category = cleanText(params.category);
+    const brand = cleanText(params.brand);
+    const minPrice = cleanNumber(params.min_price);
+    const maxPrice = cleanNumber(params.max_price);
+    const inStock = cleanText(params.in_stock) === "1";
+    const sort = cleanText(params.sort) || "newest";
+
+    const supabaseAdmin = createAdminClient();
+
+    // FIX 0A: Loading timeout logic (8 seconds)
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("TIMEOUT")), 8000)
+    );
+
     const [categoriesResult, brandsResult] = (await Promise.race([
       Promise.all([
         supabaseAdmin
