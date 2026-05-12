@@ -204,33 +204,33 @@ export default async function CustomerDashboardPage() {
     membershipNumber.replace("GB-", "REF-");
 
   return (
-    <main className="gb-customer-page">
-      <section className="gb-customer-header">
-        <div>
+    <main className="gb-dashboard-page">
+      <section className="gb-dashboard-header">
+        <div className="animate-up">
           <p className="gb-eyebrow">
             <T en="Customer Dashboard" ar="لوحة العميل" />
           </p>
 
-          <h1 style={{ marginTop: 10 }}>
+          <h1 style={{ fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3rem)', letterSpacing: '-1px' }}>
             <T en="Welcome back" ar="أهلًا بعودتك" />,{" "}
             {profile.full_name || "Creator"}
           </h1>
 
-          <p className="gb-muted-text" style={{ maxWidth: 760 }}>
+          <p className="text-muted" style={{ maxWidth: 600, fontSize: '1.1rem' }}>
             <T
-              en="Manage your bookings, rewards, saved studios, saved gear, and account verification from one premium dashboard."
-              ar="تابع حجوزاتك، مكافآتك، الاستوديوهات المحفوظة، المعدات المحفوظة، وحالة التحقق من حسابك من لوحة واحدة فخمة."
+              en="Manage your bookings, rewards, and verified studio sessions from your premium dashboard."
+              ar="تابع حجوزاتك، مكافآتك، وجلسات الاستوديو الموثقة من لوحتك الفخمة."
             />
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link href="/studios/near-me" className="btn btn-primary">
+        <div className="flex gap-12" style={{ flexWrap: "wrap" }}>
+          <Link href="/studios/near-me" className="btn btn-primary shadow-gold">
             <T en="Studios near me" ar="استوديوهات قريبة مني" />
           </Link>
 
-          <Link href="/offers" className="btn">
-            <T en="Offers" ar="العروض" />
+          <Link href="/offers" className="btn btn-outline">
+            <T en="View Offers" ar="عرض العروض" />
           </Link>
         </div>
       </section>
@@ -250,46 +250,46 @@ export default async function CustomerDashboardPage() {
           />
         </section>
 
-        <section className="gb-customer-grid" style={{ marginTop: 28 }}>
-          <div className="gb-customer-card">
-            <div style={{ fontSize: "1.5rem" }}>🎙️</div>
+        <section className="gb-dash-grid animate-up" style={{ animationDelay: '0.1s' }}>
+          <div className="gb-dash-card">
+            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>🎙️</div>
             <div>
-              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
                 <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
-              </label>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{upcomingBookings.length}</div>
+              </p>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "white" }}>{upcomingBookings.length}</div>
             </div>
           </div>
 
-          <div className="gb-customer-card">
-            <div style={{ fontSize: "1.5rem" }}>❤️</div>
+          <div className="gb-dash-card">
+            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>❤️</div>
             <div>
-              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
                 <T en="Saved Items" ar="المفضلة" />
-              </label>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>{favoriteRows.length}</div>
+              </p>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "white" }}>{favoriteRows.length}</div>
             </div>
           </div>
 
-          <div className="gb-customer-card">
-            <div style={{ fontSize: "1.5rem" }}>⭐</div>
+          <div className="gb-dash-card">
+            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>⭐</div>
             <div>
-              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
                 <T en="Rewards Points" ar="نقاط المكافآت" />
-              </label>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+              </p>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "var(--gb-gold)" }}>
                 {Number(wallet?.points_balance || 0).toLocaleString()}
               </div>
             </div>
           </div>
 
-          <div className="gb-customer-card">
-            <div style={{ fontSize: "1.5rem" }}>🪪</div>
+          <div className="gb-dash-card">
+            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>🪪</div>
             <div>
-              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
                 <T en="Verification" ar="التحقق" />
-              </label>
-              <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+              </p>
+              <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "white", textTransform: 'uppercase', letterSpacing: 1 }}>
                 {profile.identity_verification_status || "not_started"}
               </div>
             </div>
@@ -307,7 +307,7 @@ export default async function CustomerDashboardPage() {
           className="gb-dashboard-stack"
         >
           <div style={{ display: "grid", gap: 22 }}>
-            <div className="card">
+            <div className="card-premium">
               <div
                 style={{
                   display: "flex",
@@ -315,33 +315,35 @@ export default async function CustomerDashboardPage() {
                   gap: 12,
                   alignItems: "center",
                   flexWrap: "wrap",
+                  marginBottom: 24
                 }}
               >
                 <div>
-                  <h2>
+                  <h2 style={{ fontWeight: 800 }}>
                     <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
                   </h2>
-                  <p style={{ color: "var(--muted)" }}>
+                  <p className="text-muted">
                     <T
-                      en="Your current and upcoming studio sessions."
-                      ar="جلسات الاستوديو الحالية والقادمة."
+                      en="Your confirmed studio sessions."
+                      ar="جلسات الاستوديو المؤكدة."
                     />
                   </p>
                 </div>
 
-                <Link href="/customer/bookings" className="btn">
+                <Link href="/customer/bookings" className="btn btn-outline btn-sm">
                   <T en="View all" ar="عرض الكل" />
                 </Link>
               </div>
 
-              <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
+              <div style={{ display: "grid", gap: 12 }}>
                 {upcomingBookings.length === 0 ? (
-                  <div className="gb-empty-state" style={{ textAlign: "center" }}>
+                  <div className="gb-empty-state" style={{ textAlign: "center", padding: '40px 20px' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: 16 }}>🔇</div>
                     <h3>
                       <T en="No upcoming bookings" ar="لا توجد حجوزات قادمة" />
                     </h3>
 
-                    <p style={{ color: "var(--muted)" }}>
+                    <p className="text-muted mb-24">
                       <T
                         en="Find your next creative space and start booking."
                         ar="اكتشف مساحتك الإبداعية القادمة وابدأ الحجز."
@@ -350,8 +352,7 @@ export default async function CustomerDashboardPage() {
 
                     <Link
                       href="/studios"
-                      className="btn btn-primary"
-                      style={{ marginTop: 12 }}
+                      className="btn btn-primary shadow-gold"
                     >
                       <T en="Explore studios" ar="استكشف الاستوديوهات" />
                     </Link>
@@ -375,34 +376,31 @@ export default async function CustomerDashboardPage() {
                     return (
                       <div
                         key={booking.id}
+                        className="gb-dash-card"
                         style={{
-                          padding: 16,
-                          borderRadius: 16,
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          background: "rgba(255,255,255,0.04)",
                           display: "flex",
                           justifyContent: "space-between",
-                          gap: 14,
+                          gap: 16,
                           flexWrap: "wrap",
+                          padding: 16
                         }}
                       >
-                        <div>
-                          <h3>{studioName}</h3>
-                          <p style={{ color: "var(--muted)", marginTop: 4 }}>
-                            {formatDate(booking.booking_date || booking.created_at)}
+                        <div style={{ flex: 1, minWidth: 200 }}>
+                          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{studioName}</h3>
+                          <p className="text-muted" style={{ marginTop: 4, fontSize: '0.9rem' }}>
+                            📅 {formatDate(booking.booking_date || booking.created_at)}
                             {booking.start_time ? ` · ${booking.start_time}` : ""}
-                            {booking.end_time ? ` - ${booking.end_time}` : ""}
                           </p>
                           {location ? (
-                            <p style={{ color: "var(--muted)", marginTop: 4 }}>
-                              {location}
+                            <p className="text-muted" style={{ marginTop: 2, fontSize: '0.85rem' }}>
+                              📍 {location}
                             </p>
                           ) : null}
                         </div>
 
-                        <div style={{ textAlign: "right" }}>
-                          <span className="badge">{booking.status || "pending"}</span>
-                          <div style={{ marginTop: 8, fontWeight: 700 }}>
+                        <div className="text-end">
+                          <span className={`badge ${booking.status === 'confirmed' ? 'badge-success' : ''}`}>{booking.status || "pending"}</span>
+                          <div style={{ marginTop: 8, fontWeight: 900, color: 'var(--gb-gold)' }}>
                             {formatMoney(booking.total_amount, currency)}
                           </div>
                         </div>
@@ -480,38 +478,37 @@ export default async function CustomerDashboardPage() {
           </div>
 
           <aside style={{ display: "grid", gap: 22 }}>
-            <section className="card">
-              <div className="gb-card-header">
-                <div>
-                  <p className="gb-eyebrow">Quick access</p>
-                  <h2>
-                    <T en="Account Links" ar="روابط الحساب" />
-                  </h2>
-                  <p className="gb-muted-text">
-                    <T en="Open your most important account pages quickly." ar="افتح أهم صفحات حسابك بسرعة." />
-                  </p>
-                </div>
+            <section className="card-premium">
+              <div className="gb-card-header mb-24">
+                <p className="gb-eyebrow"><T en="Quick access" ar="وصول سريع" /></p>
+                <h2 style={{ fontWeight: 800 }}>
+                  <T en="Account Hub" ar="مركز الحساب" />
+                </h2>
               </div>
 
-              <div className="gb-customer-grid" style={{ marginTop: 16 }}>
-                <Link href="/customer/bookings" className="gb-customer-card">
-                  <strong><T en="My Bookings" ar="حجوزاتي" /></strong>
-                  <span className="gb-muted-text"><T en="View studio bookings." ar="عرض حجوزات الاستوديو." /></span>
+              <div className="grid grid-2 gap-16">
+                <Link href="/customer/bookings" className="gb-dash-card" style={{ padding: 20 }}>
+                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🎙️</div>
+                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="My Bookings" ar="حجوزاتي" /></strong>
+                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="View sessions." ar="عرض الجلسات." /></span>
                 </Link>
 
-                <Link href="/customer/marketplace-orders" className="gb-customer-card">
-                  <strong><T en="My Orders" ar="طلباتي" /></strong>
-                  <span className="gb-muted-text"><T en="View marketplace orders." ar="عرض طلبات السوق." /></span>
+                <Link href="/customer/marketplace-orders" className="gb-dash-card" style={{ padding: 20 }}>
+                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🛒</div>
+                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="My Orders" ar="طلباتي" /></strong>
+                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Marketplace." ar="المتجر." /></span>
                 </Link>
 
-                <Link href="/customer/payments" className="gb-customer-card">
-                  <strong><T en="Payments" ar="المدفوعات والإيصالات" /></strong>
-                  <span className="gb-muted-text"><T en="View payment history." ar="عرض سجل المدفوعات." /></span>
+                <Link href="/customer/payments" className="gb-dash-card" style={{ padding: 20 }}>
+                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>💳</div>
+                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="Payments" ar="المدفوعات" /></strong>
+                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Receipts." ar="الإيصالات." /></span>
                 </Link>
 
-                <Link href="/customer/rewards" className="gb-customer-card">
-                  <strong><T en="Rewards" ar="المكافآت" /></strong>
-                  <span className="gb-muted-text"><T en="View points and benefits." ar="عرض نقاطك ومزاياك." /></span>
+                <Link href="/customer/rewards" className="gb-dash-card" style={{ padding: 20 }}>
+                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🎁</div>
+                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="Rewards" ar="المكافآت" /></strong>
+                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Points." ar="النقاط." /></span>
                 </Link>
               </div>
             </section>

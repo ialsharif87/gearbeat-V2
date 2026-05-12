@@ -33,8 +33,11 @@ export function AdminSidebar({
       height: '100vh'
     }}>
       {/* Logo Area */}
-      <div style={{ padding: '0 24px 32px', fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-1px' }}>
-        GearBeat Admin
+      <div style={{ padding: '0 24px 32px', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 40, height: 40, background: 'var(--gb-gold)', borderRadius: 8, display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', fontWeight: 900, color: 'black', fontSize: '1.2rem' }}>GB</div>
+        <div style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-1px', color: 'white' }}>
+          Admin
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
@@ -161,5 +164,5 @@ const collapsibleHeaderStyle: React.CSSProperties = {
   justifyContent: 'space-between',
   alignItems: 'center',
   cursor: 'pointer',
-  paddingRight: 16
+  paddingInlineEnd: 16
 };
