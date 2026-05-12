@@ -22,7 +22,7 @@ export default function TicketsLandingPage() {
           </span>
         </h1>
         <p className="lead" style={{ maxWidth: 700, margin: "24px 0", color: "var(--gb-text-muted)" }}>
-          <T 
+          <T
             en="From intimate studio workshops to global concerts and exclusive creator experiences. Secure your spot in the future of sound."
             ar="من ورش العمل الخاصة في الاستوديو إلى الحفلات العالمية وتجارب المبدعين الحصرية. احجز مكانك في مستقبل الصوت."
           />
@@ -87,7 +87,7 @@ export default function TicketsLandingPage() {
             <div>
               <h2 style={{ marginBottom: 16 }}><T en="Secure Experience Discovery" ar="اكتشاف تجارب آمن" /></h2>
               <p style={{ color: 'var(--muted)', lineHeight: 1.6 }}>
-                <T 
+                <T
                   en="Every experience on GearBeat is verified for safety, quality, and technical readiness. Our ticketing engine ensures secure access for creators and fans alike."
                   ar="تتم مراجعة كل تجربة على جيربيت للتأكد من السلامة والجودة والجاهزية الفنية. يضمن محرك حجز التذاكر لدينا وصولاً آمناً للمبدعين والمعجبين على حد سواء."
                 />
@@ -100,14 +100,14 @@ export default function TicketsLandingPage() {
               </div>
             </div>
             <div style={{ textAlign: 'center', padding: 32, background: 'rgba(212, 175, 55, 0.03)', borderRadius: 20 }}>
-               <h4 style={{ marginBottom: 12 }}><T en="Public Readiness Status" ar="حالة الجاهزية العامة" /></h4>
+               <h4 style={{ marginBottom: 12 }}><T en="Platform Readiness" ar="جاهزية المنصة" /></h4>
                <div style={{ display: 'grid', gap: 10 }}>
                  {[
                    { label: 'Discovery Grid', status: '✅ READY' },
                    { label: 'Experience Cards', status: '✅ READY' },
                    { label: 'Trust Integration', status: '✅ READY' },
                    { label: 'Mobile Optimization', status: '✅ READY' },
-                   { label: 'Checkout Flow', status: '⏳ DEFERRED' },
+                   { label: 'Checkout Flow', status: '⏳ COMING SOON' },
                  ].map(i => (
                    <div key={i.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                      <span style={{ color: '#888' }}>{i.label}</span>
@@ -128,19 +128,19 @@ export default function TicketsLandingPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                 <span style={{ fontSize: "1.8rem" }}>📲</span>
                 <h3 style={{ fontSize: "1.3rem" }}><T en="Native Mobile Access" ar="وصول عبر تطبيق المحمول الأصلي" /></h3>
-                <span className="badge badge-warning" style={{ fontSize: '0.65rem' }}>PLANNING PHASE</span>
+                <span className="badge badge-gold" style={{ fontSize: '0.65rem' }}>COMING SOON</span>
               </div>
               <p style={{ color: 'var(--muted)', maxWidth: 600, lineHeight: 1.6 }}>
-                <T 
-                  en="The future GearBeat mobile app will feature native Apple/Google Wallet integration for digital tickets and rapid QR code entry at events." 
-                  ar="سيتميز تطبيق جيربيت المستقبلي للهواتف المحمولة بدمج محفظة Apple/Google الأصلية للتذاكر الرقمية والدخول السريع عبر رمز الاستجابة السريعة (QR) في الفعاليات." 
+                <T
+                  en="The future GearBeat mobile app will feature native Digital Wallet integration for digital tickets and rapid QR code entry at events."
+                  ar="سيتميز تطبيق جيربيت المستقبلي للهواتف المحمولة بدمج المحفظة الرقمية الأصلية للتذاكر الرقمية والدخول السريع عبر رمز الاستجابة السريعة (QR) في الفعاليات."
                 />
               </p>
             </div>
             <div style={{ padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px dashed rgba(212,175,55,0.3)', textAlign: 'center', minWidth: 200 }}>
               <div style={{ fontSize: '2rem', marginBottom: 8 }}>🎫</div>
               <div style={{ fontSize: '0.8rem', color: 'var(--gb-gold)', fontWeight: 800 }}><T en="Digital Pass Sync" ar="مزامنة التذاكر الرقمية" /></div>
-              <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 4 }}>Coming Phase 59+</div>
+              <div style={{ fontSize: '0.7rem', color: '#888', marginTop: 4 }}>Coming Soon</div>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function TicketsLandingPage() {
             <T en="Coming Soon to GearBeat" ar="قريباً على جيربيت" />
           </h2>
           <p style={{ color: 'var(--muted)', marginBottom: 40, maxWidth: 600, marginInline: 'auto' }}>
-            <T 
+            <T
               en="We are currently onboarding elite event partners. Our secure ticketing engine and event extranet are under final testing."
               ar="نعمل حالياً على ضم شركاء فعاليات متميزين. محرك حجز التذاكر الآمن وإكسترانت الفعاليات قيد الاختبار النهائي."
             />

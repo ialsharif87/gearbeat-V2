@@ -3,12 +3,12 @@ import Link from "next/link";
 
 export default function TicketingPartnerFoundationPage() {
   const eventTypes = [
-    "Event Organizer", "Venue", "Promoter", "Workshop Host", 
+    "Event Organizer", "Venue", "Promoter", "Workshop Host",
     "Listening Session Host", "Brand Activation Partner"
   ];
 
   const ticketTypes = [
-    "General Admission", "VIP", "Early Bird", 
+    "General Admission", "VIP", "Early Bird",
     "Group Ticket", "Guest List", "Platinum Package"
   ];
 
@@ -38,9 +38,9 @@ export default function TicketingPartnerFoundationPage() {
               <T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" />
             </h1>
             <p className="hero-desc">
-              <T 
-                en="Premium extranet foundation for event organizers and venues to manage ticket sales, attendees, and QR check-ins." 
-                ar="تأسيس إكسترانت متميز لمنظمي الفعاليات والمرافق لإدارة مبيعات التذاكر والحضور وتسجيل الدخول عبر QR." 
+              <T
+                en="Premium extranet foundation for event organizers and venues to manage ticket sales, attendees, and QR check-ins."
+                ar="تأسيس إكسترانت متميز لمنظمي الفعاليات والمرافق لإدارة مبيعات التذاكر والحضور وتسجيل الدخول عبر QR."
               />
             </p>
             <div className="foundation-tag" style={{ color: '#ec4899', borderColor: '#ec4899', background: 'rgba(236, 72, 153, 0.1)' }}>
@@ -136,16 +136,16 @@ export default function TicketingPartnerFoundationPage() {
         <section className="section-container" style={{ marginTop: 60 }}>
           <div className="section-header">
             <h2><T en="Partner Mobile Operations" ar="عمليات الشركاء عبر المحمول" /></h2>
-            <span className="badge badge-warning" style={{ marginLeft: 16 }}><T en="PLANNING PHASE" ar="مرحلة التخطيط" /></span>
+            <span className="badge badge-gold" style={{ marginLeft: 16 }}><T en="BETA ACCESS" ar="وصول تجريبي" /></span>
           </div>
           <div className="card-premium" style={{ background: 'linear-gradient(135deg, rgba(207,167,98,0.05), transparent)' }}>
             <div className="flex-between" style={{ flexWrap: 'wrap', gap: 20 }}>
               <div>
                 <h3 style={{ fontSize: "1.2rem", marginBottom: 12 }}><T en="GearBeat Pro Scanner App" ar="تطبيق ماسح جيربيت برو" /></h3>
                 <p style={{ color: 'var(--muted)', maxWidth: 600, lineHeight: 1.6 }}>
-                  <T 
-                    en="We are planning native iOS and Android tools for event partners. The upcoming GearBeat Pro app will allow staff to scan QR tickets instantly, view live capacity, and manage door operations in real-time." 
-                    ar="نحن نخطط لأدوات iOS و Android أصلية لشركاء الفعاليات. سيتيح تطبيق جيربيت برو القادم للموظفين مسح تذاكر QR على الفور، وعرض السعة المباشرة، وإدارة عمليات الدخول في الوقت الفعلي." 
+                  <T
+                    en="We are developing native mobile tools for event partners. The upcoming GearBeat Pro app will allow staff to scan QR tickets instantly, view live capacity, and manage door operations in real-time."
+                    ar="نحن نطور أدوات جوال أصلية لشركاء الفعاليات. سيتيح تطبيق جيربيت برو القادم للموظفين مسح تذاكر QR على الفور، وعرض السعة المباشرة، وإدارة عمليات الدخول في الوقت الفعلي."
                   />
                 </p>
               </div>
@@ -184,16 +184,16 @@ export default function TicketingPartnerFoundationPage() {
             <div className="card-premium" style={{ background: 'rgba(236, 72, 153, 0.02)', border: '1px dashed rgba(236, 72, 153, 0.2)' }}>
               <h3><T en="Sales Readiness" ar="جاهزية المبيعات" /></h3>
               <p style={{ fontSize: '0.85rem', color: '#888', marginTop: 12, lineHeight: 1.6 }}>
-                <T 
+                <T
                   en="Before ticketing goes live, partners must complete the GearBeat Sales Readiness Audit to ensure secure transaction flows and attendee protection."
                   ar="قبل تفعيل حجز التذاكر، يجب على الشركاء إكمال تدقيق جاهزية المبيعات من GearBeat لضمان تدفق المعاملات الآمنة وحماية الحضور."
                 />
               </p>
               <div style={{ marginTop: 24, padding: 16, background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
                 <p className="text-muted" style={{ fontSize: '0.75rem', margin: 0 }}>
-                  <T 
-                    en="Note: No real event inventory, ticket sales, QR scanning, or payout logic is active in this foundation patch." 
-                    ar="ملاحظة: لا يوجد مخزون فعاليات حقيقي أو مبيعات تذاكر أو مسح QR أو منطق مدفوعات في هذا المسار التأسيسي." 
+                  <T
+                    en="Note: No real event inventory, ticket sales, QR scanning, or payout logic is active in this foundation patch."
+                    ar="ملاحظة: لا يوجد مخزون فعاليات حقيقي أو مبيعات تذاكر أو مسح QR أو منطق مدفوعات في هذا المسار التأسيسي."
                   />
                 </p>
               </div>

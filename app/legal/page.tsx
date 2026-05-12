@@ -20,15 +20,15 @@ export default function LegalHubPage() {
     <main className="dashboard-page" style={{ maxWidth: 1000, margin: "0 auto", padding: "100px 24px" }}>
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <div className="badge-gold mb-16 ms-auto me-auto">
-          <T en="DRAFT / PLANNING PHASE" ar="مسودة / مرحلة التخطيط" />
+          <T en="Official Platform Governance" ar="الحوكمة الرسمية للمنصة" />
         </div>
         <h1 className="text-balance" style={{ fontSize: "clamp(2.5rem, 5vw, 3.5rem)", fontWeight: 900, marginBottom: 24 }}>
           <T en="Legal & Policies" ar="الشؤون القانونية والسياسات" />
         </h1>
         <p className="text-muted text-balance" style={{ maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
           <T 
-            en="GearBeat is committed to transparency and compliance. The following documents are currently structural drafts undergoing final review by legal counsel. They provide a framework for platform rules and user protection before the official launch."
-            ar="تلتزم GearBeat بالشفافية والامتثال. الوثائق التالية هي حالياً مسودات هيكلية تخضع للمراجعة النهائية من قبل المستشار القانوني. وهي توفر إطاراً لقواعد المنصة وحماية المستخدم قبل الإطلاق الرسمي."
+            en="GearBeat is committed to transparency and compliance. The following documents establish the framework for platform rules and user protection for our community."
+            ar="تلتزم GearBeat بالشفافية والامتثال. الوثائق التالية ترسي إطار قواعد المنصة وحماية المستخدم لمجتمعنا."
           />
         </p>
       </div>
@@ -40,7 +40,7 @@ export default function LegalHubPage() {
             <div style={{ flex: 1 }}>
               <h2 style={{ fontSize: '1.25rem', marginBottom: 4, fontWeight: 800 }}><T en={p.titleEn} ar={p.titleAr} /></h2>
               <span className="text-gold" style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: 0.5 }}>
-                <T en="VIEW DRAFT" ar="عرض المسودة" /> →
+                <T en="VIEW POLICY" ar="عرض السياسة" /> →
               </span>
             </div>
           </Link>

@@ -36,9 +36,9 @@ export default function PartnerPortalFoundationPage() {
               <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>
             <p className="hero-desc text-balance mb-40">
-              <T 
-                en="Join the elite network of music studios, equipment vendors, and service providers. Reach a global audience of creators and manage your business with professional tools." 
-                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. صل إلى جمهور عالمي من المبدعين وأدر عملك بأدوات احترافية." 
+              <T
+                en="Join the elite network of music studios, equipment vendors, and service providers. Reach a global audience of creators and manage your business with professional tools."
+                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. صل إلى جمهور عالمي من المبدعين وأدر عملك بأدوات احترافية."
               />
             </p>
             <div className="hero-actions" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
@@ -137,25 +137,25 @@ export default function PartnerPortalFoundationPage() {
             <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
               <div style={{ fontSize: "3rem" }}>📱</div>
               <div>
-                <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="GearBeat Pro" ar="جيربيت برو" /> <span className="badge badge-warning" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>PLANNING PHASE</span></h3>
+                <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="GearBeat Partner App" ar="تطبيق شركاء جيربيت" /> <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>COMING SOON</span></h3>
                 <p style={{ color: 'var(--muted)', maxWidth: 650, lineHeight: 1.6 }}>
-                  <T 
-                    en="We are architecting a dedicated React Native companion app for Partners. Manage studio calendar blocks, accept bookings, fulfill marketplace orders, and chat with customers on the go." 
-                    ar="نحن نقوم بتصميم تطبيق مرافق مخصص لـ React Native للشركاء. يمكنك إدارة حظر تقويم الاستوديو، وقبول الحجوزات، وتنفيذ طلبات السوق، والدردشة مع العملاء أثناء التنقل." 
+                  <T
+                    en="We are architecting a dedicated mobile companion app for Partners. Manage studio calendars, accept bookings, and communicate with customers from anywhere."
+                    ar="نحن نقوم بتصميم تطبيق جوال مخصص للشركاء. يمكنك إدارة تقويم الاستوديو، وقبول الحجوزات، والتواصل مع العملاء من أي مكان."
                   />
                 </p>
               </div>
             </div>
-            
+
             <div className="grid grid-2 gap-24" style={{ marginTop: 24 }}>
               <div style={{ padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
                 <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <span>🔔</span> <T en="Push Notifications" ar="إشعارات الدفع" />
                 </h4>
                 <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                  <T 
-                    en="Future native push notification infrastructure for instant booking requests, new marketplace orders, and customer messages." 
-                    ar="البنية التحتية المستقبلية لإشعارات الدفع الأصلية لطلبات الحجز الفورية، وطلبات السوق الجديدة، ورسائل العملاء." 
+                  <T
+                    en="Future native push notification infrastructure for instant booking requests, new marketplace orders, and customer messages."
+                    ar="البنية التحتية المستقبلية لإشعارات الدفع الأصلية لطلبات الحجز الفورية، وطلبات السوق الجديدة، ورسائل العملاء."
                   />
                 </p>
               </div>
@@ -165,9 +165,9 @@ export default function PartnerPortalFoundationPage() {
                   <span>🔗</span> <T en="External Integrations" ar="تكاملات خارجية" />
                 </h4>
                 <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                  <T 
-                    en="API webhook foundation allowing Pro vendors to sync inventory with third-party logistics and CRM tools." 
-                    ar="أساس واجهة برمجة التطبيقات (API webhook) الذي يسمح للبائعين المحترفين بمزامنة المخزون مع أدوات اللوجستيات وإدارة علاقات العملاء الخارجية." 
+                  <T
+                    en="API webhook foundation allowing Pro vendors to sync inventory with third-party logistics and CRM tools."
+                    ar="أساس واجهة برمجة التطبيقات (API webhook) الذي يسمح للبائعين المحترفين بمزامنة المخزون مع أدوات اللوجستيات وإدارة علاقات العملاء الخارجية."
                   />
                 </p>
               </div>

@@ -9,7 +9,7 @@ export default function HomePage() {
         <div className="container hero-container animate-up">
           <div className="hero-content">
             <div className="badge-gold mb-16">
-              <T en="Official Phase 61 — Launch Operations" ar="المرحلة 61 الرسمية — عمليات الإطلاق" />
+              <T en="Official Launch Pilot" ar="الإطلاق التجريبي الرسمي" />
             </div>
             <h1 className="text-balance" style={{ fontWeight: 900 }}>
               <T

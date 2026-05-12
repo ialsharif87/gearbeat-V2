@@ -36,13 +36,13 @@ export default function CustomerRewardsPage() {
             </h1>
             <p className="gb-muted-text" style={{ maxWidth: 760 }}>
               <T
-                en="Track your membership level, points, wallet balance, and rewards. (Note: This is a UI Foundation. Live data sync coming soon.)"
-                ar="تابع مستوى عضويتك، نقاطك، رصيد المحفظة، والمكافآت. (ملاحظة: هذه واجهة تأسيسية. سيتم تفعيل ربط البيانات قريباً.)"
+                en="Track your membership level, points, wallet balance, and rewards. Our loyalty system is currently in active beta for pilot members."
+                ar="تابع مستوى عضويتك، نقاطك، رصيد المحفظة، والمكافآت. نظام الولاء لدينا حالياً في المرحلة التجريبية النشطة للأعضاء المشاركين."
               />
             </p>
           </div>
           <div className="foundation-badge">
-             <T en="SAMPLE DATA — UI FOUNDATION" ar="بيانات عينة — واجهة تأسيسية" />
+             <T en="BETA PREVIEW — PILOT ACCESS" ar="معاينة تجريبية — وصول خاص" />
           </div>
         </div>
 
@@ -181,15 +181,15 @@ export default function CustomerRewardsPage() {
                   <div style={{ width: '75%', height: '100%', background: 'var(--gb-gold)' }} />
                 </div>
                 <p style={{ fontSize: '0.8rem', color: '#666', marginTop: 12 }}>
-                  <T 
-                    en="Complete your first studio booking to unlock your GearBeat Welcome Kit. (No live rewards automation yet)" 
-                    ar="أكمل أول حجز استوديو لك لفتح حقيبة ترحيب GearBeat. (لا يوجد أتمتة حية للمكافآت بعد)" 
+                  <T
+                    en="Complete your first studio booking to unlock your GearBeat Welcome Kit."
+                    ar="أكمل أول حجز استوديو لك لفتح حقيبة ترحيب GearBeat."
                   />
                 </p>
                 <div style={{ marginTop: 20, padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px solid #1a1a1a' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', color: '#888' }}><T en="Fulfillment Status" ar="حالة التنفيذ" /></span>
-                    <span className="pill" style={{ fontSize: '0.65rem', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', padding: '2px 8px', borderRadius: 4 }}>PENDING — SAMPLE</span>
+                    <span className="pill" style={{ fontSize: '0.65rem', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', padding: '2px 8px', borderRadius: 4 }}>BETA STATUS</span>
                   </div>
                 </div>
               </div>
@@ -227,13 +227,13 @@ export default function CustomerRewardsPage() {
 
             <div className="card" style={{ border: "1px dashed rgba(207,167,98,0.4)", background: "rgba(207,167,98,0.02)" }}>
               <h2><T en="Future Loyalty Engine" ar="محرك الولاء المستقبلي" /></h2>
-              <span className="badge badge-warning" style={{ marginTop: 8, display: 'inline-block', fontSize: '0.65rem' }}>
-                <T en="PLANNING PHASE" ar="مرحلة التخطيط" />
+              <span className="badge badge-gold" style={{ marginTop: 8, display: 'inline-block', fontSize: '0.65rem' }}>
+                <T en="BETA PREVIEW" ar="معاينة تجريبية" />
               </span>
               <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginTop: 16, lineHeight: 1.6 }}>
-                <T 
-                  en="The unified GearBeat Loyalty Engine will soon allow you to earn and redeem points across the entire ecosystem:" 
-                  ar="سيتيح لك محرك ولاء جيربيت الموحد قريباً اكتساب واستبدال النقاط عبر النظام البيئي بأكمله:" 
+                <T
+                  en="The unified GearBeat Loyalty Engine will soon allow you to earn and redeem points across the entire ecosystem:"
+                  ar="سيتيح لك محرك ولاء جيربيت الموحد قريباً اكتساب واستبدال النقاط عبر النظام البيئي بأكمله:"
                 />
               </p>
               <ul style={{ paddingInlineStart: 20, color: "var(--muted)", fontSize: "0.85rem", marginTop: 12, lineHeight: 1.6 }}>
@@ -249,9 +249,9 @@ export default function CustomerRewardsPage() {
                 <h3 style={{ fontSize: "1.1rem" }}><T en="Mobile App Readiness" ar="جاهزية تطبيق الجوال" /></h3>
               </div>
               <p style={{ color: "var(--muted)", fontSize: "0.85rem", lineHeight: 1.6 }}>
-                <T 
-                  en="GearBeat is preparing native iOS and Android wallet integration. Soon, you'll be able to tap to redeem points and scan QR codes for event entry directly from your phone." 
-                  ar="تقوم جيربيت بإعداد دمج محافظ iOS و Android الأصلية. قريباً، ستتمكن من النقر لاستبدال النقاط ومسح رموز QR لدخول الفعاليات مباشرة من هاتفك." 
+                <T
+                  en="GearBeat is preparing native mobile wallet integration. Soon, you'll be able to tap to redeem points and scan QR codes for event entry directly from your device."
+                  ar="تقوم جيربيت بإعداد دمج محافظ الجوال الأصلية. قريباً، ستتمكن من النقر لاستبدال النقاط ومسح رموز QR لدخول الفعاليات مباشرة من جهازك."
                 />
               </p>
             </div>

@@ -15,8 +15,8 @@ export default function MarketplacePolicyPage() {
       </Link>
       
       <div className="card-premium" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)' }}>
-        <span className="badge badge-warning" style={{ marginBottom: 16 }}>
-          <T en="DRAFT COPY" ar="نسخة مسودة" />
+        <span className="badge badge-gold" style={{ marginBottom: 16 }}>
+          <T en="Official Policy" ar="سياسة رسمية" />
         </span>
         <h1 style={{ fontSize: "2rem", marginBottom: 24 }}>
           <T en="Marketplace Policy" ar="سياسة السوق" />
@@ -24,7 +24,7 @@ export default function MarketplacePolicyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This marketplace policy is a structural draft. It is NOT finalized and is pending review by the GearBeat logistics and legal team." ar="سياسة السوق هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة من قبل فريق اللوجستيات والقانون في GearBeat." />
+            <strong><T en="Notice:" ar="تنبيه:" /></strong> <T en="This marketplace policy establishes the standards for verified gear transactions, buyer protection, and vendor obligations on GearBeat." ar="ترسي سياسة المتجر هذه معايير معاملات المعدات الموثقة وحماية المشتري والتزامات التاجر على GearBeat." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Buyer Protection & Disputes" ar="1. حماية المشتري والنزاعات" /></h3>

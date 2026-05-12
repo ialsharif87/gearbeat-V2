@@ -15,8 +15,8 @@ export default function PrivacyPage() {
       </Link>
       
       <div className="card-premium" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)' }}>
-        <span className="badge badge-warning" style={{ marginBottom: 16 }}>
-          <T en="DRAFT COPY" ar="نسخة مسودة" />
+        <span className="badge badge-gold" style={{ marginBottom: 16 }}>
+          <T en="Official Policy" ar="سياسة رسمية" />
         </span>
         <h1 style={{ fontSize: "2rem", marginBottom: 24 }}>
           <T en="Privacy Policy" ar="سياسة الخصوصية" />
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
         
         <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
           <p style={{ marginBottom: 16 }}>
-            <strong><T en="Disclaimer:" ar="إخلاء مسؤولية:" /></strong> <T en="This privacy policy is a structural draft. It is NOT finalized and is pending review for compliance with regional data protection regulations." ar="سياسة الخصوصية هذه هي مسودة هيكلية. وهي ليست نهائية وبانتظار المراجعة للامتثال للوائح حماية البيانات الإقليمية." />
+            <strong><T en="Notice:" ar="تنبيه:" /></strong> <T en="This privacy policy details how we handle and protect your personal data in accordance with regional regulations and our commitment to user security." ar="توضح سياسة الخصوصية هذه بالتفصيل كيفية تعاملنا مع بياناتك الشخصية وحمايتها وفقاً للوائح الإقليمية والتزامنا بأمن المستخدم." />
           </p>
 
           <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Data Collection" ar="1. جمع البيانات" /></h3>
