@@ -80,7 +80,7 @@ export default function CartPage() {
                 <T en="Inclusive of VAT" ar="شامل ضريبة القيمة المضافة" />
               </p>
               <Link href="/checkout" className="btn btn-primary btn-large w-full" style={{ marginTop: 10 }}>
-                <T en="Proceed to Checkout" ar="المتابعة للدفع" />
+                <T en="Review & Place Order (Pilot)" ar="المراجعة وإتمام الطلب (تجريبي)" />
               </Link>
             </div>
           </div>
