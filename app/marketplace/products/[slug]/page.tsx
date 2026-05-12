@@ -538,7 +538,7 @@ export default async function ProductDetailPage({
               { icon: '🎚️', en: 'Pro Audio Grade', ar: 'جودة صوت احترافية' },
               { icon: '🤝', en: 'Trusted Seller', ar: 'بائع موثوق' },
               { icon: '📦', en: 'Insured Delivery', ar: 'توصيل مؤمن' },
-              { icon: '💳', en: 'Secure Checkout', ar: 'دفع آمن' },
+              { icon: '💳', en: 'Pilot Verification', ar: 'تحقق تجريبي' },
               { icon: '🎙️', en: 'Studio Tested', ar: 'مختبر في الاستوديو' },
             ].map(item => (
               <div key={item.en} style={{ 

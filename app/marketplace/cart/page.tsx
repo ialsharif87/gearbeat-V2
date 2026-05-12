@@ -366,7 +366,7 @@ export default async function MarketplaceCartPage() {
             className={items.length > 0 ? "btn btn-primary btn-large" : "btn btn-large"}
           >
             {items.length > 0 ? (
-              <T en="Proceed to checkout" ar="إتمام الطلب" />
+              <T en="Review & Place Order (Pilot)" ar="المراجعة وإتمام الطلب (تجريبي)" />
             ) : (
               <T en="Browse products" ar="تصفح المنتجات" />
             )}
