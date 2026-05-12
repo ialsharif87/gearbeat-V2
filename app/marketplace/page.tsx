@@ -164,8 +164,8 @@ export default async function MarketplacePage({
       timeoutPromise,
     ])) as any[];
 
-    if (categoriesResult.error) throw categoriesResult.error;
-    if (brandsResult.error) throw brandsResult.error;
+    if (categoriesResult.error) console.warn("Marketplace Categories Error:", categoriesResult.error);
+    if (brandsResult.error) console.warn("Marketplace Brands Error:", brandsResult.error);
 
     const categories = categoriesResult.data || [];
     const brands = brandsResult.data || [];
@@ -252,7 +252,7 @@ export default async function MarketplacePage({
       timeoutPromise,
     ])) as any;
 
-    if (productsResult.error) throw productsResult.error;
+    if (productsResult.error) console.warn("Marketplace Products Error:", productsResult.error);
 
     const products = productsResult.data || [];
 
