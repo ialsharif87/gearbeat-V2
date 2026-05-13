@@ -14,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
       ],
     },
-    sitemap: 'https://gearbeat.com/sitemap.xml',
+    sitemap: 'https://gearbeat.app/sitemap.xml',
   }
 }
