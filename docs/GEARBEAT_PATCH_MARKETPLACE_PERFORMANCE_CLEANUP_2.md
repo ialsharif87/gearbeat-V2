@@ -50,4 +50,4 @@ This patch further improves the PageSpeed performance for the public `/marketpla
 ## Confirmation
 I confirm that no backend, database, API, payment, order, or marketplace business logic was changed in this patch. The scope was strictly limited to UI performance and hydration optimizations.
 
-**Commit Hash**: [Insert after commit]
+**Commit Hash**: 948e3e2
