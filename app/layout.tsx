@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ClientProviders } from "@/components/client-providers";
 import ConditionalLayout from "@/components/conditional-layout";
+import Analytics from "@/components/analytics";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -153,6 +154,7 @@ export default async function RootLayout({
       className={`${spaceGrotesk.variable} ${cairo.variable}`}
     >
       <body>
+        <Analytics />
         <ClientProviders>
           <ConditionalLayout
             isLoggedIn={Boolean(user)}
