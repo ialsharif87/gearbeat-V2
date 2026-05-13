@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://gearbeat.com",
+    url: "https://gearbeat.app",
     siteName: "GearBeat",
     title: "GearBeat | The Global Pulse of Studio Sound",
     description: "Book premium music and audio studios across Saudi Arabia and the GCC.",

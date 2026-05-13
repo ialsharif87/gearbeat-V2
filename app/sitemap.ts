@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
  
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://gearbeat.com'
+  const baseUrl = 'https://gearbeat.app'
  
   // Public static routes
   const routes = [
