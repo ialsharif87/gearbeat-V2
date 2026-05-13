@@ -86,8 +86,8 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       await supabaseAdmin.from("studio_applications").update({ contract_draft: contractDraft }).eq("id", appId);
     }
 
-    // 2. Use a fixed temp password for testing convenience
-    const tempPassword = "GearBeat123!";
+    // 2. Generate a secure temporary password
+    const tempPassword = generatePassword();
 
     // 3. Create or Get Auth User
     let userId: string;

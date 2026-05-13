@@ -17,7 +17,11 @@ export async function sendEmail({ to, subject, html, text }: EmailPayload) {
   console.log(`[EMAIL_SENT] To: ${to}, Subject: ${subject}`);
   
   if (!process.env.RESEND_API_KEY) {
-    console.warn("RESEND_API_KEY not found. Email not sent to provider.");
+    if (process.env.NODE_ENV === "production") {
+      console.error("CRITICAL: RESEND_API_KEY missing in production. Email failed.");
+      return { success: false, error: "Email provider not configured" };
+    }
+    console.warn("RESEND_API_KEY not found. Email mocked in development.");
     return { success: true, mocked: true };
   }
 

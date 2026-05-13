@@ -384,7 +384,7 @@ export async function POST() {
         notificationType: "marketplace_order_created",
         entityType: "marketplace_order",
         entityId: order.id,
-        actionUrl: "/vendor/orders",
+        actionUrl: "/portal/store/orders",
       });
     }
 

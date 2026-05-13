@@ -12,12 +12,14 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-latin",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
-
+ 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
   variable: "--font-arabic",
   display: "swap",
+  fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
 export const metadata: Metadata = {
