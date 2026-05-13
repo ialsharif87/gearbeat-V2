@@ -240,6 +240,14 @@ export default function PartnerPortalFoundationPage() {
         .font-bold { font-weight: 900; }
         [dir="rtl"] .hero-title { letter-spacing: 0; }
         [dir="rtl"] .status-connector { right: 50%; left: auto; }
+
+        @media (max-width: 400px) {
+          .hero-title { font-size: 2.2rem !important; }
+          .hero-desc { font-size: 1rem !important; }
+          .hero-actions { flex-direction: column; width: 100%; }
+          .hero-actions .btn { width: 100%; text-align: center; }
+          .container { padding: 0 16px; }
+        }
       `}} />
     </div>
   );

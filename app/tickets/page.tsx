@@ -71,7 +71,7 @@ export default function TicketsLandingPage() {
                 <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontWeight: 700, color: 'var(--gb-gold)' }}>TBA</span>
                   <span className="btn btn-outline btn-sm" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>
-                    <T en="View Event" ar="عرض الفعالية" />
+                    <T en="Request Access" ar="طلب دخول" />
                   </span>
                 </div>
               </div>

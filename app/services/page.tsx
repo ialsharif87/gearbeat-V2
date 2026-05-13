@@ -141,6 +141,20 @@ export default async function ServicesPage({
     studios = studios.filter((s) => s.service_slugs.includes(activeServiceSlug));
   }
 
+  const getServiceIcon = (slug: string, currentIcon: string | null) => {
+    if (currentIcon) return currentIcon;
+    const fallbacks: Record<string, string> = {
+      mixing: "🎚️",
+      mastering: "🎧",
+      production: "🎹",
+      voiceover: "🎙️",
+      podcasting: "📻",
+      rehearsal: "🎸",
+      recording: "🎙️",
+    };
+    return fallbacks[slug] || "🛠️";
+  };
+
   return (
     <div className="services-page">
       {/* HERO SECTION */}
@@ -192,7 +206,7 @@ export default async function ServicesPage({
                   gap: 8
                 }}
               >
-                {svc.icon && <span>{svc.icon}</span>}
+                <span>{getServiceIcon(svc.slug, svc.icon)}</span>
                 <T en={svc.name_en} ar={svc.name_ar} />
               </Link>
             ))}
