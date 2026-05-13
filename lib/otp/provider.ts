@@ -101,14 +101,29 @@ export async function sendOtpWithConfiguredProvider(
   const provider = process.env.OTP_PROVIDER || "mock";
 
   if (provider === "mock") {
+    if (process.env.NODE_ENV === "production" && process.env.MOCK_OTP_ENABLED !== "true") {
+      console.error("CRITICAL: Mock OTP provider used in production without explicit MOCK_OTP_ENABLED=true flag.");
+      return {
+        provider: "mock",
+        delivered: false,
+        message: "OTP delivery failed: Mock provider not allowed in production."
+      };
+    }
     return sendMockOtp(input);
   }
 
   // Future provider integration point.
-  // Do not fail hard now. Keep the foundation ready.
   console.warn(
     `OTP provider "${provider}" is not implemented yet. Falling back to mock provider.`
   );
+
+  if (process.env.NODE_ENV === "production" && process.env.MOCK_OTP_ENABLED !== "true") {
+    return {
+      provider: "mock",
+      delivered: false,
+      message: "OTP delivery failed: Configured provider not implemented."
+    };
+  }
 
   return sendMockOtp(input);
 }

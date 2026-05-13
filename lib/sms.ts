@@ -14,20 +14,18 @@ export async function sendMessage({ to, body, channel }: MessagePayload) {
   // TODO: Integrate with Twilio or Unifonic API
   console.log(`[${channel.toUpperCase()}_SENT] To: ${to}, Body: ${body}`);
   
-  // Example for WhatsApp (Twilio):
-  /*
-  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Basic ' + Buffer.from(process.env.TWILIO_ACCOUNT_SID + ':' + process.env.TWILIO_AUTH_TOKEN).toString('base64'),
-    },
-    body: new URLSearchParams({
-      To: channel === 'whatsapp' ? `whatsapp:${to}` : to,
-      From: channel === 'whatsapp' ? `whatsapp:${process.env.TWILIO_WA_NUMBER}` : process.env.TWILIO_SMS_NUMBER,
-      Body: body,
-    }),
-  });
-  */
+  const hasProvider = !!(process.env.TWILIO_ACCOUNT_SID || process.env.UNIFONIC_API_KEY);
+
+  if (!hasProvider) {
+    if (process.env.NODE_ENV === "production") {
+      console.error(`CRITICAL: SMS/WhatsApp provider not configured in production. ${channel} failed.`);
+      return { success: false, error: "SMS provider not configured" };
+    }
+    console.warn(`SMS/WhatsApp provider not found. ${channel} mocked in development.`);
+    return { success: true, mocked: true };
+  }
+
+  // Future implementation here...
   
   return { success: true };
 }
