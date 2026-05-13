@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import LanguageSwitcher from "./language-switcher";
-import T from "./t";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import CartBadge from "./cart-badge";
@@ -13,6 +12,7 @@ type SiteHeaderProps = {
   userRole: string | null;
   dashboardPath: string;
   logoutAction?: () => Promise<void>;
+  lang?: "en" | "ar";
 };
 
 export default function SiteHeader({
@@ -22,6 +22,7 @@ export default function SiteHeader({
   userRole,
   dashboardPath,
   logoutAction,
+  lang = "ar",
 }: SiteHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -87,7 +88,7 @@ export default function SiteHeader({
         <nav className="header-nav">
           {navLinks.map(link => (
             <Link key={link.href} href={link.href} className="nav-link">
-              <T en={link.en} ar={link.ar} />
+              {lang === "en" ? link.en : link.ar}
             </Link>
           ))}
         </nav>
@@ -114,12 +115,12 @@ export default function SiteHeader({
                   </div>
                   <hr className="dropdown-divider" />
                   <Link href={dashboardPath} className="dropdown-item">
-                    <T en="Dashboard" ar="لوحة التحكم" />
+                    {lang === "en" ? "Dashboard" : "لوحة التحكم"}
                   </Link>
                   {logoutAction && (
                     <form action={logoutAction}>
                       <button type="submit" className="dropdown-item logout-btn">
-                        <T en="Logout" ar="خروج" />
+                        {lang === "en" ? "Logout" : "خروج"}
                       </button>
                     </form>
                   )}
@@ -129,10 +130,10 @@ export default function SiteHeader({
           ) : (
             <div className="auth-group">
               <Link href="/login" className="nav-link hide-mobile">
-                <T en="Login" ar="دخول" />
+                {lang === "en" ? "Login" : "دخول"}
               </Link>
               <Link href="/signup" className="btn btn-primary btn-sm">
-                <T en="Sign Up" ar="تسجيل" />
+                {lang === "en" ? "Sign Up" : "تسجيل"}
               </Link>
             </div>
           )}
@@ -145,12 +146,12 @@ export default function SiteHeader({
           <nav className="mobile-nav">
             {navLinks.map(link => (
               <Link key={link.href} href={link.href} className="mobile-nav-link">
-                <T en={link.en} ar={link.ar} />
+                {lang === "en" ? link.en : link.ar}
               </Link>
             ))}
             {!isLoggedIn && (
               <Link href="/login" className="mobile-nav-link text-gold">
-                <T en="Login" ar="دخول" />
+                {lang === "en" ? "Login" : "دخول"}
               </Link>
             )}
           </nav>
