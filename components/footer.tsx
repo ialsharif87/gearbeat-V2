@@ -36,6 +36,7 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <h4>{lang === "en" ? "Platform" : "المنصة"}</h4>
             <Link href="/studios">{lang === "en" ? "Discovery" : "الاكتشاف"}</Link>
             <Link href="/marketplace">{lang === "en" ? "Marketplace" : "السوق"}</Link>
+            <Link href="/academy">{lang === "en" ? "Academy" : "الأكاديمية"}</Link>
             <Link href="/tickets">{lang === "en" ? "Tickets" : "التذاكر"}</Link>
             <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
           </div>
