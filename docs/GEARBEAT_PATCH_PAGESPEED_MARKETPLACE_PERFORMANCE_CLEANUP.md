@@ -47,4 +47,4 @@ I confirm that no backend, database, API, payment, order, or marketplace busines
 - **Third-Party Scripts**: GA4 and Microsoft Clarity contribute to the TBT, but are necessary for business requirements.
 - **Dynamic Content**: The page remains `force-dynamic` due to search/filter requirements, which adds a small TTFB cost compared to static pages.
 
-**Commit Hash**: [Insert after commit]
+**Commit Hash**: 0c69f81
