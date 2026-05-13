@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import T from "@/components/t";
+import MarketplaceProductCard from "@/components/marketplace-product-card";
 
 export const metadata: Metadata = {
   title: "Shop Elite Audio Gear",
@@ -125,10 +126,12 @@ export default async function MarketplacePage({
     max_price?: string;
     in_stock?: string;
     sort?: string;
+    lang?: string;
   }>;
 }) {
   try {
     const params = await searchParams || {};
+    const lang = params.lang === "en" ? "en" : "ar";
 
     const q = cleanText(params.q);
     const category = cleanText(params.category);
@@ -319,7 +322,7 @@ export default async function MarketplacePage({
               }}>
                 <span style={{ fontSize: '1.4rem' }}>{item.icon}</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
-                  <T en={item.en} ar={item.ar} />
+                  {lang === "en" ? item.en : item.ar}
                 </span>
               </div>
             ))}
@@ -331,9 +334,11 @@ export default async function MarketplacePage({
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: '1.5rem' }}>🎛️</span>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '0.9rem' }}><T en="Advanced Filtering & Mobile Drawer" ar="تصفية متقدمة ودرج الهاتف المحمول" /></h4>
+                  <h4 style={{ margin: 0, fontSize: '0.9rem' }}>
+                    {lang === "en" ? "Advanced Filtering & Mobile Drawer" : "تصفية متقدمة ودرج الهاتف المحمول"}
+                  </h4>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
-                    <T en="Enhanced search and filtering capabilities are being optimized to improve your shopping experience." ar="يتم تحسين قدرات البحث والتصفية المتقدمة لتحسين تجربة التسوق الخاصة بك." />
+                    {lang === "en" ? "Enhanced search and filtering capabilities are being optimized to improve your shopping experience." : "يتم تحسين قدرات البحث والتصفية المتقدمة لتحسين تجربة التسوق الخاصة بك."}
                   </p>
                 </div>
               </div>
@@ -363,7 +368,7 @@ export default async function MarketplacePage({
                   <T en="Category" ar="التصنيف" />
                 </label>
                 <select name="category" className="input" defaultValue={category}>
-                  <option value="">All categories</option>
+                  <option value="">{lang === "en" ? "All categories" : "جميع الفئات"}</option>
                   {categories.map((item: any) => (
                     <option key={item.id} value={item.id}>
                       {item.name_ar || item.name_en}
@@ -377,7 +382,7 @@ export default async function MarketplacePage({
                   <T en="Brand" ar="العلامة" />
                 </label>
                 <select name="brand" className="input" defaultValue={brand}>
-                  <option value="">All brands</option>
+                  <option value="">{lang === "en" ? "All brands" : "جميع العلامات"}</option>
                   {brands.map((item: any) => (
                     <option key={item.id} value={item.id}>
                       {item.name_ar || item.name_en}
@@ -391,9 +396,9 @@ export default async function MarketplacePage({
                   <T en="Sort" ar="الترتيب" />
                 </label>
                 <select name="sort" className="input" defaultValue={sort}>
-                  <option value="newest">Newest</option>
-                  <option value="price_low">Price: low to high</option>
-                  <option value="price_high">Price: high to low</option>
+                  <option value="newest">{lang === "en" ? "Newest" : "الأحدث"}</option>
+                  <option value="price_low">{lang === "en" ? "Price: low to high" : "السعر: من الأقل للأعلى"}</option>
+                  <option value="price_high">{lang === "en" ? "Price: high to low" : "السعر: من الأعلى للأقل"}</option>
                 </select>
               </div>
             </div>
@@ -480,7 +485,7 @@ export default async function MarketplacePage({
           >
             <p style={{ color: "var(--muted)", margin: 0 }}>
               <strong>{products.length}</strong>{" "}
-              <T en="approved products found" ar="منتج معتمد" />
+              {lang === "en" ? "approved products found" : "منتج معتمد"}
             </p>
 
             {activeFilterCount > 0 ? (
@@ -527,192 +532,14 @@ export default async function MarketplacePage({
                 gap: 18,
               }}
             >
-            {products.map((product: any) => {
-              const image = getProductImage(product);
-              const price = product.sale_price || product.base_price;
-              const hasSalePrice =
-                product.sale_price &&
-                Number(product.sale_price) > 0 &&
-                Number(product.sale_price) < Number(product.base_price || 0);
-
-              return (
-                <article
-                  key={product.id}
-                  className="card"
-                  style={{
-                    overflow: "hidden",
-                    padding: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    minHeight: "100%",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    background:
-                      "linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025))",
-                  }}
-                >
-                  <Link
-                    href={getProductUrl(product)}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      flex: 1,
-                      color: "inherit",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: 190,
-                        background:
-                          "radial-gradient(circle at center, rgba(207,167,98,0.18), rgba(255,255,255,0.035))",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        position: "relative"
-                      }}
-                    >
-                      {image ? (
-                        <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                          <Image
-                            src={image}
-                            alt={getProductName(product)}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                            style={{ objectFit: "cover" }}
-                          />
-                          <div style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            background: 'rgba(212, 175, 55, 0.95)',
-                            color: '#000',
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            fontSize: '0.6rem',
-                            fontWeight: 800,
-                            letterSpacing: 0.5,
-                            backdropFilter: 'blur(4px)',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                            zIndex: 2
-                          }}>
-                            <T en="CERTIFIED VENDOR" ar="تاجر معتمد" />
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            width: 86,
-                            height: 86,
-                            borderRadius: 22,
-                            display: "grid",
-                            placeItems: "center",
-                            background: "rgba(207,167,98,0.16)",
-                          }}
-                        >
-                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--gb-gold)' }}>
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="12" y1="3" x2="12" y2="21"></line>
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <circle cx="7.5" cy="7.5" r="1.5"></circle>
-                            <circle cx="16.5" cy="7.5" r="1.5"></circle>
-                            <circle cx="7.5" cy="16.5" r="1.5"></circle>
-                            <circle cx="16.5" cy="16.5" r="1.5"></circle>
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ padding: 16, display: "grid", gap: 10, flex: 1, flexDirection: 'column' }}>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <span className="badge">
-                          {getCategoryName(product.category)}
-                        </span>
-                        <span className="badge">
-                          {getBrandName(product.brand)}
-                        </span>
-                      </div>
-
-                      <h3 style={{ margin: 0, lineHeight: 1.35, fontSize: '1rem' }}>
-                        {getProductName(product)}
-                      </h3>
-
-                      {getProductDescription(product) ? (
-                        <p
-                          style={{
-                            color: "var(--muted)",
-                            lineHeight: 1.6,
-                            margin: 0,
-                            fontSize: '0.85rem',
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {getProductDescription(product)}
-                        </p>
-                      ) : null}
-
-                      <div>
-                        <strong style={{ fontSize: "1.15rem" }}>
-                          {formatMoney(price, product.currency_code || "SAR")}
-                        </strong>
-
-                        {hasSalePrice ? (
-                          <span
-                            style={{
-                              marginInlineStart: 8,
-                              color: "var(--muted)",
-                              textDecoration: "line-through",
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            {formatMoney(
-                              product.base_price,
-                              product.currency_code || "SAR"
-                            )}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 10,
-                          alignItems: "center",
-                          marginTop: 'auto',
-                          paddingTop: 10,
-                          borderTop: '1px solid rgba(255,255,255,0.05)'
-                        }}
-                      >
-                        <div style={{ display: 'grid' }}>
-                          <span style={{ color: "var(--muted)", fontSize: "0.75rem", fontWeight: 600 }}>
-                            {getVendorName(product.vendor)}
-                          </span>
-                          {Number(product.stock_quantity || 0) > 0 ? (
-                            <span style={{ color: "var(--gb-success)", fontSize: "0.65rem", fontWeight: 700 }}>
-                              <T en="In Stock" ar="متوفر" />
-                            </span>
-                          ) : (
-                            <span style={{ color: "var(--gb-danger)", fontSize: "0.65rem", fontWeight: 700 }}>
-                              <T en="Out of Stock" ar="غير متوفر" />
-                            </span>
-                          )}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <span title="Authentic Gear">🛡️</span>
-                          <span title="Studio Tested">🎙️</span>
-                          <span title="Secure Payment">💳</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </article>
-              );
-            })}
+            {products.map((product: any, index: number) => (
+              <MarketplaceProductCard 
+                key={product.id} 
+                product={product} 
+                lang={lang} 
+                priority={index < 4}
+              />
+            ))}
           </div>
         )}
       </section>
@@ -723,12 +550,14 @@ export default async function MarketplacePage({
           <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ fontSize: "3rem" }}>🛍️</div>
             <div>
-              <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}><T en="Mobile Shopping Experience" ar="تجربة التسوق عبر الجوال" /> <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>COMING SOON</span></h3>
+              <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}>
+                {lang === "en" ? "Mobile Shopping Experience" : "تجربة التسوق عبر الجوال"} 
+                <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>COMING SOON</span>
+              </h3>
               <p style={{ color: 'var(--muted)', maxWidth: 700, lineHeight: 1.6 }}>
-                <T
-                  en="We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse verified gear and manage your studio equipment on the go."
-                  ar="نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات المعتمدة وإدارة معدات الاستوديو الخاصة بك أثناء التنقل."
-                />
+                {lang === "en" 
+                  ? "We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse verified gear and manage your studio equipment on the go."
+                  : "نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات المعتمدة وإدارة معدات الاستوديو الخاصة بك أثناء التنقل."}
               </p>
             </div>
           </div>
