@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
-import T from "@/components/t";
 import MarketplaceProductCard from "@/components/marketplace-product-card";
 
 export const metadata: Metadata = {
@@ -269,32 +268,62 @@ export default async function MarketplacePage({
     ].filter(Boolean).length;
 
     return (
-      <main
-        className="dashboard-page"
-        style={{ maxWidth: 1240, margin: "0 auto" }}
-      >
-        <section
-          style={{
-            marginTop: 24,
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr)",
-            gap: 18,
-          }}
-        >
+      <main className="marketplace-page">
+        <style dangerouslySetInnerHTML={{ __html: `
+          .marketplace-page {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 20px;
+          }
+          .marketplace-header {
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 18px;
+          }
+          .trust-badge-item {
+            padding: 16px 20px;
+            background: rgba(212, 175, 55, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            borderRadius: var(--gb-radius-md);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+          }
+          .trust-badge-icon {
+            font-size: 1.4rem;
+          }
+          .trust-badge-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+          }
+          .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+            margin-top: 26px;
+          }
+          @media (max-width: 600px) {
+            .marketplace-page { padding: 0 16px; }
+            .marketplace-trust-grid { grid-template-columns: 1fr 1fr !important; }
+          }
+        `}} />
+        <section className="marketplace-header">
           <div>
             <span className="badge badge-gold">
-              <T en="Marketplace" ar="المتجر" />
+              {lang === "en" ? "Marketplace" : "المتجر"}
             </span>
 
             <h1 style={{ marginTop: 10 }}>
-              <T en="Studio gear marketplace" ar="متجر معدات الاستوديو" />
+              {lang === "en" ? "Studio gear marketplace" : "متجر معدات الاستوديو"}
             </h1>
 
             <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
-              <T
-                en="Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
-                ar="تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."
-              />
+              {lang === "en" 
+                ? "Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
+                : "تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."}
             </p>
           </div>
 
@@ -311,17 +340,9 @@ export default async function MarketplacePage({
               { icon: '🤝', en: 'Trusted Seller', ar: 'بائع موثوق' },
               { icon: '⚡', en: 'Fast Shipping', ar: 'شحن سريع' },
             ].map(item => (
-              <div key={item.en} style={{
-                padding: '16px 20px',
-                background: 'rgba(212, 175, 55, 0.04)',
-                border: '1px solid rgba(212, 175, 55, 0.12)',
-                borderRadius: 'var(--gb-radius-md)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12
-              }}>
-                <span style={{ fontSize: '1.4rem' }}>{item.icon}</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
+              <div key={item.en} className="trust-badge-item">
+                <span className="trust-badge-icon">{item.icon}</span>
+                <span className="trust-badge-text">
                   {lang === "en" ? item.en : item.ar}
                 </span>
               </div>
@@ -353,7 +374,7 @@ export default async function MarketplacePage({
             <div className="grid grid-4" style={{ alignItems: 'end' }}>
               <div>
                 <label>
-                  <T en="Search" ar="بحث" />
+                  {lang === "en" ? "Search" : "بحث"}
                 </label>
                 <input
                   name="q"
@@ -365,7 +386,7 @@ export default async function MarketplacePage({
 
               <div>
                 <label>
-                  <T en="Category" ar="التصنيف" />
+                  {lang === "en" ? "Category" : "التصنيف"}
                 </label>
                 <select name="category" className="input" defaultValue={category}>
                   <option value="">{lang === "en" ? "All categories" : "جميع الفئات"}</option>
@@ -379,7 +400,7 @@ export default async function MarketplacePage({
 
               <div>
                 <label>
-                  <T en="Brand" ar="العلامة" />
+                  {lang === "en" ? "Brand" : "العلامة"}
                 </label>
                 <select name="brand" className="input" defaultValue={brand}>
                   <option value="">{lang === "en" ? "All brands" : "جميع العلامات"}</option>
@@ -393,7 +414,7 @@ export default async function MarketplacePage({
 
               <div>
                 <label>
-                  <T en="Sort" ar="الترتيب" />
+                  {lang === "en" ? "Sort" : "الترتيب"}
                 </label>
                 <select name="sort" className="input" defaultValue={sort}>
                   <option value="newest">{lang === "en" ? "Newest" : "الأحدث"}</option>
@@ -407,7 +428,7 @@ export default async function MarketplacePage({
               <div className="grid grid-2" style={{ gap: 10 }}>
                 <div>
                   <label>
-                    <T en="Min price" ar="أقل سعر" />
+                    {lang === "en" ? "Min price" : "أقل سعر"}
                   </label>
                   <input
                     name="min_price"
@@ -422,7 +443,7 @@ export default async function MarketplacePage({
 
                 <div>
                   <label>
-                    <T en="Max price" ar="أعلى سعر" />
+                    {lang === "en" ? "Max price" : "أعلى سعر"}
                   </label>
                   <input
                     name="max_price"
@@ -458,17 +479,17 @@ export default async function MarketplacePage({
                   style={{ width: 18, height: 18, accentColor: 'var(--gb-gold)' }}
                 />
                 <span style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'none' }}>
-                  <T en="In stock only" ar="المتوفر فقط" />
+                  {lang === "en" ? "In stock only" : "المتوفر فقط"}
                 </span>
               </label>
 
               <div style={{ display: "flex", gap: 10 }}>
                 <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
-                  <T en="Apply filters" ar="تطبيق الفلتر" />
+                  {lang === "en" ? "Apply filters" : "تطبيق الفلتر"}
                 </button>
 
                 <Link href="/marketplace" className="btn btn-outline" style={{ flex: 1 }}>
-                  <T en="Reset" ar="إعادة ضبط" />
+                  {lang === "en" ? "Reset" : "إعادة ضبط"}
                 </Link>
               </div>
             </div>
@@ -496,7 +517,7 @@ export default async function MarketplacePage({
           </div>
         </section>
 
-        <section style={{ marginTop: 26 }}>
+        <section className="products-grid">
           {products.length === 0 ? (
             <div
               className="card"
@@ -510,28 +531,21 @@ export default async function MarketplacePage({
             >
               <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
               <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-                <T en="Marketplace is being prepared for pilot launch" ar="المتجر قيد التجهيز للمرحلة التجريبية" />
+                {lang === "en" ? "Marketplace is being prepared for pilot launch" : "المتجر قيد التجهيز للمرحلة التجريبية"}
               </h2>
 
               <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
-                <T
-                  en="We are preparing GearBeat Marketplace products and operations for a controlled pilot experience. Please check back soon."
-                  ar="نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا."
-                />
+                {lang === "en" 
+                  ? "We are preparing GearBeat Marketplace products and operations for a controlled pilot experience. Please check back soon."
+                  : "نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا."}
               </p>
 
               <Link href="/join/seller" className="btn btn-primary">
-                <T en="Join as Seller" ar="انضم كتاجر" />
+                {lang === "en" ? "Join as Seller" : "انضم كتاجر"}
               </Link>
             </div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: 18,
-              }}
-            >
+            <>
             {products.map((product: any, index: number) => (
               <MarketplaceProductCard 
                 key={product.id} 
@@ -540,7 +554,7 @@ export default async function MarketplacePage({
                 priority={index < 4}
               />
             ))}
-          </div>
+            </>
         )}
       </section>
 
@@ -583,18 +597,15 @@ export default async function MarketplacePage({
         >
           <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
           <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-            <T en="Marketplace is being prepared for pilot launch" ar="المتجر قيد التجهيز للمرحلة التجريبية" />
+            المتجر قيد التجهيز للمرحلة التجريبية
           </h2>
 
           <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
-            <T
-              en="We are preparing GearBeat Marketplace products and operations for a controlled pilot experience. Please check back soon."
-              ar="نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا."
-            />
+            نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا.
           </p>
 
           <Link href="/join/seller" className="btn btn-primary">
-            <T en="Join as Seller" ar="انضم كتاجر" />
+            انضم كتاجر
           </Link>
         </div>
       </main>

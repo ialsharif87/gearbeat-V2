@@ -1,8 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import T from "./t";
 
-export default function Footer() {
+type FooterProps = {
+  lang?: "en" | "ar";
+};
+
+export default function Footer({ lang = "ar" }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -23,41 +26,40 @@ export default function Footer() {
               STUDIO. SOUND. CONNECTED.
             </p>
             <p className="footer-desc">
-              <T
-                en="The global marketplace for audio creators, music studios, and gear vendors."
-                ar="المنصة العالمية لمبدعي الصوت، استوديوهات الموسيقى، وتجار المعدات."
-              />
+              {lang === "en" 
+                ? "The global marketplace for audio creators, music studios, and gear vendors."
+                : "المنصة العالمية لمبدعي الصوت، استوديوهات الموسيقى، وتجار المعدات."}
             </p>
           </div>
 
           <div className="footer-col">
-            <h4><T en="Platform" ar="المنصة" /></h4>
-            <Link href="/studios"><T en="Discovery" ar="الاكتشاف" /></Link>
-            <Link href="/marketplace"><T en="Marketplace" ar="السوق" /></Link>
-            <Link href="/tickets"><T en="Tickets" ar="التذاكر" /></Link>
-            <Link href="/how-it-works"><T en="How it Works" ar="كيف يعمل" /></Link>
+            <h4>{lang === "en" ? "Platform" : "المنصة"}</h4>
+            <Link href="/studios">{lang === "en" ? "Discovery" : "الاكتشاف"}</Link>
+            <Link href="/marketplace">{lang === "en" ? "Marketplace" : "السوق"}</Link>
+            <Link href="/tickets">{lang === "en" ? "Tickets" : "التذاكر"}</Link>
+            <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
           </div>
 
           <div className="footer-col">
-            <h4><T en="Partner Network" ar="شبكة الشركاء" /></h4>
-            <Link href="/join/studio"><T en="List Your Studio" ar="أضف استوديوك" /></Link>
-            <Link href="/join/seller"><T en="Sell Gear" ar="بع معداتك" /></Link>
-            <Link href="/partner"><T en="Partner Portal" ar="بوابة الشركاء" /></Link>
-            <Link href="/support"><T en="Partner Support" ar="دعم الشركاء" /></Link>
+            <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
+            <Link href="/join/studio">{lang === "en" ? "List Your Studio" : "أضف استوديوك"}</Link>
+            <Link href="/join/seller">{lang === "en" ? "Sell Gear" : "بع معداتك"}</Link>
+            <Link href="/partner">{lang === "en" ? "Partner Portal" : "بوابة الشركاء"}</Link>
+            <Link href="/support">{lang === "en" ? "Partner Support" : "دعم الشركاء"}</Link>
           </div>
 
           <div className="footer-col">
-            <h4><T en="Legal & Trust" ar="القانونية والثقة" /></h4>
-            <Link href="/legal"><T en="Legal Hub" ar="المركز القانوني" /></Link>
-            <Link href="/legal/terms"><T en="Terms of Service" ar="شروط الخدمة" /></Link>
-            <Link href="/legal/privacy"><T en="Privacy Policy" ar="سياسة الخصوصية" /></Link>
-            <Link href="/legal/booking-policy"><T en="Booking Policy" ar="سياسة الحجز" /></Link>
-            <Link href="/gearbeat-certified"><T en="GearBeat Certified" ar="جيربيت المعتمد" /></Link>
+            <h4>{lang === "en" ? "Legal & Trust" : "القانونية والثقة"}</h4>
+            <Link href="/legal">{lang === "en" ? "Legal Hub" : "المركز القانوني"}</Link>
+            <Link href="/legal/terms">{lang === "en" ? "Terms of Service" : "شروط الخدمة"}</Link>
+            <Link href="/legal/privacy">{lang === "en" ? "Privacy Policy" : "سياسة الخصوصية"}</Link>
+            <Link href="/legal/booking-policy">{lang === "en" ? "Booking Policy" : "سياسة الحجز"}</Link>
+            <Link href="/gearbeat-certified">{lang === "en" ? "GearBeat Certified" : "جيربيت المعتمد"}</Link>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>© {currentYear} GearBeat. <T en="All rights reserved." ar="جميع الحقوق محفوظة." /></p>
+          <p>© {currentYear} GearBeat. {lang === "en" ? "All rights reserved." : "جميع الحقوق محفوظة."}</p>
         </div>
       </div>
 

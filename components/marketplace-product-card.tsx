@@ -71,6 +71,7 @@ export default function MarketplaceProductCard({ product, lang, priority = false
         <div
           style={{
             height: 190,
+            aspectRatio: "16 / 9",
             background: "radial-gradient(circle at center, rgba(207,167,98,0.18), rgba(255,255,255,0.035))",
             display: "flex",
             alignItems: "center",
@@ -85,10 +86,11 @@ export default function MarketplaceProductCard({ product, lang, priority = false
                 src={image}
                 alt={getProductName(product)}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 style={{ objectFit: "cover" }}
                 priority={priority}
-                loading={priority ? undefined : "lazy"}
+                loading={priority ? "eager" : "lazy"}
+                decoding={priority ? "sync" : "async"}
               />
               <div style={{
                 position: 'absolute',

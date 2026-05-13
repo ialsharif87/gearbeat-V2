@@ -47,10 +47,11 @@ export default function ConditionalLayout({
           userRole={userRole}
           dashboardPath={dashboardPath}
           logoutAction={logoutAction}
+          lang={lang as "en" | "ar"}
         />
       )}
       {children}
-      {!hideChrome && <Footer />}
+      {!hideChrome && <Footer lang={lang as "en" | "ar"} />}
     </>
   );
 }
