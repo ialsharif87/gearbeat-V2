@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "../components/t";
+import AskGearBeatPreview from "../components/ask-gearbeat-preview";
 
 export default function HomePage() {
   return (
@@ -54,6 +55,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <AskGearBeatPreview />
 
       {/* 2. CHOOSE YOUR PATH */}
       <section className="section-padding">
