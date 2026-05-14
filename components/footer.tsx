@@ -55,6 +55,7 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <Link href="/legal/terms">{lang === "en" ? "Terms of Service" : "شروط الخدمة"}</Link>
             <Link href="/legal/privacy">{lang === "en" ? "Privacy Policy" : "سياسة الخصوصية"}</Link>
             <Link href="/legal/marketplace-policy">{lang === "en" ? "Marketplace Policy" : "سياسة السوق"}</Link>
+            <Link href="/legal/academy-policy">{lang === "en" ? "Academy Policy" : "سياسة الأكاديمية"}</Link>
             <Link href="/legal/booking-policy">{lang === "en" ? "Booking Policy" : "سياسة الحجز"}</Link>
             <Link href="/gearbeat-certified">{lang === "en" ? "GearBeat Certified" : "جيربيت المعتمد"}</Link>
           </div>

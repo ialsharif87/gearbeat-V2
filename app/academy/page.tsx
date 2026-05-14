@@ -109,30 +109,53 @@ export default function AcademyLandingPage() {
         </div>
       </section>
 
-      {/* TRUST & SAFETY */}
+      {/* TRUST, SAFETY & REGULATORY POSITIONING */}
       <section className="section-padding bg-darker">
         <div className="container">
-          <div className="grid grid-2 gap-40">
+          <div className="section-head text-center">
+            <h2><T en="Trust & Safety Standards" ar="معايير الثقة والسلامة" /></h2>
+            <p className="text-muted"><T en="Professional music learning in a secure, live environment." ar="تعلم موسيقي احترافي في بيئة حية وآمنة." /></p>
+          </div>
+
+          <div className="grid grid-3 gap-24">
             <div className="card-premium trust-box">
               <div style={{ fontSize: '2rem', marginBottom: 16 }}>🛡️</div>
-              <h3><T en="Instructor Verification" ar="توثيق المدربين" /></h3>
-              <p style={{ color: '#888', fontSize: '0.9rem' }}>
+              <h3><T en="Verified Instructors" ar="مدربون موثقون" /></h3>
+              <p style={{ color: '#888', fontSize: '0.85rem' }}>
                 <T 
-                  en="Every GearBeat instructor undergoes a rigorous vetting process, including identity verification, technical skills assessment, and professional background checks."
-                  ar="يخضع كل مدرب في جيربيت لعملية تدقيق صارمة، تشمل التحقق من الهوية، تقييم المهارات التقنية، ومراجعة الخلفية المهنية."
+                  en="“GearBeat-verified” means we have reviewed an instructor's professional experience and credentials. Note: GearBeat Academy is a private marketplace and does not offer government-accredited certificates or official qualifications."
+                  ar="“موثق من جيربيت” يعني أننا قمنا بمراجعة الخبرة المهنية والمؤهلات للمدرب. ملاحظة: أكاديمية جيربيت هي سوق خاص ولا تقدم شهادات معتمدة حكومياً أو مؤهلات رسمية."
                 />
               </p>
             </div>
+            
             <div className="card-premium trust-box" style={{ borderColor: 'rgba(212, 175, 55, 0.4)' }}>
-              <div style={{ fontSize: '2rem', marginBottom: 16 }}>👨‍👩‍👧</div>
-              <h3><T en="Safe Learning for Minors" ar="تعلم آمن للقاصرين" /></h3>
-              <p style={{ color: '#888', fontSize: '0.9rem' }}>
+              <div style={{ fontSize: '2rem', marginBottom: 16 }}>🎥</div>
+              <h3><T en="Live Interaction Only" ar="تفاعل حي فقط" /></h3>
+              <p style={{ color: '#888', fontSize: '0.85rem' }}>
                 <T 
-                  en="Parental or guardian supervision is required for students under 18. We maintain strict safeguarding standards for all educational interactions."
-                  ar="يُشترط إشراف الوالدين أو الوصي للطلاب الذين تقل أعمارهم عن 18 عاماً. نحن نحافظ على معايير حماية صارمة لجميع التفاعلات التعليمية."
+                  en="Our Academy focuses exclusively on live, synchronous online lessons for real-time feedback. No pre-recorded courses or automated classes are offered in our current MVP."
+                  ar="تركز أكاديميتنا حصرياً على الدروس الحية والمباشرة عبر الإنترنت للحصول على تعليقات في الوقت الفعلي. لا يتم تقديم دورات مسجلة مسبقاً أو حصص مؤتمتة في نسختنا الحالية."
                 />
               </p>
             </div>
+
+            <div className="card-premium trust-box">
+              <div style={{ fontSize: '2rem', marginBottom: 16 }}>👨‍👩‍👧</div>
+              <h3><T en="Minor Safety Rules" ar="قواعد سلامة القاصرين" /></h3>
+              <p style={{ color: '#888', fontSize: '0.85rem' }}>
+                <T 
+                  en="Parental approval and supervision are mandatory for students under 18. We maintain strict safeguarding standards for all live video interactions to ensure a safe learning space."
+                  ar="موافقة الوالدين والإشراف عليهما إلزاميان للطلاب الذين تقل أعمارهم عن 18 عاماً. نحن نحافظ على معايير حماية صارمة لجميع تفاعلات الفيديو الحية لضمان مساحة تعلم آمنة."
+                />
+              </p>
+            </div>
+          </div>
+          
+          <div className="text-center mt-48">
+            <Link href="/legal/academy-policy" className="text-gold" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+              <T en="Read Full Academy & Safety Policy" ar="اقرأ سياسة الأكاديمية والسلامة الكاملة" /> →
+            </Link>
           </div>
         </div>
       </section>
