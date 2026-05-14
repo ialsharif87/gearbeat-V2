@@ -534,13 +534,13 @@ export default async function MarketplacePage({
             >
               <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
               <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-                {lang === "en" ? "Marketplace is being prepared for pilot launch" : "المتجر قيد التجهيز للمرحلة التجريبية"}
+                {lang === "en" ? "Marketplace Discovery Guidance" : "دليل اكتشاف المتجر"}
               </h2>
 
               <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
                 {lang === "en" 
-                  ? "We are preparing GearBeat Marketplace products and operations for a controlled pilot experience. Please check back soon."
-                  : "نعمل على تجهيز منتجات وتجربة GearBeat Marketplace بشكل منظم وآمن. يرجى العودة قريبًا."}
+                  ? "No exact matches found for your smart query. Try broadening your search or use the advanced filters below."
+                  : "لم يتم العثور على نتائج تطابق طلبك. جرب توسيع نطاق البحث أو استخدم الفلاتر المتقدمة أدناه."}
               </p>
 
               <Link href="/join/seller" className="btn btn-primary">
