@@ -11,8 +11,11 @@ This document establishes the **Support & Outreach Framework** for the GearBeat 
 *Note: These are templates for preparation only. No real outreach is authorized in this patch.*
 
 ### 2.1 WhatsApp / Quick-Reply Templates
-- **Studio/Vendor**: "Hi [Placeholder Name], this is GearBeat. You've been selected for our invite-only pilot. We’re simulation-testing our [Studio/Marketplace] flows. Are you free for a 5-min briefing on the intent-only scope?"
-- **Academy Instructor**: "Hi [Placeholder Name], we're finalizing our Academy 'Verified Instructor' framework. Would you like to review the safety positioning and joining the waitlist?"
+- **Studios**: "Hi [Placeholder Name], this is GearBeat. You've been selected for our invite-only pilot. We’re simulation-testing our Studio booking flows. Are you free for a 5-min briefing on the intent-only scope?"
+- **Marketplace Vendors**: "Hi [Placeholder Name], we're preparing our Marketplace pilot. We'd like to test your store's 'Certified Vendor' appearance in a private sandbox. Free to chat?"
+- **Service Providers**: "Hi [Placeholder Name], we're adding 'Verified Service' categories. We'd love to include your profile in our dry-run pilot. Can we discuss the evidence required?"
+- **Academy Instructors**: "Hi [Placeholder Name], we're finalizing our Academy 'Verified Instructor' framework. Would you like to review the safety positioning and join the waitlist?"
+- **Creators / Customers**: "Hi [Placeholder Name], you've been invited to the GearBeat V2 Private Pilot. Explore our new discovery journeys and help us harden the platform. Interested?"
 
 ### 2.2 Email Invitation Template
 **Subject**: Invitation: GearBeat Invite-Only Pilot Cohort 1
@@ -43,6 +46,7 @@ This document establishes the **Support & Outreach Framework** for the GearBeat 
 - [ ] **Infrastructure Heartbeat**: Confirm Sentry and GA4 are receiving telemetry.
 - [ ] **Lead Review**: Audit newly captured waitlist intents for data hygiene.
 - [ ] **Evidence Audit**: Verify that all simulation documents (ID/CR) are stored in the secure vault.
+- [ ] **Script Review**: Ensure all placeholders in outreach templates are clearly marked.
 
 ### 4.2 Evidence Capture Checklist
 - [ ] **ID Verification**: Placeholder verification status updated in tracker.
@@ -62,10 +66,11 @@ This document establishes the **Support & Outreach Framework** for the GearBeat 
 
 ---
 
-## 6. Blocker List
-- **Real Outreach**: Authorization for real-world partner contact is PENDING.
-- **Commercial Commitments**: Final legal approval of Partner Pack agreements is PENDING.
-- **Fulfillment Simulation**: Authorization for real-world order status testing is PENDING.
+## 6. Blocker List before any Real Outreach
+- **PII Authorization**: Authorization for real-world document storage is PENDING.
+- **Commercial Contracts**: Final legal approval of Partner Pack agreements is PENDING.
+- **Support Escalation**: Formal service level agreement (SLA) for pilot-support is PENDING.
+- **Real Outreach Signal**: Formal "Go" signal from the executive team is PENDING.
 
 ---
 
