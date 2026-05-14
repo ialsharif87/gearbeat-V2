@@ -14,6 +14,7 @@ export default function LegalHubPage() {
     { titleEn: 'Marketplace Policy', titleAr: 'سياسة السوق', path: '/legal/marketplace-policy', icon: '🛍️' },
     { titleEn: 'Booking Policy', titleAr: 'سياسة الحجز', path: '/legal/booking-policy', icon: '📅' },
     { titleEn: 'Ticketing Policy', titleAr: 'سياسة التذاكر', path: '/legal/ticketing-policy', icon: '🎫' },
+    { titleEn: 'Academy Policy', titleAr: 'سياسة الأكاديمية', path: '/legal/academy-policy', icon: '🎓' },
   ];
 
   return (
