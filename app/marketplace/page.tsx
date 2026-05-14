@@ -370,6 +370,14 @@ export default async function MarketplacePage({
 
           <SmartDiscoveryPreview vertical="marketplace" />
 
+          <div style={{ marginTop: 40, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--gb-gold)', textTransform: 'uppercase', letterSpacing: 1 }}>
+              {lang === "en" ? "Manual Advanced Filters" : "فلاتر يدوية متقدمة"}
+            </span>
+            <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
+          </div>
+
           <form
             action="/marketplace"
             className="filter-panel animate-up"
