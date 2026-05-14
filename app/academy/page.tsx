@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import T from "@/components/t";
+import SmartDiscoveryPreview from "@/components/smart-discovery-preview";
 
 export const metadata: Metadata = {
   title: "GearBeat Academy | Master the Art of Sound",
@@ -43,6 +44,7 @@ export default function AcademyLandingPage() {
       <section className="section-padding bg-darker">
         <div className="container">
           <div className="section-head text-center">
+            <SmartDiscoveryPreview vertical="academy" />
             <h2><T en="Creative Learning Verticals" ar="مجالات التعلم الإبداعي" /></h2>
             <p className="text-muted"><T en="Specialized curriculums designed for modern creators." ar="مناهج متخصصة مصممة للمبدعين العصريين." /></p>
           </div>

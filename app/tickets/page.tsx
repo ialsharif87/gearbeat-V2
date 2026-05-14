@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import T from "@/components/t";
+import SmartDiscoveryPreview from "@/components/smart-discovery-preview";
 
 export const metadata: Metadata = {
   title: "Audio Events & Masterclasses",
@@ -31,6 +32,7 @@ export default function TicketsLandingPage() {
 
       {/* FEATURED EXPERIENCES GRID */}
       <section style={{ marginTop: 80 }}>
+        <SmartDiscoveryPreview vertical="tickets" />
         <div className="flex-between" style={{ marginBottom: 32 }}>
           <div>
             <h2 style={{ fontSize: '2.2rem' }}>
