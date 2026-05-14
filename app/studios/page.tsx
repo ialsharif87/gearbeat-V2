@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 };
 import T from "@/components/t";
 import StudioFilter from "@/components/studio-filter";
+import SmartDiscoveryPreview from "@/components/smart-discovery-preview";
 import { getActiveCountries } from "@/lib/countries-server";
 import { getActiveCities } from "@/lib/locations-server";
 import { sanitizeStudioListing, SanitizedStudioListing } from "@/lib/studios-server";
@@ -594,6 +595,8 @@ export default async function StudiosPage({
             <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>ENHANCED SEARCH</span>
           </div>
         </div>
+
+        <SmartDiscoveryPreview vertical="studios" />
 
         <StudioFilter
           cities={legacyCities}

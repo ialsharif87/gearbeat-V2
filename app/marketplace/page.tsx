@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import MarketplaceProductCard from "@/components/marketplace-product-card";
+import SmartDiscoveryPreview from "@/components/smart-discovery-preview";
 
 export const metadata: Metadata = {
   title: "Shop Elite Audio Gear",
@@ -366,6 +367,8 @@ export default async function MarketplacePage({
               <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>ENHANCED SEARCH</span>
             </div>
           </div>
+
+          <SmartDiscoveryPreview vertical="marketplace" />
 
           <form
             action="/marketplace"
