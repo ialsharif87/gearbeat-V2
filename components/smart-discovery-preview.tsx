@@ -114,7 +114,7 @@ export default function SmartDiscoveryPreview({ vertical }: SmartDiscoveryPrevie
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
           {chips.map((chip, i) => (
             <div key={i} className="hover-lift" style={{ 
               background: 'rgba(255, 255, 255, 0.02)',
@@ -133,6 +133,25 @@ export default function SmartDiscoveryPreview({ vertical }: SmartDiscoveryPrevie
               <T en={chip.en} ar={chip.ar} />
             </div>
           ))}
+        </div>
+
+        <div style={{ 
+          borderTop: '1px solid rgba(255,255,255,0.05)', 
+          paddingTop: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12
+        }}>
+          <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: 'var(--gb-gold)' }}>💡</span>
+            <T en="Tip: Use specific intents like 'podcast setup' or 'vocal recording'." ar="نصيحة: استخدم احتياجات محددة مثل 'تجهيز بودكاست' أو 'تسجيل غناء'." />
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+             <span style={{ fontSize: '0.6rem', color: 'var(--gb-gold)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.6 }}>
+               <T en="Precise Discovery" ar="اكتشاف دقيق" />
+             </span>
+          </div>
         </div>
       </div>
     </div>
