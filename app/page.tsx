@@ -33,9 +33,19 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-visual">
-            <div className="sound-wave-glow shadow-gold"></div>
+            <div className="ambient-glow"></div>
+            <div className="pulse-ring ring-1"></div>
+            <div className="pulse-ring ring-2"></div>
+            <div className="pulse-ring ring-3"></div>
             <div className="abstract-orb">
-              <div className="inner-orb"></div>
+              <div className="orb-inner-glow"></div>
+              <div className="soundwave-container">
+                <div className="sw-line sw-1"></div>
+                <div className="sw-line sw-2"></div>
+                <div className="sw-line sw-3"></div>
+                <div className="sw-line sw-4"></div>
+                <div className="sw-line sw-5"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -289,35 +299,97 @@ export default function HomePage() {
 
         .hero-visual {
           position: relative;
-          height: 400px;
+          height: 450px;
           display: flex;
           justify-content: center;
           align-items: center;
+          perspective: 1000px;
         }
 
-        .sound-wave-glow {
+        .ambient-glow {
           position: absolute;
-          width: 400px;
-          height: 200px;
-          background: var(--gb-gold);
-          filter: blur(120px);
-          opacity: 0.15;
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+          filter: blur(60px);
+          pointer-events: none;
+        }
+
+        .pulse-ring {
+          position: absolute;
+          border: 1px solid rgba(212, 175, 55, 0.2);
           border-radius: 50%;
+          animation: elegant-pulse 8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
+        }
+
+        .ring-1 { width: 300px; height: 300px; animation-delay: 0s; }
+        .ring-2 { width: 300px; height: 300px; animation-delay: -2.66s; }
+        .ring-3 { width: 300px; height: 300px; animation-delay: -5.33s; }
+
+        @keyframes elegant-pulse {
+          0% { transform: scale(0.8); opacity: 0; }
+          20% { opacity: 0.5; }
+          100% { transform: scale(1.6); opacity: 0; }
         }
 
         .abstract-orb {
+          position: relative;
           width: 280px;
           height: 280px;
-          border: 1px solid var(--gb-gold);
+          background: radial-gradient(circle at 30% 30%, #151c29 0%, #000 100%);
+          border: 1.5px solid rgba(212, 175, 55, 0.4);
           border-radius: 50%;
-          opacity: 0.2;
-          box-shadow: 0 0 40px var(--gb-gold-glow);
-          animation: pulse 4s infinite ease-in-out;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+          box-shadow: 
+            0 0 50px rgba(0,0,0,0.8),
+            inset 0 0 30px rgba(212, 175, 55, 0.1);
+          z-index: 10;
         }
 
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.2; }
-          50% { transform: scale(1.1); opacity: 0.3; }
+        .orb-inner-glow {
+          position: absolute;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 60%);
+          animation: orb-drift 12s infinite linear;
+        }
+
+        @keyframes orb-drift {
+          0% { transform: translate(-20%, -20%); }
+          50% { transform: translate(10%, 10%); }
+          100% { transform: translate(-20%, -20%); }
+        }
+
+        .soundwave-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          width: 160px;
+          z-index: 20;
+        }
+
+        .sw-line {
+          height: 1.5px;
+          background: linear-gradient(to right, transparent, var(--gb-gold), transparent);
+          border-radius: 2px;
+          animation: sw-horizontal-vibrate 2s infinite ease-in-out;
+          opacity: 0.5;
+        }
+
+        .sw-1 { width: 100px; animation-delay: 0s; }
+        .sw-2 { width: 140px; animation-delay: 0.2s; }
+        .sw-3 { width: 110px; animation-delay: 0.4s; }
+        .sw-4 { width: 150px; animation-delay: 0.6s; }
+        .sw-5 { width: 90px; animation-delay: 0.8s; }
+
+        @keyframes sw-horizontal-vibrate {
+          0%, 100% { transform: scaleX(1); opacity: 0.4; }
+          50% { transform: scaleX(1.15); opacity: 0.8; }
         }
 
         /* PATH SECTION */
