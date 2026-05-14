@@ -103,20 +103,20 @@ export default function HomePage() {
       </section>
 
       {/* 3. TRUST / WHY GEARBEAT */}
-      <section className="section-padding trust-section border-y border-white/5">
+      <section className="trust-section border-y border-white/5" style={{ padding: '60px 0' }}>
         <div className="container">
-          <div className="grid grid-2 items-center gap-60">
+          <div className="grid grid-2 items-center gap-40">
             <div className="trust-text">
-              <div className="badge-gold mb-16"><T en="Verified Integrity" ar="نزاهة موثقة" /></div>
-              <h2 className="mb-24 text-balance"><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
-              <p className="text-muted leading-relaxed" style={{ maxWidth: 500 }}>
+              <div className="badge-gold mb-12"><T en="Verified Integrity" ar="نزاهة موثقة" /></div>
+              <h2 className="mb-16 text-balance" style={{ fontSize: '2.2rem' }}><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
+              <p className="text-muted leading-relaxed" style={{ maxWidth: 450, fontSize: '0.95rem' }}>
                 <T 
                   en="Every studio is vetted, every piece of gear is verified, and every transaction is secured. No more session friction, just pure sound."
                   ar="كل استوديو يتم فحصه، كل قطعة معدات يتم توثيقها، وكل عملية شراء مؤمنة. لا مزيد من معوقات الجلسات، فقط صوت نقي."
                 />
               </p>
             </div>
-            <div className="grid grid-3 gap-16">
+            <div className="grid grid-3 gap-12">
               {[
                 { icon: '🛡️', en: 'Verified Gear', ar: 'معدات موثقة' },
                 { icon: '🎚️', en: 'Studio Grade', ar: 'جودة استوديو' },
@@ -125,17 +125,18 @@ export default function HomePage() {
                 { icon: '🌍', en: 'Global Reach', ar: 'وصول عالمي' },
                 { icon: '🏛️', en: 'Certified Network', ar: 'شبكة معتمدة' },
               ].map(item => (
-                <div key={item.en} className="card-premium trust-item" style={{ 
+                <div key={item.en} className="trust-item-compact hover-lift" style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
-                  padding: '24px 16px',
-                  background: 'rgba(212, 175, 55, 0.02)',
+                  padding: '16px 12px',
+                  background: 'rgba(212, 175, 55, 0.03)',
                   border: '1px solid rgba(212, 175, 55, 0.1)',
-                  borderRadius: 'var(--gb-radius-md)'
+                  borderRadius: '16px',
+                  textAlign: 'center'
                 }}>
-                  <div className="trust-icon" style={{ fontSize: '1.5rem', marginBottom: 12 }}>{item.icon}</div>
-                  <h4 style={{ fontSize: '0.75rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  <div className="trust-icon-mini" style={{ fontSize: '1.2rem', marginBottom: 8 }}>{item.icon}</div>
+                  <h4 style={{ fontSize: '0.65rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--gb-gold-light)' }}>
                     <T en={item.en} ar={item.ar} />
                   </h4>
                 </div>
@@ -430,10 +431,7 @@ export default function HomePage() {
 
         /* TRUST SECTION */
         .trust-section { background: #080b0e; }
-        .trust-text h2 { font-size: 2.8rem; margin: 24px 0; }
-        .trust-item { text-align: center; padding: 24px; }
-        .trust-icon { font-size: 2.2rem; margin-bottom: 12px; }
-        .trust-item h4 { font-size: 1.1rem; }
+        .trust-item-compact { transition: var(--transition); }
 
         /* STUDIO PREVIEW */
         .bg-darker { background: #030507; }
