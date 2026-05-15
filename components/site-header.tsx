@@ -274,32 +274,60 @@ export default function SiteHeader({
           top: 80px;
           left: 0;
           width: 100%;
-          background: rgba(11, 15, 22, 0.98);
+          min-height: calc(100vh - 80px);
+          background: rgba(0, 0, 0, 0.98);
+          backdrop-filter: blur(20px);
           border-bottom: 1px solid var(--gb-border);
-          padding: 24px;
+          padding: 40px 24px;
           z-index: 999;
+          display: flex;
+          flex-direction: column;
         }
 
         .mobile-nav {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 12px;
         }
 
         .mobile-nav-link {
-          font-size: 1.1rem;
-          font-weight: 700;
+          font-size: 1.25rem;
+          font-weight: 800;
           color: #fff;
           text-decoration: none;
-          padding: 12px 16px;
+          padding: 20px 24px;
           background: rgba(255,255,255,0.03);
-          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 16px;
+          transition: var(--transition);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .mobile-nav-link::after {
+          content: '→';
+          font-size: 1rem;
+          opacity: 0.3;
           transition: var(--transition);
         }
 
         .mobile-nav-link:hover {
           background: rgba(201, 162, 77, 0.1);
+          border-color: rgba(201, 162, 77, 0.3);
           color: var(--gb-gold);
+        }
+
+        .mobile-nav-link:hover::after {
+          opacity: 1;
+          transform: translateX(5px);
+        }
+
+        [dir="rtl"] .mobile-nav-link::after {
+          content: '←';
+        }
+        [dir="rtl"] .mobile-nav-link:hover::after {
+          transform: translateX(-5px);
         }
 
         .user-dropdown-container {
