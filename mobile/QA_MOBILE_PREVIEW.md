@@ -80,7 +80,41 @@ The app supports multiple environments via a hidden switcher.
 - **No Live Payments**: Live gateways are blocked pending legal registration.
 - **No Database Changes**: Database migrations and updates are strictly out of scope.
 
-## 6. Known Limitations
+## 6. Sprint 5 Readiness (Full Customer Journey)
+
+**Objective**: Verify the end-to-end customer journey across all verticals (Home, Studios, Marketplace, Services, Tickets, Academy) to ensure premium mobile UX and discovery flow.
+
+### Customer Journey Verification
+- [ ] **Home**: Verify Hero section, Search bar, and Featured categories scale correctly on mobile devices.
+- [ ] **Studios**: Navigate to `/studios`. Verify filters, list view, and individual Studio profiles.
+- [ ] **Marketplace**: Navigate to `/marketplace`. Verify product grid, category tabs, and Product detail pages.
+- [ ] **Services**: Navigate to `/services`. Verify service type filtering and provider profile pages.
+- [ ] **Tickets**: Navigate to `/tickets`. Verify event discovery cards and event detail layouts.
+- [ ] **Academy**: Navigate to `/academy`. Verify course grid and lesson preview readability.
+
+### Transactional & Interaction Blocks
+- [ ] **Live Payments**: Stripe/Checkout interactions must remain in "Preview/Deferred" mode. No live credit card processing.
+- [ ] **Live AI**: "Ask GearBeat" interactions are simulated or restricted. No live production LLM tokens should be consumed during this QA phase.
+- [ ] **Data Mutations**: Booking, Order placement, and Ticket acquisition must NOT result in persistent database changes during public UI verification.
+
+## 8. Customer Journey Readiness (Sprint 5 Addendum)
+
+**Focus**: Premium discovery flow across all verticals.
+
+### Core Journey Checks
+- [ ] Verify header/footer navigation links in WebView.
+- [ ] Verify "Ask GearBeat" discovery UI renders without layout shifts.
+- [ ] Ensure all external checkout/support links route to native browser.
+
+### Verified Vertical States
+- [x] Home (Responsive Hero & Pulse)
+- [x] Studios (Filter & Profile)
+- [x] Marketplace (Grid & Detail)
+- [x] Services (Listing & Provider)
+- [x] Tickets (Event Cards)
+- [x] Academy (Grid & Preview)
+
+## 9. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
 - **Push Notifications**: Not implemented in this mirror phase.
 - **Deep Linking**: Currently only supports basic `app=1` entry.
