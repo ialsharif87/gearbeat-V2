@@ -1,0 +1,357 @@
+-- ============================================================================
+-- GEARBEAT: SQL MASTER SCHEMA DRAFT V1
+-- ============================================================================
+-- DRAFT ONLY. DO NOT EXECUTE IN PRODUCTION.
+-- This is a planning and architecture document for the GearBeat V2 database.
+-- It consolidates Sprints 0-7 into a single unified schema map.
+-- This is NOT a migration file. Do NOT run this against any database.
+-- 
+-- Rules:
+-- 1. All primary keys are UUIDs.
+-- 2. Timestamps use TIMESTAMPTZ.
+-- 3. Payment and financial columns use DECIMAL(12, 2).
+-- 4. Status fields use TEXT with CHECK constraints.
+-- 5. RLS and RPCs are planned as comments only.
+-- ============================================================================
+
+-- ==========================================
+-- 0. EXTENSION PLACEHOLDERS
+-- ==========================================
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ==========================================
+-- 0. ENUM / TYPE PLANNING
+-- ==========================================
+-- TODO: Finalize enums for vertical_type: 'studio', 'marketplace', 'academy', 'service', 'ticket'
+-- TODO: Finalize enums for transaction_status: 'pending', 'confirmed', 'failed', 'refunded'
+
+-- ==========================================
+-- PHASE 1: CORE IDENTITY & RBAC
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    display_name TEXT,
+    full_name TEXT,
+    avatar_url TEXT,
+    phone_number TEXT,
+    is_minor BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.user_roles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    role_key TEXT NOT NULL, -- super_admin, finance_admin, partner_owner, customer, etc.
+    granted_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, role_key)
+);
+
+CREATE TABLE IF NOT EXISTS public.partner_accounts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id UUID REFERENCES public.profiles(id),
+    business_name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    tax_id TEXT,
+    status TEXT DEFAULT 'pending_verification',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.partner_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.profiles(id),
+    role TEXT DEFAULT 'staff', -- owner, manager, staff
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(partner_account_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.system_audit_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    actor_id UUID REFERENCES auth.users(id),
+    action_type TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id UUID NOT NULL,
+    old_data JSONB,
+    new_data JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- PHASE 2: STUDIOS & BOOKINGS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.studios (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    description TEXT,
+    location_lat DECIMAL(10, 8),
+    location_lng DECIMAL(11, 8),
+    is_active BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.rooms (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    hourly_rate DECIMAL(12, 2) NOT NULL,
+    capacity INT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.studio_bookings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    room_id UUID REFERENCES public.rooms(id),
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    status TEXT DEFAULT 'pending_payment',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- PHASE 3: MARKETPLACE & COMMERCE
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.marketplace_vendors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id) UNIQUE,
+    display_name TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.marketplace_products (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vendor_id UUID REFERENCES public.marketplace_vendors(id),
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    inventory_count INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.marketplace_orders (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    total_amount DECIMAL(12, 2) NOT NULL,
+    status TEXT DEFAULT 'pending_payment',
+    shipping_address JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- PHASE 4: ACADEMY, SERVICES & TICKETS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.academy_lessons (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    instructor_id UUID REFERENCES public.profiles(id),
+    title TEXT NOT NULL,
+    price DECIMAL(12, 2) NOT NULL,
+    is_live BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.academy_enrollments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    lesson_id UUID REFERENCES public.academy_lessons(id),
+    student_id UUID REFERENCES auth.users(id),
+    status TEXT DEFAULT 'confirmed',
+    guardian_consent_id UUID, -- TODO: link to academy_guardian_consents
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.service_listings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    provider_id UUID REFERENCES public.profiles(id),
+    title TEXT NOT NULL,
+    base_price DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.event_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organizer_id UUID REFERENCES public.partner_accounts(id),
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    venue_name TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.event_tickets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    event_id UUID REFERENCES public.event_profiles(id),
+    user_id UUID REFERENCES auth.users(id),
+    ticket_number TEXT UNIQUE NOT NULL,
+    status TEXT DEFAULT 'active',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- PHASE 5: FINANCE & RECONCILIATION
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.payment_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    vertical_type TEXT NOT NULL,
+    vertical_record_id UUID NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    status TEXT DEFAULT 'created',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.payment_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID REFERENCES public.payment_sessions(id),
+    provider_transaction_id TEXT UNIQUE,
+    provider TEXT NOT NULL, -- manual, tap, stripe
+    amount DECIMAL(12, 2) NOT NULL,
+    status TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.finance_ledger_entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    entry_type TEXT NOT NULL, -- credit, debit
+    amount DECIMAL(12, 2) NOT NULL,
+    reference_id UUID, -- Link to transaction
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.payout_batches (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    status TEXT DEFAULT 'draft',
+    total_amount DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- PHASE 6: CERTIFIED, LOYALTY & CAMPAIGNS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.certified_entities (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type TEXT NOT NULL, -- studio, vendor, agency
+    entity_id UUID NOT NULL,
+    tier_key TEXT NOT NULL,
+    status TEXT DEFAULT 'certified',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.loyalty_reward_accounts (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id),
+    current_balance INT DEFAULT 0,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.referral_codes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) UNIQUE,
+    code TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.digital_badges (
+    badge_key TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.campaigns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    status TEXT DEFAULT 'draft',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- PHASE 7: SUPPORT, LEGAL & OPS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.support_tickets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    subject TEXT NOT NULL,
+    status TEXT DEFAULT 'open',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.legal_policies (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.user_policy_acceptances (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    policy_id UUID REFERENCES public.legal_policies(id),
+    accepted_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, policy_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.notification_outbox (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    channel TEXT NOT NULL, -- email, sms, push
+    status TEXT DEFAULT 'pending',
+    payload JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    actor_id UUID REFERENCES auth.users(id),
+    action TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- INDEX PLANNING
+-- ==========================================
+-- CREATE INDEX idx_profiles_display_name ON public.profiles(display_name);
+-- CREATE INDEX idx_bookings_user ON public.studio_bookings(user_id);
+-- CREATE INDEX idx_orders_status ON public.marketplace_orders(status);
+-- CREATE INDEX idx_payments_session ON public.payment_transactions(session_id);
+
+-- ==========================================
+-- RLS PLANNING (COMMENTS)
+-- ==========================================
+-- TODO: Implement RLS for public.profiles (Owner: ALL, others: SELECT)
+-- TODO: Implement RLS for public.studio_bookings (Owner: SELECT, Customer: SELECT/INSERT)
+-- TODO: Implement RLS for public.finance_ledger_entries (Admin: ALL, Partner: SELECT own)
+
+-- ==========================================
+-- RPC / FUNCTION PLANNING (COMMENTS)
+-- ==========================================
+-- TODO: Create handle_updated_at() trigger function
+-- TODO: Create confirm_manual_payment() RPC with role check
+-- TODO: Create deduct_inventory_atomic() RPC
+
+-- ==========================================
+-- EXECUTION WARNINGS
+-- ==========================================
+-- WARNING: This schema involves high-stakes financial and legal records.
+-- WARNING: RLS must be rigorously tested before any data migration.
+-- WARNING: Manual-confirm workflows must be gated by finance_admin roles.
+
+-- ==========================================
+-- OPEN QUESTIONS
+-- ==========================================
+-- 1. Should academy_guardian_consents be unified with user_policy_acceptances?
+-- 2. How should cross-vertical schedules be managed?
+-- 3. Is the triple-entry ledger granularity sufficient for tax reconciliation?
+
+-- ============================================================================
+-- END OF MASTER SCHEMA DRAFT V1
+-- ============================================================================

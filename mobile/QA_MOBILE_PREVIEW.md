@@ -139,7 +139,7 @@ The app supports multiple environments via a hidden switcher.
 - [ ] **Safe-Mode Verification**: Confirm that all transactional CTAs (Buy, Book, Enroll) are strictly in "Simulation/Deferred" mode.
 - [ ] **Documentation**: See [GEARBEAT_AGENT_1_SPRINT_7_MOBILE_PILOT_DEMO_CHECKLIST.md](../docs/GEARBEAT_AGENT_1_SPRINT_7_MOBILE_PILOT_DEMO_CHECKLIST.md) for the detailed step-by-step checklist.
 
-## 12. Brand Shell Polish (Patch 104A-FIX)
+## 11. Brand Shell Polish (Patch 104A-FIX)
 
 **Objective**: Verify the premium GearBeat branding across the mobile application shell components.
 
@@ -152,6 +152,22 @@ The app supports multiple environments via a hidden switcher.
 - [ ] **Visual Consistency**: Verify the "Connection Lost" screen uses the dark/gold palette.
 - [ ] **User Experience**: Confirm the "Reconnect" button is prominent and functional.
 - [ ] **Messaging**: Ensure the offline copy is professional and helpful.
+
+## 12. Preview Build Workflow (Patch 104A-FIX2)
+
+**Objective**: Verify the professional distribution and daily checking workflows.
+
+### Script Verification
+- [ ] **LAN Mode**: `npm run start:lan` starts the dev server and displays a local IP URL.
+- [ ] **Tunnel Mode**: `npm run start:tunnel` starts the dev server via ngrok for remote access.
+- [ ] **Clear Cache**: `npm run start:clear` resets the bundler state correctly.
+
+### EAS Build Configuration
+- [ ] **eas.json**: Verify that `eas.json` exists in the mobile root and contains `preview` and `production` profiles.
+
+### Daily Sync Verification
+- [ ] **Live Mirror**: Verify that a change made to the web production site (e.g. footer text) appears in the mobile app without a re-build.
+- [ ] **Switcher Persistence**: Verify that the environment selection persists after closing and reopening the app.
 
 ## 13. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
