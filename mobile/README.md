@@ -40,3 +40,6 @@ This is an Expo-managed React Native application that serves as a premium mirror
 ## Environments
 By default, the app loads `https://gearbeat.app?app=1`. 
 Tap the top right corner of the screen 5 times to reveal the developer environment switcher.
+
+## Quality Assurance
+For detailed testing steps and checklist, see [QA_MOBILE_PREVIEW.md](./QA_MOBILE_PREVIEW.md).

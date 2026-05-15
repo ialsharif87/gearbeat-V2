@@ -7,7 +7,7 @@
 
 ## 1. RISK CATEGORIZATION & PRIORITIZATION
 
-This section categorizes the findings from the [AUDIT-101](file:///c:/Users/iaals\Documents/GitHub/gearbeat-V2/docs/GEARBEAT_AUDIT_101_BACKEND_DATABASE_REALITY_REPORT.md) based on their impact on production stability and security.
+This section categorizes the findings from the [AUDIT-101](file:///c:/Users/iaals/Documents/GitHub/gearbeat-V2/docs/GEARBEAT_AUDIT_101_BACKEND_DATABASE_REALITY_REPORT.md) based on their impact on production stability and security.
 
 ### 1.1 Critical Risks (Fix Immediately)
 *   **[R-CRIT-01] Manual Payment Exposure:**  
