@@ -1,0 +1,249 @@
+-- GEARBEAT: SQL SPRINT 7 — SUPPORT, LEGAL, NOTIFICATIONS & ADMIN AUDIT DRAFT
+-- DRAFT ONLY. DO NOT RUN IN PRODUCTION.
+-- Requires production Supabase schema verification before migration.
+-- Requires RLS/security/legal/compliance review before execution.
+-- Support, legal tracking, and notifications are placeholders only and do not activate live communication or binding contracts.
+-- Admin audit and risk logs require strict security boundaries before execution.
+
+-- ==========================================
+-- 1. SUPPORT & ESCALATION
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.support_categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    priority_level INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.support_tickets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    category_id UUID REFERENCES public.support_categories(id),
+    subject TEXT NOT NULL,
+    status TEXT DEFAULT 'open', -- open, in_progress, resolved, closed, escalated
+    priority TEXT DEFAULT 'normal', -- low, normal, high, critical
+    source TEXT DEFAULT 'web', -- web, app, email, manual
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.support_ticket_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    ticket_id UUID REFERENCES public.support_tickets(id) ON DELETE CASCADE,
+    sender_id UUID REFERENCES auth.users(id),
+    body TEXT NOT NULL,
+    is_internal_only BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.support_ticket_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    ticket_id UUID REFERENCES public.support_tickets(id) ON DELETE CASCADE,
+    actor_id UUID REFERENCES auth.users(id),
+    event_type TEXT NOT NULL, -- status_change, assignment, category_change
+    old_value TEXT,
+    new_value TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.support_escalations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    ticket_id UUID REFERENCES public.support_tickets(id) UNIQUE,
+    escalated_by UUID REFERENCES auth.users(id),
+    target_role TEXT NOT NULL, -- e.g., 'finance_admin', 'security_officer'
+    reason TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 2. LEGAL & COMPLIANCE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.legal_policies (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL, -- terms, privacy, academy-minor-consent, etc.
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.legal_policy_versions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    policy_id UUID REFERENCES public.legal_policies(id),
+    version_number TEXT NOT NULL,
+    content_en TEXT NOT NULL,
+    content_ar TEXT,
+    is_active BOOLEAN DEFAULT false,
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.user_policy_acceptances (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    policy_version_id UUID REFERENCES public.legal_policy_versions(id),
+    accepted_at TIMESTAMPTZ DEFAULT NOW(),
+    ip_address TEXT,
+    user_agent TEXT,
+    UNIQUE(user_id, policy_version_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.partner_agreement_references (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    agreement_type TEXT NOT NULL,
+    external_doc_id TEXT,
+    status TEXT DEFAULT 'pending', -- pending, signed, expired
+    valid_until DATE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 3. NOTIFICATIONS ENGINE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.notification_preferences (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id),
+    email_enabled BOOLEAN DEFAULT true,
+    sms_enabled BOOLEAN DEFAULT false,
+    whatsapp_enabled BOOLEAN DEFAULT false,
+    push_enabled BOOLEAN DEFAULT true,
+    marketing_opt_in BOOLEAN DEFAULT false,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.notification_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug TEXT UNIQUE NOT NULL,
+    title_en TEXT,
+    title_ar TEXT,
+    body_en TEXT NOT NULL,
+    body_ar TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.notification_outbox (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    template_id UUID REFERENCES public.notification_templates(id),
+    channel TEXT NOT NULL, -- email, sms, whatsapp, push
+    status TEXT DEFAULT 'pending', -- pending, sent, failed, retry
+    payload JSONB NOT NULL,
+    scheduled_for TIMESTAMPTZ,
+    sent_at TIMESTAMPTZ,
+    error_log TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.notification_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    outbox_id UUID REFERENCES public.notification_outbox(id),
+    event_type TEXT NOT NULL, -- delivered, opened, clicked, bounced
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 4. ADMIN AUDIT & INTERNAL TASKS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    actor_id UUID REFERENCES auth.users(id),
+    entity_type TEXT NOT NULL,
+    entity_id UUID NOT NULL,
+    action TEXT NOT NULL, -- view, change, delete
+    old_data JSONB,
+    new_data JSONB,
+    ip_address TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_action_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    actor_id UUID REFERENCES auth.users(id),
+    description TEXT NOT NULL,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_notes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type TEXT NOT NULL, -- user, studio, booking, order
+    entity_id UUID NOT NULL,
+    author_id UUID REFERENCES auth.users(id),
+    note_type TEXT DEFAULT 'general', -- general, compliance, support
+    body TEXT NOT NULL,
+    is_pinned BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.internal_review_tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    description TEXT,
+    assigned_to UUID REFERENCES auth.users(id),
+    status TEXT DEFAULT 'pending', -- pending, in_progress, completed, cancelled
+    due_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 5. RISK & COMPLIANCE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.compliance_flags (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type TEXT NOT NULL,
+    entity_id UUID NOT NULL,
+    flag_type TEXT NOT NULL, -- potential_fraud, minor_safety, unusual_activity
+    severity TEXT DEFAULT 'medium',
+    status TEXT DEFAULT 'active', -- active, cleared, investigated
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.risk_review_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    flag_id UUID REFERENCES public.compliance_flags(id),
+    actor_id UUID REFERENCES auth.users(id),
+    notes TEXT,
+    conclusion TEXT, -- e.g., 'cleared', 'account_suspended'
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.data_retention_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type TEXT NOT NULL,
+    entity_id UUID NOT NULL,
+    action_taken TEXT NOT NULL, -- archived, anonymized, deleted
+    actor_id UUID, -- SYSTEM or Admin UUID
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 6. INDEXES & TRIGGERS
+-- ==========================================
+CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON public.support_tickets(user_id);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON public.support_tickets(status);
+CREATE INDEX IF NOT EXISTS idx_policy_acceptances_user ON public.user_policy_acceptances(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON public.notification_outbox(status);
+CREATE INDEX IF NOT EXISTS idx_admin_notes_entity ON public.admin_notes(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_compliance_flags_entity ON public.compliance_flags(entity_type, entity_id);
+
+CREATE TRIGGER tr_support_tickets_updated_at BEFORE UPDATE ON public.support_tickets FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+CREATE TRIGGER tr_internal_review_tasks_updated_at BEFORE UPDATE ON public.internal_review_tasks FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- ==========================================
+-- 7. RLS DIRECTION (DRAFT)
+-- ==========================================
+-- ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.admin_notes ENABLE ROW LEVEL SECURITY;
+
+-- EXAMPLE: User sees only their own tickets
+-- CREATE POLICY "Users view own tickets"
+-- ON public.support_tickets FOR SELECT
+-- USING (user_id = auth.uid());
+
+-- EXAMPLE: Admin notes are restricted to internal staff
+-- CREATE POLICY "Admins view notes"
+-- ON public.admin_notes FOR SELECT
+-- USING (EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role_key IN ('support_agent', 'super_admin')));
