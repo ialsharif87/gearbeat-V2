@@ -54,7 +54,33 @@ The app supports multiple environments via a hidden switcher.
 - [ ] Tap the link.
 - [ ] **Expected**: The link should open in the **native system browser** (Safari/Chrome), NOT inside the app's WebView.
 
-## 5. Known Limitations
+## 5. Sprint 4 Readiness (Academy, Services, Tickets)
+
+**Objective**: Verify the public UI layer for the Academy, Services, and Tickets verticals within the mobile WebView without executing live transactions or interacting with the backend.
+
+### Academy Verification
+- [ ] Navigate to `/academy` via the mobile app.
+- [ ] Verify that the dark/gold UI styling renders correctly on mobile.
+- [ ] Verify that "Ask GearBeat" (AI simulation) displays properly and doesn't break layout.
+- [ ] **Blocked**: Live AI responses are disabled (no live LLM keys).
+
+### Services Verification
+- [ ] Navigate to `/services` via the mobile app.
+- [ ] Verify mobile layout scaling for service categories and listings.
+- [ ] Ensure external links to service provider social/contact open in the device's native browser.
+- [ ] **Blocked**: Live booking and payment execution are disabled.
+
+### Tickets Verification
+- [ ] Navigate to `/tickets` via the mobile app.
+- [ ] Verify mobile layout and event card styling.
+- [ ] **Blocked**: Real ticket purchasing and database mutations are disabled.
+
+### General Limitations
+- **No Backend Mutations**: All testing must be limited to read-only UI verification.
+- **No Live Payments**: Live gateways are blocked pending legal registration.
+- **No Database Changes**: Database migrations and updates are strictly out of scope.
+
+## 6. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
 - **Push Notifications**: Not implemented in this mirror phase.
 - **Deep Linking**: Currently only supports basic `app=1` entry.
