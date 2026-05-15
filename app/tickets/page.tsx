@@ -150,21 +150,22 @@ export default function TicketsLandingPage() {
 
       {/* CALL TO ACTION */}
       <section style={{ marginTop: 100, textAlign: 'center', paddingBottom: 100 }}>
-        <div className="card-premium" style={{ padding: '60px 20px', background: 'linear-gradient(to bottom, rgba(212, 175, 55, 0.05), transparent)' }}>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: 20 }}>
-            <T en="Coming Soon to GearBeat" ar="قريباً على جيربيت" />
+        <div className="card-premium" style={{ padding: '80px 40px', background: 'linear-gradient(to bottom, rgba(212, 175, 55, 0.05), transparent)' }}>
+          <div className="badge-gold mb-24 ms-auto me-auto"><T en="Pilot Phase: Now Boarding" ar="المرحلة التجريبية: بدأنا الاستقبال" /></div>
+          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: 20 }}>
+            <T en="The Gateway to Industry Access." ar="بوابتك للوصول إلى الصناعة." />
           </h2>
-          <p style={{ color: 'var(--muted)', marginBottom: 40, maxWidth: 600, marginInline: 'auto' }}>
+          <p style={{ color: 'var(--gb-text-muted)', marginBottom: 40, maxWidth: 700, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
             <T
-              en="We are currently onboarding elite event partners. Our secure ticketing engine and event extranet are under final testing."
-              ar="نعمل حالياً على ضم شركاء فعاليات متميزين. محرك حجز التذاكر الآمن وإكسترانت الفعاليات قيد الاختبار النهائي."
+              en="GearBeat Ticketing is currently onboarding elite event partners across the GCC. Our secure booking engine and QR-ready entry systems are undergoing final pilot testing."
+              ar="تذاكر جيربيت تعمل حالياً على ضم شركاء فعاليات متميزين في منطقة الخليج. محرك الحجز الآمن وأنظمة الدخول الجاهزة لرمز QR قيد الاختبار التجريبي النهائي."
             />
           </p>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/partner/tickets" className="btn btn-primary">
-              <T en="Join as Event Partner" ar="انضم كشريك فعاليات" />
+              <T en="Partner with GearBeat" ar="شارك مع جيربيت" />
             </Link>
-            <Link href="/" className="btn btn-outline">
+            <Link href="/support" className="btn btn-outline">
               <T en="Stay Notified" ar="ابق على اطلاع" />
             </Link>
           </div>

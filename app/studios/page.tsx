@@ -786,28 +786,44 @@ export default async function StudiosPage({
             })
           ) : (
             <div
-              className="card"
-              style={{ textAlign: "center", padding: "60px 20px" }}
+              className="card-premium animate-up"
+              style={{ 
+                textAlign: "center", 
+                padding: "80px 40px",
+                background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
+                border: "1px dashed rgba(212,175,55,0.2)",
+                gridColumn: "1 / -1"
+              }}
             >
-              <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+              <div style={{ fontSize: "4rem", marginBottom: 24 }}>🎙️</div>
+              <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
                 <T en="Ready to join GearBeat?" ar="هل أنت مستعد للانضمام إلى GearBeat؟" />
               </h2>
-              <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
-                <T en="Become a part of our elite network of studios." ar="انضم إلى شبكة الاستوديوهات المتميزة لدينا." />
+              <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
+                <T 
+                  en="We couldn't find studios matching your current filters. Become a part of our elite network of verified studios today." 
+                  ar="لم نتمكن من العثور على استوديوهات تطابق فلاتر البحث. كن جزءًا من شبكتنا النخبة من الاستوديوهات الموثقة اليوم." 
+                />
               </p>
-              <p style={{ marginTop: "1rem", color: "var(--gb-gold)", fontWeight: 600 }}>
+              
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <Link href="/join/studio" className="btn btn-primary">
+                  <T en="Join as Studio" ar="انضم كاستوديو" />
+                </Link>
+                <Link href="/studios" className="btn btn-outline">
+                  <T en="Reset Filters" ar="إعادة ضبط الفلاتر" />
+                </Link>
+                <Link href="/support" className="btn btn-outline">
+                  <T en="Request a Location" ar="طلب موقع" />
+                </Link>
+                <Link href="/marketplace" className="btn btn-outline">
+                  <T en="Explore Marketplace" ar="استكشاف المتجر" />
+                </Link>
+              </div>
+
+              <p style={{ marginTop: "2rem", color: "var(--gb-gold)", fontWeight: 600, fontSize: "0.9rem" }}>
                 <T en="Pilot‑Ready – listings are provisional and no live payments are processed." ar="في مرحلة التجريب – القوائم تجريبية ولا يتم معالجة المدفوعات الحية." />
               </p>
-
-              <Link href="/join/studio" className="btn btn-primary">
-                <T en="Join as Studio" ar="انضم كاستوديو" />
-              </Link>
-              <Link href="/support" className="btn btn-outline">
-                <T en="Request a Location" ar="طلب موقع" />
-              </Link>
-              <Link href="/marketplace" className="btn btn-outline">
-                <T en="Explore Marketplace" ar="استكشاف المتجر" />
-              </Link>
             </div>
           )}
         </div>

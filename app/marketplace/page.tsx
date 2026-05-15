@@ -531,24 +531,24 @@ export default async function MarketplacePage({
         <section className="products-grid">
           {products.length === 0 ? (
             <div
-              className="card"
+              className="card-premium animate-up"
               style={{
-                padding: "80px 20px",
+                padding: "80px 40px",
                 textAlign: "center",
                 background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
                 border: "1px dashed rgba(212,175,55,0.2)",
-                borderRadius: 24
+                gridColumn: "1 / -1"
               }}
             >
-              <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
-              <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
+              <div style={{ fontSize: "4rem", marginBottom: 24 }}>🛡️</div>
+              <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
                 {lang === "en" ? "Marketplace Discovery" : "اكتشاف المتجر"}
               </h2>
 
-              <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
+              <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
                 {lang === "en" 
-                  ? "No exact matches found. We are currently in a pilot phase with a curated selection of elite gear."
-                  : "لم يتم العثور على نتائج تطابق طلبك. نحن حالياً في مرحلة تجريبية مع مجموعة مختارة من المعدات النخبة."}
+                  ? "No exact matches found. We are currently in a pilot phase with a curated selection of elite gear. Our catalog is expanding daily."
+                  : "لم يتم العثور على نتائج تطابق طلبك. نحن حالياً في مرحلة تجريبية مع مجموعة مختارة من المعدات النخبة. كتالوجنا يتوسع يومياً."}
               </p>
 
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -587,16 +587,16 @@ export default async function MarketplacePage({
       <section style={{ marginTop: 60, marginBottom: 40 }}>
         <div className="card-premium" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(212,175,55,0.03))', border: '1px dashed rgba(212,175,55,0.3)' }}>
           <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ fontSize: "3rem" }}>🛍️</div>
+            <div style={{ fontSize: "3rem" }}>📲</div>
             <div>
               <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}>
-                {lang === "en" ? "Mobile Shopping Experience" : "تجربة التسوق عبر الجوال"} 
-                <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>COMING SOON</span>
+                {lang === "en" ? "Mobile-First Shopping Experience" : "تجربة تسوق تعتمد على الجوال أولاً"} 
+                <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>PILOT READY</span>
               </h3>
               <p style={{ color: 'var(--muted)', maxWidth: 700, lineHeight: 1.6 }}>
                 {lang === "en" 
-                  ? "We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse verified gear and manage your studio equipment on the go."
-                  : "نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات المعتمدة وإدارة معدات الاستوديو الخاصة بك أثناء التنقل."}
+                  ? "We are currently optimizing the GearBeat Marketplace for seamless mobile and WebView access. Our secure checkout and vendor dashboards are built to perform anywhere."
+                  : "نحن نعمل حالياً على تحسين متجر جيربيت للوصول السلس عبر الجوال وWebView. تم بناء عمليات الدفع الآمنة ولوحات تحكم التجار لتعمل في أي مكان."}
               </p>
             </div>
           </div>
