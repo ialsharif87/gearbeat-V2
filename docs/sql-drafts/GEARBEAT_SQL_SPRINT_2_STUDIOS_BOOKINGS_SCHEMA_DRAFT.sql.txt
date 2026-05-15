@@ -1,0 +1,203 @@
+-- GEARBEAT: SQL SPRINT 2 — STUDIOS & BOOKINGS SCHEMA DRAFT
+-- DRAFT ONLY. DO NOT RUN IN PRODUCTION.
+-- Requires production Supabase schema verification before migration.
+-- Requires RLS/security review before execution.
+-- Payment columns are placeholders only and do not activate live payment.
+
+-- ==========================================
+-- 1. STUDIO CORE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.studios (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    slug TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    address TEXT,
+    city TEXT DEFAULT 'Riyadh',
+    district TEXT,
+    coordinates POINT, -- For maps
+    base_hourly_rate DECIMAL(12, 2) NOT NULL,
+    currency_code TEXT DEFAULT 'SAR',
+    status TEXT DEFAULT 'draft', -- draft, pending_review, published, archived
+    is_verified BOOLEAN DEFAULT false,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Studio Media Gallery
+CREATE TABLE IF NOT EXISTS public.studio_media (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    media_type TEXT DEFAULT 'image', -- image, video, 360_tour
+    is_primary BOOLEAN DEFAULT false,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Specific rooms within a studio (if applicable)
+CREATE TABLE IF NOT EXISTS public.studio_rooms (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    capacity INT,
+    price_override DECIMAL(12, 2),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Equipment Catalog
+CREATE TABLE IF NOT EXISTS public.studio_equipment (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    category TEXT, -- mics, consoles, instruments, monitoring
+    quantity INT DEFAULT 1,
+    is_premium BOOLEAN DEFAULT false, -- if it costs extra
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 2. AVAILABILITY & PRICING
+-- ==========================================
+-- Weekly availability (0=Sunday)
+CREATE TABLE IF NOT EXISTS public.studio_availability_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    day_of_week INT CHECK (day_of_week BETWEEN 0 AND 6),
+    open_time TIME NOT NULL,
+    close_time TIME NOT NULL,
+    is_closed BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Specific dates when studio is unavailable (holidays, private events)
+CREATE TABLE IF NOT EXISTS public.studio_blackout_dates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Dynamic pricing rules (weekend surge, early bird, etc.)
+CREATE TABLE IF NOT EXISTS public.studio_pricing_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) ON DELETE CASCADE,
+    rule_type TEXT NOT NULL, -- percentage, fixed_adjustment, absolute
+    value DECIMAL(12, 2) NOT NULL,
+    day_of_week INT,
+    start_date DATE,
+    end_date DATE,
+    start_time TIME,
+    end_time TIME,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 3. BOOKING ENGINE
+-- ==========================================
+-- Initial request before payment
+CREATE TABLE IF NOT EXISTS public.studio_booking_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    studio_id UUID REFERENCES public.studios(id),
+    room_id UUID REFERENCES public.studio_rooms(id),
+    booking_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    duration_hours DECIMAL(4, 2) NOT NULL,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    currency_code TEXT DEFAULT 'SAR',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Confirmed Bookings
+CREATE TABLE IF NOT EXISTS public.studio_bookings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    request_id UUID REFERENCES public.studio_booking_requests(id) UNIQUE,
+    booking_number TEXT UNIQUE NOT NULL, -- e.g., GB-STU-12345
+    status TEXT DEFAULT 'pending_payment', -- pending_payment, confirmed, completed, cancelled, refunded
+    payment_reference_id UUID, -- Links to internal payment log
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Status Audit Trail
+CREATE TABLE IF NOT EXISTS public.booking_status_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    booking_id UUID REFERENCES public.studio_bookings(id),
+    old_status TEXT,
+    new_status TEXT NOT NULL,
+    actor_id UUID REFERENCES auth.users(id),
+    reason TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 4. POST-BOOKING & SUPPORT
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.booking_cancellation_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    booking_id UUID REFERENCES public.studio_bookings(id),
+    user_id UUID REFERENCES auth.users(id),
+    reason TEXT,
+    status TEXT DEFAULT 'pending', -- pending, approved, rejected
+    refund_amount DECIMAL(12, 2),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.studio_reviews (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id),
+    booking_id UUID REFERENCES public.studio_bookings(id) UNIQUE,
+    user_id UUID REFERENCES auth.users(id),
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    is_verified_booking BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 5. PAYMENT PLACEHOLDERS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.booking_payment_references (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    booking_id UUID REFERENCES public.studio_bookings(id),
+    provider TEXT DEFAULT 'manual', -- manual, tap, stripe
+    external_reference_id TEXT, -- e.g., tap_charge_id
+    amount DECIMAL(12, 2) NOT NULL,
+    status TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 6. INDEXES
+-- ==========================================
+CREATE INDEX IF NOT EXISTS idx_studios_slug ON public.studios(slug);
+CREATE INDEX IF NOT EXISTS idx_studio_bookings_number ON public.studio_bookings(booking_number);
+CREATE INDEX IF NOT EXISTS idx_studio_bookings_status ON public.studio_bookings(status);
+CREATE INDEX IF NOT EXISTS idx_booking_requests_date ON public.studio_booking_requests(booking_date);
+
+-- ==========================================
+-- 7. TRIGGERS
+-- ==========================================
+CREATE TRIGGER tr_studios_updated_at BEFORE UPDATE ON public.studios FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+CREATE TRIGGER tr_studio_bookings_updated_at BEFORE UPDATE ON public.studio_bookings FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- ==========================================
+-- 8. RLS DIRECTION (DRAFT)
+-- ==========================================
+-- ALTER TABLE public.studios ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.studio_bookings ENABLE ROW LEVEL SECURITY;
+
+-- EXAMPLE: Owner can update their studio
+-- CREATE POLICY "Owners can update own studio"
+-- ON public.studios FOR UPDATE
+-- USING (EXISTS (
+--     SELECT 1 FROM public.partner_accounts pa 
+--     WHERE pa.id = studios.partner_account_id AND pa.owner_id = auth.uid()
+-- ));
