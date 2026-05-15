@@ -31,14 +31,14 @@ export default function PartnerPortalFoundationPage() {
       <header className="portal-hero">
         <div className="container">
           <div className="hero-content">
-            <div className="badge-gold mb-24 ms-auto me-auto"><T en="GLOBAL PARTNER NETWORK" ar="شبكة الشركاء العالمية" /></div>
+            <div className="badge-gold mb-24 ms-auto me-auto"><T en="PILOT PHASE: PARTNER NETWORK" ar="المرحلة التجريبية: شبكة الشركاء" /></div>
             <h1 className="hero-title text-balance">
               <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>
             <p className="hero-desc text-balance mb-40">
               <T
-                en="Join the elite network of music studios, equipment vendors, and service providers. Reach a global audience of creators and manage your business with professional tools."
-                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. صل إلى جمهور عالمي من المبدعين وأدر عملك بأدوات احترافية."
+                en="Join the elite network of music studios, equipment vendors, and service providers. Currently onboarding our first cohort of certified partners for our global pilot launch."
+                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. نقوم حالياً بضم أول مجموعة من الشركاء المعتمدين لإطلاقنا التجريبي العالمي."
               />
             </p>
             <div className="hero-actions" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>

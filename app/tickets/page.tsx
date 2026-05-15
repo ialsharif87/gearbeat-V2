@@ -13,19 +13,19 @@ export default function TicketsLandingPage() {
     <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto", padding: "40px 20px" }}>
       {/* HERO SECTION */}
       <section className="section-head animate-up">
-        <span className="badge-gold">
-          <T en="GearBeat Experiences" ar="تجارب جيربيت" />
-        </span>
+        <div className="badge-gold mb-24 ms-auto me-auto">
+          <T en="GEARBEAT TICKETS — PILOT PHASE" ar="تذاكر جيربيت — المرحلة التجريبية" />
+        </div>
         <h1 style={{ fontSize: "3.5rem", marginTop: 16 }}>
-          <T en="Access premium" ar="احصل على" />{" "}
+          <T en="Access elite" ar="احصل على" />{" "}
           <span className="neon-text">
-            <T en="audio events." ar="فعاليات صوتية مميزة." />
+            <T en="audio events." ar="فعاليات صوتية نخبوية." />
           </span>
         </h1>
         <p className="lead" style={{ maxWidth: 700, margin: "24px 0", color: "var(--gb-text-muted)" }}>
           <T
-            en="From intimate studio workshops to global concerts and exclusive creator experiences. Secure your spot in the future of sound."
-            ar="من ورش العمل الخاصة في الاستوديو إلى الحفلات العالمية وتجارب المبدعين الحصرية. احجز مكانك في مستقبل الصوت."
+            en="From intimate studio workshops to exclusive industry masterclasses. We are currently onboarding elite event partners for our GCC-wide pilot launch."
+            ar="من ورش عمل الاستوديو الخاصة إلى دروس ماستر كلاس حصرية في الصناعة. نقوم حالياً بضم شركاء فعاليات متميزين لإطلاقنا التجريبي على مستوى دول الخليج."
           />
         </p>
       </section>

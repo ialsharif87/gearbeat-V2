@@ -167,14 +167,14 @@ export default async function ServicesPage({
         }}
       >
         <div className="container">
-          <div className="badge-gold mb-24 ms-auto me-auto"><T en="Professional Audio Services" ar="خدمات الصوت الاحترافية" /></div>
+          <div className="badge-gold mb-24 ms-auto me-auto"><T en="PILOT PHASE: ELITE AUDIO SERVICES" ar="المرحلة التجريبية: خدمات الصوت النخبة" /></div>
           <h1 className="text-balance" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 900, marginBottom: 24 }}>
-            <T en="Book Creative Services" ar="احجز الخدمات الإبداعية" />
+            <T en="Professional Audio Solutions" ar="حلول صوتية احترافية" />
           </h1>
           <p className="text-balance" style={{ fontSize: "1.2rem", color: "var(--gb-text-muted)", maxWidth: 700, marginInline: "auto" }}>
             <T 
-              en="Mixing, mastering, production, voiceover and more from verified providers who meet the GearBeat standard of excellence." 
-              ar="مكس، ماستر، إنتاج، تعليق صوتي والمزيد من مزودين موثقين يستوفون معايير التميز في GearBeat." 
+              en="Direct access to verified mixing, mastering, and production experts. We are currently onboarding our first cohort of certified service providers." 
+              ar="وصول مباشر إلى خبراء المكس والماستر والإنتاج المعتمدين. نحن نقوم حالياً بضم أول مجموعة من مزودي الخدمة المعتمدين لدينا." 
             />
           </p>
         </div>

@@ -15,7 +15,7 @@ export default function AcademyLandingPage() {
       <section className="academy-hero">
         <div className="container text-center animate-up">
           <div className="badge-gold mb-24 ms-auto me-auto">
-            <T en="GEARBEAT ACADEMY — OPENING SOON" ar="أكاديمية جيربيت — تفتح قريباً" />
+            <T en="GEARBEAT ACADEMY — PILOT PHASE" ar="أكاديمية جيربيت — المرحلة التجريبية" />
           </div>
           <h1 className="hero-title text-balance">
             <T en="Master the art of" ar="احترف فنون" />{" "}
@@ -25,16 +25,16 @@ export default function AcademyLandingPage() {
           </h1>
           <p className="lead text-balance mb-48">
             <T
-              en="Elite 1:1 lessons and group classes for music production, voice training, and audio engineering. Learn from verified industry experts, in-studio or online."
-              ar="دروس خاصة 1:1 وحصص جماعية في الإنتاج الموسيقي، تدريب الصوت، والهندسة الصوتية. تعلم من خبراء الصناعة المعتمدين، داخل الاستوديو أو عبر الإنترنت."
+              en="Elite 1:1 lessons and group masterclasses with verified industry experts. Currently onboarding elite instructors for our global pilot launch."
+              ar="دروس خاصة 1:1 ودروس ماستر كلاس جماعية مع خبراء صناعة معتمدين. نقوم حالياً بضم مدربين متميزين لإطلاقنا التجريبي العالمي."
             />
           </p>
           <div className="hero-actions" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
             <Link href="/support" className="btn btn-primary btn-lg shadow-gold">
-              <T en="Join Academy Waitlist" ar="انضم لقائمة انتظار الأكاديمية" />
+              <T en="Request Student Access" ar="طلب دخول الطلاب" />
             </Link>
-            <Link href="/partner" className="btn btn-outline btn-lg">
-              <T en="Become an Instructor" ar="كن مدرباً" />
+            <Link href="/support" className="btn btn-outline btn-lg">
+              <T en="Apply to Teach" ar="قدم للتدريس" />
             </Link>
           </div>
         </div>
