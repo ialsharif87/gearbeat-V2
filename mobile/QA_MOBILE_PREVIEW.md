@@ -114,6 +114,21 @@ The app supports multiple environments via a hidden switcher.
 - [x] Tickets (Event Cards)
 - [x] Academy (Grid & Preview)
 
+## 9. Sprint 6 Readiness (Trust, Legal, Support)
+
+**Objective**: Verify that customers can easily locate and consume trust, legal, and support information within the mobile app shell.
+
+### Accessibility & Readability
+- [ ] **Footer Links**: Scroll to the bottom of any vertical. Verify that "Terms of Service", "Privacy Policy", and "Support" links are legible and reachable.
+- [ ] **Support Landing**: Navigate to `/support`. Verify that the mobile layout for support categories and contact forms is optimized for small screens.
+- [ ] **Legal Document Scaling**: Open a legal policy page (e.g., Privacy). Verify that the text scales correctly and remains readable without excessive horizontal scrolling.
+- [ ] **Help Access**: Verify that FAQ or Help sections are navigable and that expanding/collapsing content works smoothly.
+
+### Integrity & Safety Boundaries
+- [ ] **No Live Claims**: Legal flows are for documentation and pilot verification only. No automated enforcement is active.
+- [ ] **No Real-World Support Automation**: Contact forms and support triggers are in "Demonstration" mode. No live ticket system integration is active.
+- [ ] **External Routing**: Any link to external legal resources or third-party support portals must open in the device's native browser.
+
 ## 10. Sprint 7 Readiness (Pilot Demo Journey)
 
 **Objective**: Verify the full customer journey for the invite-only pilot demo (Investors/Government).
