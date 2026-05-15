@@ -330,6 +330,10 @@ export default async function StudioDetailsPage({
       )}
 
       <section style={{ marginTop: 24 }}>
+          {/* Pilot Ready Banner */}
+          <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '12px 16px', borderRadius: 8, marginBottom: 16, border: '1px solid rgba(212, 175, 55, 0.3)', textAlign: 'center' }}>
+            <strong style={{ color: '#D4AF37' }}>Pilot‑Ready – bookings are provisional and no live payments are processed.</strong>
+          </div>
         <div
           style={{
             display: "flex",
@@ -640,7 +644,7 @@ export default async function StudioDetailsPage({
                 href={`/studios/${studio.slug || studio.id}/book`}
                 className="btn btn-primary btn-large"
               >
-                <T en="Book this studio" ar="احجز هذا الاستوديو" />
+                <T en="Reserve (Pilot)" ar="احجز (تجريبي)" />
               </Link>
             ) : (
               <div

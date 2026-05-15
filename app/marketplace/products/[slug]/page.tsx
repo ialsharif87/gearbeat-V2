@@ -363,6 +363,13 @@ export default async function ProductDetailPage({
               {getProductName(product)}
             </h1>
 
+            {/* Pilot Ready Banner */}
+            <div style={{ marginTop: 12, background: 'rgba(212, 175, 55, 0.1)', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.85rem' }}>
+              <strong style={{ color: '#D4AF37' }}>
+                <T en="Pilot Listing – Purchases are for demo purposes only." ar="قائمة تجريبية – المشتريات لأغراض العرض فقط." />
+              </strong>
+            </div>
+
             <p style={{ color: "var(--muted)", marginTop: 10 }}>
               SKU: {product.sku || "—"}
             </p>
@@ -451,6 +458,10 @@ export default async function ProductDetailPage({
             maxQuantity={Number(product.stock_quantity || 0)}
             disabled={Number(product.stock_quantity || 0) <= 0}
           />
+
+          <p style={{ fontSize: '0.75rem', color: 'var(--gb-gold)', textAlign: 'center', margin: 0 }}>
+            <T en="Pilot Phase: Add to cart to preview the checkout flow. No real payments." ar="المرحلة التجريبية: أضف للسلة لمعاينة عملية الدفع. لا توجد مدفوعات حقيقية." />
+          </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button

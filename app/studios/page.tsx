@@ -790,17 +790,23 @@ export default async function StudiosPage({
               style={{ textAlign: "center", padding: "60px 20px" }}
             >
               <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
-                <T en="No studios available" ar="لا توجد استوديوهات" />
+                <T en="Ready to join GearBeat?" ar="هل أنت مستعد للانضمام إلى GearBeat؟" />
               </h2>
               <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
-                <T
-                  en="Be the first to list your studio on GearBeat!"
-                  ar="كن أول من يضيف استوديو خاص به على GearBeat!"
-                />
+                <T en="Become a part of our elite network of studios." ar="انضم إلى شبكة الاستوديوهات المتميزة لدينا." />
+              </p>
+              <p style={{ marginTop: "1rem", color: "var(--gb-gold)", fontWeight: 600 }}>
+                <T en="Pilot‑Ready – listings are provisional and no live payments are processed." ar="في مرحلة التجريب – القوائم تجريبية ولا يتم معالجة المدفوعات الحية." />
               </p>
 
               <Link href="/join/studio" className="btn btn-primary">
                 <T en="Join as Studio" ar="انضم كاستوديو" />
+              </Link>
+              <Link href="/support" className="btn btn-outline">
+                <T en="Request a Location" ar="طلب موقع" />
+              </Link>
+              <Link href="/marketplace" className="btn btn-outline">
+                <T en="Explore Marketplace" ar="استكشاف المتجر" />
               </Link>
             </div>
           )}
