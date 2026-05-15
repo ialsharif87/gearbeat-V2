@@ -318,7 +318,7 @@ export default async function MarketplacePage({
             </span>
 
             <h1 style={{ marginTop: 10 }}>
-              {lang === "en" ? "Studio gear marketplace" : "متجر معدات الاستوديو"}
+              {lang === "en" ? "Gear Marketplace Preview" : "معاينة متجر المعدات"}
             </h1>
 
             <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
@@ -553,7 +553,7 @@ export default async function MarketplacePage({
 
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
                 <Link href="/join/seller" className="btn btn-primary">
-                  {lang === "en" ? "Join as Seller" : "انضم كتاجر"}
+                  {lang === "en" ? "Apply as Vendor" : "قدم كتاجر"}
                 </Link>
                 <Link href="/support" className="btn btn-outline">
                   {lang === "en" ? "Contact Support" : "اتصل بالدعم"}

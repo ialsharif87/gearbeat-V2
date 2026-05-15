@@ -529,9 +529,9 @@ export default async function StudiosPage({
           </span>
 
           <h1>
-            <T en="Find a studio that matches your" ar="اعثر على استوديو يناسب" />{" "}
+            <T en="Explore elite studios in our" ar="استكشف استوديوهات النخبة في" />{" "}
             <span className="neon-text">
-              <T en="sound." ar="صوتك." />
+              <T en="pilot network." ar="شبكتنا التجريبية." />
             </span>
           </h1>
 
@@ -709,7 +709,7 @@ export default async function StudiosPage({
                       ) : null}
 
                       <span className="badge studio-bookable-badge">
-                        <T en="Bookable" ar="قابل للحجز" />
+                        <T en="Pilot Partner" ar="شريك تجريبي" />
                       </span>
 
                       <span className="badge">
@@ -718,7 +718,7 @@ export default async function StudiosPage({
 
                       {studio.instant_booking_enabled ? (
                         <span className="badge badge-success">
-                          <T en="Instant booking" ar="حجز فوري" />
+                          <T en="Direct Access" ar="وصول مباشر" />
                         </span>
                       ) : null}
 
@@ -743,7 +743,7 @@ export default async function StudiosPage({
                   <div className="studio-card-body">
                     <div>
                       <span className="badge">
-                        <T en="Available for booking" ar="متاح للحجز" />
+                        <T en="Active Pilot Studio" ar="استوديو تجريبي نشط" />
                       </span>
 
                       <h2>{studio.name}</h2>
@@ -777,7 +777,7 @@ export default async function StudiosPage({
                       </p>
 
                       <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                        <T en="View & Book" ar="عرض وحجز" />
+                        <T en="Explore Studio" ar="استكشف الاستوديو" />
                       </Link>
                     </div>
                   </div>

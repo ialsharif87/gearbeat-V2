@@ -177,7 +177,7 @@ export default function PartnerPortalFoundationPage() {
 
         <section className="section-container text-center" style={{ marginTop: 100, paddingBottom: 120 }}>
           <div className="badge-gold mb-24 ms-auto me-auto"><T en="Take the Leap" ar="خذ الخطوة" /></div>
-          <h2 className="mb-40 text-balance" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginInline: 'auto' }}><T en="Join the Pulse of Music Innovation." ar="انضم إلى نبض الابتكار الموسيقي." /></h2>
+          <h2 className="mb-40 text-balance" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginInline: 'auto' }}><T en="Join the Pilot Network." ar="انضم إلى الشبكة التجريبية." /></h2>
           <div className="hero-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
                <T en="Start Your Application" ar="ابدأ طلبك" />
