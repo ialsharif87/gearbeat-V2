@@ -229,7 +229,7 @@ export default function HomePage() {
                </p>
                <div className="hero-actions">
                  <Link href="/tickets" className="btn btn-primary btn-lg shadow-gold">
-                   <T en="Explore Tickets" ar="استكشف التذاكر" />
+                   <T en="Explore Hub" ar="استكشف المركز" />
                  </Link>
                  <Link href="/partner" className="btn btn-outline btn-lg">
                    <T en="Host an Event" ar="استضف فعالية" />
