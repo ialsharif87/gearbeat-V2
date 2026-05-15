@@ -12,29 +12,35 @@ export function ErrorScreen({ onRetry, error }: ErrorScreenProps) {
       <View style={styles.content}>
         <View style={styles.iconWrapper}>
           <View style={styles.iconContainer}>
-            <View style={[styles.signalBar, { height: 12 }]} />
-            <View style={[styles.signalBar, { height: 24 }]} />
-            <View style={[styles.signalBar, { height: 36, opacity: 0.2 }]} />
+            <View style={[styles.signalBar, { height: 12, opacity: 0.3 }]} />
+            <View style={[styles.signalBar, { height: 24, opacity: 0.6 }]} />
+            <View style={[styles.signalBar, { height: 36, opacity: 0.1 }]} />
             <View style={styles.warningDot} />
           </View>
         </View>
         
-        <Text style={styles.title}>Connection Lost</Text>
+        <Text style={styles.title}>System Offline</Text>
         <Text style={styles.message}>
-          {error || 'Unable to sync with GearBeat premium servers. Please check your connection and try again.'}
+          {error || 'The GearBeat premium mirror is currently unable to reach the core network. Please verify your connection.'}
         </Text>
         
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={styles.button} 
             onPress={onRetry}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
-            <Text style={styles.buttonText}>Reconnect</Text>
+            <Text style={styles.buttonText}>Establish Connection</Text>
           </TouchableOpacity>
           
-          <Text style={styles.footerNote}>Limited access available in offline mode</Text>
+          <TouchableOpacity style={styles.secondaryButton} activeOpacity={0.7}>
+            <Text style={styles.secondaryButtonText}>Diagnostic Report</Text>
+          </TouchableOpacity>
         </View>
+      </View>
+      
+      <View style={styles.footer}>
+        <Text style={styles.footerNote}>ACTIVE PILOT PHASE V1.0.4</Text>
       </View>
     </View>
   );
@@ -45,16 +51,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0a0a0a',
     justifyContent: 'center',
-    padding: 32,
+    padding: 40,
   },
   content: {
     alignItems: 'center',
   },
   iconWrapper: {
-    marginBottom: 48,
-    padding: 24,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 215, 0, 0.03)',
+    marginBottom: 60,
+    padding: 30,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.1)',
+    backgroundColor: 'rgba(255, 215, 0, 0.02)',
   },
   iconContainer: {
     flexDirection: 'row',
@@ -64,69 +72,88 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   signalBar: {
-    width: 8,
+    width: 6,
     backgroundColor: '#FFD700',
-    marginHorizontal: 3,
-    borderRadius: 4,
+    marginHorizontal: 4,
+    borderRadius: 2,
   },
   warningDot: {
     position: 'absolute',
-    top: -4,
-    right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    top: -5,
+    right: -5,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     backgroundColor: '#ff4444',
     borderWidth: 2,
     borderColor: '#0a0a0a',
   },
   title: {
-    color: '#FFD700',
-    fontSize: 24,
+    color: '#FFFFFF',
+    fontSize: 28,
     fontWeight: '900',
-    marginBottom: 16,
+    marginBottom: 20,
     textTransform: 'uppercase',
-    letterSpacing: 4,
+    letterSpacing: 6,
   },
   message: {
     color: '#666666',
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 24,
     textAlign: 'center',
-    marginBottom: 56,
-    maxWidth: 280,
-    letterSpacing: 0.5,
+    marginBottom: 60,
+    maxWidth: 300,
+    letterSpacing: 1,
   },
   buttonContainer: {
     width: '100%',
-    alignItems: 'center',
+    gap: 16,
   },
   button: {
     backgroundColor: '#FFD700',
-    paddingHorizontal: 48,
-    paddingVertical: 18,
-    borderRadius: 4,
+    paddingVertical: 20,
+    borderRadius: 12,
     width: '100%',
     alignItems: 'center',
     shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
   },
   buttonText: {
     color: '#0a0a0a',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+  },
+  secondaryButton: {
+    paddingVertical: 18,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+  },
+  secondaryButtonText: {
+    color: '#444444',
+    fontSize: 10,
+    fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 2,
   },
+  footer: {
+    position: 'absolute',
+    bottom: 40,
+    width: '100%',
+    left: 40,
+    alignItems: 'center',
+  },
   footerNote: {
-    marginTop: 24,
-    color: '#333333',
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    color: '#222222',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 3,
   },
 });
