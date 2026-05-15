@@ -23,13 +23,16 @@ export default function LegalHubPage() {
         <div className="badge-gold mb-16 ms-auto me-auto">
           <T en="Official Platform Governance" ar="الحوكمة الرسمية للمنصة" />
         </div>
+        <div style={{ display: 'inline-block', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', padding: '6px 16px', borderRadius: 99, fontSize: '0.75rem', fontWeight: 800, marginBottom: 24 }}>
+          <T en="PILOT PHASE NOTICE" ar="تنبيه المرحلة التجريبية" />
+        </div>
         <h1 className="text-balance" style={{ fontSize: "clamp(2.5rem, 5vw, 3.5rem)", fontWeight: 900, marginBottom: 24 }}>
           <T en="Legal & Policies" ar="الشؤون القانونية والسياسات" />
         </h1>
         <p className="text-muted text-balance" style={{ maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
           <T 
-            en="GearBeat is committed to transparency and compliance. The following documents establish the framework for platform rules and user protection for our community."
-            ar="تلتزم GearBeat بالشفافية والامتثال. الوثائق التالية ترسي إطار قواعد المنصة وحماية المستخدم لمجتمعنا."
+            en="GearBeat is currently in a controlled Pilot Phase. The following documents establish the framework for platform rules, user protection, and pre-launch compliance."
+            ar="GearBeat حالياً في مرحلة تجريبية محكومة. الوثائق التالية ترسي إطار قواعد المنصة، حماية المستخدم، والامتثال لما قبل الإطلاق."
           />
         </p>
       </div>

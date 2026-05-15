@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Image from "next/image";
 
 type FooterProps = {
@@ -24,46 +24,48 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             </Link>
             <p className="footer-tagline">
               STUDIO. SOUND. CONNECTED.
-              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6 }}>OFFICIAL PILOT PHASE</span>
+              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6, letterSpacing: '1px' }}>
+                {lang === "en" ? "ACTIVE PILOT PHASE — PRE-LAUNCH" : "المرحلة التجريبية النشطة — ما قبل الإطلاق"}
+              </span>
             </p>
             <p className="footer-desc">
               {lang === "en" 
                 ? "The global marketplace for audio creators, music studios, and gear vendors."
-                : "المنصة العالمية لمبدعي الصوت، استوديوهات الموسيقى، وتجار المعدات."}
+                : "Ø§Ù„Ù…Ù†ØµØ© Ø§Ù„Ø¹Ø§Ù„Ù…ÙŠØ© Ù„Ù…Ø¨Ø¯Ø¹ÙŠ Ø§Ù„ØµÙˆØªØŒ Ø§Ø³ØªÙˆØ¯ÙŠÙˆÙ‡Ø§Øª Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰ØŒ ÙˆØªØ¬Ø§Ø± Ø§Ù„Ù…Ø¹Ø¯Ø§Øª."}
             </p>
           </div>
 
           <div className="footer-col">
-            <h4>{lang === "en" ? "Platform" : "المنصة"}</h4>
-            <Link href="/studios">{lang === "en" ? "Discovery" : "الاكتشاف"}</Link>
-            <Link href="/marketplace">{lang === "en" ? "Marketplace" : "السوق"}</Link>
-            <Link href="/academy">{lang === "en" ? "Academy" : "الأكاديمية"}</Link>
-            <Link href="/tickets">{lang === "en" ? "Tickets" : "التذاكر"}</Link>
-            <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
+            <h4>{lang === "en" ? "Platform" : "Ø§Ù„Ù…Ù†ØµØ©"}</h4>
+            <Link href="/studios">{lang === "en" ? "Discovery" : "Ø§Ù„Ø§ÙƒØªØ´Ø§Ù"}</Link>
+            <Link href="/marketplace">{lang === "en" ? "Marketplace" : "Ø§Ù„Ø³ÙˆÙ‚"}</Link>
+            <Link href="/academy">{lang === "en" ? "Academy" : "Ø§Ù„Ø£ÙƒØ§Ø¯ÙŠÙ…ÙŠØ©"}</Link>
+            <Link href="/tickets">{lang === "en" ? "Tickets" : "Ø§Ù„ØªØ°Ø§ÙƒØ±"}</Link>
+            <Link href="/how-it-works">{lang === "en" ? "How it Works" : "ÙƒÙŠÙ ÙŠØ¹Ù…Ù„"}</Link>
           </div>
 
           <div className="footer-col">
-            <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
-            <Link href="/join/studio">{lang === "en" ? "Apply as Studio" : "قدم كاستوديو"}</Link>
-            <Link href="/join/seller">{lang === "en" ? "Apply as Vendor" : "قدم كتاجر"}</Link>
-            <Link href="/partner">{lang === "en" ? "Become a Partner" : "كن شريكاً"}</Link>
-            <Link href="/support">{lang === "en" ? "Partner Support" : "دعم الشركاء"}</Link>
+            <h4>{lang === "en" ? "Partner Network" : "Ø´Ø¨ÙƒØ© Ø§Ù„Ø´Ø±ÙƒØ§Ø¡"}</h4>
+            <Link href="/join/studio">{lang === "en" ? "Apply as Studio" : "Ù‚Ø¯Ù… ÙƒØ§Ø³ØªÙˆØ¯ÙŠÙˆ"}</Link>
+            <Link href="/join/seller">{lang === "en" ? "Apply as Vendor" : "Ù‚Ø¯Ù… ÙƒØªØ§Ø¬Ø±"}</Link>
+            <Link href="/partner">{lang === "en" ? "Become a Partner" : "ÙƒÙ† Ø´Ø±ÙŠÙƒØ§Ù‹"}</Link>
+            <Link href="/support">{lang === "en" ? "Partner Support" : "Ø¯Ø¹Ù… Ø§Ù„Ø´Ø±ÙƒØ§Ø¡"}</Link>
           </div>
 
           <div className="footer-col">
-            <h4>{lang === "en" ? "Legal & Trust" : "القانونية والثقة"}</h4>
-            <Link href="/legal">{lang === "en" ? "Legal Hub" : "المركز القانوني"}</Link>
-            <Link href="/legal/terms">{lang === "en" ? "Terms of Service" : "شروط الخدمة"}</Link>
-            <Link href="/legal/privacy">{lang === "en" ? "Privacy Policy" : "سياسة الخصوصية"}</Link>
-            <Link href="/legal/marketplace-policy">{lang === "en" ? "Marketplace Policy" : "سياسة السوق"}</Link>
-            <Link href="/legal/academy-policy">{lang === "en" ? "Academy Policy" : "سياسة الأكاديمية"}</Link>
-            <Link href="/legal/booking-policy">{lang === "en" ? "Booking Policy" : "سياسة الحجز"}</Link>
-            <Link href="/gearbeat-certified">{lang === "en" ? "GearBeat Certified" : "جيربيت المعتمد"}</Link>
+            <h4>{lang === "en" ? "Legal & Trust" : "Ø§Ù„Ù‚Ø§Ù†ÙˆÙ†ÙŠØ© ÙˆØ§Ù„Ø«Ù‚Ø©"}</h4>
+            <Link href="/legal">{lang === "en" ? "Legal Hub" : "Ø§Ù„Ù…Ø±ÙƒØ² Ø§Ù„Ù‚Ø§Ù†ÙˆÙ†ÙŠ"}</Link>
+            <Link href="/legal/terms">{lang === "en" ? "Terms of Service" : "Ø´Ø±ÙˆØ· Ø§Ù„Ø®Ø¯Ù…Ø©"}</Link>
+            <Link href="/legal/privacy">{lang === "en" ? "Privacy Policy" : "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆØµÙŠØ©"}</Link>
+            <Link href="/legal/marketplace-policy">{lang === "en" ? "Marketplace Policy" : "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø³ÙˆÙ‚"}</Link>
+            <Link href="/legal/academy-policy">{lang === "en" ? "Academy Policy" : "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø£ÙƒØ§Ø¯ÙŠÙ…ÙŠØ©"}</Link>
+            <Link href="/legal/booking-policy">{lang === "en" ? "Booking Policy" : "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø­Ø¬Ø²"}</Link>
+            <Link href="/gearbeat-certified">{lang === "en" ? "GearBeat Certified" : "Ø¬ÙŠØ±Ø¨ÙŠØª Ø§Ù„Ù…Ø¹ØªÙ…Ø¯"}</Link>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>© {currentYear} GearBeat. {lang === "en" ? "All rights reserved." : "جميع الحقوق محفوظة."}</p>
+          <p>Â© {currentYear} GearBeat. {lang === "en" ? "All rights reserved." : "Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ‚ Ù…Ø­ÙÙˆØ¸Ø©."}</p>
         </div>
       </div>
 
@@ -152,3 +154,4 @@ export default function Footer({ lang = "ar" }: FooterProps) {
     </footer>
   );
 }
+
