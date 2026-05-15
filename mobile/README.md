@@ -44,9 +44,10 @@ Tap the top right corner of the screen 5 times to reveal the developer environme
 ## Quality Assurance
 For detailed testing steps and checklist, see [QA_MOBILE_PREVIEW.md](./QA_MOBILE_PREVIEW.md).
 
-## Sprint 4 Readiness
-The mobile app is ready for Sprint 4 demo focusing on:
-- **Academy**: Public UI & AI simulation verification.
-- **Services**: Layout scaling & external provider links.
-- **Tickets**: Event card mobile UX.
-*Note: Payments, Live AI, and Backend mutations are currently disabled/simulated.*
+## Sprint 5 Readiness
+The mobile app is ready for the Sprint 5 "Full Customer Journey" demo, covering:
+- **Home & Studios**: Premium discovery and profile navigation.
+- **Marketplace**: Product grid and detail UX scaling.
+- **Services & Tickets**: Multi-vertical browse flow.
+- **Academy**: Lesson preview and grid responsiveness.
+*Note: Interactions remain read-only; no live payments or production AI responses.*
