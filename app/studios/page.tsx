@@ -581,7 +581,7 @@ export default async function StudiosPage({
         </div>
 
         {/* ADVANCED FILTERS READINESS */}
-        <div style={{ marginBottom: 24 }}>
+        <div className="hide-app" style={{ marginBottom: 24 }}>
           <div className="card-premium" style={{ padding: 16, background: 'rgba(212,175,55,0.05)', border: '1px dashed rgba(212,175,55,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: '1.5rem' }}>🎛️</span>
