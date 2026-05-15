@@ -21,6 +21,7 @@ To start the mobile app preview:
 
 - **QR Code**: Once the server starts, a QR code will be displayed in your terminal. Scan this with the **iOS Camera** or the **Android Expo Go App**.
 - **exp URL**: If the QR code is not visible, look for a URL starting with `exp://`. You can manually enter this URL into the Expo Go app.
+- **Visual Verification**: The app should show a premium dark/gold **GEARBEAT** loading screen with a fade-in effect upon launch.
 - **Troubleshooting**: Ensure your mobile device and computer have internet access. If the tunnel fails, try running with the `--clear` flag: `npx expo start --tunnel --clear`.
 
 ## 3. Testing Environments

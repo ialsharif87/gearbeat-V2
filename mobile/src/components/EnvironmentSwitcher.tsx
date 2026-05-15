@@ -26,7 +26,8 @@ export function EnvironmentSwitcher({ currentEnv, onEnvChange, onClose, visible 
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modal}>
-          <Text style={styles.title}>Select Environment</Text>
+          <Text style={styles.title}>Developer Menu</Text>
+          <Text style={styles.subtitle}>Select Environment</Text>
           {Object.entries(ENVIRONMENTS).map(([key, url]) => (
             <TouchableOpacity
               key={key}
@@ -66,6 +67,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  subtitle: {
+    color: '#888888',
+    fontSize: 14,
+    marginBottom: 24,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   button: {
     padding: 15,
