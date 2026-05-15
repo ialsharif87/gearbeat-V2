@@ -25,13 +25,21 @@ export default function ConditionalLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lang = searchParams.get("lang") === "en" ? "en" : "ar";
+  const isAppMode = searchParams.get("app") === "1";
 
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  }, [lang]);
+    
+    if (isAppMode) {
+      document.body.classList.add("app-mode");
+    } else {
+      document.body.classList.remove("app-mode");
+    }
+  }, [lang, isAppMode]);
 
   const hideChrome =
+    isAppMode ||
     pathname.startsWith("/portal") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/staff-access") ||
