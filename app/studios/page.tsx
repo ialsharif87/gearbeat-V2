@@ -786,33 +786,22 @@ export default async function StudiosPage({
             })
           ) : (
             <div
-              className="card-premium animate-up"
-              style={{ 
-                textAlign: "center", 
-                padding: "80px 40px",
-                background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
-                border: "1px dashed rgba(212,175,55,0.2)",
-                gridColumn: "1 / -1"
-              }}
+              className="card"
+              style={{ textAlign: "center", padding: "60px 20px" }}
             >
-              <div style={{ fontSize: "4rem", marginBottom: 24 }}>🎙️</div>
-              <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-                <T en="Studio Discovery Guidance" ar="دليل اكتشاف الاستوديو" />
+              <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>
+                <T en="No studios available" ar="لا توجد استوديوهات" />
               </h2>
-              <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
+              <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
                 <T
-                  en="We couldn't find studios matching your current filters. Try broadening your search or explore our global partner network."
-                  ar="لم نتمكن من العثور على استوديوهات تطابق فلاتر البحث الحالية. جرب توسيع نطاق البحث أو استكشف شبكة شركائنا العالمية."
+                  en="Be the first to list your studio on GearBeat!"
+                  ar="كن أول من يضيف استوديو خاص به على GearBeat!"
                 />
               </p>
-              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/studios" className="btn btn-primary">
-                  <T en="Reset All Filters" ar="إعادة ضبط الفلاتر" />
-                </Link>
-                <Link href="/join/studio" className="btn btn-outline">
-                  <T en="Join as Studio" ar="انضم كاستوديو" />
-                </Link>
-              </div>
+
+              <Link href="/join/studio" className="btn btn-primary">
+                <T en="Join as Studio" ar="انضم كاستوديو" />
+              </Link>
             </div>
           )}
         </div>

@@ -531,34 +531,29 @@ export default async function MarketplacePage({
         <section className="products-grid">
           {products.length === 0 ? (
             <div
-              className="card-premium animate-up"
+              className="card"
               style={{
-                padding: "80px 40px",
+                padding: "80px 20px",
                 textAlign: "center",
                 background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
                 border: "1px dashed rgba(212,175,55,0.2)",
-                gridColumn: "1 / -1"
+                borderRadius: 24
               }}
             >
-              <div style={{ fontSize: "4rem", marginBottom: 24 }}>🛡️</div>
-              <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
+              <div style={{ fontSize: "3.5rem", marginBottom: 24 }}>🛡️</div>
+              <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
                 {lang === "en" ? "Marketplace Discovery Guidance" : "دليل اكتشاف المتجر"}
               </h2>
 
-              <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
+              <p style={{ color: "var(--gb-steel)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', lineHeight: 1.6 }}>
                 {lang === "en" 
-                  ? "We couldn't find any verified products matching your current criteria. Our catalog is expanding daily during this pilot phase."
-                  : "لم نتمكن من العثور على أي منتجات معتمدة تطابق معاييرك الحالية. كتالوجنا يتوسع يومياً خلال هذه المرحلة التجريبية."}
+                  ? "No exact matches found for your smart query. Try broadening your search or use the advanced filters below."
+                  : "لم يتم العثور على نتائج تطابق طلبك. جرب توسيع نطاق البحث أو استخدم الفلاتر المتقدمة أدناه."}
               </p>
 
-              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/marketplace" className="btn btn-primary">
-                  {lang === "en" ? "Reset All Filters" : "إعادة ضبط الفلاتر"}
-                </Link>
-                <Link href="/join/seller" className="btn btn-outline">
-                  {lang === "en" ? "Join as Seller" : "انضم كتاجر"}
-                </Link>
-              </div>
+              <Link href="/join/seller" className="btn btn-primary">
+                {lang === "en" ? "Join as Seller" : "انضم كتاجر"}
+              </Link>
             </div>
           ) : (
             <>
@@ -578,16 +573,16 @@ export default async function MarketplacePage({
       <section style={{ marginTop: 60, marginBottom: 40 }}>
         <div className="card-premium" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(212,175,55,0.03))', border: '1px dashed rgba(212,175,55,0.3)' }}>
           <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ fontSize: "3rem" }}>📲</div>
+            <div style={{ fontSize: "3rem" }}>🛍️</div>
             <div>
               <h3 style={{ fontSize: "1.3rem", marginBottom: 8 }}>
-                {lang === "en" ? "Mobile-First Shopping Experience" : "تجربة تسوق تعتمد على الجوال أولاً"} 
-                <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>PILOT READY</span>
+                {lang === "en" ? "Mobile Shopping Experience" : "تجربة التسوق عبر الجوال"} 
+                <span className="badge badge-gold" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: 8 }}>COMING SOON</span>
               </h3>
               <p style={{ color: 'var(--muted)', maxWidth: 700, lineHeight: 1.6 }}>
                 {lang === "en" 
-                  ? "We are currently optimizing the GearBeat Marketplace for seamless mobile and WebView access. Our secure checkout and vendor dashboards are built to perform anywhere."
-                  : "نحن نعمل حالياً على تحسين متجر جيربيت للوصول السلس عبر الجوال وWebView. تم بناء عمليات الدفع الآمنة ولوحات تحكم التجار لتعمل في أي مكان."}
+                  ? "We are optimizing the GearBeat Marketplace for native mobile access. Soon, you will be able to browse verified gear and manage your studio equipment on the go."
+                  : "نحن نعمل على تحسين متجر جيربيت للوصول الأصلي عبر الجوال. قريباً، ستتمكن من تصفح المعدات المعتمدة وإدارة معدات الاستوديو الخاصة بك أثناء التنقل."}
               </p>
             </div>
           </div>

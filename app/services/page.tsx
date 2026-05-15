@@ -272,34 +272,22 @@ export default async function ServicesPage({
             ))}
           </div>
         ) : (
-          <div
-            className="card-premium animate-up"
-            style={{ 
-              textAlign: "center", 
-              padding: "80px 40px",
-              background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
-              border: "1px dashed rgba(212,175,55,0.2)",
-              gridColumn: "1 / -1"
-            }}
-          >
-            <div style={{ fontSize: "4rem", marginBottom: 24 }}>🛠️</div>
-            <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-              <T en="Service Discovery Guidance" ar="دليل اكتشاف الخدمة" />
-            </h2>
-            <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
-              <T
-                en="We couldn't find any service providers matching your current selection. Our verified network is expanding to include more audio professionals soon."
-                ar="لم نتمكن من العثور على أي مزودي خدمة يطابقون اختيارك الحالي. شبكتنا الموثقة تتوسع لتشمل المزيد من محترفي الصوت قريباً."
-              />
-            </p>
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/services" className="btn btn-primary">
-                <T en="Clear All Filters" ar="مسح كل الفلاتر" />
-              </Link>
-              <Link href="/support" className="btn btn-outline">
-                <T en="Speak to an Expert" ar="تحدث مع خبير" />
-              </Link>
+          <div style={{ textAlign: "center", padding: "100px 20px", color: "var(--muted)" }}>
+            <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--gb-gold)' }}>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
             </div>
+            <h3>
+              <T en="No service providers found" ar="لم يتم العثور على مزودي خدمة" />
+            </h3>
+            <p>
+              <T en="Try selecting a different service or check back later." ar="حاول اختيار خدمة أخرى أو عد لاحقاً." />
+            </p>
+            <Link href="/services" className="btn btn-secondary" style={{ marginTop: 20 }}>
+              <T en="Clear Filters" ar="مسح الفلاتر" />
+            </Link>
           </div>
         )}
       </div>

@@ -165,24 +165,22 @@ export default function AcademyLandingPage() {
       {/* FINAL CTA */}
       <section className="section-padding text-center">
         <div className="container animate-up">
-          <div className="card-premium" style={{ padding: '80px 40px', background: 'linear-gradient(to bottom, rgba(212, 175, 55, 0.05), transparent)' }}>
-            <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: 24 }}>
-              <T en="Your Creative Evolution Starts Here." ar="تطورك الإبداعي يبدأ من هنا." />
-            </h2>
-            <p className="text-muted mb-48" style={{ maxWidth: 700, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
-              <T 
-                en="GearBeat Academy is currently in the elite instructor onboarding phase. We are building a global network of verified experts to ensure a world-class learning experience."
-                ar="أكاديمية جيربيت حالياً في مرحلة انضمام المدربين النخبة. نحن نبني شبكة عالمية من الخبراء المعتمدين لضمان تجربة تعليمية عالمية المستوى."
-              />
-            </p>
-            <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/support" className="btn btn-primary btn-lg shadow-gold">
-                <T en="Join the Waiting List" ar="انضم إلى قائمة الانتظار" />
-              </Link>
-              <Link href="/support" className="btn btn-outline btn-lg">
-                <T en="Request Instructor Access" ar="طلب دخول المدربين" />
-              </Link>
-            </div>
+          <h2 style={{ fontSize: '2.8rem', marginBottom: 24 }}>
+            <T en="Your Creative Evolution Starts Here." ar="تطورك الإبداعي يبدأ من هنا." />
+          </h2>
+          <p className="text-muted mb-40" style={{ maxWidth: 600, marginInline: 'auto' }}>
+            <T 
+              en="Academy booking is currently in the instructor onboarding phase. Join the waitlist to be notified when enrollment opens."
+              ar="حجز الأكاديمية حالياً في مرحلة انضمام المدربين. انضم إلى قائمة الانتظار ليتم إخطارك عند فتح باب التسجيل."
+            />
+          </p>
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/support" className="btn btn-primary btn-lg">
+              <T en="Notify Me on Launch" ar="أخبرني عند الإطلاق" />
+            </Link>
+            <Link href="/support" className="btn btn-outline btn-lg">
+              <T en="Request Instructor Info" ar="طلب معلومات المدرب" />
+            </Link>
           </div>
         </div>
       </section>
