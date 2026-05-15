@@ -114,8 +114,8 @@ export default function HomePage() {
               <h2 className="mb-16 text-balance" style={{ fontSize: '2.2rem' }}><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
               <p className="text-muted leading-relaxed" style={{ maxWidth: 450, fontSize: '0.95rem' }}>
                 <T 
-                  en="GearBeat is establishing the global standard for studio trust. We are currently in our Pilot Phase, vetting studios and verifying gear to ensure frictionless creative sessions."
-                  ar="تعمل GearBeat على إرساء المعيار العالمي للثقة في الاستوديوهات. نحن حالياً في مرحلتنا التجريبية، نفحص الاستوديوهات ونوثق المعدات لضمان جلسات إبداعية بلا عوائق."
+                  en="Every studio is vetted, every piece of gear is verified, and every transaction is secured. No more session friction, just pure sound."
+                  ar="كل استوديو يتم فحصه، كل قطعة معدات يتم توثيقها، وكل عملية شراء مؤمنة. لا مزيد من معوقات الجلسات، فقط صوت نقي."
                 />
               </p>
             </div>

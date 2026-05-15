@@ -22,8 +22,8 @@ export default function SupportPage() {
 
           <p>
             <T
-              en="GearBeat is currently in Pilot Phase. Our support team is here to assist with onboarding, account setup, and reporting issues for our early partners."
-              ar="GearBeat حالياً في المرحلة التجريبية. فريق الدعم هنا لمساعدتك في الانضمام، إعداد الحساب، والإبلاغ عن المشكلات لشركائنا الأوائل."
+              en="Our support team is here to help with bookings, accounts, payments, studio listings, reviews, and reports."
+              ar="فريق الدعم موجود لمساعدتك في الحجوزات، الحسابات، الدفع، قوائم الاستوديوهات، التقييمات، والبلاغات."
             />
           </p>
 
