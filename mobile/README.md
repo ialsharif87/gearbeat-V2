@@ -78,3 +78,9 @@ Standardized the mobile preview and build process:
 - **EAS Readiness**: Integrated `eas.json` for professional APK/build distribution.
 - **Script Standardization**: Added `start:lan`, `start:tunnel`, and `start:clear`.
 - **Workflow Documentation**: Clarified that daily web changes are verified via the live mirror, reducing the need for constant mobile builds.
+
+## Sprint 9A — Expo Config & Asset Polish
+Fixed Expo configuration and validated assets for a professional launch:
+- **Asset Fix**: Corrected missing splash image reference in `app.json` to use existing `splash-icon.png`.
+- **Validation**: Verified the project with `expo-doctor` ensuring 100% check pass rate.
+- **Shell Polish**: Maintained premium GearBeat dark/gold identity across all mobile shell components.

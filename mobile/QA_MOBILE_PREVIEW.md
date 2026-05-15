@@ -169,7 +169,19 @@ The app supports multiple environments via a hidden switcher.
 - [ ] **Live Mirror**: Verify that a change made to the web production site (e.g. footer text) appears in the mobile app without a re-build.
 - [ ] **Switcher Persistence**: Verify that the environment selection persists after closing and reopening the app.
 
-## 13. Known Limitations
+## 14. Expo Config & Asset Polish (Sprint 9A)
+
+**Objective**: Verify the corrected Expo configuration and asset validation.
+
+### Asset Validation
+- [ ] **Splash Screen**: Confirm the splash screen (before the loading screen) displays correctly using `splash-icon.png`.
+- [ ] **Expo Doctor**: Run `npx expo-doctor` in the mobile directory. It should pass with 0 errors.
+
+### Visual Polish
+- [ ] **App Shell**: Confirm the transition from native splash to the custom GearBeat LoadingScreen is smooth.
+- [ ] **Branding**: Verify that all shell components (Loading, Error) maintain the premium dark/gold aesthetic.
+
+## 15. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
 - **Push Notifications**: Not implemented in this mirror phase.
 - **Deep Linking**: Currently only supports basic `app=1` entry.
