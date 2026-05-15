@@ -31,7 +31,7 @@ export default function PartnerPortalFoundationPage() {
       <header className="portal-hero">
         <div className="container">
           <div className="hero-content">
-            <div className="badge-gold mb-24 ms-auto me-auto"><T en="PILOT PHASE: PARTNER ONBOARDING" ar="المرحلة التجريبية: انضمام الشركاء" /></div>
+            <div className="badge-gold mb-24 ms-auto me-auto"><T en="PRE-PILOT: INVESTOR & PARTNER READINESS" ar="ما قبل المرحلة التجريبية: جاهزية المستثمرين والشركاء" /></div>
             <h1 className="hero-title text-balance">
               <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>

@@ -15,7 +15,7 @@ export default function AcademyLandingPage() {
       <section className="academy-hero">
         <div className="container text-center animate-up">
           <div className="badge-gold mb-24 ms-auto me-auto">
-            <T en="GEARBEAT ACADEMY — PILOT PHASE" ar="أكاديمية جيربيت — المرحلة التجريبية" />
+            <T en="DEMO READINESS: ACADEMY PILOT" ar="جاهزية العرض: تجربة الأكاديمية" />
           </div>
           <h1 className="hero-title text-balance">
             <T en="Master the art of" ar="احترف فنون" />{" "}
