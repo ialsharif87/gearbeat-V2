@@ -139,7 +139,21 @@ The app supports multiple environments via a hidden switcher.
 - [ ] **Safe-Mode Verification**: Confirm that all transactional CTAs (Buy, Book, Enroll) are strictly in "Simulation/Deferred" mode.
 - [ ] **Documentation**: See [GEARBEAT_AGENT_1_SPRINT_7_MOBILE_PILOT_DEMO_CHECKLIST.md](../docs/GEARBEAT_AGENT_1_SPRINT_7_MOBILE_PILOT_DEMO_CHECKLIST.md) for the detailed step-by-step checklist.
 
-## 11. Known Limitations
+## 12. Brand Shell Polish (Patch 104A-FIX)
+
+**Objective**: Verify the premium GearBeat branding across the mobile application shell components.
+
+### Loading Screen Verification
+- [ ] **Pulse Animation**: Verify the "GEARBEAT" logo text pulses smoothly during initial load.
+- [ ] **Typography**: Confirm the gold/dark typography feels premium and matches the brand identity.
+- [ ] **Fade In/Out**: Ensure the loading screen transitions smoothly without jarring flashes.
+
+### Error Screen Verification
+- [ ] **Visual Consistency**: Verify the "Connection Lost" screen uses the dark/gold palette.
+- [ ] **User Experience**: Confirm the "Reconnect" button is prominent and functional.
+- [ ] **Messaging**: Ensure the offline copy is professional and helpful.
+
+## 13. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
 - **Push Notifications**: Not implemented in this mirror phase.
 - **Deep Linking**: Currently only supports basic `app=1` entry.

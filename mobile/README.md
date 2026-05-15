@@ -57,3 +57,10 @@ The mobile app is ready for the Sprint 7 "Pilot Demo" (Investors/Government), co
 - **Trust & Legal**: High-fidelity mirror of legal and support portals.
 - **Safe Mode**: All transactional triggers are simulated/deferred.
 *Note: This is a read-only demo; no real payments, AI tokens, or DB writes occur.*
+
+## Patch 104A-FIX — Brand Shell Polish
+The mobile app shell has been polished to enhance the premium GearBeat identity:
+- **Premium Loading**: Added animated pulse effect and improved logo typography.
+- **Improved Error State**: Refined offline UI with better messaging and reconnect flow.
+- **Visual Integrity**: Removed generic Expo styling in favor of dark/gold cinematic theme.
+- **StatusBar Optimization**: Smooth transitions between splash and app content.
