@@ -671,15 +671,86 @@ body.app-mode {
 }
 
 body.app-mode main {
-  padding-top: env(safe-area-inset-top, 20px);
+  padding-top: 0 !important;
 }
 
-body.app-mode .hero-section {
-  padding-top: 60px !important;
+body.app-mode .section-padding {
+  padding: 50px 0 !important;
+}
+
+body.app-mode .hero-section,
+body.app-mode .portal-hero,
+body.app-mode .academy-hero,
+body.app-mode .certified-hero {
+  padding-top: 30px !important;
+  padding-bottom: 50px !important;
 }
 
 body.app-mode .section-head {
   margin-top: 0 !important;
+  margin-bottom: 24px !important;
+}
+
+/* Header & Footer Simplification in App Mode */
+body.app-mode .site-header {
+  background: #000 !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  padding: 8px 0 !important;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+  position: sticky !important;
+  top: 0;
+  z-index: 1000;
+}
+
+body.app-mode .header-nav,
+body.app-mode .header-actions,
+body.app-mode .mobile-menu-toggle {
+  display: none !important;
+}
+
+body.app-mode .header-shell {
+  justify-content: center !important;
+  min-height: auto !important;
+}
+
+body.app-mode .header-left {
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+body.app-mode .logo-img {
+  height: 20px !important;
+  width: auto !important;
+}
+
+body.app-mode .site-footer {
+  padding: 30px 0 20px !important;
+  background: #000 !important;
+  margin-top: 40px !important;
+}
+
+body.app-mode .footer-grid {
+  display: none !important;
+}
+
+body.app-mode .footer-bottom {
+  border-top: none !important;
+  padding-top: 0 !important;
+  justify-content: center !important;
+  text-align: center;
+}
+
+/* Page Specific App Mode Clutter Reduction */
+body.app-mode .marketplace-trust-grid,
+body.app-mode .studio-trust-grid {
+  gap: 12px !important;
+  margin-top: 20px !important;
+}
+
+body.app-mode .card-premium {
+  padding: 20px !important;
 }
 
 /* Hide desktop-only or browser-only elements in App Mode if necessary */
@@ -690,5 +761,27 @@ body.app-mode .hide-app {
 @media (max-width: 600px) {
   body.app-mode {
     padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  
+  body.app-mode .container {
+    width: 94% !important;
+  }
+
+  body.app-mode h1 {
+    font-size: 1.8rem !important;
+  }
+
+  body.app-mode .hero-visual {
+    display: none !important;
+  }
+
+  body.app-mode .hero-container {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+    gap: 20px !important;
+  }
+  
+  body.app-mode .hero-actions {
+    justify-content: center !important;
   }
 }

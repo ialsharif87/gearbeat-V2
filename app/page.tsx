@@ -257,7 +257,7 @@ export default function HomePage() {
          </div>
        </section>
  
-      <section className="section-padding final-cta text-center py-120">
+      <section className="section-padding final-cta text-center py-120 hide-app">
         <div className="container animate-up">
           <div className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></div>
           <h2 className="mb-60 text-balance" style={{ marginInline: 'auto' }}><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
