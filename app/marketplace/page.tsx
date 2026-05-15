@@ -542,23 +542,32 @@ export default async function MarketplacePage({
             >
               <div style={{ fontSize: "4rem", marginBottom: 24 }}>🛡️</div>
               <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-                {lang === "en" ? "Marketplace Discovery Guidance" : "دليل اكتشاف المتجر"}
+                {lang === "en" ? "Marketplace Discovery" : "اكتشاف المتجر"}
               </h2>
 
               <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
                 {lang === "en" 
-                  ? "We couldn't find any verified products matching your current criteria. Our catalog is expanding daily during this pilot phase."
-                  : "لم نتمكن من العثور على أي منتجات معتمدة تطابق معاييرك الحالية. كتالوجنا يتوسع يومياً خلال هذه المرحلة التجريبية."}
+                  ? "No exact matches found. We are currently in a pilot phase with a curated selection of elite gear. Our catalog is expanding daily."
+                  : "لم يتم العثور على نتائج تطابق طلبك. نحن حالياً في مرحلة تجريبية مع مجموعة مختارة من المعدات النخبة. كتالوجنا يتوسع يومياً."}
               </p>
 
-              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/marketplace" className="btn btn-primary">
-                  {lang === "en" ? "Reset All Filters" : "إعادة ضبط الفلاتر"}
-                </Link>
-                <Link href="/join/seller" className="btn btn-outline">
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <Link href="/join/seller" className="btn btn-primary">
                   {lang === "en" ? "Join as Seller" : "انضم كتاجر"}
                 </Link>
+                <Link href="/support" className="btn btn-outline">
+                  {lang === "en" ? "Contact Support" : "اتصل بالدعم"}
+                </Link>
+                <Link href="/marketplace" className="btn btn-outline">
+                  {lang === "en" ? "Browse All Gear" : "تصفح جميع المعدات"}
+                </Link>
               </div>
+
+              <p style={{ marginTop: "2rem", color: "var(--gb-gold)", fontWeight: 600, fontSize: "0.9rem" }}>
+                {lang === "en" 
+                  ? "Pilot‑Ready – listings are provisional and no live payments are processed."
+                  : "في مرحلة التجريب – القوائم تجريبية ولا يتم معالجة المدفوعات الحية."}
+              </p>
             </div>
           ) : (
             <>

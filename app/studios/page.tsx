@@ -797,22 +797,33 @@ export default async function StudiosPage({
             >
               <div style={{ fontSize: "4rem", marginBottom: 24 }}>🎙️</div>
               <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-                <T en="Studio Discovery Guidance" ar="دليل اكتشاف الاستوديو" />
+                <T en="Ready to join GearBeat?" ar="هل أنت مستعد للانضمام إلى GearBeat؟" />
               </h2>
               <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
-                <T
-                  en="We couldn't find studios matching your current filters. Try broadening your search or explore our global partner network."
-                  ar="لم نتمكن من العثور على استوديوهات تطابق فلاتر البحث الحالية. جرب توسيع نطاق البحث أو استكشف شبكة شركائنا العالمية."
+                <T 
+                  en="We couldn't find studios matching your current filters. Become a part of our elite network of verified studios today." 
+                  ar="لم نتمكن من العثور على استوديوهات تطابق فلاتر البحث. كن جزءًا من شبكتنا النخبة من الاستوديوهات الموثقة اليوم." 
                 />
               </p>
-              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/studios" className="btn btn-primary">
-                  <T en="Reset All Filters" ar="إعادة ضبط الفلاتر" />
-                </Link>
-                <Link href="/join/studio" className="btn btn-outline">
+              
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <Link href="/join/studio" className="btn btn-primary">
                   <T en="Join as Studio" ar="انضم كاستوديو" />
                 </Link>
+                <Link href="/studios" className="btn btn-outline">
+                  <T en="Reset Filters" ar="إعادة ضبط الفلاتر" />
+                </Link>
+                <Link href="/support" className="btn btn-outline">
+                  <T en="Request a Location" ar="طلب موقع" />
+                </Link>
+                <Link href="/marketplace" className="btn btn-outline">
+                  <T en="Explore Marketplace" ar="استكشاف المتجر" />
+                </Link>
               </div>
+
+              <p style={{ marginTop: "2rem", color: "var(--gb-gold)", fontWeight: 600, fontSize: "0.9rem" }}>
+                <T en="Pilot‑Ready – listings are provisional and no live payments are processed." ar="في مرحلة التجريب – القوائم تجريبية ولا يتم معالجة المدفوعات الحية." />
+              </p>
             </div>
           )}
         </div>

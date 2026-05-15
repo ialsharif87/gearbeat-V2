@@ -96,18 +96,38 @@ export default function MarketplaceProductCard({ product, lang, priority = false
                 position: 'absolute',
                 top: 10,
                 right: 10,
-                background: 'rgba(212, 175, 55, 0.95)',
-                color: '#000',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                fontSize: '0.6rem',
-                fontWeight: 800,
-                letterSpacing: 0.5,
-                backdropFilter: 'blur(4px)',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
                 zIndex: 2
               }}>
-                {lang === "en" ? "CERTIFIED VENDOR" : "تاجر معتمد"}
+                <div style={{
+                  background: 'rgba(212, 175, 55, 0.95)',
+                  color: '#000',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.6rem',
+                  fontWeight: 800,
+                  letterSpacing: 0.5,
+                  backdropFilter: 'blur(4px)',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                }}>
+                  {lang === "en" ? "CERTIFIED VENDOR" : "تاجر معتمد"}
+                </div>
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  color: 'var(--gb-gold)',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.6rem',
+                  fontWeight: 800,
+                  letterSpacing: 0.5,
+                  border: '1px solid var(--gb-gold)',
+                  backdropFilter: 'blur(4px)',
+                  textAlign: 'center'
+                }}>
+                  {lang === "en" ? "PILOT READY" : "جاهز للتجربة"}
+                </div>
               </div>
             </div>
           ) : (
