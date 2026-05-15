@@ -13,6 +13,7 @@ type SiteHeaderProps = {
   dashboardPath: string;
   logoutAction?: () => Promise<void>;
   lang?: "en" | "ar";
+  isAppMode?: boolean;
 };
 
 export default function SiteHeader({
@@ -23,6 +24,7 @@ export default function SiteHeader({
   dashboardPath,
   logoutAction,
   lang = "ar",
+  isAppMode = false,
 }: SiteHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -74,6 +76,7 @@ export default function SiteHeader({
             </svg>
           </button>
           
+          
           <Link href="/" className="header-logo">
             <Image
               src="/brand/logo-horizontal.svg"
@@ -84,6 +87,9 @@ export default function SiteHeader({
               priority
             />
           </Link>
+          
+          {/* Spacer for mobile centering */}
+          <div className="mobile-spacer" aria-hidden="true" />
         </div>
 
         <nav className="header-nav">
@@ -95,8 +101,8 @@ export default function SiteHeader({
         </nav>
 
         <div className="header-actions">
+          {!isAppMode && <LanguageSwitcher />}
           <CartBadge />
-          <LanguageSwitcher />
 
           {isLoggedIn ? (
             <div className="user-dropdown-container" ref={dropdownRef}>
@@ -144,18 +150,27 @@ export default function SiteHeader({
       {/* MOBILE DRAWER */}
       {isMobileMenuOpen && (
         <div className="mobile-drawer glass animate-fade-in">
+          <div className="drawer-header">
+            <span className="drawer-title">{lang === "en" ? "MENU" : "القائمة"}</span>
+          </div>
           <nav className="mobile-nav">
             {navLinks.map(link => (
               <Link key={link.href} href={link.href} className="mobile-nav-link">
-                {lang === "en" ? link.en : link.ar}
+                <span className="link-text">{lang === "en" ? link.en : link.ar}</span>
               </Link>
             ))}
             {!isLoggedIn && (
-              <Link href="/login" className="mobile-nav-link text-gold">
-                {lang === "en" ? "Login" : "دخول"}
+              <Link href="/login" className="mobile-nav-link auth-link">
+                <span className="link-text">{lang === "en" ? "Login" : "دخول"}</span>
               </Link>
             )}
           </nav>
+          
+          {isAppMode && (
+            <div className="drawer-footer">
+              <p className="app-version">GearBeat Mobile v1.0.4</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -427,10 +442,73 @@ export default function SiteHeader({
 
         @media (max-width: 1000px) {
           .header-nav { display: none; }
-          .mobile-menu-toggle { display: block; }
+          .mobile-menu-toggle { 
+            display: block; 
+            order: 1;
+          }
+          .header-logo {
+            order: 2;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+          .logo-img {
+            height: 24px;
+          }
+          .header-actions {
+            order: 3;
+            gap: 12px;
+          }
+          .mobile-spacer {
+            display: block;
+            width: 40px;
+            order: 4;
+          }
           .hide-mobile { display: none; }
           .site-header { height: 70px; }
           .mobile-drawer { top: 70px; }
+          
+          .drawer-header {
+            padding: 0 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 24px;
+          }
+          
+          .drawer-title {
+            font-size: 0.7rem;
+            color: var(--gb-gold);
+            letter-spacing: 4px;
+            font-weight: 900;
+          }
+          
+          .mobile-nav {
+            gap: 8px;
+          }
+          
+          .mobile-nav-link {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            letter-spacing: 1px;
+          }
+          
+          .auth-link {
+            border-color: rgba(201, 162, 77, 0.3);
+            color: var(--gb-gold);
+            margin-top: 12px;
+          }
+          
+          .drawer-footer {
+            margin-top: auto;
+            padding: 40px 0 20px;
+            text-align: center;
+          }
+          
+          .app-version {
+            font-size: 0.6rem;
+            color: #333;
+            letter-spacing: 1px;
+          }
         }
       `}} />
     </header>

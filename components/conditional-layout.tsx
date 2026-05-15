@@ -55,6 +55,7 @@ export default function ConditionalLayout({
           dashboardPath={dashboardPath}
           logoutAction={logoutAction}
           lang={lang as "en" | "ar"}
+          isAppMode={isAppMode}
         />
       )}
       {children}

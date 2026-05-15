@@ -39,6 +39,7 @@ export function LoadingScreen() {
           <View style={styles.logoContainer}>
             <View style={styles.logoCircle} />
             <Text style={styles.text}>GEARBEAT</Text>
+            <View style={styles.goldLine} />
           </View>
         </Animated.View>
         
@@ -46,6 +47,10 @@ export function LoadingScreen() {
           <ActivityIndicator size="small" color="#FFD700" />
           <Text style={styles.subtext}>Initializing Premium Experience</Text>
         </View>
+      </View>
+      
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>STUDIO . SOUND . CONNECTED</Text>
       </View>
     </Animated.View>
   );
@@ -61,45 +66,66 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     width: '100%',
+    paddingHorizontal: 40,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 60,
   },
   logoCircle: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#FFD700',
-    marginBottom: 16,
+    marginBottom: 20,
     shadowColor: '#FFD700',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 8,
   },
   text: {
-    color: '#FFD700',
-    fontSize: 32,
-    letterSpacing: 8,
+    color: '#FFFFFF',
+    fontSize: 34,
+    letterSpacing: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
     textAlign: 'center',
-    textShadowColor: 'rgba(255, 215, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
+    marginBottom: 16,
+  },
+  goldLine: {
+    width: 40,
+    height: 1,
+    backgroundColor: '#FFD700',
+    opacity: 0.5,
   },
   loaderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   subtext: {
     marginLeft: 12,
-    color: '#444444',
-    fontSize: 10,
+    color: '#666666',
+    fontSize: 9,
     letterSpacing: 2,
     fontWeight: '700',
     textTransform: 'uppercase',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 60,
+  },
+  footerText: {
+    color: '#222222',
+    fontSize: 8,
+    letterSpacing: 4,
+    fontWeight: '800',
   },
 });

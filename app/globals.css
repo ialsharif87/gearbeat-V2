@@ -702,26 +702,30 @@ body.app-mode .site-header {
   z-index: 1000;
 }
 
-body.app-mode .header-nav,
-body.app-mode .header-actions,
-body.app-mode .mobile-menu-toggle {
+body.app-mode .header-nav {
   display: none !important;
 }
 
+body.app-mode .header-actions {
+  display: flex !important;
+}
+
+body.app-mode .mobile-menu-toggle {
+  display: block !important;
+}
+
 body.app-mode .header-shell {
-  justify-content: center !important;
+  justify-content: space-between !important;
   min-height: auto !important;
 }
 
 body.app-mode .header-left {
-  margin: 0 auto !important;
   display: flex !important;
-  justify-content: center !important;
-  width: 100% !important;
+  align-items: center !important;
 }
 
 body.app-mode .logo-img {
-  height: 20px !important;
+  height: 24px !important;
   width: auto !important;
 }
 
