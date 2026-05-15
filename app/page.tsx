@@ -10,7 +10,7 @@ export default function HomePage() {
         <div className="container hero-container animate-up">
           <div className="hero-content">
             <div className="badge-gold mb-16">
-              <T en="Official Launch Pilot" ar="الإطلاق التجريبي الرسمي" />
+              <T en="Pilot Phase — Demo Readiness" ar="المرحلة التجريبية — جاهزية العرض" />
             </div>
             <h1 className="text-balance" style={{ fontWeight: 900 }}>
               <T
@@ -257,7 +257,7 @@ export default function HomePage() {
          </div>
        </section>
  
-      <section className="section-padding final-cta text-center py-120 hide-app">
+      <section className="section-padding final-cta text-center py-120">
         <div className="container animate-up">
           <div className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></div>
           <h2 className="mb-60 text-balance" style={{ marginInline: 'auto' }}><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>

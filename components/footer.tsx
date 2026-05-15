@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 
 type FooterProps = {
@@ -25,7 +25,7 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <p className="footer-tagline">
               STUDIO. SOUND. CONNECTED.
               <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6, letterSpacing: '1px' }}>
-                {lang === "en" ? "ACTIVE PILOT PHASE — PRE-LAUNCH" : "المرحلة التجريبية النشطة — ما قبل الإطلاق"}
+                {lang === "en" ? "ACTIVE PILOT PHASE — INVESTOR & GOVERNANCE DEMO" : "المرحلة التجريبية النشطة — عرض المستثمرين والحوكمة"}
               </span>
             </p>
             <p className="footer-desc">

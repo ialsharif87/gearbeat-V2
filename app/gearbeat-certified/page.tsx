@@ -16,7 +16,7 @@ export default function GearBeatCertifiedPage() {
         <div className="container animate-up">
           <div className="hero-content text-center">
             <div className="badge-gold mb-24 ms-auto me-auto">
-              <T en="GEARBEAT CERTIFIED — OFFICIAL" ar="موثق من جيربيت — رسمي" />
+              <T en="PILOT READINESS — GOVERNANCE DEMO" ar="جاهزية المرحلة التجريبية — عرض الحوكمة" />
             </div>
             <h1 className="text-balance" style={{ lineHeight: 1.1, fontWeight: 900 }}>
               <T
