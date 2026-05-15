@@ -44,10 +44,9 @@ Tap the top right corner of the screen 5 times to reveal the developer environme
 ## Quality Assurance
 For detailed testing steps and checklist, see [QA_MOBILE_PREVIEW.md](./QA_MOBILE_PREVIEW.md).
 
-## Sprint 5 Readiness
-The mobile app is ready for the Sprint 5 "Full Customer Journey" demo, covering:
-- **Home & Studios**: Premium discovery and profile navigation.
-- **Marketplace**: Product grid and detail UX scaling.
-- **Services & Tickets**: Multi-vertical browse flow.
-- **Academy**: Lesson preview and grid responsiveness.
-*Note: Interactions remain read-only; no live payments or production AI responses.*
+## Sprint 7 Readiness
+The mobile app is ready for the Sprint 7 "Pilot Demo" (Investors/Government), covering:
+- **Full Discovery**: Home, Studios, Marketplace, Services, Tickets, Academy.
+- **Trust & Legal**: High-fidelity mirror of legal and support portals.
+- **Safe Mode**: All transactional triggers are simulated/deferred.
+*Note: This is a read-only demo; no real payments, AI tokens, or DB writes occur.*
