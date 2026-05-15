@@ -25,24 +25,32 @@ This is an Expo-managed React Native application that serves as a premium mirror
    cd mobile
    ```
 
-2. Install dependencies:
+2. Start the Expo development server (Choose a mode):
    ```bash
-   npm install
+   npm run start:lan     # Recommended for local network (Fastest)
+   npm run start:tunnel  # Use if local network is restricted
+   npm run start:clear   # Use to reset cache if issues occur
    ```
 
-3. Start the Expo development server:
-   ```bash
-   npm run start
-   ```
+3. Scan the QR code with your camera (iOS) or the Expo Go app (Android).
 
-4. Scan the QR code with your camera (iOS) or the Expo Go app (Android).
+## Preview Build Workflow (EAS)
 
-## Environments
-By default, the app loads `https://gearbeat.app?app=1`. 
-Tap the top right corner of the screen 5 times to reveal the developer environment switcher.
+For persistent previewing without running a local dev server, use EAS to create an installable APK (Android):
 
-## Quality Assurance
-For detailed testing steps and checklist, see [QA_MOBILE_PREVIEW.md](./QA_MOBILE_PREVIEW.md).
+1. **Install EAS CLI**: `npm install -g eas-cli`
+2. **Build Preview APK**: `eas build --profile preview --platform android`
+3. **Install**: Download the resulting APK to your Android device.
+
+*Note: Expo Go is intended for local development only. For high-stakes investor or government demos, always use a compiled Preview Build.*
+
+## Daily Web-Mirror Checking
+Because the mobile app is a Mirror Shell, most daily changes to the website (styles, logic, copy) are reflected immediately in the mobile app without requiring a new mobile build.
+
+**How to verify daily changes on mobile**:
+1. Open the **installed GearBeat app** (or Preview APK) on your device.
+2. The app automatically loads the production URL `https://gearbeat.app?app=1`.
+3. If you need to check a non-production environment, use the **hidden environment switcher** (Tap top-right corner 5 times).
 
 ## Sprint 6 Readiness
 The mobile app is ready for the Sprint 6 "Trust, Legal, & Support" demo, covering:
@@ -57,3 +65,16 @@ The mobile app is ready for the Sprint 7 "Pilot Demo" (Investors/Government), co
 - **Trust & Legal**: High-fidelity mirror of legal and support portals.
 - **Safe Mode**: All transactional triggers are simulated/deferred.
 *Note: This is a read-only demo; no real payments, AI tokens, or DB writes occur.*
+
+## Patch 104A-FIX — Brand Shell Polish
+The mobile app shell has been polished to enhance the premium GearBeat identity:
+- **Premium Loading**: Added animated pulse effect and improved logo typography.
+- **Improved Error State**: Refined offline UI with better messaging and reconnect flow.
+- **Visual Integrity**: Removed generic Expo styling in favor of dark/gold cinematic theme.
+- **StatusBar Optimization**: Smooth transitions between splash and app content.
+
+## Patch 104A-FIX2 — Preview Build Workflow
+Standardized the mobile preview and build process:
+- **EAS Readiness**: Integrated `eas.json` for professional APK/build distribution.
+- **Script Standardization**: Added `start:lan`, `start:tunnel`, and `start:clear`.
+- **Workflow Documentation**: Clarified that daily web changes are verified via the live mirror, reducing the need for constant mobile builds.
