@@ -24,7 +24,9 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             </Link>
             <p className="footer-tagline">
               STUDIO. SOUND. CONNECTED.
-              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6 }}>OFFICIAL PILOT PHASE</span>
+              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6, letterSpacing: '1px' }}>
+                <T en="ACTIVE PILOT PHASE — PRE-LAUNCH" ar="المرحلة التجريبية النشطة — ما قبل الإطلاق" />
+              </span>
             </p>
             <p className="footer-desc">
               {lang === "en" 

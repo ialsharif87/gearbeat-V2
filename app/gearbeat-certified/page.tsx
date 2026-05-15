@@ -26,8 +26,8 @@ export default function GearBeatCertifiedPage() {
             </h1>
             <p className="lead text-balance mb-48">
               <T
-                en="GearBeat Certified is the most rigorous audit in the music industry. We verify every signal chain, room treatment, and hardware asset to ensure absolute session reliability."
-                ar="موثق من جيربيت هو التدقيق الأكثر صرامة في صناعة الموسيقى. نحن نتحقق من كل سلسلة إشارة، معالجة غرف، وأصول العتاد لضمان موثوقية الجلسة المطلقة."
+                en="GearBeat Certified is currently in its Pilot Phase, establishing the most rigorous audit standards in the music industry. We are actively verifying signal chains and hardware assets for our launch partners."
+                ar="موثق من جيربيت حالياً في مرحلته التجريبية، حيث يضع أكثر معايير التدقيق صرامة في صناعة الموسيقى. نحن نتحقق بنشاط من سلاسل الإشارة وأصول العتاد لشركاء الإطلاق."
               />
             </p>
             <div className="hero-actions" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
