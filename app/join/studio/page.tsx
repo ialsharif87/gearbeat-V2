@@ -213,13 +213,13 @@ export default function JoinStudioPage() {
       <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center", marginBottom: 40 }}>
         <div style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-1px", marginBottom: 24, color: "#D4AF37" }}>GearBeat</div>
         <div style={{ display: "inline-block", background: "rgba(212, 175, 55, 0.1)", color: "#D4AF37", padding: "4px 12px", borderRadius: 99, fontSize: "0.85rem", fontWeight: 700, marginBottom: 16 }}>
-          <T en="Studio Owner Program" ar="برنامج ملاك الاستوديوهات" />
+          <T en="Studio Partner Onboarding" ar="انضمام شركاء الاستوديوهات" />
         </div>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: 16 }}>
-          <T en="Join GearBeat as a Provider" ar="انضم لـ GearBeat كمزود خدمة" />
+          <T en="Apply for GearBeat Partnership" ar="قدم لطلب شراكة GearBeat" />
         </h1>
         <p style={{ color: "#888", fontSize: "1.1rem" }}>
-          <T en="Register your company to manage one or more studios on our premium marketplace." ar="سجل شركتك لإدارة استوديو واحد أو أكثر على منصتنا الفاخرة." />
+          <T en="Submit your company details for verification. Once approved, you can list and manage your studios on our premium marketplace." ar="قدم بيانات شركتك للتحقق. بمجرد الموافقة، يمكنك عرض وإدارة استوديوهاتك على منصتنا الفاخرة." />
         </p>
       </div>
 

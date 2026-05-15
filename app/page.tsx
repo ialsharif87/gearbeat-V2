@@ -67,7 +67,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-3 path-grid">
-            <Link href="/signup" className="card-premium path-card hover-lift">
+            <Link href="/studios" className="card-premium path-card hover-lift">
               <div className="path-icon">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
@@ -76,8 +76,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3><T en="Creators & Artists" ar="المبدعون والفنانون" /></h3>
-              <p><T en="Book legendary spaces, buy certified equipment, and attend exclusive workshops." ar="احجز مساحات أسطورية، اشترِ معدات معتمدة، واحضر ورش عمل حصرية." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Start Creating" ar="ابدأ الإبداع" /> →</span>
+              <p><T en="Discover legendary studios, explore verified gear, and request access to elite workshops." ar="اكتشف استوديوهات أسطورية، تصفح معدات موثقة، واطلب الانضمام لورش عمل النخبة." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Start Browsing" ar="ابدأ التصفح" /> →</span>
             </Link>
 
             <Link href="/join/studio" className="card-premium path-card active-border hover-lift">
@@ -87,8 +87,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3><T en="Studio Owners" ar="أصحاب الاستوديوهات" /></h3>
-              <p><T en="Monetize your space, simplify bookings, and gain 'GearBeat Certified' status." ar="استثمر مساحتك، بسط حجوزاتك، واحصل على حالة 'GearBeat Certified'." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Get Certified" ar="احصل على التوثيق" /> →</span>
+              <p><T en="Monetize your space, simplify bookings, and apply for 'GearBeat Certified' status." ar="استثمر مساحتك، بسط حجوزاتك، وقدم طلباً للحصول على حالة 'GearBeat Certified'." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Apply to Join" ar="قدم للانضمام" /> →</span>
             </Link>
 
             <Link href="/join/seller" className="card-premium path-card hover-lift">
@@ -98,8 +98,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3><T en="Certified Vendors" ar="التجار المعتمدون" /></h3>
-              <p><T en="Reach professional buyers and list gear with integrated global shipping support." ar="صل إلى مشترين محترفين واعرض معداتك مع دعم شحن عالمي مدمج." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Open Store" ar="افتح متجرك" /> →</span>
+              <p><T en="Reach professional buyers. List gear with integrated global shipping and pilot verification." ar="صل إلى مشترين محترفين. اعرض معداتك مع شحن عالمي مدمج وتوثيق تجريبي." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Start Onboarding" ar="ابدأ الانضمام" /> →</span>
             </Link>
           </div>
         </div>

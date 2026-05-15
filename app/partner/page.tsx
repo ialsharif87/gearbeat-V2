@@ -31,22 +31,22 @@ export default function PartnerPortalFoundationPage() {
       <header className="portal-hero">
         <div className="container">
           <div className="hero-content">
-            <div className="badge-gold mb-24 ms-auto me-auto"><T en="PILOT PHASE: PARTNER NETWORK" ar="المرحلة التجريبية: شبكة الشركاء" /></div>
+            <div className="badge-gold mb-24 ms-auto me-auto"><T en="PILOT PHASE: PARTNER ONBOARDING" ar="المرحلة التجريبية: انضمام الشركاء" /></div>
             <h1 className="hero-title text-balance">
               <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>
             <p className="hero-desc text-balance mb-40">
               <T
-                en="Join the elite network of music studios, equipment vendors, and service providers. Currently onboarding our first cohort of certified partners for our global pilot launch."
-                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. نقوم حالياً بضم أول مجموعة من الشركاء المعتمدين لإطلاقنا التجريبي العالمي."
+                en="Join the elite network of music studios, equipment vendors, and service providers. Currently reviewing applications for our first cohort of certified partners."
+                ar="انضم إلى شبكة النخبة من استوديوهات الموسيقى، تجار المعدات، ومزودي الخدمات. نقوم حالياً بمراجعة طلبات أول مجموعة من الشركاء المعتمدين."
               />
             </p>
             <div className="hero-actions" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
               <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
-                 <T en="Join as Studio" ar="انضم كاستوديو" />
+                 <T en="Apply as Studio" ar="قدم كاستوديو" />
               </Link>
               <Link href="/join/seller" className="btn btn-outline btn-lg">
-                 <T en="Sell Professional Gear" ar="بع معدات احترافية" />
+                 <T en="Apply as Vendor" ar="قدم كتاجر" />
               </Link>
             </div>
           </div>

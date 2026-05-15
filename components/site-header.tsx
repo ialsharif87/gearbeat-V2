@@ -52,7 +52,7 @@ export default function SiteHeader({
     { href: "/academy", en: "Academy", ar: "الأكاديمية" },
     { href: "/tickets", en: "Tickets", ar: "التذاكر" },
     { href: "/services", en: "Services", ar: "الخدمات" },
-    { href: "/partner", en: "Partner Portal", ar: "بوابة الشركاء" },
+    { href: "/partner", en: "Become a Partner", ar: "كن شريكاً" },
     { href: "/support", en: "Support", ar: "الدعم" },
   ];
 
