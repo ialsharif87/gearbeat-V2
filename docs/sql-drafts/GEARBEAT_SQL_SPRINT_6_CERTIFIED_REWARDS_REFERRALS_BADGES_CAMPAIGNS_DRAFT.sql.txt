@@ -1,0 +1,243 @@
+-- GEARBEAT: SQL SPRINT 6 — CERTIFIED, REWARDS, REFERRALS, BADGES & CAMPAIGNS DRAFT
+-- DRAFT ONLY. DO NOT RUN IN PRODUCTION.
+-- Requires production Supabase schema verification before migration.
+-- Requires RLS/security/business review before execution.
+-- Rewards, referrals, badges, and campaign eligibility are placeholders only and do not activate live benefits.
+-- Public verification tokens require security review before execution.
+-- Referral fraud and campaign attribution require admin review workflows before activation.
+
+-- ==========================================
+-- 1. GEARBEAT CERTIFIED (Studios & Partners)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.studio_tiers (
+    tier_key TEXT PRIMARY KEY, -- verified, trusted, premium, elite, flagship
+    name TEXT NOT NULL,
+    description TEXT,
+    min_audit_score INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.certified_studios (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id) UNIQUE,
+    tier_key TEXT REFERENCES public.studio_tiers(tier_key),
+    status TEXT DEFAULT 'pending_audit', -- pending_audit, auditing, certified, suspended, expired
+    last_audit_at TIMESTAMPTZ,
+    audit_metadata JSONB DEFAULT '{}'::jsonb, -- Hardware audit, acoustic scores, etc.
+    verification_token TEXT UNIQUE, -- For public QR verification
+    valid_until DATE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.studio_certification_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    certified_studio_id UUID REFERENCES public.certified_studios(id),
+    old_status TEXT,
+    new_status TEXT NOT NULL,
+    actor_id UUID REFERENCES auth.users(id),
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 2. LOYALTY & REWARD TIERS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.customer_tiers (
+    tier_key TEXT PRIMARY KEY, -- standard, bronze, silver, gold, platinum, black
+    name TEXT NOT NULL,
+    min_points_ytd INT NOT NULL,
+    benefits JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.vendor_tiers (
+    tier_key TEXT PRIMARY KEY, -- standard, pro, elite
+    name TEXT NOT NULL,
+    min_sales_ytd DECIMAL(12, 2),
+    commission_discount DECIMAL(5, 2),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.tier_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tier_type TEXT NOT NULL, -- customer, vendor, studio
+    target_tier TEXT NOT NULL,
+    metric_key TEXT NOT NULL, -- bookings_count, total_spend, review_avg
+    threshold DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 3. REWARDS ENGINE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.loyalty_reward_accounts (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id),
+    current_balance INT DEFAULT 0,
+    lifetime_points INT DEFAULT 0,
+    current_customer_tier TEXT REFERENCES public.customer_tiers(tier_key),
+    last_milestone_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.reward_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    action_key TEXT NOT NULL, -- booking_complete, order_paid, review_approved
+    points_awarded INT NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.reward_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    rule_id UUID REFERENCES public.reward_rules(id),
+    points_change INT NOT NULL, -- Positive for earn, negative for spend
+    source_type TEXT NOT NULL, -- booking, order, review, manual
+    source_id UUID,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 4. BADGES SYSTEM
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.digital_badges (
+    badge_key TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    image_url TEXT,
+    rarity TEXT DEFAULT 'common',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Unified assignments
+CREATE TABLE IF NOT EXISTS public.user_badges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    badge_key TEXT REFERENCES public.digital_badges(badge_key),
+    granted_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.studio_badges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    studio_id UUID REFERENCES public.studios(id),
+    badge_key TEXT REFERENCES public.digital_badges(badge_key),
+    granted_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.vendor_badges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vendor_id UUID REFERENCES public.marketplace_vendors(id),
+    badge_key TEXT REFERENCES public.digital_badges(badge_key),
+    granted_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 5. REFERRALS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.referral_codes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) UNIQUE,
+    code TEXT UNIQUE NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.referral_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    referrer_id UUID REFERENCES auth.users(id),
+    referee_id UUID REFERENCES auth.users(id) UNIQUE,
+    status TEXT DEFAULT 'pending', -- pending, qualified, rewarded, flagged_fraud
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.referral_rewards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    referral_event_id UUID REFERENCES public.referral_events(id),
+    reward_type TEXT NOT NULL, -- points, credit, discount
+    amount DECIMAL(12, 2),
+    is_processed BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 6. CAMPAIGNS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.campaigns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    campaign_type TEXT NOT NULL, -- launch, seasonal, partner_referral
+    status TEXT DEFAULT 'draft',
+    start_date TIMESTAMPTZ,
+    end_date TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.campaign_eligibility (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES public.campaigns(id) ON DELETE CASCADE,
+    rule_type TEXT NOT NULL, -- location, user_role, min_past_spend
+    rule_params JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.campaign_codes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES public.campaigns(id),
+    code TEXT UNIQUE NOT NULL,
+    max_uses INT,
+    current_uses INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 7. MERCH & FULFILLMENT
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.welcome_kit_rewards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipient_id UUID REFERENCES auth.users(id),
+    kit_type TEXT NOT NULL, -- studio_owner_starter, elite_member_gift
+    status TEXT DEFAULT 'pending', -- pending, preparing, shipped, delivered
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.reward_fulfillment_references (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    reward_id UUID, -- Polymorphic reference
+    reward_type TEXT, -- welcome_kit, physical_redemption
+    provider TEXT, -- internal, external_logistics
+    tracking_number TEXT,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 8. INDEXES & TRIGGERS
+-- ==========================================
+CREATE INDEX IF NOT EXISTS idx_certified_studios_status ON public.certified_studios(status);
+CREATE INDEX IF NOT EXISTS idx_reward_events_user ON public.reward_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_referral_code ON public.referral_codes(code);
+CREATE INDEX IF NOT EXISTS idx_campaign_codes_code ON public.campaign_codes(code);
+
+CREATE TRIGGER tr_certified_studios_updated_at BEFORE UPDATE ON public.certified_studios FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+CREATE TRIGGER tr_loyalty_reward_accounts_updated_at BEFORE UPDATE ON public.loyalty_reward_accounts FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- ==========================================
+-- 9. RLS DIRECTION (DRAFT)
+-- ==========================================
+-- ALTER TABLE public.certified_studios ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.loyalty_reward_accounts ENABLE ROW LEVEL SECURITY;
+
+-- EXAMPLE: Public can verify a studio via QR
+-- CREATE POLICY "Public can view verification via token"
+-- ON public.certified_studios FOR SELECT
+-- USING (status = 'certified' AND verification_token IS NOT NULL);
+
+-- EXAMPLE: User can see their own reward balance
+-- CREATE POLICY "Users see own loyalty account"
+-- ON public.loyalty_reward_accounts FOR SELECT
+-- USING (user_id = auth.uid());
