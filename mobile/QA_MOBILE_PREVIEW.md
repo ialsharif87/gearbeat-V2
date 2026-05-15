@@ -114,7 +114,17 @@ The app supports multiple environments via a hidden switcher.
 - [x] Tickets (Event Cards)
 - [x] Academy (Grid & Preview)
 
-## 9. Known Limitations
+## 10. Sprint 7 Readiness (Pilot Demo Journey)
+
+**Objective**: Verify the full customer journey for the invite-only pilot demo (Investors/Government).
+
+### Demo Journey Checklist
+- [ ] **Discovery Flow**: Verify Home -> Studios -> Marketplace navigation.
+- [ ] **Trust Flow**: Verify legal, support, and "Certified" trust markers.
+- [ ] **Safe-Mode Verification**: Confirm that all transactional CTAs (Buy, Book, Enroll) are strictly in "Simulation/Deferred" mode.
+- [ ] **Documentation**: See [GEARBEAT_AGENT_1_SPRINT_7_MOBILE_PILOT_DEMO_CHECKLIST.md](../docs/GEARBEAT_AGENT_1_SPRINT_7_MOBILE_PILOT_DEMO_CHECKLIST.md) for the detailed step-by-step checklist.
+
+## 11. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
 - **Push Notifications**: Not implemented in this mirror phase.
 - **Deep Linking**: Currently only supports basic `app=1` entry.
