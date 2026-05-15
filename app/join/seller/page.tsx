@@ -163,13 +163,13 @@ export default function JoinSellerPage() {
       <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center", marginBottom: 40 }}>
         <div style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-1px", marginBottom: 24 }}>GearBeat</div>
         <div style={{ display: "inline-block", background: "rgba(207, 168, 110, 0.1)", color: "#cfa86e", padding: "4px 12px", borderRadius: 99, fontSize: "0.85rem", fontWeight: 700, marginBottom: 16 }}>
-          <T en="Become a Seller" ar="سجّل كتاجر" />
+          <T en="Vendor Onboarding Program" ar="برنامج انضمام التجار" />
         </div>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: 16 }}>
-          <T en="Join GearBeat Marketplace" ar="انضم لسوق GearBeat" />
+          <T en="Apply as a Certified Vendor" ar="قدم كتاجر معتمد" />
         </h1>
         <p style={{ color: "#888", fontSize: "1.1rem" }}>
-          <T en="Fill in your details and we will review your application within 2 business days." ar="أدخل بياناتك وسنراجع طلبك خلال يومي عمل." />
+          <T en="Submit your business documents for verification. Our team will review your application within 2 business days." ar="قدم مستندات عملك للتحقق. سيقوم فريقنا بمراجعة طلبك خلال يومي عمل." />
         </p>
       </div>
 

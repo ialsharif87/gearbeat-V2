@@ -44,9 +44,9 @@ export default function Footer({ lang = "ar" }: FooterProps) {
 
           <div className="footer-col">
             <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
-            <Link href="/join/studio">{lang === "en" ? "List Your Studio" : "أضف استوديوك"}</Link>
-            <Link href="/join/seller">{lang === "en" ? "Sell Gear" : "بع معداتك"}</Link>
-            <Link href="/partner">{lang === "en" ? "Partner Portal" : "بوابة الشركاء"}</Link>
+            <Link href="/join/studio">{lang === "en" ? "Apply as Studio" : "قدم كاستوديو"}</Link>
+            <Link href="/join/seller">{lang === "en" ? "Apply as Vendor" : "قدم كتاجر"}</Link>
+            <Link href="/partner">{lang === "en" ? "Become a Partner" : "كن شريكاً"}</Link>
             <Link href="/support">{lang === "en" ? "Partner Support" : "دعم الشركاء"}</Link>
           </div>
 
