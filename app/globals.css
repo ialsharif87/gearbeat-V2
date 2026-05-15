@@ -664,3 +664,31 @@ label {
 [dir="rtl"] .gb-eyebrow {
   letter-spacing: 0;
 }
+
+/* APP MODE - WEBVIEW OPTIMIZATIONS */
+body.app-mode {
+  background: #000;
+}
+
+body.app-mode main {
+  padding-top: env(safe-area-inset-top, 20px);
+}
+
+body.app-mode .hero-section {
+  padding-top: 60px !important;
+}
+
+body.app-mode .section-head {
+  margin-top: 0 !important;
+}
+
+/* Hide desktop-only or browser-only elements in App Mode if necessary */
+body.app-mode .hide-app {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  body.app-mode {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+}
