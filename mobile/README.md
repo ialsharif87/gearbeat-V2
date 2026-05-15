@@ -44,6 +44,13 @@ Tap the top right corner of the screen 5 times to reveal the developer environme
 ## Quality Assurance
 For detailed testing steps and checklist, see [QA_MOBILE_PREVIEW.md](./QA_MOBILE_PREVIEW.md).
 
+## Sprint 6 Readiness
+The mobile app is ready for the Sprint 6 "Trust, Legal, & Support" demo, covering:
+- **Support Access**: Mobile-optimized help and contact flows.
+- **Legal & Compliance**: Responsive Terms, Privacy, and Policy readability.
+- **Trust Indicators**: Footer and navigation accessibility for corporate info.
+*Note: All support and legal flows are currently for demonstration only.*
+
 ## Sprint 7 Readiness
 The mobile app is ready for the Sprint 7 "Pilot Demo" (Investors/Government), covering:
 - **Full Discovery**: Home, Studios, Marketplace, Services, Tickets, Academy.
