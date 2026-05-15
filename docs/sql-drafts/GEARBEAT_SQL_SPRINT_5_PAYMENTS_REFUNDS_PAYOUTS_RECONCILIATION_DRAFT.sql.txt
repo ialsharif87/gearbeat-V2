@@ -1,0 +1,238 @@
+-- GEARBEAT: SQL SPRINT 5 — PAYMENTS, REFUNDS, PAYOUTS & RECONCILIATION DRAFT
+-- DRAFT ONLY. DO NOT RUN IN PRODUCTION.
+-- Requires production Supabase schema verification before migration.
+-- Requires RLS/security/finance review before execution.
+-- Payment columns are placeholders only and do not activate live payment.
+-- Tap live payments remain blocked until company, bank, provider, legal, and explicit approval gates are complete.
+-- Webhook/idempotency logic requires backend implementation review before execution.
+
+-- ==========================================
+-- 1. PAYMENT INFRASTRUCTURE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.payment_methods_reference (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    provider TEXT NOT NULL, -- manual, tap, stripe, etc.
+    method_type TEXT NOT NULL, -- card, mada, bank_transfer, etc.
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Initial intent tracking
+CREATE TABLE IF NOT EXISTS public.payment_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    vertical_type TEXT NOT NULL, -- studio_booking, marketplace_order, etc.
+    vertical_record_id UUID NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    currency_code TEXT DEFAULT 'SAR',
+    status TEXT DEFAULT 'created', -- created, redirected, abandoned, completed
+    provider_session_id TEXT, -- e.g., tap_session_id
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Finalized transaction records
+CREATE TABLE IF NOT EXISTS public.payment_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID REFERENCES public.payment_sessions(id),
+    provider_transaction_id TEXT UNIQUE, -- e.g., tap_charge_id
+    provider TEXT NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    status TEXT NOT NULL, -- captured, failed, declined
+    error_message TEXT,
+    processed_at TIMESTAMPTZ,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Pilot-specific manual bypass
+CREATE TABLE IF NOT EXISTS public.manual_payment_confirmations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID REFERENCES public.payment_sessions(id) UNIQUE,
+    actor_id UUID REFERENCES auth.users(id), -- The admin who confirmed it
+    confirmation_notes TEXT,
+    proof_url TEXT, -- Link to bank receipt image
+    confirmed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 2. RELIABILITY & AUDIT
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.payment_webhook_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    provider TEXT NOT NULL,
+    external_event_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    payload JSONB NOT NULL,
+    status TEXT DEFAULT 'pending', -- pending, processed, failed
+    processed_at TIMESTAMPTZ,
+    UNIQUE(provider, external_event_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.payment_idempotency_keys (
+    idempotency_key TEXT PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    request_path TEXT,
+    response_body JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Unified reference for vertical tables to join against
+CREATE TABLE IF NOT EXISTS public.payment_references_unified (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vertical_type TEXT NOT NULL,
+    vertical_record_id UUID NOT NULL,
+    transaction_id UUID REFERENCES public.payment_transactions(id),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 3. REFUNDS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.refund_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    transaction_id UUID REFERENCES public.payment_transactions(id),
+    requested_by UUID REFERENCES auth.users(id),
+    amount DECIMAL(12, 2) NOT NULL,
+    reason TEXT,
+    status TEXT DEFAULT 'pending', -- pending, approved, rejected, processed
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.refund_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    refund_request_id UUID REFERENCES public.refund_requests(id),
+    provider_refund_id TEXT UNIQUE,
+    amount DECIMAL(12, 2) NOT NULL,
+    status TEXT NOT NULL,
+    processed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 4. PAYOUTS & COMMISSIONS
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.payout_accounts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    provider TEXT DEFAULT 'bank_transfer',
+    account_details JSONB, -- Encrypted or vault-stored in production
+    status TEXT DEFAULT 'pending_verification',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.payout_batches (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    batch_number TEXT UNIQUE NOT NULL,
+    status TEXT DEFAULT 'draft', -- draft, scheduled, processing, completed
+    total_amount DECIMAL(12, 2) NOT NULL,
+    scheduled_for TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.payout_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    batch_id UUID REFERENCES public.payout_batches(id),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    payout_account_id UUID REFERENCES public.payout_accounts(id),
+    amount DECIMAL(12, 2) NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.commission_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vertical_type TEXT, -- NULL for global default
+    partner_account_id UUID, -- NULL for global default
+    commission_rate DECIMAL(5, 2) NOT NULL, -- e.g., 15.00
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.commission_calculations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    transaction_id UUID REFERENCES public.payment_transactions(id),
+    gross_amount DECIMAL(12, 2) NOT NULL,
+    commission_rate DECIMAL(5, 2) NOT NULL,
+    commission_amount DECIMAL(12, 2) NOT NULL,
+    net_payout_amount DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==========================================
+-- 5. FINANCE LEDGER & RECONCILIATION
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.finance_ledger_entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    partner_account_id UUID REFERENCES public.partner_accounts(id),
+    entry_type TEXT NOT NULL, -- credit, debit
+    amount DECIMAL(12, 2) NOT NULL,
+    description TEXT,
+    reference_type TEXT, -- payment, refund, payout, commission
+    reference_id UUID,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.reconciliation_runs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    run_date DATE DEFAULT CURRENT_DATE,
+    provider TEXT NOT NULL,
+    status TEXT DEFAULT 'in_progress', -- in_progress, completed, flagged
+    discrepancy_count INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.reconciliation_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    run_id UUID REFERENCES public.reconciliation_runs(id),
+    provider_reference_id TEXT,
+    internal_transaction_id UUID REFERENCES public.payment_transactions(id),
+    amount_discrepancy DECIMAL(12, 2),
+    status_discrepancy TEXT,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Billing references
+CREATE TABLE IF NOT EXISTS public.invoice_references (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vertical_type TEXT NOT NULL,
+    vertical_record_id UUID NOT NULL,
+    invoice_number TEXT UNIQUE NOT NULL,
+    invoice_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- FUTURE SAFE PLACEHOLDERS
+-- CREATE TABLE IF NOT EXISTS public.tax_invoice_references ...
+-- CREATE TABLE IF NOT EXISTS public.payment_disputes ...
+
+-- ==========================================
+-- 6. INDEXES & TRIGGERS
+-- ==========================================
+CREATE INDEX IF NOT EXISTS idx_payment_sessions_vertical ON public.payment_sessions(vertical_type, vertical_record_id);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_provider ON public.payment_transactions(provider, provider_transaction_id);
+CREATE INDEX IF NOT EXISTS idx_ledger_partner ON public.finance_ledger_entries(partner_account_id);
+CREATE INDEX IF NOT EXISTS idx_reconciliation_run ON public.reconciliation_items(run_id);
+
+CREATE TRIGGER tr_payment_sessions_updated_at BEFORE UPDATE ON public.payment_sessions FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+CREATE TRIGGER tr_refund_requests_updated_at BEFORE UPDATE ON public.refund_requests FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- ==========================================
+-- 7. RLS DIRECTION (DRAFT)
+-- ==========================================
+-- ALTER TABLE public.payment_transactions ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.finance_ledger_entries ENABLE ROW LEVEL SECURITY;
+
+-- EXAMPLE: Partner can only see their own payout items
+-- CREATE POLICY "Partners see own payout items"
+-- ON public.payout_items FOR SELECT
+-- USING (partner_account_id IN (SELECT id FROM public.partner_accounts WHERE owner_id = auth.uid()));
+
+-- EXAMPLE: Finance admin has full read access
+-- CREATE POLICY "Finance admins read all"
+-- ON public.finance_ledger_entries FOR SELECT
+-- USING (EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role_key = 'finance_admin'));
