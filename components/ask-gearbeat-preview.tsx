@@ -174,12 +174,23 @@ export default function AskGearBeatPreview() {
           </div>
 
           <div style={{ marginTop: 48, textAlign: 'center', position: 'relative', zIndex: 2 }}>
-            <p style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.35)', margin: 0 }}>
-              <T 
-                en="AI Discovery preview only — recommendations are not live yet." 
-                ar="نسخة تجريبية لاكتشاف الذكاء الاصطناعي فقط - التوصيات ليست حية بعد." 
-              />
-            </p>
+            <div style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 12, 
+              padding: '12px 24px', 
+              background: 'rgba(212, 175, 55, 0.03)', 
+              border: '1px solid rgba(212, 175, 55, 0.15)', 
+              borderRadius: '12px' 
+            }}>
+              <span style={{ fontSize: '1.2rem' }}>⚖️</span>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.5)', margin: 0, fontWeight: 500 }}>
+                <T 
+                  en="AI Discovery Preview — Results are simulated for demonstration. Full intelligence engine launching soon." 
+                  ar="معاينة اكتشاف الذكاء الاصطناعي - النتائج محاكاة للعرض فقط. محرك الذكاء الكامل سينطلق قريباً." 
+                />
+              </p>
+            </div>
           </div>
         </div>
       </div>
