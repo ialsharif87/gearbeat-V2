@@ -678,8 +678,14 @@ export default async function StudiosPage({
                         />
                       </div>
                     ) : (
-                      <div className="placeholder">
-                        <T en="No Image" ar="لا توجد صورة" />
+                      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                        <Image
+                          src="/brand/studio-placeholder.jpg"
+                          alt={studio.name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{ objectFit: "cover", borderRadius: 'var(--gb-radius-md) var(--gb-radius-md) 0 0' }}
+                        />
                       </div>
                     )}
 
