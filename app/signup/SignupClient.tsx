@@ -25,6 +25,35 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Password validation state
+  const [passRules, setPassRules] = useState({
+    length: false,
+    variety: false,
+    consecutive: false
+  });
+
+  useEffect(() => {
+    const hasLength = password.length >= 8;
+    
+    const types = [
+      /[a-z]/.test(password),
+      /[A-Z]/.test(password),
+      /[0-9]/.test(password),
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    ].filter(Boolean).length;
+    const hasVariety = types >= 3;
+
+    const hasConsecutive = !/(.)\1\1/.test(password);
+
+    setPassRules({
+      length: hasLength,
+      variety: hasVariety,
+      consecutive: hasConsecutive
+    });
+  }, [password]);
+
+  const isPasswordValid = passRules.length && passRules.variety && passRules.consecutive;
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -61,8 +90,8 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     try {
       validateCommonFields();
 
-      if (!password || password.length < 8) {
-        throw new Error("Password must be at least 8 characters.");
+      if (!isPasswordValid) {
+        throw new Error("Password does not meet the strength requirements.");
       }
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match.");
@@ -209,6 +238,31 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                   variant="portal"
                   autoComplete="new-password"
                 />
+                
+                {password && (
+                  <div className="password-checklist animate-up">
+                    <p className="checklist-title">
+                      <T en="Your password must contain:" ar="يجب أن تحتوي كلمة المرور على:" />
+                    </p>
+                    <ul>
+                      <li className={passRules.length ? "valid" : ""}>
+                        {passRules.length ? "✓" : "○"} <T en="At least 8 characters" ar="8 أحرف على الأقل" />
+                      </li>
+                      <li className={passRules.variety ? "valid" : ""}>
+                        {passRules.variety ? "✓" : "○"} <T en="At least 3 of the following:" ar="3 شروط على الأقل من التالي:" />
+                        <ul className="sub-list">
+                          <li><T en="Lowercase letters a-z" ar="حروف صغيرة a-z" /></li>
+                          <li><T en="Uppercase letters A-Z" ar="حروف كبيرة A-Z" /></li>
+                          <li><T en="Numbers 0-9" ar="أرقام 0-9" /></li>
+                          <li><T en="Special characters like !@#$%^&*" ar="رموز خاصة مثل !@#$%^&*" /></li>
+                        </ul>
+                      </li>
+                      <li className={passRules.consecutive ? "valid" : ""}>
+                        {passRules.consecutive ? "✓" : "○"} <T en="No more than 2 identical characters in a row" ar="لا يوجد أكثر من حرفين متطابقين متتاليين" />
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
               <div className="field">
                 <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
@@ -222,7 +276,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                 />
               </div>
 
-              <button type="submit" disabled={loading} className="gb-button">
+              <button type="submit" disabled={loading || !isPasswordValid} className="gb-button">
                 {loading ? <T en="Creating Account..." ar="جاري إنشاء الحساب..." /> : (
                   <T en="Create Account" ar="إنشاء الحساب" />
                 )}
@@ -402,6 +456,53 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .password-checklist {
+          margin-top: 12px;
+          padding: 16px;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--gb-border);
+          border-radius: 12px;
+        }
+        .checklist-title {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--gb-gold);
+          margin-bottom: 8px;
+        }
+        .password-checklist ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: grid;
+          gap: 6px;
+        }
+        .password-checklist li {
+          font-size: 0.8rem;
+          color: var(--gb-text-muted);
+          transition: color 0.2s;
+        }
+        .password-checklist li.valid {
+          color: #22c55e;
+          font-weight: 600;
+        }
+        .sub-list {
+          margin-top: 4px !important;
+          margin-left: 20px !important;
+          opacity: 0.8;
+          font-size: 0.75rem !important;
+        }
+        [dir="rtl"] .sub-list {
+          margin-left: 0 !important;
+          margin-right: 20px !important;
+        }
+        .animate-up {
+          animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(5px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `,

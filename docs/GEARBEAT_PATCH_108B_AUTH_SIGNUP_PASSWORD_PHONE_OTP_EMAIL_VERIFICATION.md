@@ -7,6 +7,12 @@ Refactor the GearBeat registration process to enforce email-and-password-based s
 
 ### 1. Signup Flow Overhaul (`app/signup/SignupClient.tsx`)
 - **Enforced Password Mode**: Removed support for magic-link/OTP-first signup. All new users must provide a full name, email, phone number, and password.
+- **Password Strength UI**: Added a live validation checklist with the following rules:
+  - Minimum 8 characters.
+  - At least 3 character types (Lowercase, Uppercase, Numbers, Special Characters).
+  - No more than 2 identical characters in a row (prevents "aaa", etc.).
+- **Visual Feedback**: Real-time checkmarks and color transitions (Green for valid, Muted for pending).
+- **Submit Enforcement**: The "Create Account" button is disabled until all password rules are satisfied.
 - **Verification Guidance UI**: Replaced the immediate "success" redirect with a multi-step verification instruction screen.
 - **Email Verification**: Instructs users to check their inbox for the Supabase-generated confirmation link.
 - **Phone Verification Prep**: Informs users that phone verification via SMS OTP will be required after email activation and login.
