@@ -4,6 +4,7 @@
 import Link from "next/link";
 // GB-FIX: Removed formatDate and formatTime from StudioDashboardView props
 import T from "@/components/t";
+import PhoneVerificationManager from "@/components/phone-verification-manager";
 
 interface StudioDashboardViewProps {
   ownerName: string;
@@ -14,6 +15,7 @@ interface StudioDashboardViewProps {
   recentBookings: any[];
   tier: any;
   cert: any;
+  user: any;
 }
 
 export default function StudioDashboardView({
@@ -25,6 +27,7 @@ export default function StudioDashboardView({
   recentBookings,
   tier,
   cert,
+  user,
 }: StudioDashboardViewProps) {
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-GB", {
@@ -199,11 +202,35 @@ export default function StudioDashboardView({
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 16, padding: 12, background: 'rgba(212, 175, 55, 0.05)', borderRadius: 8, border: '1px solid rgba(212, 175, 55, 0.1)' }}>
-              <p style={{ fontSize: '0.65rem', color: 'var(--gb-gold)', margin: 0, textAlign: 'center' }}>
-                <T en="EXTRANET ALIGNMENT: READY" ar="محاذاة الإكسترانت: جاهز" />
-              </p>
+          </div>
+
+          <div className="side-card verification-status">
+            <h3><T en="Account Verification" ar="توثيق الحساب" /></h3>
+            <div style={{ display: 'grid', gap: 12, marginBottom: 16 }}>
+              <div className="flex-between" style={{ fontSize: '0.85rem' }}>
+                <span style={{ color: '#888' }}>Email</span>
+                <span className={user.email_confirmed_at ? "text-success" : "text-muted"}>
+                  {user.email_confirmed_at ? "✓ Verified" : "○ Unverified"}
+                </span>
+              </div>
+              <div className="flex-between" style={{ fontSize: '0.85rem' }}>
+                <span style={{ color: '#888' }}>Phone</span>
+                <span className={user.phone_confirmed_at ? "text-success" : "text-muted"}>
+                  {user.phone_confirmed_at ? "✓ Verified" : "○ Unverified"}
+                </span>
+              </div>
             </div>
+
+            {!user.phone_confirmed_at && (
+              <PhoneVerificationManager 
+                phone={user.phone || ""} 
+                isVerified={false} 
+              />
+            )}
+
+            <Link href="/profile" className="btn btn-outline btn-sm w-full" style={{ marginTop: 12, display: 'block', textAlign: 'center' }}>
+              <T en="View Details" ar="عرض التفاصيل" />
+            </Link>
           </div>
 
           <div className="side-card quick-manage">
@@ -323,6 +350,10 @@ export default function StudioDashboardView({
         .date { font-weight: 600; font-size: 0.9rem; }
         .time { font-size: 0.75rem; color: #555; }
         .amount-cell { font-weight: 800; color: #D4AF37; }
+
+        .text-success { color: #22c55e; }
+        .text-muted { color: #555; }
+        .w-full { width: 100%; }
 
         .status-pill {
           padding: 4px 12px;

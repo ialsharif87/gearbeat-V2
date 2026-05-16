@@ -143,6 +143,9 @@ export async function getCurrentUserOrRedirect(
   return user as {
     id: string;
     email?: string;
+    phone?: string;
+    email_confirmed_at?: string;
+    phone_confirmed_at?: string;
     app_metadata?: Record<string, unknown>;
     user_metadata?: Record<string, unknown>;
   };
@@ -170,6 +173,9 @@ export async function getCurrentUserRole(
   user: {
     id: string;
     email?: string;
+    phone?: string;
+    email_confirmed_at?: string;
+    phone_confirmed_at?: string;
     app_metadata?: Record<string, unknown>;
     user_metadata?: Record<string, unknown>;
   }
