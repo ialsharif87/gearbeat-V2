@@ -23,8 +23,11 @@ export default async function AdminPREnginePage() {
 
   return (
     <div className="admin-page">
-      <header className="admin-header">
-        <h1><T en="PR &amp; Marketing Launch Engine" ar="محرك إطلاق العلاقات العامة والتسويق" /></h1>
+      <header className="admin-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <h1 style={{ margin: 0 }}><T en="PR &amp; Marketing Launch Engine" ar="محرك إطلاق العلاقات العامة والتسويق" /></h1>
+        <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+          PREVIEW_BETA
+        </span>
       </header>
 
       <div className="admin-content">

@@ -21,7 +21,17 @@ export default function AdminRewardsKitsPage() {
         <div className="flex-between">
           <div>
             <h1><T en="Rewards & Welcome Kits" ar="الجوائز وحقائب الترحيب" /></h1>
-            <p className="text-muted"><T en="Foundation for partner appreciation, loyalty programs, and physical merch fulfillment." ar="تأسيس لتقدير الشركاء، برامج الولاء، وتنفيذ توزيع المنتجات الملموسة." /></p>
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                MANUAL_DISTRIBUTION
+              </span>
+              <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                REQUIRES_ADMIN_REVIEW
+              </span>
+            </div>
+            <p className="text-muted" style={{ marginTop: 16 }}>
+              <T en="Foundation for partner appreciation, loyalty programs, and physical merch fulfillment." ar="تأسيس لتقدير الشركاء، برامج الولاء، وتنفيذ توزيع المنتجات الملموسة." />
+            </p>
           </div>
           <div className="foundation-badge">
             <T en="UI FOUNDATION ONLY" ar="واجهة تأسيسية فقط" />

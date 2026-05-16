@@ -328,7 +328,15 @@ export default async function AdminPayoutsPage() {
         <div>
           <p className="gb-eyebrow">Admin dashboard</p>
           <h1>Payouts & Settlement Reports</h1>
-          <p className="gb-muted-text">
+          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              MANUAL_PAYOUT_PROCESSING
+            </span>
+            <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              REQUIRES_ADMIN_REVIEW
+            </span>
+          </div>
+          <p className="gb-muted-text" style={{ marginTop: 16 }}>
             Review gross revenue, GearBeat commission, and net payable amounts
             for studio owners and vendors.
           </p>

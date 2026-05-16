@@ -16,9 +16,14 @@ export default async function AdminMarketplaceOrdersPage() {
 
   return (
     <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 32 }}>
-        <T en="Marketplace Orders" ar="طلبات المتجر" />
-      </h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>
+          <T en="Marketplace Orders" ar="طلبات المتجر" />
+        </h1>
+        <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+          MANUAL_SETTLEMENT
+        </span>
+      </div>
 
       <div style={{ background: '#111', borderRadius: 20, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
