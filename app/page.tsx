@@ -20,8 +20,8 @@ export default function HomePage() {
             </h1>
             <p className="lead mb-40">
               <T
-                en="GearBeat is the ultimate ecosystem for audio professionals. Discover world-class studios, shop elite verified gear, and secure tickets to exclusive industry experiences."
-                ar="GearBeat هو النظام البيئي الأمثل لمحترفي الصوت. اكتشف استوديوهات عالمية، تسوق معدات موثقة، واحجز تذاكر لتجارب حصرية في الصناعة."
+                en="GearBeat is the definitive ecosystem for the modern studio. Book world-class recording spaces, shop elite verified audio gear, and secure access to exclusive industry events."
+                ar="GearBeat هو النظام البيئي النهائي للاستوديو الحديث. احجز مساحات تسجيل عالمية، تسوق معدات صوتية فاخرة وموثقة، واحصل على وصول حصري لفعاليات الصناعة."
               />
             </p>
             <div className="hero-actions">
@@ -76,8 +76,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3><T en="Creators & Artists" ar="المبدعون والفنانون" /></h3>
-              <p><T en="Discover legendary studios, explore verified gear, and request access to elite workshops." ar="اكتشف استوديوهات أسطورية، تصفح معدات موثقة، واطلب الانضمام لورش عمل النخبة." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Start Browsing" ar="ابدأ التصفح" /> →</span>
+              <p><T en="Discover world-class studios, browse verified equipment, and book your next session with confidence." ar="اكتشف استوديوهات عالمية، تصفح معدات موثقة، واحجز جلستك القادمة بكل ثقة." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Book a Studio" ar="احجز استوديو" /> →</span>
             </Link>
 
             <Link href="/join/studio" className="card-premium path-card active-border hover-lift">
@@ -98,8 +98,8 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3><T en="Certified Vendors" ar="التجار المعتمدون" /></h3>
-              <p><T en="Reach professional buyers. List gear with integrated global shipping and pilot verification." ar="صل إلى مشترين محترفين. اعرض معداتك مع شحن عالمي مدمج وتوثيق تجريبي." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Start Onboarding" ar="ابدأ الانضمام" /> →</span>
+              <p><T en="Join the elite marketplace. List professional audio gear with integrated logistics and verified status." ar="انضم إلى السوق المتميز. اعرض معدات الصوت الاحترافية مع خدمات لوجستية متكاملة وحالة موثقة." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Join as Vendor" ar="انضم كتاجر" /> →</span>
             </Link>
           </div>
         </div>
@@ -114,8 +114,8 @@ export default function HomePage() {
               <h2 className="mb-16 text-balance" style={{ fontSize: '2.2rem' }}><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
               <p className="text-muted leading-relaxed" style={{ maxWidth: 450, fontSize: '0.95rem' }}>
                 <T 
-                  en="GearBeat is establishing the global standard for studio trust. We are currently in our Pilot Phase, vetting studios and verifying gear to ensure frictionless creative sessions."
-                  ar="تعمل GearBeat على إرساء المعيار العالمي للثقة في الاستوديوهات. نحن حالياً في مرحلتنا التجريبية، نفحص الاستوديوهات ونوثق المعدات لضمان جلسات إبداعية بلا عوائق."
+                  en="GearBeat is setting the global standard for studio operations. From verified equipment to secure session booking, we ensure a seamless professional environment for every artist."
+                  ar="تضع GearBeat المعيار العالمي لعمليات الاستوديو. من المعدات الموثقة إلى حجز الجلسات الآمن، نضمن بيئة احترافية سلسة لكل فنان."
                 />
               </p>
             </div>
