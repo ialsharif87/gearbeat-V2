@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Metadata } from "next";
 import MarketplaceProductCard from "@/components/marketplace-product-card";
 import SmartDiscoveryPreview from "@/components/smart-discovery-preview";

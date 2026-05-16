@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import T from "@/components/t";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -272,20 +273,23 @@ export default async function ProductDetailPage({
               minHeight: 460,
               display: "grid",
               placeItems: "center",
+              position: "relative",
               background:
                 "radial-gradient(circle at center, rgba(207,167,98,0.18), rgba(255,255,255,0.035))",
             }}
           >
             {mainImage ? (
-              <img
+              <Image
                 src={mainImage}
                 alt={getProductName(product)}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  maxHeight: 560,
                   objectFit: "cover",
                 }}
+                priority
+                loading="eager"
+                decoding="sync"
               />
             ) : (
               <div
@@ -320,16 +324,18 @@ export default async function ProductDetailPage({
                     padding: 0,
                     height: 100,
                     overflow: "hidden",
+                    position: "relative",
                   }}
                 >
-                  <img
+                  <Image
                     src={image}
                     alt=""
+                    fill
+                    sizes="100px"
                     style={{
-                      width: "100%",
-                      height: "100%",
                       objectFit: "cover",
                     }}
+                    loading="lazy"
                   />
                 </div>
               ))}
@@ -628,17 +634,19 @@ export default async function ProductDetailPage({
                       overflow: "hidden",
                       display: "grid",
                       placeItems: "center",
+                      position: "relative",
                     }}
                   >
                     {itemImage ? (
-                      <img
+                      <Image
                         src={itemImage}
                         alt={getProductName(item)}
+                        fill
+                        sizes="(max-width: 480px) 100vw, 210px"
                         style={{
-                          width: "100%",
-                          height: "100%",
                           objectFit: "cover",
                         }}
+                        loading="lazy"
                       />
                     ) : (
                       <span style={{ fontSize: "2rem" }}>🎛️</span>
