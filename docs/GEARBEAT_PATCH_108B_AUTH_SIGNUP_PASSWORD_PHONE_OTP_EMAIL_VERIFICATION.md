@@ -28,6 +28,18 @@ Refactor the GearBeat registration process to enforce email-and-password-based s
 - Includes cooldown timers, error handling, and bilingual support.
 - Note: Requires SMS provider configuration (Twilio/Vonage) in the Supabase project dashboard to function in production.
 
+## Status Summary
+
+| Feature | Status | Notes |
+| :--- | :--- | :--- |
+| **Email + Password Signup** | ✅ Complete | Enforced in `SignupClient.tsx` |
+| **Password Strength UI** | ✅ Complete | Live checklist with 3 rules |
+| **Email Verification Flow** | ✅ Complete | Uses Supabase native confirmation links |
+| **Phone Verification UI** | ✅ Complete | `PhoneVerificationManager` integrated |
+| **Phone SMS Delivery** | ⏳ Readiness Only | Requires Twilio/Vonage config in Supabase |
+| **Verification Badges** | ✅ Complete | Uses `email_confirmed_at` / `phone_confirmed_at` |
+| **Profile Integration** | ✅ Complete | Badges added to Customer, Partner, and Profile pages |
+
 ## Verification Checklist
 - [x] Signup requires password.
 - [x] Post-signup UI shows email verification instructions.
