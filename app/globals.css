@@ -789,3 +789,124 @@ body.app-mode .hide-app {
     justify-content: center !important;
   }
 }
+
+/* ==========================================================================
+   GEARBEAT PREMIUM RESPONSIVE QA FIXES (PATCH 109C)
+   ========================================================================== */
+
+/* General Card Fallback Styling */
+.card {
+  background: var(--gb-card);
+  border: 1px solid var(--gb-border);
+  border-radius: var(--gb-radius-md);
+  padding: 24px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  background: var(--gb-card-hover);
+  border-color: var(--gb-gold);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-premium), var(--shadow-gold);
+}
+
+/* Base Headings and Padding Adjustments on Tablet/Mobile */
+@media (max-width: 1024px) {
+  .section-padding {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 60px 0;
+  }
+  
+  .container {
+    width: 90%;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .section-padding {
+    padding: 48px 0 !important;
+  }
+  
+  /* Prevent Card Edges from Pressing Screengrids on Small Viewports */
+  .grid {
+    gap: 16px !important;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Specific 2-column override for micro Category Cards to look premium and compact */
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    padding: 0 !important;
+  }
+
+  /* Headings size normalization to avoid clipping/huge sizes */
+  h1 {
+    font-size: clamp(2.2rem, 8vw, 2.8rem) !important;
+    line-height: 1.15 !important;
+  }
+  
+  h2 {
+    font-size: clamp(1.8rem, 6vw, 2.2rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  h3 {
+    font-size: 1.35rem !important;
+  }
+
+  /* CTA & Button Optimizations for Mobile Screens */
+  .btn {
+    padding: 12px 24px !important;
+    font-size: 0.9rem !important;
+    width: 100%;
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .btn-lg {
+    padding: 14px 28px !important;
+    font-size: 0.95rem !important;
+    width: 100%;
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .hero-actions, .cta-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  /* Compact Card padding */
+  .card, .card-premium, .gb-card {
+    padding: 16px !important;
+  }
+
+  /* Flex wrap list spacing optimization */
+  .flex-wrap, [style*="flexWrap: 'wrap'"] {
+    gap: 8px !important;
+    justify-content: center !important;
+  }
+
+  /* Horizontal Overflow Avoidance */
+  * {
+    max-width: 100%;
+  }
+}

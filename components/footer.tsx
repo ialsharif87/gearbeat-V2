@@ -146,9 +146,23 @@ export default function Footer({ lang = "ar" }: FooterProps) {
         }
 
         @media (max-width: 600px) {
-          .footer-grid { grid-template-columns: 1fr; text-align: center; }
+          .site-footer {
+            padding: 40px 0 24px !important;
+            margin-top: 40px !important;
+          }
+          .footer-grid { 
+            grid-template-columns: 1fr; 
+            text-align: center; 
+            gap: 32px !important; 
+            margin-bottom: 32px !important; 
+          }
           .logo-img-sm { margin-inline: auto; margin-bottom: 16px; }
-          .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+          .footer-bottom { 
+            flex-direction: column; 
+            gap: 16px; 
+            text-align: center; 
+            padding-top: 24px !important; 
+          }
         }
       `}} />
     </footer>
