@@ -34,9 +34,14 @@ export default function TicketingPartnerFoundationPage() {
               ← <T en="Back to Partner Hub" ar="العودة لمركز الشركاء" />
             </Link>
             <span className="eyebrow" style={{ color: '#ec4899' }}><T en="TICKETING PARTNER TRACK" ar="مسار شريك التذاكر" /></span>
-            <h1 className="hero-title">
-              <T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" />
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <h1 className="hero-title" style={{ margin: 0 }}>
+                <T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" />
+              </h1>
+              <span className="badge" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                PREVIEW
+              </span>
+            </div>
             <p className="hero-desc">
               <T
                 en="Premium extranet foundation for event organizers and venues to manage ticket sales, attendees, and QR check-ins."

@@ -232,13 +232,18 @@ export default async function OwnerBookingsPage() {
           <p className="gb-eyebrow">
             <T en="Owner Portal" ar="بوابة المالك" />
           </p>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
-            <T en="Studio Bookings" ar="حجوزات الاستوديو" />
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
+              <T en="Studio Bookings" ar="حجوزات الاستوديو" />
+            </h1>
+            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              MANUAL_MANAGEMENT
+            </span>
+          </div>
           <p className="gb-muted-text" style={{ marginTop: '8px' }}>
             <T
-              en="Manage incoming studio bookings, review payment status, and update each booking status."
-              ar="أدر الحجوزات الواردة وراجع حالة الدفع وحدّث حالة كل حجز."
+              en="Manage incoming studio bookings, review payment status, and update each booking status. Note: Payments are processed by GearBeat administration."
+              ar="أدر الحجوزات الواردة وراجع حالة الدفع وحدّث حالة كل حجز. ملاحظة: يتم معالجة المدفوعات بواسطة إدارة جيربيت."
             />
           </p>
         </div>

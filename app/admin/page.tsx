@@ -44,6 +44,9 @@ export default async function AdminDashboard() {
             <span className="badge-gold" style={{ letterSpacing: 1 }}>
               {isSuperAdmin ? "SUPER_ADMIN" : "STAFF"}
             </span>
+            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem' }}>
+              LIVE_SYSTEM
+            </span>
             <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.9rem', borderLeft: '1px solid var(--gb-border)', paddingLeft: 12, marginLeft: 0 }} className="ps-12 ms-0">{adminUserAuth.email}</span>
           </div>
         </div>
@@ -67,12 +70,12 @@ export default async function AdminDashboard() {
         <div>
           <h2 style={sectionTitleStyle}><T en="Sellers & Marketplace" ar="إدارة التجار والمتجر" /></h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <QuickActionCard titleEn="Seller Applications" titleAr="طلبات التجار" href="/admin/leads?type=seller" count={pendingLeads.data?.filter(l => l.type === 'seller').length} color="var(--gb-gold)" />
-            <QuickActionCard titleEn="Approved Sellers" titleAr="التجار المعتمدون" href="/admin/sellers" color="var(--gb-teal)" />
-            <QuickActionCard titleEn="Marketplace Products" titleAr="المنتجات" href="/admin/products" />
-            <QuickActionCard titleEn="Marketplace Orders" titleAr="الطلبات" href="/admin/marketplace-orders" />
-            <QuickActionCard titleEn="Seller Payments" titleAr="مدفوعات التجار" href="/admin/seller-payments" />
-            <QuickActionCard titleEn="Seller Settlements" titleAr="تسويات التجار" href="/admin/seller-settlements" />
+            <QuickActionCard titleEn="Seller Applications" titleAr="طلبات التجار" href="/admin/leads?type=seller" count={pendingLeads.data?.filter(l => l.type === 'seller').length} color="var(--gb-gold)" statusLabel="REVIEW_REQ" />
+            <QuickActionCard titleEn="Approved Sellers" titleAr="التجار المعتمدون" href="/admin/sellers" color="var(--gb-teal)" statusLabel="LIVE" />
+            <QuickActionCard titleEn="Marketplace Products" titleAr="المنتجات" href="/admin/products" statusLabel="LIVE" />
+            <QuickActionCard titleEn="Marketplace Orders" titleAr="الطلبات" href="/admin/marketplace-orders" statusLabel="MANUAL_SETTLEMENT" />
+            <QuickActionCard titleEn="Seller Payments" titleAr="مدفوعات التجار" href="/admin/seller-payments" statusLabel="REQ_PAYMENT" />
+            <QuickActionCard titleEn="Seller Settlements" titleAr="تسويات التجار" href="/admin/seller-settlements" statusLabel="MANUAL" />
           </div>
         </div>
 
@@ -104,10 +107,10 @@ export default async function AdminDashboard() {
       {/* SECTION 4: STUDIOS MANAGEMENT */}
       <h2 style={sectionTitleStyle}><T en="Studios & Bookings" ar="إدارة الاستوديوهات والحجوزات" /></h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 48 }}>
-        <QuickActionCard titleEn="Studio Applications" titleAr="طلبات الاستوديوهات" href="/admin/leads?type=studio" count={pendingLeads.data?.filter(l => l.type === 'studio').length} color="var(--gb-gold)" />
-        <QuickActionCard titleEn="Approved Studios" titleAr="الاستوديوهات المعتمدة" href="/admin/studios" color="var(--gb-teal)" />
-        <QuickActionCard titleEn="Studio Bookings" titleAr="الحجوزات" href="/admin/bookings" />
-        <QuickActionCard titleEn="Studio Payments" titleAr="مدفوعات الاستوديوهات" href="/admin/studio-payments" />
+        <QuickActionCard titleEn="Studio Applications" titleAr="طلبات الاستوديوهات" href="/admin/leads?type=studio" count={pendingLeads.data?.filter(l => l.type === 'studio').length} color="var(--gb-gold)" statusLabel="REVIEW_REQ" />
+        <QuickActionCard titleEn="Approved Studios" titleAr="الاستوديوهات المعتمدة" href="/admin/studios" color="var(--gb-teal)" statusLabel="LIVE" />
+        <QuickActionCard titleEn="Studio Bookings" titleAr="الحجوزات" href="/admin/bookings" statusLabel="MANUAL" />
+        <QuickActionCard titleEn="Studio Payments" titleAr="مدفوعات الاستوديوهات" href="/admin/studio-payments" statusLabel="REQ_PAYMENT" />
       </div>
 
       {/* SECTION 5: PLATFORM TOOLS */}
@@ -138,7 +141,7 @@ function MetricCard({ labelEn, labelAr, value, icon, href }: { labelEn: string, 
   );
 }
 
-function QuickActionCard({ titleEn, titleAr, href, count, color, icon }: { titleEn: string, titleAr: string, href: string, count?: number, color?: string, icon?: string }) {
+function QuickActionCard({ titleEn, titleAr, href, count, color, icon, statusLabel }: { titleEn: string, titleAr: string, href: string, count?: number, color?: string, icon?: string, statusLabel?: string }) {
   return (
     <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
       <div className="gb-card" style={{ 
@@ -147,11 +150,19 @@ function QuickActionCard({ titleEn, titleAr, href, count, color, icon }: { title
         justifyContent: 'space-between', 
         alignItems: 'center',
         transition: 'all 0.2s',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        position: 'relative'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {icon && <span style={{ fontSize: '1.2rem' }}>{icon}</span>}
-          <div style={{ fontWeight: 700, fontSize: '0.95rem' }}><T en={titleEn} ar={titleAr} /></div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}><T en={titleEn} ar={titleAr} /></div>
+            {statusLabel && (
+              <div style={{ fontSize: '0.6rem', color: 'var(--gb-gold)', letterSpacing: '0.5px', fontWeight: 800, marginTop: 4, opacity: 0.8 }}>
+                {statusLabel}
+              </div>
+            )}
+          </div>
         </div>
         {count !== undefined && count > 0 && (
           <span style={{ background: color || 'var(--gb-gold)', color: '#000', fontSize: '0.75rem', fontWeight: 900, padding: '4px 10px', borderRadius: 20 }}>

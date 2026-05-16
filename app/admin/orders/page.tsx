@@ -39,7 +39,12 @@ export default async function AdminOrdersPage() {
           <span className="badge">
             <T en="Marketplace Operations" ar="عمليات السوق" />
           </span>
-          <h1><T en="Global Orders" ar="الطلبات الشاملة" /></h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <h1><T en="Global Orders" ar="الطلبات الشاملة" /></h1>
+            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              MANUAL_SETTLEMENT
+            </span>
+          </div>
           <p><T en="Track all marketplace product sales and fulfillment status." ar="تتبع كافة مبيعات منتجات السوق وحالة التنفيذ." /></p>
         </div>
       </div>

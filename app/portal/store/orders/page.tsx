@@ -146,9 +146,14 @@ export default async function VendorOrdersPage() {
       }}
     >
       <section style={{ marginBottom: '32px' }}>
-        <span className="gb-dash-badge" style={{ background: 'rgba(207, 168, 110, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)', marginBottom: '12px' }}>
-          <T en="Orders" ar="الطلبات" />
-        </span>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
+          <span className="gb-dash-badge" style={{ background: 'rgba(207, 168, 110, 0.1)', color: 'var(--gb-gold)', border: '1px solid var(--gb-gold)' }}>
+            <T en="Orders" ar="الطلبات" />
+          </span>
+          <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+            MANUAL_SETTLEMENT
+          </span>
+        </div>
 
         <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '8px 0 0', color: 'white' }}>
           <T en="Orders" ar="الطلبات" />

@@ -198,7 +198,15 @@ export default async function AdminCommissionSettingsPage() {
         <div>
           <p className="gb-eyebrow">Admin dashboard</p>
           <h1>Commission Settings</h1>
-          <p className="gb-muted-text">
+          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              LIVE_SETTINGS
+            </span>
+            <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              REQUIRES_DB
+            </span>
+          </div>
+          <p className="gb-muted-text" style={{ marginTop: 16 }}>
             Configure GearBeat commission rules from 10% to 30% by global
             default, studio, vendor, product, or service type.
           </p>
