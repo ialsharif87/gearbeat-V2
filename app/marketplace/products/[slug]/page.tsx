@@ -460,7 +460,10 @@ export default async function ProductDetailPage({
           />
 
           <p style={{ fontSize: '0.75rem', color: 'var(--gb-gold)', textAlign: 'center', margin: 0 }}>
-            <T en="Pilot Phase: Add to cart to preview the checkout flow. No real payments." ar="المرحلة التجريبية: أضف للسلة لمعاينة عملية الدفع. لا توجد مدفوعات حقيقية." />
+            <T 
+              en="Pilot Phase: Add to cart to preview the checkout flow. No real payments. Payment status is verified by GearBeat backend only." 
+              ar="المرحلة التجريبية: أضف للسلة لمعاينة عملية الدفع. لا توجد مدفوعات حقيقية. يتم التحقق من حالة الدفع من قبل أنظمة جيربيت الخلفية فقط." 
+            />
           </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Metadata } from "next";
 import MarketplaceProductCard from "@/components/marketplace-product-card";
 import SmartDiscoveryPreview from "@/components/smart-discovery-preview";
+import T from "@/components/t";
 
 export const metadata: Metadata = {
   title: "Shop Elite Audio Gear",
@@ -326,6 +327,27 @@ export default async function MarketplacePage({
                 ? "Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
                 : "تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."}
             </p>
+
+            <div 
+              style={{ 
+                marginTop: 16,
+                background: 'rgba(0, 255, 136, 0.05)', 
+                border: '1px solid rgba(0, 255, 136, 0.2)',
+                padding: '10px 14px',
+                borderRadius: 10,
+                fontSize: '0.8rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                color: '#baffd7'
+              }}
+            >
+              <span>🛡️</span>
+              <T 
+                en="Secure Checkout: All payments are verified by GearBeat backend. Live Tap integration is currently deferred (Patch 104B), and manual customer status overrides are disabled for security (Patch 104A)."
+                ar="دفع آمن: يتم التحقق من جميع المدفوعات بواسطة أنظمة جيربيت. تم تأجيل تكامل Tap الحي حالياً (Patch 104B)، وتم تعطيل تجاوزات الحالة يدوياً من قبل العميل للأمان (Patch 104A)."
+              />
+            </div>
           </div>
 
           {/* MARKETPLACE TRUST LAYER */}
