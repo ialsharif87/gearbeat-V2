@@ -35,7 +35,7 @@ export default function GearBeatCertifiedPage() {
                 <T en="Get Certified" ar="احصل على التوثيق" />
               </Link>
               <Link href="/studios" className="btn btn-outline btn-lg">
-                <T en="Find Certified Studios" ar="ابحث عن استوديو موثق" />
+                <T en="Book a Studio" ar="احجز استوديو" />
               </Link>
             </div>
           </div>
@@ -211,10 +211,10 @@ export default function GearBeatCertifiedPage() {
           <h2 className="mb-40 text-balance" style={{ marginInline: 'auto' }}><T en="Ready to raise the volume on trust?" ar="جاهز لرفع مستوى الثقة؟" /></h2>
           <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
-              <T en="Apply for Certification" ar="قدم لطلب التوثيق" />
+              <T en="Get Certified" ar="احصل على التوثيق" />
             </Link>
             <Link href="/studios" className="btn btn-outline btn-lg">
-              <T en="Browse Certified Studios" ar="تصفح الاستوديوهات الموثقة" />
+              <T en="Book a Studio" ar="احجز استوديو" />
             </Link>
           </div>
         </div>

@@ -37,18 +37,18 @@ export default function Footer({ lang = "ar" }: FooterProps) {
 
           <div className="footer-col">
             <h4>{lang === "en" ? "Experiences" : "التجارب"}</h4>
-            <Link href="/studios">{lang === "en" ? "Book Studios" : "احجز استوديو"}</Link>
+            <Link href="/studios">{lang === "en" ? "Book a Studio" : "احجز استوديو"}</Link>
             <Link href="/marketplace">{lang === "en" ? "Shop Gear" : "تسوق معدات"}</Link>
-            <Link href="/academy">{lang === "en" ? "Learn" : "تعلم"}</Link>
-            <Link href="/tickets">{lang === "en" ? "Tickets" : "تذاكر"}</Link>
+            <Link href="/academy">{lang === "en" ? "Join Academy" : "انضم للأكاديمية"}</Link>
+            <Link href="/tickets">{lang === "en" ? "Explore Experiences" : "استكشف التجارب"}</Link>
             <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
           </div>
 
           <div className="footer-col">
             <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
-            <Link href="/join/studio">{lang === "en" ? "Apply as Studio" : "قدم كاستوديو"}</Link>
-            <Link href="/join/seller">{lang === "en" ? "Apply as Vendor" : "قدم كتاجر"}</Link>
-            <Link href="/partner">{lang === "en" ? "Partner Hub" : "مركز الشركاء"}</Link>
+            <Link href="/join/studio">{lang === "en" ? "Become a Studio Partner" : "انضم كاستوديو شريك"}</Link>
+            <Link href="/join/seller">{lang === "en" ? "Become a Vendor Partner" : "انضم كتاجر شريك"}</Link>
+            <Link href="/partner">{lang === "en" ? "Become a Partner" : "انضم كشريك"}</Link>
             <Link href="/support">{lang === "en" ? "Operations Support" : "دعم العمليات"}</Link>
           </div>
 
@@ -60,7 +60,7 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <Link href="/legal/marketplace-policy">{lang === "en" ? "Marketplace Policy" : "سياسة السوق"}</Link>
             <Link href="/legal/academy-policy">{lang === "en" ? "Academy Policy" : "سياسة الأكاديمية"}</Link>
             <Link href="/legal/booking-policy">{lang === "en" ? "Booking Policy" : "سياسة الحجز"}</Link>
-            <Link href="/gearbeat-certified">{lang === "en" ? "GearBeat Certified" : "جيربيت المعتمد"}</Link>
+            <Link href="/gearbeat-certified">{lang === "en" ? "Get Certified" : "احصل على التوثيق"}</Link>
           </div>
         </div>
 

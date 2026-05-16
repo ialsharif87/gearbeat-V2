@@ -31,10 +31,10 @@ export default function AcademyLandingPage() {
           </p>
           <div className="hero-actions" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
             <Link href="/support" className="btn btn-primary btn-lg shadow-gold">
-              <T en="Request Pilot Access" ar="طلب دخول تجريبي" />
+              <T en="Join Academy" ar="انضم للأكاديمية" />
             </Link>
             <Link href="/support" className="btn btn-outline btn-lg">
-              <T en="Apply to Teach" ar="قدم للتدريس" />
+              <T en="Become a Partner" ar="انضم كشريك" />
             </Link>
           </div>
         </div>
@@ -177,10 +177,10 @@ export default function AcademyLandingPage() {
             </p>
             <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/support" className="btn btn-primary btn-lg shadow-gold">
-                <T en="Join Pilot Waitlist" ar="انضم لقائمة الانتظار التجريبية" />
+                <T en="Join Academy" ar="انضم للأكاديمية" />
               </Link>
               <Link href="/support" className="btn btn-outline btn-lg">
-                <T en="Instructor Onboarding" ar="انضمام المدربين" />
+                <T en="Become a Partner" ar="انضم كشريك" />
               </Link>
             </div>
           </div>
