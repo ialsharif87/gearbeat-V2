@@ -24,24 +24,49 @@ function formatMoney(value: unknown, currency = "SAR") {
 
 function getStatusColor(status: string) {
   const s = status.toLowerCase();
-  if (s === "pending") return "rgba(255, 176, 32, 0.15)";
-  if (s === "paid" || s === "processing") return "rgba(32, 156, 255, 0.15)";
+  if (s === "pending_payment") return "rgba(255, 176, 32, 0.15)";
+  if (s === "payment_review") return "rgba(255, 176, 32, 0.25)";
+  if (s === "paid") return "rgba(0, 255, 136, 0.15)";
+  if (s === "processing") return "rgba(32, 156, 255, 0.15)";
+  if (s === "ready_for_pickup") return "rgba(0, 136, 255, 0.15)";
   if (s === "shipped") return "rgba(156, 32, 255, 0.15)";
-  if (s === "delivered") return "rgba(0, 255, 136, 0.15)";
-  if (s === "returned") return "rgba(255, 120, 32, 0.15)";
-  if (s === "refunded") return "rgba(120, 120, 120, 0.15)";
+  if (s === "delivered") return "rgba(0, 255, 136, 0.2)";
+  if (s === "cancelled") return "rgba(255, 77, 77, 0.15)";
+  if (s === "failed") return "rgba(255, 77, 77, 0.2)";
+  if (s === "refunded") return "rgba(120, 120, 120, 0.2)";
+  if (s === "disputed") return "rgba(255, 120, 32, 0.2)";
   return "rgba(255, 255, 255, 0.1)";
 }
 
 function getStatusTextColor(status: string) {
   const s = status.toLowerCase();
-  if (s === "pending") return "#ffb020";
-  if (s === "paid" || s === "processing") return "#209cff";
+  if (s === "pending_payment" || s === "payment_review") return "#ffb020";
+  if (s === "paid" || s === "delivered") return "#00ff88";
+  if (s === "processing" || s === "ready_for_pickup") return "#209cff";
   if (s === "shipped") return "#9c20ff";
-  if (s === "delivered") return "#00ff88";
-  if (s === "returned") return "#ff7820";
+  if (s === "cancelled" || s === "failed") return "#ff4d4d";
   if (s === "refunded") return "#888888";
+  if (s === "disputed") return "#ff7820";
   return "white";
+}
+
+function getStatusLabel(status: string) {
+  const s = status.toLowerCase();
+  switch (s) {
+    case "cart": return <T en="Cart" ar="السلة" />;
+    case "pending_payment": return <T en="Awaiting Payment" ar="في انتظار الدفع" />;
+    case "payment_review": return <T en="Payment Review" ar="مراجعة الدفع" />;
+    case "paid": return <T en="Paid & Confirmed" ar="مدفوع ومؤكد" />;
+    case "processing": return <T en="Being Prepared" ar="قيد التجهيز" />;
+    case "ready_for_pickup": return <T en="Ready for Pickup" ar="جاهز للاستلام" />;
+    case "shipped": return <T en="On its Way" ar="في الطريق" />;
+    case "delivered": return <T en="Received" ar="تم الاستلام" />;
+    case "cancelled": return <T en="Cancelled" ar="ملغي" />;
+    case "failed": return <T en="Payment Failed" ar="فشل الدفع" />;
+    case "refunded": return <T en="Refunded" ar="تم الاسترداد" />;
+    case "disputed": return <T en="Under Dispute" ar="قيد النزاع" />;
+    default: return status;
+  }
 }
 
 export default async function CustomerOrdersPage() {
@@ -105,6 +130,24 @@ export default async function CustomerOrdersPage() {
         </div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div 
+            className="card" 
+            style={{ 
+              background: 'rgba(212, 175, 55, 0.1)', 
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              padding: '12px 16px',
+              borderRadius: 12,
+              maxWidth: 400
+            }}
+          >
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--gb-gold)', lineHeight: 1.5 }}>
+              <T 
+                en="Note: Payment verification and fulfillment status are managed by GearBeat administration. Customers cannot manually confirm payments."
+                ar="ملاحظة: تتم إدارة التحقق من الدفع وحالة التنفيذ من قبل إدارة جيربيت. لا يمكن للعملاء تأكيد المدفوعات يدوياً."
+              />
+            </p>
+          </div>
+
           <Link href="/gear" className="btn btn-primary">
             <T en="Browse gear" ar="تصفح المعدات" />
           </Link>
@@ -213,20 +256,20 @@ export default async function CustomerOrdersPage() {
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      padding: "6px 14px",
-                      borderRadius: 20,
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      background: getStatusColor(order.status),
-                      color: getStatusTextColor(order.status),
-                      border: `1px solid ${getStatusTextColor(order.status)}33`,
-                    }}
-                  >
-                    {order.status}
-                  </div>
+                    <div
+                      style={{
+                        padding: "6px 14px",
+                        borderRadius: 20,
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        background: getStatusColor(order.status),
+                        color: getStatusTextColor(order.status),
+                        border: `1px solid ${getStatusTextColor(order.status)}33`,
+                      }}
+                    >
+                      {getStatusLabel(order.status)}
+                    </div>
                 </div>
 
                 <div style={{ padding: 24 }}>

@@ -2,6 +2,25 @@ import { requireAdminLayoutAccess } from "../../../lib/route-guards";
 import T from "../../../components/t";
 import Link from "next/link";
 
+function getStatusLabel(status: string) {
+  const s = status?.toLowerCase();
+  switch (s) {
+    case "cart": return <T en="Cart" ar="السلة" />;
+    case "pending_payment": return <T en="Unpaid" ar="غير مدفوع" />;
+    case "payment_review": return <T en="In Review" ar="قيد المراجعة" />;
+    case "paid": return <T en="Paid" ar="مدفوع" />;
+    case "processing": return <T en="Processing" ar="قيد المعالجة" />;
+    case "ready_for_pickup": return <T en="Ready" ar="جاهز" />;
+    case "shipped": return <T en="Shipped" ar="تم الشحن" />;
+    case "delivered": return <T en="Delivered" ar="تم التسليم" />;
+    case "cancelled": return <T en="Cancelled" ar="ملغي" />;
+    case "failed": return <T en="Failed" ar="فشل" />;
+    case "refunded": return <T en="Refunded" ar="مسترد" />;
+    case "disputed": return <T en="Disputed" ar="نزاع" />;
+    default: return status;
+  }
+}
+
 export default async function AdminOrdersPage() {
   const { supabaseAdmin } = await requireAdminLayoutAccess();
 
@@ -54,12 +73,12 @@ export default async function AdminOrdersPage() {
                   <td>{o.total_amount} SAR</td>
                   <td>
                     <span className={`badge badge-${
-                      o.status === 'delivered' ? 'success' : 
-                      o.status === 'shipped' ? 'info' : 
-                      o.status === 'cancelled' ? 'danger' : 
+                      o.status === 'delivered' || o.status === 'paid' ? 'success' : 
+                      o.status === 'shipped' || o.status === 'processing' ? 'info' : 
+                      o.status === 'cancelled' || o.status === 'failed' ? 'danger' : 
                       'warning'
                     }`}>
-                      {o.status}
+                      {getStatusLabel(o.status)}
                     </span>
                   </td>
                   <td>

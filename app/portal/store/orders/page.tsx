@@ -156,10 +156,28 @@ export default async function VendorOrdersPage() {
 
         <p style={{ color: "#888", fontSize: '0.9rem', marginTop: '8px' }}>
           <T
-            en="Manage your marketplace orders and update their status."
-            ar="أدر طلبات متجرك وحدّث حالتها."
+            en="Manage your marketplace orders and update their status. Fulfillment begins only after payment is verified."
+            ar="أدر طلبات متجرك وحدّث حالتها. يبدأ التنفيذ فقط بعد التحقق من الدفع."
           />
         </p>
+
+        <div 
+          style={{ 
+            marginTop: 16,
+            background: 'rgba(212, 175, 55, 0.1)', 
+            border: '1px solid rgba(212, 175, 55, 0.3)',
+            padding: '12px 16px',
+            borderRadius: 12,
+            maxWidth: 600
+          }}
+        >
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--gb-gold)', lineHeight: 1.5 }}>
+            <T 
+              en="Safety Notice: Vendors cannot move an order to 'Paid' status. Payment confirmation is handled automatically via secure webhooks or manually by administrators after verifying funds."
+              ar="تنبيه أمان: لا يمكن للتجار نقل الطلب إلى حالة 'مدفوع'. يتم تأكيد الدفع تلقائياً عبر webhooks آمنة أو يدوياً من قبل الإدارة بعد التحقق من الأموال."
+            />
+          </p>
+        </div>
       </section>
 
       <section className="gb-dash-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
@@ -223,14 +241,18 @@ export default async function VendorOrdersPage() {
                   const product = Array.isArray(item.product) ? item.product[0] : item.product;
 
                   const statusLabels: any = {
-                    pending: <T en="Pending" ar="معلق" />,
+                    cart: <T en="Cart" ar="السلة" />,
+                    pending_payment: <T en="Awaiting Payment" ar="في انتظار الدفع" />,
+                    payment_review: <T en="Payment Review" ar="مراجعة الدفع" />,
                     paid: <T en="Paid" ar="مدفوع" />,
                     processing: <T en="Processing" ar="قيد المعالجة" />,
+                    ready_for_pickup: <T en="Ready for Pickup" ar="جاهز للاستلام" />,
                     shipped: <T en="Shipped" ar="تم الشحن" />,
                     delivered: <T en="Delivered" ar="تم التسليم" />,
-                    returned: <T en="Returned" ar="مُرجع" />,
                     cancelled: <T en="Cancelled" ar="ملغي" />,
-                    refunded: <T en="Refunded" ar="مسترد" />
+                    failed: <T en="Failed" ar="فشل" />,
+                    refunded: <T en="Refunded" ar="مسترد" />,
+                    disputed: <T en="Disputed" ar="متنازع عليه" />
                   };
 
                   return (
@@ -266,11 +288,14 @@ export default async function VendorOrdersPage() {
                             fontWeight: 600,
                             background: 
                               item.status === 'delivered' ? 'rgba(15, 160, 138, 0.1)' :
-                              item.status === 'cancelled' ? 'rgba(239, 68, 68, 0.1)' :
+                              item.status === 'paid' ? 'rgba(15, 160, 138, 0.1)' :
+                              item.status === 'cancelled' || item.status === 'failed' ? 'rgba(239, 68, 68, 0.1)' :
+                              item.status === 'pending_payment' || item.status === 'payment_review' ? 'rgba(255, 176, 32, 0.1)' :
                               'rgba(212, 175, 55, 0.1)',
                             color:
-                              item.status === 'delivered' ? 'var(--gb-teal)' :
-                              item.status === 'cancelled' ? '#ef4444' :
+                              item.status === 'delivered' || item.status === 'paid' ? 'var(--gb-teal)' :
+                              item.status === 'cancelled' || item.status === 'failed' ? '#ef4444' :
+                              item.status === 'pending_payment' || item.status === 'payment_review' ? '#ffb020' :
                               'var(--gb-gold)'
                           }}
                         >
