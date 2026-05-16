@@ -161,12 +161,31 @@ export default async function ServicesPage({
       <section 
         className="section-padding hero-section" 
         style={{ 
-          background: "linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop') center/cover",
+          position: "relative",
+          overflow: "hidden",
           textAlign: "center",
           padding: "120px 20px"
         }}
       >
-        <div className="container">
+        <Image
+          src="/brand/studio-placeholder.jpg"
+          alt="Creative Audio Services"
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover", opacity: 0.15 }}
+          className="z-0"
+        />
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%)",
+          zIndex: 0
+        }} />
+        <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div className="badge-gold mb-24 ms-auto me-auto"><T en="PILOT PHASE: ELITE AUDIO SERVICES" ar="المرحلة التجريبية: خدمات الصوت النخبة" /></div>
           <h1 className="text-balance" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 900, marginBottom: 24 }}>
             <T en="Professional Audio Solutions" ar="حلول صوتية احترافية" />
@@ -225,7 +244,7 @@ export default async function ServicesPage({
               >
                 <div style={{ position: "relative", aspectRatio: "16/10" }}>
                   <Image 
-                    src={studio.cover_image_url || "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop"} 
+                    src={studio.cover_image_url || "/brand/studio-placeholder.jpg"} 
                     alt={studio.name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

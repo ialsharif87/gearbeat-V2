@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import T from "../components/t";
 import AskGearBeatPreview from "../components/ask-gearbeat-preview";
 
@@ -162,8 +163,15 @@ export default function HomePage() {
           <div className="grid grid-3 gap-32">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card-premium studio-preview-card hover-lift p-0 overflow-hidden">
-                <div className="studio-thumb-placeholder relative" style={{ height: 250, background: '#111' }}>
-                   <div className="absolute top-16 right-16">
+                <div className="studio-thumb-placeholder relative" style={{ height: 250 }}>
+                   <Image
+                     src="/brand/studio-placeholder.jpg"
+                     alt={`Global Sound Station ${i}`}
+                     fill
+                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                     style={{ objectFit: "cover" }}
+                   />
+                   <div className="absolute top-16 right-16" style={{ zIndex: 1 }}>
                      <span className="badge badge-gold">Certified</span>
                    </div>
                 </div>
