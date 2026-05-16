@@ -67,9 +67,14 @@ export default async function VendorProductsPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
-            <T en="Products" ar="المنتجات" />
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
+              <T en="Products" ar="المنتجات" />
+            </h1>
+            <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              REQUIRES_ADMIN_REVIEW
+            </span>
+          </div>
           <p style={{ color: "#888", fontSize: '0.9rem', marginTop: '8px' }}>
             <T
               en="View and manage your marketplace listings."

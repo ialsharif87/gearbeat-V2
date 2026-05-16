@@ -108,13 +108,23 @@ export default async function VendorDashboardPage() {
       {/* SECTION 1: Welcome Header */}
       <section className="gb-dashboard-header">
         <div className="animate-up">
-          <p className="gb-eyebrow"><T en="Seller Portal" ar="بوابة التاجر" /></p>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 }}>
+            <p className="gb-eyebrow" style={{ margin: 0 }}><T en="Seller Portal" ar="بوابة التاجر" /></p>
+            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              LIVE_MARKETPLACE
+            </span>
+          </div>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: '8px 0 0', letterSpacing: '-1.5px', color: 'white' }}>
             <T en={`Welcome, ${businessNameEn}`} ar={`مرحباً، ${businessNameAr}`} />
           </h1>
-          <p className="text-muted" style={{ fontSize: '1.1rem', marginTop: '8px' }}>
-            {new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
+            <p className="text-muted" style={{ fontSize: '1.1rem', margin: 0 }}>
+              {new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.6rem', fontWeight: 800 }}>
+              REQUIRES_ADMIN_VERIFICATION
+            </span>
+          </div>
         </div>
 
         <div className="flex gap-12" style={{ flexWrap: 'wrap' }}>
@@ -249,7 +259,10 @@ export default async function VendorDashboardPage() {
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>
               <T en="Recent Orders" ar="آخر الطلبات" />
             </h2>
-            <Link href="/portal/store/orders" style={{ color: 'var(--gb-gold)', fontSize: '0.9rem', textDecoration: 'none' }}>
+            <Link href="/portal/store/orders" style={{ color: 'var(--gb-gold)', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.6rem', fontWeight: 800 }}>
+                MANUAL_FULFILLMENT
+              </span>
               <T en="View all" ar="عرض الكل" /> →
             </Link>
           </div>

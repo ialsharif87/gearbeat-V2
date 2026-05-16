@@ -31,7 +31,12 @@ export default function PartnerPortalFoundationPage() {
       <header className="portal-hero">
         <div className="container">
           <div className="hero-content">
-            <div className="badge-gold mb-24 ms-auto me-auto"><T en="PRE-PILOT: INVESTOR & PARTNER READINESS" ar="ما قبل المرحلة التجريبية: جاهزية المستثمرين والشركاء" /></div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
+              <div className="badge-gold"><T en="PRE-PILOT: INVESTOR & PARTNER READINESS" ar="ما قبل المرحلة التجريبية: جاهزية المستثمرين والشركاء" /></div>
+              <div className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                MANUAL_ONBOARDING
+              </div>
+            </div>
             <h1 className="hero-title text-balance">
               <T en="Elevate Your Music Business." ar="ارتقِ بعملك الموسيقي." />
             </h1>
@@ -72,6 +77,7 @@ export default function PartnerPortalFoundationPage() {
               <h3><T en="Professional Tools" ar="أدوات احترافية" /></h3>
               <p className="text-muted"><T en="Access unified extranet tools for bookings, inventory, and analytics. Simplified business management for creative professionals." ar="احصل على أدوات إكسترانت موحدة للحجوزات، المخزون، والتحليلات. إدارة أعمال مبسطة للمحترفين المبدعين." /></p>
               <span className="text-gold font-bold"><T en="READY FOR LAUNCH" ar="جاهز للإطلاق" /></span>
+              <div style={{ marginTop: 8, fontSize: '0.65rem', color: 'var(--gb-gold)', fontWeight: 800 }}>REQUIRES_ADMIN_VERIFICATION</div>
             </div>
           </div>
         </section>
@@ -122,6 +128,8 @@ export default function PartnerPortalFoundationPage() {
                 <span className="cap-icon">{c.icon}</span>
                 <span className="cap-label">{c.label}</span>
                 <span className="cap-badge">{c.status}</span>
+                {c.status === 'Finance' && <span style={{ fontSize: '0.6rem', color: '#ffb020', fontWeight: 800 }}>DEFERRED_PAYMENTS</span>}
+                {c.status === 'Ops' && <span style={{ fontSize: '0.6rem', color: 'var(--gb-gold)', fontWeight: 800 }}>MANUAL_REVIEW</span>}
               </div>
             ))}
           </div>
