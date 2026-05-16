@@ -18,8 +18,8 @@ type SiteHeaderProps = {
 
 export default function SiteHeader({
   isLoggedIn,
-  isAdmin,
-  isVendor,
+  isAdmin: _isAdmin,
+  isVendor: _isVendor,
   userRole,
   dashboardPath,
   logoutAction,
