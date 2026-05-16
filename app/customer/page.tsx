@@ -5,6 +5,7 @@ import CustomerMembershipCard from "@/components/customer-membership-card";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCustomerOrRedirect } from "@/lib/auth-guards";
+import PhoneVerificationManager from "@/components/phone-verification-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -526,12 +527,12 @@ export default async function CustomerDashboardPage() {
               </p>
 
               <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-                <span className={profile.email_verified ? "badge badge-success" : "badge"}>
-                  {profile.email_verified ? "✓" : "○"} Email verified
+                <span className={user.email_confirmed_at ? "badge badge-success" : "badge"}>
+                  {user.email_confirmed_at ? "✓" : "○"} Email verified
                 </span>
 
-                <span className={profile.phone_verified ? "badge badge-success" : "badge"}>
-                  {profile.phone_verified ? "✓" : "○"} Phone verified
+                <span className={user.phone_confirmed_at ? "badge badge-success" : "badge"}>
+                  {user.phone_confirmed_at ? "✓" : "○"} Phone verified
                 </span>
 
                 <span
@@ -545,6 +546,13 @@ export default async function CustomerDashboardPage() {
                   Identity {profile.identity_verification_status || "not_started"}
                 </span>
               </div>
+
+              {!user.phone_confirmed_at && (
+                <PhoneVerificationManager 
+                  phone={profile.phone_e164 || profile.phone || user.phone || ""} 
+                  isVerified={false} 
+                />
+              )}
 
               <Link
                 href="/profile"

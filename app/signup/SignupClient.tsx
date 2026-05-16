@@ -20,15 +20,40 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
   const [countryCode, setCountryCode] = useState("SA");
   const [phoneE164, setPhoneE164] = useState("");
   
-  const [authMode, setAuthMode] = useState<"password" | "otp">("otp");
-  const [step, setStep] = useState<"request" | "verify">("request");
-  const [otpCode, setOtpCode] = useState("");
-  const [cooldown, setCooldown] = useState(0);
+  const [step, setStep] = useState<"request" | "verification">("request");
   
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  
+  // Password validation state
+  const [passRules, setPassRules] = useState({
+    length: false,
+    variety: false,
+    consecutive: false
+  });
+
+  useEffect(() => {
+    const hasLength = password.length >= 8;
+    
+    const types = [
+      /[a-z]/.test(password),
+      /[A-Z]/.test(password),
+      /[0-9]/.test(password),
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    ].filter(Boolean).length;
+    const hasVariety = types >= 3;
+
+    const hasConsecutive = !/(.)\1\1/.test(password);
+
+    setPassRules({
+      length: hasLength,
+      variety: hasVariety,
+      consecutive: hasConsecutive
+    });
+  }, [password]);
+
+  const isPasswordValid = passRules.length && passRules.variety && passRules.consecutive;
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -40,16 +65,6 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     const errorParam = searchParams.get("error");
     if (errorParam) setError(decodeURIComponent(errorParam));
   }, [searchParams]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setInterval(() => {
-        setCooldown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldown]);
 
   const validateCommonFields = () => {
     if (!fullName || fullName.length < 2) {
@@ -75,48 +90,31 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     try {
       validateCommonFields();
 
-      if (authMode === "password") {
-        if (!password || password.length < 8) {
-          throw new Error("Password must be at least 8 characters.");
-        }
-        if (password !== confirmPassword) {
-          throw new Error("Passwords do not match.");
-        }
-
-        const { data, error: authError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-              role,
-            },
-          },
-        });
-
-        if (authError) throw authError;
-        if (!data.user) throw new Error("Signup failed.");
-
-        await createProfile(data.user.id);
-        router.push(`/login?account=${role}&created=1`);
-      } else {
-        // OTP Mode - Request
-        const { error: authError } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            shouldCreateUser: true,
-            data: {
-              full_name: fullName,
-              role,
-            }
-          },
-        });
-
-        if (authError) throw authError;
-
-        setStep("verify");
-        setCooldown(60);
+      if (!isPasswordValid) {
+        throw new Error("Password does not meet the strength requirements.");
       }
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match.");
+      }
+
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            full_name: fullName,
+            role,
+            phone_e164: phoneE164,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+      if (!data.user) throw new Error("Signup failed.");
+
+      await createProfile(data.user.id);
+      setStep("verification");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.includes("email_exists")) {
@@ -124,41 +122,6 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
       } else {
         setError(msg || "An unexpected error occurred");
       }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      const { data, error: authError } = await supabase.auth.verifyOtp({
-        email,
-        token: otpCode,
-        type: "signup",
-      });
-
-      let verifyResult = { data, error: authError };
-      if (authError) {
-        verifyResult = await supabase.auth.verifyOtp({
-          email,
-          token: otpCode,
-          type: "email",
-        });
-      }
-
-      if (verifyResult.error) throw verifyResult.error;
-
-      const user = verifyResult.data.user;
-      if (!user) throw new Error("Verification failed");
-
-      await createProfile(user.id);
-      router.push(role === "studio_owner" ? "/portal/studio" : "/customer");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid or expired code.");
     } finally {
       setLoading(false);
     }
@@ -208,9 +171,9 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
             </h1>
             <p>
               {step === "request" ? (
-                <T en="Create your account to get started" ar="أنشئ حسابك للبدء" />
+                <T en="Create your account with email and password" ar="أنشئ حسابك بالبريد وكلمة المرور" />
               ) : (
-                <T en="Verify your email" ar="تحقق من بريدك الإلكتروني" />
+                <T en="Complete Verification" ar="أكمل التحقق" />
               )}
             </p>
           </div>
@@ -265,103 +228,95 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                 </select>
               </div>
 
-              {authMode === "password" && (
-                <>
-                  <div className="field">
-                    <label><T en="Password" ar="كلمة المرور" /></label>
-                    <PasswordInput
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      variant="portal"
-                      autoComplete="new-password"
-                    />
+              <div className="field">
+                <label><T en="Password" ar="كلمة المرور" /></label>
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  variant="portal"
+                  autoComplete="new-password"
+                />
+                
+                {password && (
+                  <div className="password-checklist animate-up">
+                    <p className="checklist-title">
+                      <T en="Your password must contain:" ar="يجب أن تحتوي كلمة المرور على:" />
+                    </p>
+                    <ul>
+                      <li className={passRules.length ? "valid" : ""}>
+                        {passRules.length ? "✓" : "○"} <T en="At least 8 characters" ar="8 أحرف على الأقل" />
+                      </li>
+                      <li className={passRules.variety ? "valid" : ""}>
+                        {passRules.variety ? "✓" : "○"} <T en="At least 3 of the following:" ar="3 شروط على الأقل من التالي:" />
+                        <ul className="sub-list">
+                          <li><T en="Lowercase letters a-z" ar="حروف صغيرة a-z" /></li>
+                          <li><T en="Uppercase letters A-Z" ar="حروف كبيرة A-Z" /></li>
+                          <li><T en="Numbers 0-9" ar="أرقام 0-9" /></li>
+                          <li><T en="Special characters like !@#$%^&*" ar="رموز خاصة مثل !@#$%^&*" /></li>
+                        </ul>
+                      </li>
+                      <li className={passRules.consecutive ? "valid" : ""}>
+                        {passRules.consecutive ? "✓" : "○"} <T en="No more than 2 identical characters in a row" ar="لا يوجد أكثر من حرفين متطابقين متتاليين" />
+                      </li>
+                    </ul>
                   </div>
-                  <div className="field">
-                    <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
-                    <PasswordInput
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      variant="portal"
-                      autoComplete="new-password"
-                    />
-                  </div>
-
-                </>
-              )}
-
-              <button type="submit" disabled={loading} className="gb-button">
-                {loading ? <T en="Processing..." ar="جاري المعالجة..." /> : (
-                  authMode === "password" ? <T en="Create Account" ar="إنشاء الحساب" /> : <T en="Send Verification Code" ar="إرسال رمز التحقق" />
                 )}
-              </button>
+              </div>
+              <div className="field">
+                <label><T en="Confirm Password" ar="تأكيد كلمة المرور" /></label>
+                <PasswordInput
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  variant="portal"
+                  autoComplete="new-password"
+                />
+              </div>
 
-              <button
-                type="button"
-                className="text-btn"
-                onClick={() => {
-                  setAuthMode(authMode === "password" ? "otp" : "password");
-                  setError(null);
-                }}
-              >
-                {authMode === "password" ? (
-                  <T en="Signup with code (OTP) instead" ar="التسجيل عبر رمز (OTP) بدلاً من ذلك" />
-                ) : (
-                  <T en="Signup with password instead" ar="التسجيل بكلمة مرور بدلاً من ذلك" />
+              <button type="submit" disabled={loading || !isPasswordValid} className="gb-button">
+                {loading ? <T en="Creating Account..." ar="جاري إنشاء الحساب..." /> : (
+                  <T en="Create Account" ar="إنشاء الحساب" />
                 )}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleVerify} className="auth-form">
-              <div className="field">
-                <label><T en="Verification Code" ar="رمز التحقق" /></label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="000000"
-                  required
-                  className="gb-input"
-                  style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '1.5rem' }}
-                />
+            <div className="verification-flow animate-fade-in">
+              <div className="verification-step">
+                <div className="v-icon">📧</div>
+                <h3><T en="Verify Email" ar="التحقق من البريد" /></h3>
+                <p>
+                  <T 
+                    en={`We've sent a confirmation link to ${email}. Please check your inbox (and spam) and click the link to activate your account.`}
+                    ar={`لقد أرسلنا رابط تأكيد إلى ${email}. يرجى التحقق من بريدك (والمهملات) والنقر على الرابط لتفعيل حسابك.`}
+                  />
+                </p>
               </div>
-              <button type="submit" disabled={loading} className="gb-button">
-                {loading ? <T en="Verifying..." ar="جاري التحقق..." /> : <T en="Verify & Complete" ar="تحقق وإكمال" />}
-              </button>
 
-              <div className="otp-actions">
-                <button
-                  type="button"
-                  className="resend-btn"
-                  disabled={cooldown > 0 || loading}
-                  onClick={handleSignup}
-                >
-                  {cooldown > 0 ? (
-                    <T
-                      en={`Resend in ${cooldown}s`}
-                      ar={`أعد الإرسال بعد ${cooldown} ثانية`}
-                    />
-                  ) : (
-                    <T en="Resend Code" ar="أعد إرسال الرمز" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="text-btn"
-                  onClick={() => {
-                    setStep("request");
-                    setError(null);
-                  }}
-                >
-                  <T en="Back to details" ar="العودة للبيانات" />
-                </button>
+              <div className="v-divider" />
+
+              <div className="verification-step">
+                <div className="v-icon">📱</div>
+                <h3><T en="Phone Verification" ar="التحقق من الجوال" /></h3>
+                <p>
+                  <T 
+                    en="Once you activate your email and log in, you will be prompted to verify your phone number via SMS OTP."
+                    ar="بمجرد تفعيل بريدك الإلكتروني وتسجيل الدخول، سيُطلب منك التحقق من رقم جوالك عبر رمز التحقق (SMS OTP)."
+                  />
+                </p>
+                <div className="badge badge-gold" style={{ fontSize: '0.7rem' }}>
+                  <T en="Requires SMS Provider Config" ar="يتطلب إعداد مزود رسائل SMS" />
+                </div>
               </div>
-            </form>
+
+              <div style={{ marginTop: 32 }}>
+                <Link href="/login" className="gb-button w-full" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+                  <T en="Go to Login" ar="الذهاب لتسجيل الدخول" />
+                </Link>
+              </div>
+            </div>
           )}
 
           <div className="auth-footer">
@@ -436,7 +391,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         }
 
         .gb-button {
-
+          width: 100%;
           padding: 14px;
           background: linear-gradient(135deg, var(--gb-gold-light), var(--gb-gold));
           color: #000;
@@ -470,43 +425,85 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           color: var(--gb-gold);
           text-decoration: none;
         }
-        .text-btn {
-          background: none;
-          border: none;
-          color: var(--gb-gold);
-          font-size: 0.9rem;
-          cursor: pointer;
-          padding: 8px;
-          transition: opacity 0.2s;
+        .verification-flow {
+          display: grid;
+          gap: 32px;
+          text-align: center;
         }
-        .text-btn:hover {
-          opacity: 0.8;
-          text-decoration: underline;
-        }
-        .otp-actions {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 16px;
-        }
-        .resend-btn {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--gb-border);
+        .verification-step h3 {
+          font-size: 1.25rem;
+          margin: 12px 0 8px;
           color: #fff;
-          padding: 8px 16px;
-          border-radius: 8px;
-          font-size: 0.85rem;
-          cursor: pointer;
-          transition: all 0.2s;
         }
-        .resend-btn:hover:not(:disabled) {
-          background: rgba(255,255,255,0.1);
-          border-color: var(--gb-gold);
-        }
-        .resend-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+        .verification-step p {
+          font-size: 0.9rem;
           color: var(--gb-text-muted);
+          line-height: 1.6;
+        }
+        .v-icon {
+          font-size: 2.5rem;
+        }
+        .v-divider {
+          height: 1px;
+          background: var(--gb-border);
+          opacity: 0.5;
+        }
+        .w-full {
+          width: 100%;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .password-checklist {
+          margin-top: 12px;
+          padding: 16px;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--gb-border);
+          border-radius: 12px;
+        }
+        .checklist-title {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--gb-gold);
+          margin-bottom: 8px;
+        }
+        .password-checklist ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: grid;
+          gap: 6px;
+        }
+        .password-checklist li {
+          font-size: 0.8rem;
+          color: var(--gb-text-muted);
+          transition: color 0.2s;
+        }
+        .password-checklist li.valid {
+          color: #22c55e;
+          font-weight: 600;
+        }
+        .sub-list {
+          margin-top: 4px !important;
+          margin-left: 20px !important;
+          opacity: 0.8;
+          font-size: 0.75rem !important;
+        }
+        [dir="rtl"] .sub-list {
+          margin-left: 0 !important;
+          margin-right: 20px !important;
+        }
+        .animate-up {
+          animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `,
         }}

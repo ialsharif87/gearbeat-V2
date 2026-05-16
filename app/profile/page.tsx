@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../../lib/supabase/server";
 import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
+import PhoneVerificationManager from "../../components/phone-verification-manager";
 
 function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").trim();
@@ -313,6 +314,15 @@ export default async function ProfilePage() {
 
             <label>
               <T en="Email address" ar="البريد الإلكتروني" />
+              {user.email_confirmed_at ? (
+                <span className="badge badge-success ml-8" style={{ display: 'inline-block', scale: '0.8' }}>
+                  ✓ <T en="Verified" ar="موثق" />
+                </span>
+              ) : (
+                <span className="badge ml-8" style={{ display: 'inline-block', scale: '0.8', background: '#444' }}>
+                  <T en="Not Verified" ar="غير موثق" />
+                </span>
+              )}
             </label>
             <input
               className="input"
@@ -331,6 +341,15 @@ export default async function ProfilePage() {
 
             <label>
               <T en="Phone number" ar="رقم الجوال" />
+              {user.phone_confirmed_at ? (
+                <span className="badge badge-success ml-8" style={{ display: 'inline-block', scale: '0.8' }}>
+                  ✓ <T en="Verified" ar="موثق" />
+                </span>
+              ) : (
+                <span className="badge ml-8" style={{ display: 'inline-block', scale: '0.8', background: '#444' }}>
+                  <T en="Not Verified" ar="غير موثق" />
+                </span>
+              )}
             </label>
             <input
               className="input"
@@ -341,6 +360,11 @@ export default async function ProfilePage() {
               required
               minLength={8}
               disabled={accountStatus === "pending_deletion"}
+            />
+
+            <PhoneVerificationManager 
+              phone={currentPhone} 
+              isVerified={Boolean(user.phone_confirmed_at)} 
             />
 
             <label>

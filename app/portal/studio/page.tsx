@@ -189,6 +189,7 @@ export default async function StudioDashboardPage() {
   // Render the view
   return (
     <StudioDashboardView 
+      user={user}
       ownerName={ownerName}
       totalBookingsMonth={totalBookingsMonth}
       pendingBookings={pendingBookings}
