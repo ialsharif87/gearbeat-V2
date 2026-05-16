@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, Animated, Easing } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text, Animated, Easing, Image } from 'react-native';
 
 export function LoadingScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -13,18 +13,18 @@ export function LoadingScreen() {
       useNativeDriver: true,
     }).start();
 
-    // Pulse effect
+    // Premium slow pulsing animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 1500,
+          toValue: 1.05,
+          duration: 1800,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 1500,
+          duration: 1800,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
@@ -37,20 +37,24 @@ export function LoadingScreen() {
       <View style={styles.content}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }], alignItems: 'center' }}>
           <View style={styles.logoContainer}>
-            <View style={styles.logoCircle} />
+            <Image 
+              source={require('../../assets/logo-mark.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={styles.text}>GEARBEAT</Text>
             <View style={styles.goldLine} />
           </View>
         </Animated.View>
         
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="small" color="#FFD700" />
+          <ActivityIndicator size="small" color="#D4AF37" />
           <Text style={styles.subtext}>Initializing Premium Experience</Text>
         </View>
       </View>
       
       <View style={styles.footer}>
-        <Text style={styles.footerText}>STUDIO . SOUND . CONNECTED</Text>
+        <Text style={styles.footerText}>STUDIO · SOUND · CONNECTED.</Text>
       </View>
     </Animated.View>
   );
@@ -61,7 +65,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#0B0F16', // Core brand luxurious deep slate background
   },
   content: {
     alignItems: 'center',
@@ -70,50 +74,44 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 60,
+    marginBottom: 50,
   },
-  logoCircle: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#FFD700',
+  logoImage: {
+    width: 90,
+    height: 90,
     marginBottom: 20,
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 15,
-    elevation: 8,
   },
   text: {
-    color: '#FFFFFF',
-    fontSize: 34,
-    letterSpacing: 10,
+    color: '#F8F9FA', // Cream color for brand text
+    fontSize: 32,
+    letterSpacing: 12,
     fontWeight: '900',
     textTransform: 'uppercase',
     textAlign: 'center',
     marginBottom: 16,
+    fontFamily: 'System', // Avoid crash if custom fonts aren't loaded in React Native
   },
   goldLine: {
-    width: 40,
-    height: 1,
-    backgroundColor: '#FFD700',
-    opacity: 0.5,
+    width: 50,
+    height: 2,
+    backgroundColor: '#D4AF37', // True metallic gold
+    opacity: 0.6,
   },
   loaderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 30,
+    marginTop: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(212, 175, 55, 0.15)', // Subtle gold border
   },
   subtext: {
     marginLeft: 12,
-    color: '#666666',
-    fontSize: 9,
+    color: '#8A99AD', // Muted slate gray
+    fontSize: 10,
     letterSpacing: 2,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -123,8 +121,8 @@ const styles = StyleSheet.create({
     bottom: 60,
   },
   footerText: {
-    color: '#222222',
-    fontSize: 8,
+    color: '#3A4659', // Beautiful dark copper tone for subtle branding
+    fontSize: 9,
     letterSpacing: 4,
     fontWeight: '800',
   },
