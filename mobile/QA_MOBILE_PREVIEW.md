@@ -181,7 +181,19 @@ The app supports multiple environments via a hidden switcher.
 - [ ] **App Shell**: Confirm the transition from native splash to the custom GearBeat LoadingScreen is smooth.
 - [ ] **Branding**: Verify that all shell components (Loading, Error) maintain the premium dark/gold aesthetic.
 
-## 15. Known Limitations
+## 15. Mobile Shell Cleanup & Brand Polish (Patch 108E)
+
+**Objective**: Verify the luxury branding polish across all mobile shell components after the final cleanup phase.
+
+### Visual Quality Check
+- [ ] **Seamless Dark Transition**: Confirm the background of the entire app shell (Status Bar, Loading screen, Webview background container, Offline screen) uses the luxury deep slate color `#0B0F16` instead of basic dark gray `#0a0a0a`.
+- [ ] **Premium Metallic Accent**: Verify that the generic gold `#FFD700` has been completely replaced with GearBeat's authentic brand metallic gold `#D4AF37` for loaders, custom lines, active states, and buttons.
+- [ ] **Official Logo Mark**: Ensure the `LoadingScreen` and `ErrorScreen` load the premium `logo-mark.png` instead of unbranded placeholders.
+- [ ] **Glowing Offline State**: Verify that the `ErrorScreen` displays the official gold logo mark decorated with a high-fidelity pulsing/glowing red status dot, representing "System Offline" in a gorgeous brand-consistent presentation.
+- [ ] **Consistent Tagline**: Verify the loading screen footer tagline matches the web exactly (`STUDIO · SOUND · CONNECTED.`).
+- [ ] **Developer Switcher Refinements**: Tap the top-right trigger 5 times and verify that the environment switcher is styled as a premium card (`#0F1621` background, gold borders `#D4AF37` and active highlight states, clean micro-copy in `#8A99AD`).
+
+## 16. Known Limitations
 - **File Uploads**: Some complex file upload interactions might behave differently than on desktop.
 - **Push Notifications**: Not implemented in this mirror phase.
 - **Deep Linking**: Currently only supports basic `app=1` entry.

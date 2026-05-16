@@ -83,7 +83,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <StatusBar style="light" backgroundColor="#0a0a0a" />
+        <StatusBar style="light" backgroundColor="#0B0F16" />
         
         {hasError ? (
           <ErrorScreen 
@@ -100,8 +100,8 @@ export default function App() {
               <RefreshControl 
                 refreshing={refreshing} 
                 onRefresh={onRefresh} 
-                tintColor="#FFD700" 
-                colors={['#FFD700']} 
+                tintColor="#D4AF37" 
+                colors={['#D4AF37']} 
               />
             }
           >
@@ -154,14 +154,14 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#0B0F16', // Core brand luxurious background
   },
   scrollContainer: {
     flex: 1,
   },
   webview: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#0B0F16', // Core brand luxurious background
   },
   devMenuTrigger: {
     position: 'absolute',

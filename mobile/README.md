@@ -28,7 +28,11 @@ This is an Expo-managed React Native application that serves as a premium mirror
 2. Start the Expo development server (Choose a mode):
    ```bash
    npm run start:lan     # Recommended for local network (Fastest)
+   ```
+   ```bash
    npm run start:tunnel  # Use if local network is restricted
+   ```
+   ```bash
    npm run start:clear   # Use to reset cache if issues occur
    ```
 
@@ -84,3 +88,11 @@ Fixed Expo configuration and validated assets for a professional launch:
 - **Asset Fix**: Corrected missing splash image reference in `app.json` to use existing `splash-icon.png`.
 - **Validation**: Verified the project with `expo-doctor` ensuring 100% check pass rate.
 - **Shell Polish**: Maintained premium GearBeat dark/gold identity across all mobile shell components.
+
+## Patch 108E — Mobile Shell Cleanup / Brand Polish
+Polished the mobile mirror shell components to match the luxurious dark/gold aesthetic of the main platform:
+- **Primary Asset Integration**: Replaced basic loading placeholders with official, premium `logo-mark.png` assets in `LoadingScreen` and `ErrorScreen`.
+- **Exact Brand Consistency**: Replaced generic `#FFD700` with the official luxury metallic gold `#D4AF37` across custom loaders, text borders, and active switcher buttons.
+- **Seamless Deep Slate Theme**: Unified the status bar, container wrappers, error screens, and loading screen backgrounds to use the brand's primary deep slate `#0B0F16`, eliminating jarring visual transitions.
+- **Glowing Offline Indicator**: Styled a custom pulsing/glowing `#FF4444` offline badge overlaid on the gold brand mark, signaling connection drops beautifully.
+- **Switcher Visual Overhaul**: Refined the developer menu modal with high-fidelity slate card styling, gold borders, and elegant slate-blue metadata.
