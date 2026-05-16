@@ -49,12 +49,12 @@ export default function SiteHeader({
   }, []);
 
   const navLinks = [
-    { href: "/studios", en: "Studios", ar: "الاستوديوهات" },
-    { href: "/marketplace", en: "Marketplace", ar: "السوق" },
+    { href: "/studios", en: "Book Studios", ar: "احجز استوديو" },
+    { href: "/marketplace", en: "Shop Gear", ar: "تسوق معدات" },
     { href: "/academy", en: "Academy", ar: "الأكاديمية" },
-    { href: "/tickets", en: "Tickets", ar: "التذاكر" },
+    { href: "/tickets", en: "Experiences", ar: "تجارب" },
     { href: "/services", en: "Services", ar: "الخدمات" },
-    { href: "/partner", en: "Become a Partner", ar: "كن شريكاً" },
+    { href: "/partner", en: "Partner Portal", ar: "بوابة الشركاء" },
     { href: "/support", en: "Support", ar: "الدعم" },
   ];
 

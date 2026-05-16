@@ -36,11 +36,11 @@ export default function Footer({ lang = "ar" }: FooterProps) {
           </div>
 
           <div className="footer-col">
-            <h4>{lang === "en" ? "Platform" : "المنصة"}</h4>
-            <Link href="/studios">{lang === "en" ? "Discovery" : "الاكتشاف"}</Link>
-            <Link href="/marketplace">{lang === "en" ? "Marketplace" : "السوق"}</Link>
-            <Link href="/academy">{lang === "en" ? "Academy" : "الأكاديمية"}</Link>
-            <Link href="/tickets">{lang === "en" ? "Tickets" : "التذاكر"}</Link>
+            <h4>{lang === "en" ? "Experiences" : "التجارب"}</h4>
+            <Link href="/studios">{lang === "en" ? "Book Studios" : "احجز استوديو"}</Link>
+            <Link href="/marketplace">{lang === "en" ? "Shop Gear" : "تسوق معدات"}</Link>
+            <Link href="/academy">{lang === "en" ? "Learn" : "تعلم"}</Link>
+            <Link href="/tickets">{lang === "en" ? "Tickets" : "تذاكر"}</Link>
             <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
           </div>
 
@@ -48,8 +48,8 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
             <Link href="/join/studio">{lang === "en" ? "Apply as Studio" : "قدم كاستوديو"}</Link>
             <Link href="/join/seller">{lang === "en" ? "Apply as Vendor" : "قدم كتاجر"}</Link>
-            <Link href="/partner">{lang === "en" ? "Become a Partner" : "كن شريكاً"}</Link>
-            <Link href="/support">{lang === "en" ? "Partner Support" : "دعم الشركاء"}</Link>
+            <Link href="/partner">{lang === "en" ? "Partner Hub" : "مركز الشركاء"}</Link>
+            <Link href="/support">{lang === "en" ? "Operations Support" : "دعم العمليات"}</Link>
           </div>
 
           <div className="footer-col">
