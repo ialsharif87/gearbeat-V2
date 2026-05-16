@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+import { getCurrentUserRole, isAdminRole } from "@/lib/auth-guards";
+
 function cleanText(value: unknown) {
   return String(value || "").trim();
 }
@@ -464,6 +466,19 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Authentication required." },
         { status: 401 }
+      );
+    }
+
+    const role = await getCurrentUserRole(supabase, user);
+    const isDev = process.env.NODE_ENV === "development";
+
+    if (!isAdminRole(role) && !isDev) {
+      return NextResponse.json(
+        {
+          error:
+            "Access denied. Manual confirmation is restricted to administrators in production environments.",
+        },
+        { status: 403 }
       );
     }
 
