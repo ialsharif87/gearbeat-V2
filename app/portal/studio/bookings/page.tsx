@@ -72,19 +72,33 @@ function formatMoney(amount: number, currency: string) {
 
 function getStatusLabel(status: string) {
   switch (status) {
+    case "draft":
+      return <T en="Draft" ar="مسودة" />;
     case "pending":
+    case "pending_payment":
     case "pending_review":
     case "pending_owner_review":
-      return <T en="Pending" ar="معلق" />;
+      return <T en="Awaiting Payment" ar="بانتظار الدفع" />;
+    case "payment_review":
+      return <T en="Payment Review" ar="مراجعة الدفع" />;
     case "confirmed":
     case "accepted":
       return <T en="Confirmed" ar="مؤكد" />;
-    case "cancelled":
-    case "declined":
-    case "rejected":
-      return <T en="Cancelled" ar="ملغي" />;
+    case "in_progress":
+    case "active":
+      return <T en="In Progress" ar="قيد التنفيذ" />;
     case "completed":
       return <T en="Completed" ar="مكتمل" />;
+    case "cancelled":
+    case "canceled":
+    case "declined":
+    case "rejected":
+    case "failed":
+      return <T en="Cancelled" ar="ملغى" />;
+    case "refunded":
+      return <T en="Refunded" ar="تم الاسترداد" />;
+    case "disputed":
+      return <T en="Disputed" ar="قيد النزاع" />;
     default:
       return status || <T en="Unknown" ar="غير معروف" />;
   }
@@ -94,6 +108,7 @@ function getPaymentLabel(status: string) {
   switch (status) {
     case "pending":
     case "unpaid":
+    case "pending_payment":
       return <T en="Pending" ar="معلق" />;
     case "paid":
     case "manual_paid":
@@ -102,7 +117,7 @@ function getPaymentLabel(status: string) {
       return <T en="Refunded" ar="مسترد" />;
     case "cancelled":
     case "failed":
-      return <T en="Cancelled" ar="ملغي" />;
+      return <T en="Voided/Failed" ar="ملغى/فشل" />;
     default:
       return status || <T en="Pending" ar="معلق" />;
   }
