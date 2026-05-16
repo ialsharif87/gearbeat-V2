@@ -1,19 +1,15 @@
-import { Cairo, Space_Grotesk } from "next/font/google";
+import Image from "next/image";
 import styles from "./brand-preview.module.css";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
+// Font fallbacks for build stabilization
+const spaceGrotesk = {
   variable: "--font-space-grotesk",
-  display: "swap",
-  fallback: ["system-ui", "sans-serif"],
-});
+};
  
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
+const cairo = {
   variable: "--font-cairo",
-  display: "swap",
-  fallback: ["system-ui", "Arial", "sans-serif"],
-});
+};
+
 
 const studios = [
   {
@@ -59,10 +55,13 @@ export default function BrandPreviewPage() {
       <section className={styles.shell}>
         <nav className={styles.navbar}>
           <a href="/brand-preview" className={styles.logo} aria-label="GearBeat">
-            <img
+            <Image
               src="/brand/logo-horizontal-ai.png"
               alt="GearBeat"
+              width={350}
+              height={100}
               className={styles.logoImage}
+              priority
             />
           </a>
 
@@ -110,9 +109,11 @@ export default function BrandPreviewPage() {
 
           <aside className={styles.previewCard}>
             <div className={styles.phoneTop}>
-              <img
+              <Image
                 src="/brand/logo-mark-ai.png"
                 alt=""
+                width={42}
+                height={42}
                 className={styles.markSmall}
               />
 
@@ -184,9 +185,11 @@ export default function BrandPreviewPage() {
               <article className={styles.studioCard} key={studio.name}>
                 <div className={styles.studioVisual}>
                   <span className={styles.wave} />
-                  <img
+                  <Image
                     src="/brand/logo-mark-ai.png"
                     alt=""
+                    width={104}
+                    height={104}
                     className={styles.markLarge}
                   />
                 </div>
