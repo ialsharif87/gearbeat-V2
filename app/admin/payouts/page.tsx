@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import AdminPayoutsReport, {
   type PayoutReportRow,
 } from "../../../components/admin-payouts-report";

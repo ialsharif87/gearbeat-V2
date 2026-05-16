@@ -1,10 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import T from "@/components/t";
 
+interface Campaign {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  budget: number | string;
+  results_json?: {
+    reach?: number;
+  };
+  created_at?: string;
+}
+
 export default async function AdminPREnginePage() {
   const supabase = await createClient();
 
-  const { data: campaigns, error } = await supabase
+  const { data: campaigns } = await supabase
     .from("pr_campaigns")
     .select("*")
     .order('created_at', { ascending: false });
@@ -12,7 +24,7 @@ export default async function AdminPREnginePage() {
   return (
     <div className="admin-page">
       <header className="admin-header">
-        <h1><T en="PR & Marketing Launch Engine" ar="محرك إطلاق العلاقات العامة والتسويق" /></h1>
+        <h1><T en="PR &amp; Marketing Launch Engine" ar="محرك إطلاق العلاقات العامة والتسويق" /></h1>
       </header>
 
       <div className="admin-content">
@@ -51,7 +63,7 @@ export default async function AdminPREnginePage() {
               </thead>
               <tbody>
                 {campaigns && campaigns.length > 0 ? (
-                  campaigns.map((camp: any) => (
+                  campaigns.map((camp: Campaign) => (
                     <tr key={camp.id}>
                       <td><strong>{camp.name}</strong></td>
                       <td>{camp.type}</td>

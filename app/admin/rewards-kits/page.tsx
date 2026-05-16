@@ -1,15 +1,6 @@
 import T from "@/components/t";
-import Link from "next/link";
 
 export default function AdminRewardsKitsPage() {
-  const fulfillmentStatuses = [
-    { en: 'Pending', ar: 'قيد الانتظار', class: 'status-pending' },
-    { en: 'Approved', ar: 'تمت الموافقة', class: 'status-approved' },
-    { en: 'Packed', ar: 'تم التجهيز', class: 'status-packed' },
-    { en: 'Shipped', ar: 'تم الشحن', class: 'status-shipped' },
-    { en: 'Delivered', ar: 'تم التسليم', class: 'status-delivered' },
-    { en: 'Cancelled', ar: 'تم الإلغاء', class: 'status-cancelled' },
-  ];
 
   const sampleOrders = [
     { id: 'GB-K-1001', entity: 'Sound Horizon Studio', type: 'Studio Welcome Kit', status: 'Shipped', date: '2026-05-08' },
