@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import T from "@/components/t";
 import { createClient } from "@/lib/supabase/server";
@@ -228,17 +229,19 @@ export default async function MarketplaceCartPage() {
                         overflow: "hidden",
                         display: "grid",
                         placeItems: "center",
+                        position: "relative",
                       }}
                     >
                       {image ? (
-                        <img
+                        <Image
                           src={image}
                           alt={getProductName(product)}
+                          fill
+                          sizes="90px"
                           style={{
-                            width: "100%",
-                            height: "100%",
                             objectFit: "cover",
                           }}
+                          loading="lazy"
                         />
                       ) : (
                         <span style={{ fontSize: "1.8rem" }}>🎛️</span>
