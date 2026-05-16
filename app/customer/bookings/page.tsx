@@ -60,18 +60,52 @@ function getBookingDateValue(booking: any) {
 }
 
 function getBookingStatus(booking: any) {
-  return String(booking.status || "pending").toLowerCase();
+  return String(booking.status || "pending_payment").toLowerCase();
+}
+
+function getStatusLabel(status: string) {
+  switch (status) {
+    case "draft":
+      return <T en="Draft" ar="مسودة" />;
+    case "pending_payment":
+    case "pending":
+      return <T en="Awaiting Payment" ar="بانتظار الدفع" />;
+    case "payment_review":
+      return <T en="Payment Review" ar="مراجعة الدفع" />;
+    case "confirmed":
+    case "accepted":
+      return <T en="Confirmed" ar="مؤكد" />;
+    case "in_progress":
+    case "active":
+      return <T en="In Progress" ar="قيد التنفيذ" />;
+    case "completed":
+    case "done":
+      return <T en="Completed" ar="مكتمل" />;
+    case "cancelled":
+    case "canceled":
+    case "declined":
+    case "rejected":
+      return <T en="Cancelled" ar="ملغى" />;
+    case "failed":
+      return <T en="Failed" ar="فشل" />;
+    case "refunded":
+      return <T en="Refunded" ar="تم الاسترداد" />;
+    case "disputed":
+      return <T en="Disputed" ar="قيد النزاع" />;
+    default:
+      return status;
+  }
 }
 
 function isCancelledBooking(booking: any) {
   const status = getBookingStatus(booking);
-  return ["cancelled", "canceled", "refunded"].includes(status);
+  return ["cancelled", "canceled", "refunded", "failed", "declined", "rejected"].includes(status);
 }
 
 function isPastBooking(booking: any) {
   const status = getBookingStatus(booking);
 
-  if (["completed", "done"].includes(status)) {
+  if (["completed", "done", "disputed"].includes(status)) {
     return true;
   }
 
@@ -150,7 +184,7 @@ function BookingCard({
         }}
       >
         <div>
-          <span className="badge">{status}</span>
+          <span className="badge">{getStatusLabel(status)}</span>
 
           <h2 style={{ marginTop: 10 }}>{studioName}</h2>
 

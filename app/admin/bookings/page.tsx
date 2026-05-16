@@ -3,6 +3,43 @@ import { requireAdminLayoutAccess } from "@/lib/route-guards";
 
 export const dynamic = "force-dynamic";
 
+function getStatusLabel(status: string) {
+  const s = String(status || "").toLowerCase();
+  switch (s) {
+    case "draft":
+      return "DRAFT";
+    case "pending_payment":
+    case "pending":
+    case "pending_review":
+    case "pending_owner_review":
+      return "AWAITING PAYMENT";
+    case "payment_review":
+      return "PAYMENT REVIEW";
+    case "confirmed":
+    case "accepted":
+      return "CONFIRMED";
+    case "in_progress":
+    case "active":
+    case "checked_in":
+      return "IN PROGRESS";
+    case "completed":
+    case "done":
+      return "COMPLETED";
+    case "cancelled":
+    case "canceled":
+    case "declined":
+    case "rejected":
+    case "failed":
+      return "VOID / CANCELLED";
+    case "refunded":
+      return "REFUNDED";
+    case "disputed":
+      return "DISPUTED";
+    default:
+      return s.toUpperCase() || "UNKNOWN";
+  }
+}
+
 export default async function AdminBookingsPage() {
   const { supabaseAdmin } = await requireAdminLayoutAccess();
 
@@ -42,10 +79,10 @@ export default async function AdminBookingsPage() {
                     padding: '4px 8px', 
                     borderRadius: 6, 
                     fontSize: '0.75rem', 
-                    background: b.status === 'confirmed' ? 'rgba(34,197,94,0.1)' : 'rgba(234,179,8,0.1)',
-                    color: b.status === 'confirmed' ? '#22c55e' : '#eab308'
+                    background: (b.status === 'confirmed' || b.status === 'completed') ? 'rgba(34,197,94,0.1)' : 'rgba(234,179,8,0.1)',
+                    color: (b.status === 'confirmed' || b.status === 'completed') ? '#22c55e' : '#eab308'
                   }}>
-                    {b.status?.toUpperCase()}
+                    {getStatusLabel(b.status)}
                   </span>
                 </td>
                 <td style={tdStyle}>{new Date(b.created_at).toLocaleDateString()}</td>
