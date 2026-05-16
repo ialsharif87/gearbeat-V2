@@ -163,7 +163,7 @@ export default function TicketsLandingPage() {
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/partner/tickets" className="btn btn-primary">
-              <T en="Partner with GearBeat" ar="شارك مع جيربيت" />
+              <T en="Become a Partner" ar="انضم كشريك" />
             </Link>
             <Link href="/support" className="btn btn-outline">
               <T en="Stay Notified" ar="ابق على اطلاع" />

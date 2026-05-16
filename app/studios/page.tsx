@@ -783,7 +783,7 @@ export default async function StudiosPage({
                       </p>
 
                       <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                        <T en="Explore Studio" ar="استكشف الاستوديو" />
+                        <T en="Book a Studio" ar="احجز استوديو" />
                       </Link>
                     </div>
                   </div>
@@ -814,7 +814,7 @@ export default async function StudiosPage({
               
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
                 <Link href="/join/studio" className="btn btn-primary">
-                  <T en="Join as Studio" ar="انضم كاستوديو" />
+                  <T en="Become a Partner" ar="انضم كشريك" />
                 </Link>
                 <Link href="/studios" className="btn btn-outline">
                   <T en="Reset Filters" ar="إعادة ضبط الفلاتر" />
@@ -823,7 +823,7 @@ export default async function StudiosPage({
                   <T en="Request a Location" ar="طلب موقع" />
                 </Link>
                 <Link href="/marketplace" className="btn btn-outline">
-                  <T en="Explore Marketplace" ar="استكشاف المتجر" />
+                  <T en="Shop Gear" ar="تسوق معدات" />
                 </Link>
               </div>
 

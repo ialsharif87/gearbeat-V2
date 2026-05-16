@@ -574,13 +574,13 @@ export default async function MarketplacePage({
 
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
                 <Link href="/join/seller" className="btn btn-primary">
-                  {lang === "en" ? "Apply as Vendor" : "قدم كتاجر"}
+                  {lang === "en" ? "Become a Partner" : "انضم كشريك"}
                 </Link>
                 <Link href="/support" className="btn btn-outline">
                   {lang === "en" ? "Contact Support" : "اتصل بالدعم"}
                 </Link>
                 <Link href="/marketplace" className="btn btn-outline">
-                  {lang === "en" ? "Browse All Gear" : "تصفح جميع المعدات"}
+                  {lang === "en" ? "Shop Gear" : "تسوق معدات"}
                 </Link>
               </div>
 
@@ -651,7 +651,7 @@ export default async function MarketplacePage({
           </p>
 
           <Link href="/join/seller" className="btn btn-primary">
-            انضم كتاجر
+            انضم كشريك
           </Link>
         </div>
       </main>

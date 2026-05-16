@@ -49,12 +49,12 @@ export default function SiteHeader({
   }, []);
 
   const navLinks = [
-    { href: "/studios", en: "Book Studios", ar: "احجز استوديو" },
+    { href: "/studios", en: "Book a Studio", ar: "احجز استوديو" },
     { href: "/marketplace", en: "Shop Gear", ar: "تسوق معدات" },
-    { href: "/academy", en: "Academy", ar: "الأكاديمية" },
-    { href: "/tickets", en: "Experiences", ar: "تجارب" },
+    { href: "/academy", en: "Join Academy", ar: "انضم للأكاديمية" },
+    { href: "/tickets", en: "Explore Experiences", ar: "استكشف التجارب" },
     { href: "/services", en: "Services", ar: "الخدمات" },
-    { href: "/partner", en: "Partner Portal", ar: "بوابة الشركاء" },
+    { href: "/partner", en: "Become a Partner", ar: "انضم كشريك" },
     { href: "/support", en: "Support", ar: "الدعم" },
   ];
 
@@ -137,10 +137,10 @@ export default function SiteHeader({
           ) : (
             <div className="auth-group">
               <Link href="/login" className="nav-link hide-mobile">
-                {lang === "en" ? "Login" : "دخول"}
+                {lang === "en" ? "Sign In" : "تسجيل الدخول"}
               </Link>
               <Link href="/signup" className="btn btn-primary btn-sm">
-                {lang === "en" ? "Sign Up" : "تسجيل"}
+                {lang === "en" ? "Create Account" : "إنشاء حساب"}
               </Link>
             </div>
           )}
@@ -161,7 +161,7 @@ export default function SiteHeader({
             ))}
             {!isLoggedIn && (
               <Link href="/login" className="mobile-nav-link auth-link">
-                <span className="link-text">{lang === "en" ? "Login" : "دخول"}</span>
+                <span className="link-text">{lang === "en" ? "Sign In" : "تسجيل الدخول"}</span>
               </Link>
             )}
           </nav>

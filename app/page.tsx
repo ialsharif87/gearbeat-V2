@@ -27,10 +27,10 @@ export default function HomePage() {
             </p>
             <div className="hero-actions">
               <Link href="/studios" className="btn btn-primary btn-lg shadow-gold">
-                <T en="Find a Studio" ar="ابحث عن استوديو" />
+                <T en="Book a Studio" ar="احجز استوديو" />
               </Link>
               <Link href="/marketplace" className="btn btn-outline btn-lg">
-                <T en="Shop Verified Gear" ar="تسوق معدات موثقة" />
+                <T en="Shop Gear" ar="تسوق معدات" />
               </Link>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function HomePage() {
               </div>
               <h3><T en="Studio Owners" ar="أصحاب الاستوديوهات" /></h3>
               <p><T en="Monetize your space, simplify bookings, and apply for 'GearBeat Certified' status." ar="استثمر مساحتك، بسط حجوزاتك، وقدم طلباً للحصول على حالة 'GearBeat Certified'." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Apply to Join" ar="قدم للانضمام" /> →</span>
+              <span className="path-cta text-gold font-bold"><T en="Become a Partner" ar="انضم كشريك" /> →</span>
             </Link>
 
             <Link href="/join/seller" className="card-premium path-card hover-lift">
@@ -100,7 +100,7 @@ export default function HomePage() {
               </div>
               <h3><T en="Certified Vendors" ar="التجار المعتمدون" /></h3>
               <p><T en="Join the elite marketplace. List professional audio gear with integrated logistics and verified status." ar="انضم إلى السوق المتميز. اعرض معدات الصوت الاحترافية مع خدمات لوجستية متكاملة وحالة موثقة." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Join as Vendor" ar="انضم كتاجر" /> →</span>
+              <span className="path-cta text-gold font-bold"><T en="Become a Partner" ar="انضم كشريك" /> →</span>
             </Link>
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function HomePage() {
               <span className="badge-gold"><T en="Curated Selection" ar="مختارات مختارة" /></span>
               <h2 className="mt-8"><T en="Elite Studios" ar="استوديوهات النخبة" /></h2>
             </div>
-            <Link href="/studios" className="btn btn-outline btn-sm"><T en="View All Studios" ar="عرض كل الاستوديوهات" /> →</Link>
+            <Link href="/studios" className="btn btn-outline btn-sm"><T en="Book a Studio" ar="احجز استوديو" /> →</Link>
           </div>
           <div className="grid grid-3 gap-32">
             {[1, 2, 3].map((i) => (
@@ -182,7 +182,7 @@ export default function HomePage() {
                   </div>
                   <p className="text-muted text-sm mb-20">Verified Partner • Riyadh</p>
                   <Link href="/studios" className="btn btn-outline btn-sm w-full">
-                    <T en="Check Availability" ar="تحقق من التوفر" />
+                    <T en="Book a Studio" ar="احجز استوديو" />
                   </Link>
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function HomePage() {
                <span className="badge-gold"><T en="Boutique Inventory" ar="مخزون فاخر" /></span>
                <h2 className="mt-8"><T en="Verified Marketplace" ar="سوق موثق" /></h2>
              </div>
-             <Link href="/marketplace" className="btn btn-outline btn-sm"><T en="Browse All Gear" ar="تصفح كل المعدات" /> →</Link>
+             <Link href="/marketplace" className="btn btn-outline btn-sm"><T en="Shop Gear" ar="تسوق معدات" /> →</Link>
           </div>
           <div className="grid grid-4 category-grid gap-24">
             {[
@@ -271,7 +271,7 @@ export default function HomePage() {
           <h2 className="mb-60 text-balance" style={{ marginInline: 'auto' }}><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
           <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
             <Link href="/signup" className="btn btn-primary btn-lg shadow-gold">
-              <T en="Create Your Account" ar="أنشئ حسابك" />
+              <T en="Create Account" ar="إنشاء حساب" />
             </Link>
             <Link href="/support" className="btn btn-outline btn-lg">
                <T en="Speak to an Expert" ar="تحدث مع خبير" />

@@ -48,10 +48,10 @@ export default function PartnerPortalFoundationPage() {
             </p>
             <div className="hero-actions" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
               <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
-                 <T en="Apply as Studio" ar="قدم كاستوديو" />
+                 <T en="Become a Partner" ar="انضم كشريك" />
               </Link>
               <Link href="/join/seller" className="btn btn-outline btn-lg">
-                 <T en="Apply as Vendor" ar="قدم كتاجر" />
+                 <T en="Become a Partner" ar="انضم كشريك" />
               </Link>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function PartnerPortalFoundationPage() {
           <h2 className="mb-40 text-balance" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginInline: 'auto' }}><T en="Join the Pilot Network." ar="انضم إلى الشبكة التجريبية." /></h2>
           <div className="hero-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/join/studio" className="btn btn-primary btn-lg shadow-gold">
-               <T en="Start Your Application" ar="ابدأ طلبك" />
+               <T en="Become a Partner" ar="انضم كشريك" />
             </Link>
             <Link href="/support" className="btn btn-outline btn-lg">
                <T en="Partner Support" ar="دعم الشركاء" />
