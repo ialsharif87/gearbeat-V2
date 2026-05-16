@@ -173,8 +173,8 @@ export default async function VendorOrdersPage() {
         >
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--gb-gold)', lineHeight: 1.5 }}>
             <T 
-              en="Safety Notice: Vendors cannot move an order to 'Paid' status. Payment confirmation is handled automatically via secure webhooks or manually by administrators after verifying funds."
-              ar="تنبيه أمان: لا يمكن للتجار نقل الطلب إلى حالة 'مدفوع'. يتم تأكيد الدفع تلقائياً عبر webhooks آمنة أو يدوياً من قبل الإدارة بعد التحقق من الأموال."
+              en="Safety Notice: Vendors cannot move an order to 'Paid' status. Tap live payments remain deferred; confirmation is handled automatically via secure webhooks or manually by administrators after verifying funds."
+              ar="تنبيه أمان: لا يمكن للتجار نقل الطلب إلى حالة 'مدفوع'. لا تزال مدفوعات Tap الحية مؤجلة؛ يتم التأكيد تلقائياً عبر webhooks آمنة أو يدوياً من قبل الإدارة بعد التحقق من الأموال."
             />
           </p>
         </div>

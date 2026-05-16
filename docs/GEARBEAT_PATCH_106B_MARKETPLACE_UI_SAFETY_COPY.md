@@ -15,7 +15,7 @@ This patch aligns the visible marketplace order and payment labels with the cano
     - Implemented `getStatusLabel` helper for universal label alignment.
     - Updated badge colors to match the marketplace lifecycle.
 - **Marketplace Discovery** (`app/marketplace/page.tsx`):
-    - Added a "Secure Checkout" notice clarifying that all payments are verified by backend systems and manual overrides are disabled.
+    - Added a "Secure Checkout" notice clarifying that all payments are verified by backend systems, Tap integration is deferred (Patch 104B), and manual overrides are disabled (Patch 104A).
 - **Product Details** (`app/marketplace/products/[slug]/page.tsx`):
     - Updated "Pilot Phase" notice to explicitly mention backend-only payment verification.
 
@@ -41,4 +41,4 @@ This patch aligns the visible marketplace order and payment labels with the cano
 ## 5. Confirmation
 - ✅ **UI/Copy Only**: No changes were made to backend logic, API behavior, Supabase queries, or payment handling.
 - ✅ **Brand Consistency**: Preserved GearBeat premium dark/gold identity and bilingual support.
-- ✅ **Safety Lock**: Reinforced the "Manual Payment Safety Lock" (Patch 104A) through explicit UI messaging.
+- ✅ **Safety Lock**: Reinforced the "Manual Payment Safety Lock" (Patch 104A) and "Tap Webhook Safety Plan" (Patch 104B) through explicit UI messaging.

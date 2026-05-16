@@ -344,8 +344,8 @@ export default async function MarketplacePage({
             >
               <span>🛡️</span>
               <T 
-                en="Secure Checkout: All payments are verified by GearBeat backend systems. Manual or customer-initiated status overrides are disabled for production safety."
-                ar="دفع آمن: يتم التحقق من جميع المدفوعات بواسطة أنظمة جيربيت الخلفية. تم تعطيل تجاوزات الحالة يدوياً أو من قبل العميل لسلامة الإنتاج."
+                en="Secure Checkout: All payments are verified by GearBeat backend. Live Tap integration is currently deferred (Patch 104B), and manual customer status overrides are disabled for security (Patch 104A)."
+                ar="دفع آمن: يتم التحقق من جميع المدفوعات بواسطة أنظمة جيربيت. تم تأجيل تكامل Tap الحي حالياً (Patch 104B)، وتم تعطيل تجاوزات الحالة يدوياً من قبل العميل للأمان (Patch 104A)."
               />
             </div>
           </div>
