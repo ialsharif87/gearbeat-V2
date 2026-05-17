@@ -934,6 +934,7 @@ body.app-mode .hide-app {
   .hero-content {
     align-items: center !important;
     text-align: center !important;
+  }
 }
 
 /* Premium Gold Focus Indicators for Keyboard Navigation (WCAG 2.1) */
