@@ -878,6 +878,7 @@ body.app-mode .hide-app {
     width: 100%;
     display: inline-flex;
     justify-content: center;
+    min-height: 48px !important;
   }
 
   .btn-lg {
@@ -886,6 +887,7 @@ body.app-mode .hide-app {
     width: 100%;
     display: inline-flex;
     justify-content: center;
+    min-height: 52px !important;
   }
 
   .hero-actions, .cta-actions {
@@ -905,8 +907,32 @@ body.app-mode .hide-app {
     justify-content: center !important;
   }
 
-  /* Horizontal Overflow Avoidance */
+  /* Horizontal Overflow & Stacking Avoidance */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative !important;
+  }
+
   * {
-    max-width: 100%;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .container {
+    width: 94% !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  /* Stack hero content perfectly on small viewports */
+  .hero-section, .portal-hero {
+    padding: 60px 0 !important;
+    text-align: center !important;
+  }
+
+  .hero-content {
+    align-items: center !important;
+    text-align: center !important;
   }
 }
