@@ -39,14 +39,26 @@ export default function TicketingPartnerFoundationPage() {
                 <T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" />
               </h1>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <span className="badge" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-                  PREVIEW
-                </span>
-                <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-                  <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+                <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.05)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="PRE-LAUNCH PARTNER PORTAL" ar="بوابة الشركاء ما قبل الإطلاق" />
                 </span>
                 <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
                   <T en="SENSITIVE DATA BLOCKED" ar="حظر البيانات الحساسة" />
+                </span>
+                <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="DOCUMENT COLLECTION DISABLED" ar="جمع المستندات معطل" />
+                </span>
+                <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
+                </span>
+                <span className="badge" style={{ background: 'rgba(255, 176, 32, 0.1)', color: '#ffb020', border: '1px solid rgba(255, 176, 32, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="MANUAL REVIEW REQUIRED" ar="مطلوب مراجعة يدوية" />
+                </span>
+                <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+                </span>
+                <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="COMMERCIAL VERIFICATION PENDING" ar="معلق التحقق التجاري" />
                 </span>
               </div>
             </div>

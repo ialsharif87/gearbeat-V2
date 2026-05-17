@@ -57,13 +57,56 @@ export default function StudioDashboardView({
             })}
           </p>
         </div>
-        <div className="header-actions animate-up">
-          <div className="status-badge" style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '8px 16px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="dot" style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' }}></span>
-            <T en="Live Status" ar="الحالة: مباشر" />
+        <div className="header-actions animate-up" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="status-badge" style={{ background: 'rgba(212, 175, 55, 0.05)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', padding: '8px 16px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="dot" style={{ width: 8, height: 8, background: 'var(--gb-gold)', borderRadius: '50%', boxShadow: '0 0 10px var(--gb-gold)' }}></span>
+            <T en="PRE-LAUNCH PARTNER PORTAL" ar="بوابة الشركاء ما قبل الإطلاق" />
+          </div>
+          <div style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', padding: '8px 16px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 800 }}>
+            <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+          </div>
+          <div style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', padding: '8px 16px', borderRadius: '99px', fontSize: '0.7rem', fontWeight: 800 }}>
+            <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
           </div>
         </div>
       </header>
+
+      {/* Pre-launch compliance warning banner */}
+      <div style={{
+        background: "rgba(212, 175, 55, 0.03)",
+        border: "1px dashed rgba(212, 175, 55, 0.2)",
+        borderRadius: 16,
+        padding: "20px 24px",
+        marginBottom: 32,
+        textAlign: "left"
+      }} className="animate-up">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+          <span style={{ color: "var(--gb-gold)", fontWeight: 800, fontSize: "0.9rem", letterSpacing: "0.5px" }}>
+            <T en="PRE-LAUNCH COMPLIANCE & PORTAL BOUNDARIES" ar="حدود بوابة الشركاء والامتثال ما قبل الإطلاق" />
+          </span>
+        </div>
+        <p style={{ margin: 0, fontSize: "0.85rem", color: "#aaa", lineHeight: 1.6 }}>
+          <T
+            en="Welcome to the GearBeat V2 Partner Extranet Sandbox. Please note that partner onboarding, booking transactions, automated product listings, and real-time bank payouts are currently offline and run in simulated sandbox mode. In full compliance with Saudi PDPL data residency mandates, sensitive corporate document collection is completely disabled until verified local sovereign storage is fully provisioned in Google Cloud Dammam region."
+            ar="مرحباً بك في البيئة التجريبية لإكسترانت الشركاء لـ GearBeat V2. يرجى العلم أن تسجيل الشركاء، ومعاملات الحجز، وقوائم المنتجات المؤتمتة، والمدفوعات البنكية الفورية هي حالياً غير مفعلة وتعمل في وضع المحاكاة التجريبي. تماشياً مع متطلبات نظام حماية البيانات الشخصية السعودي (PDPL)، تم إيقاف جمع المستندات المؤسسية الحساسة تماماً حتى يتم توفير التخزين المحلي السيادي المعتمد في منطقة Google Cloud الدمام."
+          />
+        </p>
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ background: "rgba(255, 77, 77, 0.15)", color: "#ff4d4d", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            DOCUMENT COLLECTION DISABLED
+          </span>
+          <span style={{ background: "rgba(255, 176, 32, 0.15)", color: "#ffb020", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            MANUAL REVIEW REQUIRED
+          </span>
+          <span style={{ background: "rgba(212, 175, 55, 0.15)", color: "var(--gb-gold)", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            SENSITIVE DATA BLOCKED
+          </span>
+          <span style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            COMMERCIAL VERIFICATION PENDING
+          </span>
+        </div>
+      </div>
 
       {/* Main Grid: Stats */}
       <section className="gb-dash-grid animate-up" style={{ animationDelay: '0.1s', marginBottom: 48 }}>
@@ -189,16 +232,16 @@ export default function StudioDashboardView({
             <div className="readiness-list" style={{ marginTop: 12 }}>
               {[
                 { label: 'Studio Profile', status: '✅' },
-                { label: 'Documents', status: '✅' },
+                { label: 'Document Collection', status: '🚫 DISABLED' },
                 { label: 'Contract', status: '✅' },
-                { label: 'Certified Status', status: '⏳' },
-                { label: 'Rewards/Kits', status: '⏳' },
-                { label: 'Payouts', status: '⏳' },
-                { label: 'Support', status: '⏳' },
+                { label: 'Certified Status', status: '⏳ PENDING' },
+                { label: 'Rewards/Kits', status: '⏳ PENDING' },
+                { label: 'Payouts & Banking', status: '⏳ DEFERRED' },
+                { label: 'Support Track', status: '⏳ PENDING' },
               ].map(item => (
                 <div key={item.label} className="flex-between" style={{ padding: '8px 0', borderBottom: '1px solid #111', fontSize: '0.8rem' }}>
                   <span style={{ color: '#888' }}>{item.label}</span>
-                  <span>{item.status}</span>
+                  <span style={{ fontWeight: 700, color: item.status.includes('✅') ? '#10b981' : item.status.includes('🚫') ? '#ff4d4d' : '#ffb020' }}>{item.status}</span>
                 </div>
               ))}
             </div>

@@ -32,12 +32,24 @@ export default function PartnerPortalFoundationPage() {
         <div className="container">
           <div className="hero-content">
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
-              <div className="badge-gold"><T en="PRE-PILOT: INVESTOR & PARTNER READINESS" ar="ما قبل المرحلة التجريبية: جاهزية المستثمرين والشركاء" /></div>
+              <div className="badge-gold"><T en="PRE-LAUNCH PARTNER PORTAL" ar="بوابة الشركاء ما قبل الإطلاق" /></div>
               <div className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
                 <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
               </div>
               <div className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
                 <T en="SENSITIVE DATA BLOCKED" ar="حظر البيانات الحساسة" />
+              </div>
+              <div className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="DOCUMENT COLLECTION DISABLED" ar="جمع المستندات معطل" />
+              </div>
+              <div className="badge" style={{ background: 'rgba(255, 176, 32, 0.1)', color: '#ffb020', border: '1px solid rgba(255, 176, 32, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="MANUAL REVIEW REQUIRED" ar="مطلوب مراجعة يدوية" />
+              </div>
+              <div className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+              </div>
+              <div className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="COMMERCIAL VERIFICATION PENDING" ar="معلق التحقق التجاري" />
               </div>
             </div>
             <h1 className="hero-title text-balance">

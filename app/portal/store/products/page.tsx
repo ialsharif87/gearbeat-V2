@@ -72,11 +72,17 @@ export default async function VendorProductsPage() {
               <T en="Products" ar="المنتجات" />
             </h1>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.05)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="PRE-LAUNCH PARTNER PORTAL" ar="بوابة الشركاء ما قبل الإطلاق" />
+              </span>
+              <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="SENSITIVE DATA BLOCKED" ar="حظر البيانات الحساسة" />
+              </span>
+              <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
+              </span>
               <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
                 <T en="REQUIRES_ADMIN_REVIEW" ar="يتطلب مراجعة المشرف" />
-              </span>
-              <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-                <T en="PRE-LAUNCH" ar="ما قبل الإطلاق" />
               </span>
             </div>
           </div>
