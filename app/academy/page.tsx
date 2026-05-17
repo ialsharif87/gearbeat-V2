@@ -30,10 +30,10 @@ export default function AcademyLandingPage() {
             />
           </p>
           <div className="hero-actions" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
-            <Link href="/support" className="btn btn-primary btn-lg shadow-gold">
+            <Link href="/signup" className="btn btn-primary btn-lg shadow-gold">
               <T en="Join Academy" ar="انضم للأكاديمية" />
             </Link>
-            <Link href="/support" className="btn btn-outline btn-lg">
+            <Link href="/join/studio" className="btn btn-outline btn-lg">
               <T en="Become a Partner" ar="انضم كشريك" />
             </Link>
           </div>
