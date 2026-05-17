@@ -11,7 +11,7 @@ export default function HomePage() {
         <div className="container hero-container animate-up">
           <div className="hero-content">
             <div className="badge-gold mb-16">
-              <T en="Pilot Phase — Demo Readiness" ar="المرحلة التجريبية — جاهزية العرض" />
+              <T en="Saudi-First Creative Marketplace" ar="منصة إبداعية صوتية سعودية أولاً" />
             </div>
             <h1 className="text-balance" style={{ fontWeight: 900 }}>
               <T
@@ -21,8 +21,8 @@ export default function HomePage() {
             </h1>
             <p className="lead mb-40">
               <T
-                en="GearBeat is the definitive ecosystem for the modern studio. Book world-class recording spaces, shop elite verified audio gear, and secure access to exclusive industry events."
-                ar="GearBeat هو النظام البيئي النهائي للاستوديو الحديث. احجز مساحات تسجيل عالمية، تسوق معدات صوتية فاخرة وموثقة، واحصل على وصول حصري لفعاليات الصناعة."
+                en="Built for Saudi launch, GCC expansion, and global reach. Explore now. Full commercial activation coming in controlled phases. Payments and sensitive onboarding are activated only after compliance readiness."
+                ar="مصممة للإطلاق في المملكة العربية السعودية، والتوسع في الخليج، والوصول العالمي. استكشف الآن. التفعيل التجاري الكامل يأتي في مراحل خاضعة للرقابة. يتم تنشيط المدفوعات والتسجيل الحساس للمعلومات فقط بعد جاهزية الامتثال."
               />
             </p>
             <div className="hero-actions">
@@ -32,6 +32,13 @@ export default function HomePage() {
               <Link href="/marketplace" className="btn btn-outline btn-lg">
                 <T en="Shop Gear" ar="تسوق معدات" />
               </Link>
+            </div>
+            <div style={{ marginTop: 24, fontSize: '0.8rem', color: 'var(--gb-gold-light)', display: 'flex', alignItems: 'center', gap: 8, opacity: 0.8 }}>
+              <span>🛡️</span>
+              <T 
+                en="Verified listings and partner review before full activation." 
+                ar="قوائم موثقة ومراجعة للشركاء قبل التفعيل الكامل للخدمات." 
+              />
             </div>
           </div>
           <div className="hero-visual">
