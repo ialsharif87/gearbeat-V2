@@ -155,6 +155,28 @@ export default async function RootLayout({
       dir="rtl"
       className={`${spaceGrotesk.variable} ${cairo.variable}`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const lang = new URLSearchParams(window.location.search).get('lang');
+                if (lang === 'en') {
+                  document.documentElement.lang = 'en';
+                  document.documentElement.dir = 'ltr';
+                } else {
+                  document.documentElement.lang = 'ar';
+                  document.documentElement.dir = 'rtl';
+                }
+                const isApp = new URLSearchParams(window.location.search).get('app') === '1';
+                if (isApp) {
+                  document.body.classList.add('app-mode');
+                }
+              } catch (e) {}
+            `
+          }}
+        />
+      </head>
       <body>
         <Analytics />
         <ClientProviders>

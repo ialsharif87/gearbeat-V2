@@ -257,15 +257,6 @@ export default function SiteHeader({
           opacity: 1;
         }
 
-        [dir="rtl"] .header-nav {
-          order: 2;
-        }
-        [dir="rtl"] .header-actions {
-          order: 1;
-        }
-        [dir="rtl"] .header-left {
-          order: 3;
-        }
 
         .header-left {
           display: flex;
@@ -449,10 +440,8 @@ export default function SiteHeader({
           .header-nav { display: none; }
           .mobile-menu-toggle { 
             display: block; 
-            order: 1;
           }
           .header-logo {
-            order: 2;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -461,13 +450,11 @@ export default function SiteHeader({
             height: 24px;
           }
           .header-actions {
-            order: 3;
             gap: 12px;
           }
           .mobile-spacer {
             display: block;
             width: 40px;
-            order: 4;
           }
           .hide-mobile { display: none; }
           .site-header { height: 70px; }
@@ -534,13 +521,8 @@ export default function SiteHeader({
             position: static !important;
             transform: none !important;
             margin: 0 auto;
-            order: 2 !important;
-          }
-          .mobile-menu-toggle {
-            order: 1 !important;
           }
           .header-actions {
-            order: 3 !important;
             gap: 12px !important;
           }
           .mobile-spacer {

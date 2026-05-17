@@ -143,9 +143,15 @@ export default function SmartDiscoveryPreview({ vertical }: SmartDiscoveryPrevie
           alignItems: 'center',
           gap: 12
         }}>
-          <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: 'var(--gb-gold)' }}>💡</span>
-            <T en="Tip: Use specific intents like 'podcast setup' or 'vocal recording'." ar="نصيحة: استخدم احتياجات محددة مثل 'تجهيز بودكاست' أو 'تسجيل غناء'." />
+          <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: 'var(--gb-gold)' }}>💡</span>
+              <T en="Tip: Use specific intents like 'podcast setup' or 'vocal recording'." ar="نصيحة: استخدم احتياجات محددة مثل 'تجهيز بودكاست' أو 'تسجيل غناء'." />
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, opacity: 0.6, fontSize: '0.62rem' }}>
+              <span>⚠️</span>
+              <T en="AI advice is advisory only — confirm hardware compatibility with your engineer." ar="مشورة الذكاء الاصطناعي استشارية فقط — تحقق من توافق الأجهزة مع مهندسك المختص." />
+            </span>
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
              <span style={{ fontSize: '0.6rem', color: 'var(--gb-gold)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.6 }}>
