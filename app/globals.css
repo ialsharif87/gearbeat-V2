@@ -852,8 +852,8 @@ body.app-mode .hide-app {
   /* Specific 2-column override for micro Category Cards to look premium and compact */
   .category-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    padding: 0 !important;
+    gap: 16px !important;
+    padding: 0 4px !important;
   }
 
   /* Headings size normalization to avoid clipping/huge sizes */
@@ -934,5 +934,18 @@ body.app-mode .hide-app {
   .hero-content {
     align-items: center !important;
     text-align: center !important;
-  }
 }
+
+/* Premium Gold Focus Indicators for Keyboard Navigation (WCAG 2.1) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.btn:focus-visible,
+.mobile-nav-link:focus-visible {
+  outline: 2px solid var(--gb-gold) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
+}
+
