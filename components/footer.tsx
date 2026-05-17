@@ -27,6 +27,9 @@ export default function Footer({ lang = "ar" }: FooterProps) {
               <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6, letterSpacing: '1px' }}>
                 {lang === "en" ? "ACTIVE PILOT PHASE — INVESTOR & GOVERNANCE DEMO" : "المرحلة التجريبية النشطة — عرض المستثمرين والحوكمة"}
               </span>
+              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.8, color: 'var(--gb-gold)' }}>
+                {lang === "en" ? "MANUAL BANK TRANSFER VERIFICATION ONLY — NO LIVE CARD TRANSACTIONS" : "التحقق عبر التحويل البنكي اليدوي فقط — لا توجد معاملات بطاقات مباشرة"}
+              </span>
             </p>
             <p className="footer-desc">
               {lang === "en" 
