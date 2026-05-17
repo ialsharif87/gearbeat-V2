@@ -40,12 +40,18 @@ export default async function AdminDashboard() {
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: 0, letterSpacing: '-1.5px' }}>
             <T en="Platform Operations" ar="عمليات المنصة" />
           </h1>
-          <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center', flexWrap: 'wrap' }}>
             <span className="badge-gold" style={{ letterSpacing: 1 }}>
               {isSuperAdmin ? "SUPER_ADMIN" : "STAFF"}
             </span>
             <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem' }}>
               LIVE_SYSTEM
+            </span>
+            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              <T en="PRE-LAUNCH" ar="ما قبل الإطلاق" />
+            </span>
+            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
             </span>
             <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.9rem', borderLeft: '1px solid var(--gb-border)', paddingLeft: 12, marginLeft: 0 }} className="ps-12 ms-0">{adminUserAuth.email}</span>
           </div>

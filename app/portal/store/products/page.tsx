@@ -67,13 +67,18 @@ export default async function VendorProductsPage() {
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
               <T en="Products" ar="المنتجات" />
             </h1>
-            <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-              REQUIRES_ADMIN_REVIEW
-            </span>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="REQUIRES_ADMIN_REVIEW" ar="يتطلب مراجعة المشرف" />
+              </span>
+              <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="PRE-LAUNCH" ar="ما قبل الإطلاق" />
+              </span>
+            </div>
           </div>
           <p style={{ color: "#888", fontSize: '0.9rem', marginTop: '8px' }}>
             <T

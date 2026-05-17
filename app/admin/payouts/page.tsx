@@ -328,12 +328,18 @@ export default async function AdminPayoutsPage() {
         <div>
           <p className="gb-eyebrow">Admin dashboard</p>
           <h1>Payouts & Settlement Reports</h1>
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
             <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
               MANUAL_PAYOUT_PROCESSING
             </span>
             <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
               REQUIRES_ADMIN_REVIEW
+            </span>
+            <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              PAYMENT_ACTIVATION_PENDING
+            </span>
+            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              PRE-LAUNCH
             </span>
           </div>
           <p className="gb-muted-text" style={{ marginTop: 16 }}>
