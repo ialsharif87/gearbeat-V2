@@ -30,6 +30,14 @@ We refined wording and introduced bilingual disclaimers across key pages:
 ### D. Academy Learning Vertical (`app/academy/page.tsx`)
 *   *Action*: Ensured all learning curriculums list "Live Interactions Only" and clearly state that no pre-recorded courses, automatic grading engines, or government-accredited credentials are offered inside the MVP.
 
+### E. Homepage Hero & Brand Positioning (`app/page.tsx`)
+*   *Action*: Integrated the recommended copy directions in a highly visual, premium, and fully bilingual layout:
+    *   **Saudi-First Creative Marketplace**: Added directly to the gold badge element (`T` component supported).
+    *   **Built for Saudi launch, GCC expansion, and global reach**: Integrated into the hero description.
+    *   **Explore now. Full commercial activation coming in controlled phases**: Appended to the lead description to set expectations.
+    *   **Payments and sensitive onboarding are activated only after compliance readiness**: Explicitly laid out in the hero layout.
+    *   **Verified listings and partner review before full activation**: Designed as a golden lock trust indicator immediately below the primary action buttons.
+
 ---
 
 ## 3. Top Compliance Improvements
