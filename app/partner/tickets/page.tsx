@@ -34,13 +34,21 @@ export default function TicketingPartnerFoundationPage() {
               ← <T en="Back to Partner Hub" ar="العودة لمركز الشركاء" />
             </Link>
             <span className="eyebrow" style={{ color: '#ec4899' }}><T en="TICKETING PARTNER TRACK" ar="مسار شريك التذاكر" /></span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginTop: 12 }}>
               <h1 className="hero-title" style={{ margin: 0 }}>
                 <T en="Ticketing Partner Portal" ar="بوابة شريك التذاكر" />
               </h1>
-              <span className="badge" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-                PREVIEW
-              </span>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span className="badge" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  PREVIEW
+                </span>
+                <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+                </span>
+                <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <T en="SENSITIVE DATA BLOCKED" ar="حظر البيانات الحساسة" />
+                </span>
+              </div>
             </div>
             <p className="hero-desc">
               <T

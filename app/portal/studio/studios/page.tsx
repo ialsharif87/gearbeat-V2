@@ -164,13 +164,21 @@ export default async function OwnerStudiosPage() {
           <p className="gb-eyebrow">
             <T en="Owner Portal" ar="بوابة المالك" />
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, color: 'white' }}>
               <T en="My Studios" ar="استوديوهاتي" />
             </h1>
-            <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-              REQUIRES_VERIFICATION
-            </span>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="PRE-LAUNCH" ar="ما قبل الإطلاق" />
+              </span>
+              <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="COMPLIANCE REQUIRED" ar="مطلوب الامتثال" />
+              </span>
+              <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+                <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
+              </span>
+            </div>
           </div>
           <div style={{ display: "flex", gap: "16px", marginTop: "12px", alignItems: "center" }}>
             <p className="gb-muted-text">

@@ -151,7 +151,13 @@ export default async function VendorOrdersPage() {
             <T en="Orders" ar="الطلبات" />
           </span>
           <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-            MANUAL_SETTLEMENT
+            <T en="MANUAL SETTLEMENT" ar="تسوية يدوية" />
+          </span>
+          <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+            <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+          </span>
+          <span className="badge" style={{ background: 'rgba(32, 156, 255, 0.1)', color: '#209cff', border: '1px solid rgba(32, 156, 255, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+            <T en="PRE-LAUNCH" ar="ما قبل الإطلاق" />
           </span>
         </div>
 

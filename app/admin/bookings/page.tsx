@@ -53,13 +53,21 @@ export default async function AdminBookingsPage() {
 
   return (
     <main style={{ padding: 32, background: '#0a0a0a', minHeight: '100vh', color: '#fff' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>
           <T en="Studio Bookings" ar="حجوزات الاستوديوهات" />
         </h1>
-        <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-          MANUAL_MANAGEMENT
-        </span>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+            <T en="MANUAL REVIEW REQUIRED" ar="يتطلب مراجعة يدوية" />
+          </span>
+          <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+            <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+          </span>
+          <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+            <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
+          </span>
+        </div>
       </div>
 
       <div style={{ background: '#111', borderRadius: 20, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
