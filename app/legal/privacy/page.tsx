@@ -14,32 +14,107 @@ export default function PrivacyPage() {
         ← <T en="Back to Legal Hub" ar="العودة إلى المركز القانوني" />
       </Link>
       
-      <div className="card-premium" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)' }}>
-        <span className="badge badge-gold" style={{ marginBottom: 16 }}>
-          <T en="Official Policy" ar="سياسة رسمية" />
-        </span>
-        <h1 style={{ fontSize: "2rem", marginBottom: 24 }}>
+      <div className="card-premium animate-up" style={{ border: '1px dashed rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.02)', padding: 40 }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
+          <span className="badge badge-gold">
+            <T en="DRAFT POLICY FOR PILOT PHASE VETTING" ar="مسودة سياسة لغرض مراجعة المرحلة التجريبية" />
+          </span>
+          <span className="badge" style={{ background: "rgba(255, 77, 77, 0.1)", color: "#ff4d4d", border: "1px solid rgba(255, 77, 77, 0.2)" }}>
+            <T en="PENDING LEGAL REVIEW" ar="قيد المراجعة القانونية" />
+          </span>
+        </div>
+
+        <h1 style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)", fontWeight: 900, marginBottom: 24, lineHeight: 1.1 }}>
           <T en="Privacy Policy" ar="سياسة الخصوصية" />
         </h1>
         
-        <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.9rem' }}>
-          <p style={{ marginBottom: 16 }}>
-            <strong><T en="Notice:" ar="تنبيه:" /></strong> <T en="This privacy policy details how we handle and protect your personal data in accordance with regional regulations and our commitment to user security." ar="توضح سياسة الخصوصية هذه بالتفصيل كيفية تعاملنا مع بياناتك الشخصية وحمايتها وفقاً للوائح الإقليمية والتزامنا بأمن المستخدم." />
+        <div style={{ color: 'var(--muted)', lineHeight: 1.8, fontSize: '0.95rem' }}>
+          <p style={{ marginBottom: 24, fontSize: "1.05rem", color: "#fff", borderLeft: "2px solid var(--gb-gold)", paddingLeft: 16 }}>
+            <strong><T en="Important Notice:" ar="تنبيه هام:" /></strong>{" "}
+            <T 
+              en="This Privacy Policy is a draft prepared for compliance readiness and is subject to change based on final legal counsel approval. GearBeat V2 is in its invite-only GCC pilot phase." 
+              ar="سياسة الخصوصية هذه عبارة عن مسودة معدة لغرض الجاهزية والامتثال وتخضع للتغيير بناءً على المراجعة القانونية النهائية. GearBeat V2 حالياً في مرحلتها التجريبية المغلقة للخليج." 
+            />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="1. Data Collection" ar="1. جمع البيانات" /></h3>
+          {/* Section 1: Data Collection & Sensitive Data Blocklist */}
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16, fontSize: "1.25rem", fontWeight: 800 }}>
+            <T en="1. Data Collection & Sensitive Data Blocklist" ar="1. جمع البيانات وقائمة حظر البيانات الحساسة" />
+          </h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="GearBeat collects information necessary to provide booking and marketplace services, including name, email, phone number, and professional studio details. We also collect transaction metadata to ensure secure payment processing." ar="تجمع GearBeat المعلومات اللازمة لتقديم خدمات الحجز والمتجر، بما في ذلك الاسم والبريد الإلكتروني ورقم الهاتف وتفاصيل الاستوديو المهني. كما نجمع البيانات الوصفية للمعاملات لضمان معالجة الدفع الآمنة." />
+            <T 
+              en="We collect only necessary information to process manual reservations and platform onboarding (e.g., name, corporate email, mobile number, and city). Under our strict compliance guidelines, GearBeat does not collect, process, or upload sensitive partner documents (such as Commercial Registrations, VAT certificates, national IDs, or bank screenshots) through public web flows until fully localized KSA storage nodes are verified." 
+              ar="نحن نجمع فقط المعلومات الضرورية لمعالجة الحجوزات اليدوية والطلبات المبدئية (مثل الاسم، البريد الإلكتروني للعمل، رقم الجوال، والمدينة). بموجب إرشادات الامتثال الصارمة لدينا، لا تقوم المنصة بجمع أو معالجة أو رفع أي وثائق حساسة للشركاء (مثل السجل التجاري، شهادة الضريبة، الهوية الوطنية، أو صور الحسابات البنكية) عبر تدفقات الويب العامة حتى يتم تفعيل خوادم التخزين المحلية المعتمدة داخل المملكة." 
+            />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="2. Usage & Sharing" ar="2. الاستخدام والمشاركة" /></h3>
+          {/* Section 2: Data Residency & Sovereignty */}
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16, fontSize: "1.25rem", fontWeight: 800 }}>
+            <T en="2. Data Residency & Sovereignty" ar="2. إقامة البيانات والسيادة المحلية" />
+          </h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="Your data is used to manage bookings, verify identity for GearBeat Certified status, and communicate platform updates. We do not sell PII to third parties. Data is shared with payment providers only as required for transaction fulfillment." ar="تُستخدم بياناتك لإدارة الحجوزات، والتحقق من الهوية لحالة GearBeat Certified، وإرسال تحديثات المنصة. نحن لا نبيع معلومات التعريف الشخصية لأطراف ثالثة. يتم مشاركة البيانات مع مزودي الدفع فقط حسب الضرورة لإتمام المعاملات." />
+            <T 
+              en="In compliance with the Saudi Personal Data Protection Law (PDPL), all personal identifying information (PII) of Saudi Arabian citizens and residents is designated to be stored locally within the geographical boundaries of the Kingdom of Saudi Arabia. Core staging elements reside temporarily on secure isolated nodes, and any international data transfers are strictly prohibited unless certified under local SDAIA regulatory exemptions." 
+              ar="امتثالاً لنظام حماية البيانات الشخصية السعودي (PDPL)، فإن كافة بيانات التعريف الشخصية الخاصة بمواطني ومقيمي المملكة العربية السعودية مصممة ليتم تخزينها محلياً بالكامل داخل الحدود الجغرافية للمملكة. تقيم عناصر النظام التجريبي مؤقتاً على خوادم معزولة آمنة، ويُحظر تماماً نقل البيانات خارج الحدود الإقليمية دون ترخيص وإعفاء رسمي من الهيئة السعودية للبيانات والذكاء الاصطناعي (سدايا)." 
+            />
           </p>
 
-          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16 }}><T en="3. PDPL Compliance (KSA)" ar="3. الامتثال لنظام حماية البيانات الشخصية (السعودية)" /></h3>
+          {/* Section 3: User Rights Under Saudi PDPL */}
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16, fontSize: "1.25rem", fontWeight: 800 }}>
+            <T en="3. User Rights Under KSA PDPL" ar="3. حقوق المستخدم بموجب نظام حماية البيانات الشخصية" />
+          </h3>
+          <p style={{ marginBottom: 12 }}>
+            <T 
+              en="Every registered user on GearBeat holds the following legal rights regarding their personal datasets under the PDPL:" 
+              ar="يتمتع كل مستخدم مسجل على منصة GearBeat بالحقوق القانونية التالية المتعلقة ببياناته الشخصية بموجب النظام:" 
+            />
+          </p>
+          <ul style={{ paddingLeft: 20, marginBottom: 24, listStyleType: "square" }}>
+            <li style={{ marginBottom: 8 }}>
+              <strong><T en="Right to Know:" ar="الحق في العلم:" /></strong>{" "}
+              <T en="Access details on our exact processing methods and database storage locations." ar="معرفة تفاصيل وإجراءات معالجة البيانات الشخصية وجهات تخزينها." />
+            </li>
+            <li style={{ marginBottom: 8 }}>
+              <strong><T en="Right of Access:" ar="الحق في الوصول:" /></strong>{" "}
+              <T en="Request a full digital copy of all personal datasets registered on our servers." ar="طلب نسخة رقمية كاملة من كافة البيانات الشخصية المسجلة لدى المنصة." />
+            </li>
+            <li style={{ marginBottom: 8 }}>
+              <strong><T en="Right of Correction:" ar="الحق في التصحيح:" /></strong>{" "}
+              <T en="Instantly request amendments or updates to outdated or incorrect profile entries." ar="طلب تصحيح أو تحديث أي بيانات غير دقيقة أو قديمة." />
+            </li>
+            <li style={{ marginBottom: 8 }}>
+              <strong><T en="Right of Destruction:" ar="الحق في الإتلاف (الحق في النسيان):" /></strong>{" "}
+              <T en="Request permanent erasure of all stored personal records from our databases." ar="طلب الحذف النهائي والإتلاف لكافة السجلات والبيانات الشخصية المسجلة." />
+            </li>
+            <li style={{ marginBottom: 8 }}>
+              <strong><T en="Right to Withdraw Consent:" ar="الحق في سحب الموافقة:" /></strong>{" "}
+              <T en="Instantly withdraw previously granted data-processing consents at any time." ar="سحب الموافقة الممنوحة مسبقاً لمعالجة البيانات في أي وقت." />
+            </li>
+          </ul>
+
+          {/* Section 4: Live Payment Disclaimers */}
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16, fontSize: "1.25rem", fontWeight: 800 }}>
+            <T en="4. Payment Gateway & SAMA Readiness" ar="4. بوابة المدفوعات والجاهزية لمؤسسة النقد (ساما)" />
+          </h3>
           <p style={{ marginBottom: 16 }}>
-            <T en="GearBeat is designed with Saudi Personal Data Protection Law (PDPL) principles in mind, focusing on data residency requirements, user consent, and the right to access or rectify personal information." ar="تم تصميم GearBeat مع مراعاة مبادئ نظام حماية البيانات الشخصية السعودي (PDPL)، مع التركيز على متطلبات إقامة البيانات، وموافقة المستخدم، والحق في الوصول إلى المعلومات الشخصية أو تصحيحها." />
+            <T 
+              en="GearBeat does not process raw credit card or automated online transaction credentials directly. All live payment gateway integrations remain subject to SAMA provider licensing, complete regulatory audits, and final operational authorization. Currently, only manual bank-ledger transfer verification options are supported during our GCC pilot rollout." 
+              ar="لا تقوم المنصة بمعالجة بطاقات الائتمان أو بيانات الدفع التلقائية مباشرة عبر الإنترنت في هذه المرحلة. تخضع كافة عمليات تكامل بوابة الدفع الحية لترخيص مزودي الخدمة من البنك المركزي السعودي (ساما)، وإتمام التدقيق التنظيمي الشامل. حالياً، يتم دعم خيارات التحقق اليدوي للحوالات البنكية فقط خلال فترة الإطلاق التجريبي للخليج." 
+            />
+          </p>
+
+          {/* Section 5: Data Protection Office & Contact */}
+          <h3 style={{ color: '#fff', marginTop: 32, marginBottom: 16, fontSize: "1.25rem", fontWeight: 800 }}>
+            <T en="5. Data Protection Office & Contact" ar="5. مكتب حماية البيانات والتواصل" />
+          </h3>
+          <p style={{ marginBottom: 24 }}>
+            <T 
+              en="For any privacy inquiries, consent withdrawals, or user rights execution, please contact our designated Data Protection team at: " 
+              ar="لأي استفسارات تتعلق بالخصوصية، أو سحب الموافقة، أو ممارسة حقوقك القانونية، يرجى التواصل مع فريق حماية البيانات المخصص لدينا عبر: " 
+            />
+            <a href="mailto:privacy@gearbeat.com" style={{ color: "var(--gb-gold)", textDecoration: "underline", fontWeight: 700 }}>
+              privacy@gearbeat.com
+            </a>
           </p>
         </div>
       </div>
