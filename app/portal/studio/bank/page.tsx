@@ -362,8 +362,8 @@ export default async function OwnerBankPage({
               </h2>
               <p className="gb-muted-text">
                 <T
-                  en="Add your bank details to enable automatic payouts for your bookings."
-                  ar="أضف بيانات البنك لتفعيل التحويلات التلقائية لحجوزاتك."
+                  en="Add your bank details to enable manual bank settlements for your bookings."
+                  ar="أضف بيانات البنك لتفعيل التسويات البنكية اليدوية لحجوزاتك."
                 />
               </p>
             </div>
