@@ -160,9 +160,14 @@ export default function SiteHeader({
               </Link>
             ))}
             {!isLoggedIn && (
-              <Link href="/login" className="mobile-nav-link auth-link">
-                <span className="link-text">{lang === "en" ? "Sign In" : "تسجيل الدخول"}</span>
-              </Link>
+              <>
+                <Link href="/login" className="mobile-nav-link auth-link">
+                  <span className="link-text">{lang === "en" ? "Sign In" : "تسجيل الدخول"}</span>
+                </Link>
+                <Link href="/signup" className="mobile-nav-link auth-link auth-link-signup">
+                  <span className="link-text">{lang === "en" ? "Create Account" : "إنشاء حساب"}</span>
+                </Link>
+              </>
             )}
           </nav>
           
@@ -497,6 +502,18 @@ export default function SiteHeader({
             color: var(--gb-gold);
             margin-top: 12px;
           }
+
+          .auth-link-signup {
+            background: linear-gradient(135deg, var(--gb-gold-light), var(--gb-gold)) !important;
+            color: #000 !important;
+            border: none !important;
+            margin-top: 8px !important;
+          }
+
+          .auth-link-signup::after {
+            color: #000 !important;
+            opacity: 0.6 !important;
+          }
           
           .drawer-footer {
             margin-top: auto;
@@ -508,6 +525,26 @@ export default function SiteHeader({
             font-size: 0.6rem;
             color: #333;
             letter-spacing: 1px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .auth-group { display: none !important; }
+          .header-logo {
+            position: static !important;
+            transform: none !important;
+            margin: 0 auto;
+            order: 2 !important;
+          }
+          .mobile-menu-toggle {
+            order: 1 !important;
+          }
+          .header-actions {
+            order: 3 !important;
+            gap: 12px !important;
+          }
+          .mobile-spacer {
+            display: none !important;
           }
         }
       `}} />
