@@ -5,7 +5,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { createNotification } from "@/lib/notifications";
-import { uploadProviderDocumentAction } from "@/lib/storage/provider-documents";
 
 import { CountryOption } from "@/lib/countries";
 import { CityOption } from "@/lib/locations";
@@ -14,7 +13,7 @@ export default function JoinStudioPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submittedOnce, setSubmittedOnce] = useState(false);
+
 
   // Data State
   const [countries, setCountries] = useState<CountryOption[]>([]);
@@ -78,36 +77,11 @@ export default function JoinStudioPage() {
     fetchCities();
   }, [country]);
 
-  // Files State
-  const [crFile, setCrFile] = useState<File | null>(null);
-  const [vatFile, setVatFile] = useState<File | null>(null);
-  const [nationalAddressFile, setNationalAddressFile] = useState<File | null>(null);
-  const [bankFile, setBankFile] = useState<File | null>(null);
-
-  async function uploadFile(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await uploadProviderDocumentAction(formData, "studio-applications");
-
-    if (!res.success || !res.path) {
-      throw new Error("File upload failed");
-    }
-
-    return res.path;
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmittedOnce(true);
+
     
     if (!termsAccepted) return;
-
-    // Validate Required Documents
-    if (!crFile || !vatFile || !nationalAddressFile || !bankFile) {
-      setError("Please upload all required documents.");
-      return;
-    }
 
     // Validate VAT Number (15 digits for Saudi Arabia)
     if (country === "SA" && (vatNumber.length !== 15 || !/^\d+$/.test(vatNumber))) {
@@ -119,14 +93,6 @@ export default function JoinStudioPage() {
     setError(null);
 
     try {
-      // Step 1: Upload Files
-      const [crUrl, vatUrl, nationalAddressUrl, bankUrl] = await Promise.all([
-        uploadFile(crFile),
-        uploadFile(vatFile),
-        uploadFile(nationalAddressFile),
-        uploadFile(bankFile),
-      ]);
-
       // Step 2: Insert into DB
       const supabase = createClient();
       const fullMobile = `${phoneCode}${mobile}`;
@@ -139,10 +105,10 @@ export default function JoinStudioPage() {
         company_name_en: companyNameEn,
         commercial_registration: commercialRegistration,
         vat_number: vatNumber,
-        vat_certificate_url: vatUrl,
-        cr_document_url: crUrl,
-        national_address_url: nationalAddressUrl,
-        bank_document_url: bankUrl,
+        vat_certificate_url: null,
+        cr_document_url: null,
+        national_address_url: null,
+        bank_document_url: null,
         country: countries.find(c => c.country_code === country)?.name_en || country,
         city: cities.find(c => c.id === city)?.name_en || city,
         planned_studios_count: parseInt(plannedStudios),
@@ -322,35 +288,41 @@ export default function JoinStudioPage() {
             </div>
           </section>
 
-          {/* Section 3: Documents */}
-          <section>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 4, color: "#D4AF37" }}>
-              <T en="Required Documents" ar="الوثائق المطلوبة" />
+          {/* Section 3: Documents Compliance Warning */}
+          <section style={{ 
+            background: "rgba(212, 175, 55, 0.05)", 
+            border: "1px dashed rgba(212, 175, 55, 0.3)", 
+            borderRadius: 16, 
+            padding: 24 
+          }}>
+            <h3 style={{ fontSize: "1.1rem", marginBottom: 8, color: "#D4AF37", display: "flex", alignItems: "center", gap: 8 }}>
+              <span>🛡️</span>
+              <T en="Saudi-First Compliance Protection" ar="حماية الامتثال للأولوية السعودية" />
             </h3>
-            <p style={{ color: "#666", fontSize: "0.85rem", marginBottom: 20 }}>
-              <T en="All documents are mandatory for verification." ar="كافة الوثائق إلزامية لغرض التحقق." />
+            <p style={{ color: "#fff", fontSize: "0.95rem", fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
+              <T 
+                en="Sensitive partner documents are not collected through this public flow during pre-launch." 
+                ar="لا يتم جمع وثائق الشركاء الحساسة من خلال هذا التدفق العام خلال مرحلة ما قبل الإطلاق." 
+              />
             </p>
-            
-            <div style={{ display: "grid", gap: 24 }}>
-              <UploadField 
-                labelEn="Commercial Registration" labelAr="السجل التجاري" 
-                file={crFile} onChange={setCrFile} required 
-                showError={submittedOnce && !crFile}
+            <p style={{ color: "#aaa", fontSize: "0.85rem", marginBottom: 16, lineHeight: 1.5 }}>
+              <T 
+                en="Commercial verification will happen later through an approved secure Saudi-first compliance process." 
+                ar="سيتم التحقق التجاري لاحقاً من خلال عملية امتثال معتمدة وآمنة ذات أولوية سعودية." 
               />
-              <UploadField 
-                labelEn="VAT Certificate" labelAr="شهادة الضريبة" 
-                file={vatFile} onChange={setVatFile} required 
-                showError={submittedOnce && !vatFile}
-              />
-              <UploadField 
-                labelEn="National Address" labelAr="العنوان الوطني" 
-                file={nationalAddressFile} onChange={setNationalAddressFile} required 
-                showError={submittedOnce && !nationalAddressFile}
-              />
-              <UploadField 
-                labelEn="Bank Account Screenshot" labelAr="صورة الحساب البنكي" 
-                file={bankFile} onChange={setBankFile} required 
-                showError={submittedOnce && !bankFile}
+            </p>
+            <div style={{ 
+              background: "rgba(255, 77, 77, 0.1)", 
+              border: "1px solid rgba(255, 77, 77, 0.2)", 
+              borderRadius: 8, 
+              padding: "12px 16px", 
+              color: "#ff4d4d", 
+              fontSize: "0.85rem", 
+              fontWeight: 700 
+            }}>
+              ⚠️ <T 
+                en="Do not upload IDs, CR, VAT, IBAN, contracts, or bank documents here." 
+                ar="يرجى عدم تحميل الهويات، السجل التجاري، شهادة الضريبة، الآيبان (IBAN)، العقود، أو الوثائق البنكية هنا." 
               />
             </div>
           </section>
@@ -408,29 +380,6 @@ export default function JoinStudioPage() {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .upload-area {
-          border: 2px dashed #333;
-          border-radius: 12px;
-          padding: 24px;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.2s;
-          background: rgba(255,255,255,0.01);
-          position: relative;
-        }
-        .upload-area:hover {
-          border-color: #D4AF37;
-          background: rgba(212, 175, 55, 0.05);
-        }
-        .upload-area.error {
-          border-color: #ff4d4d;
-        }
-        .upload-area input {
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          cursor: pointer;
-        }
         .terms-link {
           color: #D4AF37;
           text-decoration: underline;
@@ -442,30 +391,6 @@ export default function JoinStudioPage() {
         }
       `}} />
     </main>
-  );
-}
-
-function UploadField({ labelEn, labelAr, file, onChange, required, showError }: any) {
-  return (
-    <div style={{ display: "grid", gap: 8 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <label style={{ fontSize: "0.85rem", fontWeight: 600 }}><T en={labelEn} ar={labelAr} /> {required && "*"}</label>
-      </div>
-      <div className={`upload-area ${showError ? 'error' : ''}`}>
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => onChange(e.target.files?.[0] || null)} required={required} />
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: "1.5rem" }}>📎</span>
-          <div style={{ fontSize: "0.85rem", color: file ? "#22c55e" : "#888", fontWeight: file ? 700 : 400 }}>
-            {file ? file.name : <T en="Click to upload" ar="اضغط للرفع" />}
-          </div>
-        </div>
-      </div>
-      {showError && (
-        <div style={{ color: "#ff4d4d", fontSize: "0.75rem", fontWeight: 600 }}>
-          <T en="This document is required" ar="هذا المستند مطلوب" />
-        </div>
-      )}
-    </div>
   );
 }
 
