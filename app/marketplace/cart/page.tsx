@@ -170,24 +170,29 @@ export default async function MarketplaceCartPage() {
             <div
               style={{
                 marginTop: 18,
-                padding: 30,
-                borderRadius: 18,
-                background: "rgba(255,255,255,0.035)",
+                padding: "60px 40px",
+                borderRadius: 20,
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.02) 0%, rgba(0, 0, 0, 0.4) 100%)",
+                border: "1px dashed rgba(212, 175, 55, 0.25)",
                 textAlign: "center",
+                display: "grid",
+                placeItems: "center",
+                gap: 16
               }}
             >
-              <h3>
+              <div style={{ fontSize: "3rem", filter: "drop-shadow(0 0 10px rgba(212, 175, 55, 0.3))" }}>🛒</div>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: 800 }}>
                 <T en="Your cart is empty" ar="سلتك فارغة" />
               </h3>
 
-              <p style={{ color: "var(--muted)" }}>
+              <p style={{ color: "var(--gb-text-muted)", maxWidth: 500, margin: "0 auto", fontSize: "0.9rem", lineHeight: 1.6 }}>
                 <T
-                  en="Add products from the marketplace to start your order."
-                  ar="أضف منتجات من المتجر لبدء طلبك."
+                  en="Explore our curated marketplace of verified audio gear. Note: GearBeat is currently in its GCC Pilot Phase. All order flows are provisional and subject to manual review without live online payment integrations."
+                  ar="استكشف سوقنا المنسق للمعدات الصوتية الموثقة. ملاحظة: جيربيت حالياً في مرحلته التجريبية للخليج. جميع تدفقات الطلبات مؤقتة وتخضع للمراجعة اليدوية دون تكامل للمدفوعات الحية عبر الإنترنت."
                 />
               </p>
 
-              <Link href="/marketplace" className="btn btn-primary">
+              <Link href="/marketplace" className="btn btn-primary shadow-gold" style={{ marginTop: 12 }}>
                 <T en="Browse marketplace" ar="تصفح المتجر" />
               </Link>
             </div>
