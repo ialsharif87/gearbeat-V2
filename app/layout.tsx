@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Space_Grotesk, Cairo } from "next/font/google";
@@ -188,7 +189,8 @@ export default async function RootLayout({
             dashboardPath={dashboardPath}
             logoutAction={logout}
           >
-            <main className="main">{children}</main>
+            <main className="main">{children}
+        <SpeedInsights /></main>
           </ConditionalLayout>
         </ClientProviders>
       </body>
