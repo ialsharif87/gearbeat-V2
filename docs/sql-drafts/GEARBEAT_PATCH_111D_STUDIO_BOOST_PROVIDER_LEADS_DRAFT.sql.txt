@@ -1,0 +1,47 @@
+-- DRAFT SQL FOR FUTURE MIGRATION 101
+-- This file is for review purposes only. Do not execute directly against the production database.
+-- Target Location: supabase/migrations/patch_101_studio_boost_and_provider_leads.sql
+
+-- 1. Table Creation
+CREATE TABLE IF NOT EXISTS public.studio_boost_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  studio_id UUID NOT NULL REFERENCES public.studios(id) ON DELETE CASCADE,
+  owner_auth_user_id UUID NOT NULL,
+  base_commission_percent DECIMAL(5,2) NOT NULL DEFAULT 15.00,
+  boost_commission_percent DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  total_commission_percent DECIMAL(5,2) GENERATED ALWAYS AS 
+    (base_commission_percent + boost_commission_percent) STORED,
+  duration_days INTEGER NOT NULL CHECK (duration_days IN (7, 14, 30)),
+  starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ends_at TIMESTAMPTZ GENERATED ALWAYS AS 
+    (starts_at + (duration_days || ' days')::INTERVAL) STORED,
+  status TEXT DEFAULT 'active' 
+    CHECK (status IN ('active', 'expired', 'cancelled')),
+  terms_accepted BOOLEAN DEFAULT false,
+  terms_accepted_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Row Level Security Activation
+ALTER TABLE public.studio_boost_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- 3. Row Level Security Policies
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Owner can manage own boosts') THEN
+    CREATE POLICY "Owner can manage own boosts" 
+    ON public.studio_boost_subscriptions FOR ALL 
+    USING (owner_auth_user_id = auth.uid());
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public can read active boosts') THEN
+    CREATE POLICY "Public can read active boosts"
+    ON public.studio_boost_subscriptions FOR SELECT
+    USING (status = 'active' AND ends_at > NOW());
+  END IF;
+END $$;
+
+-- 4. Extends Provider Leads Columns
+ALTER TABLE public.provider_leads 
+ADD COLUMN IF NOT EXISTS signed_contract_url TEXT,
+ADD COLUMN IF NOT EXISTS commission_percent INTEGER DEFAULT 15;
