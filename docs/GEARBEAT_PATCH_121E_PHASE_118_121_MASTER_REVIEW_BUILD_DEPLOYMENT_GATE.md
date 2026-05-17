@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > **Sovereign Quality Assurance & Deployment Readiness Gate**
-> In absolute compliance with SAMA regulatory sandboxing guidelines, CITC customer transparency rules, and KSA PDPL data sovereignty mandates, this document delivers the definitive master audit consolidation of Sprints 118 through 121, registers the complete file inventory verification, logs build/typecheck compilation success, and certifies our pilot release status. No active database schemas, APIs, auth, or live payment credentials are modified.
+> Manual settlement and payment boundaries remain documented for pre-launch review only. No live payment, SAMA-certified checkout, or commercial payment activation is approved in this phase. No active database schemas, APIs, auth, or live payment credentials are modified.
 
 ---
 
@@ -17,7 +17,7 @@ Over the course of the Sprints 118–121 lifecycle, the GearBeat engineering tea
 ## 2. Sprint-by-Sprint Master Review
 
 ### 2.1 Phase 118: Transactional & Settlement Integrity
-*   **Objectives**: Map out marketplace inventory reservation lifetimes, design stale pending order cron cleanup triggers, specify booking atomicity locks, and establish manual offline SAMA settlement state matrices.
+*   **Objectives**: Map out marketplace inventory reservation lifetimes, design stale pending order cron cleanup triggers, specify booking atomicity locks, and establish manual sandboxed offline settlement state matrices.
 *   **Key Artifacts**: 
     *   [GEARBEAT_PATCH_118A_MARKETPLACE_INVENTORY_RESERVATION_ORDER_LIFECYCLE_STALE_PENDING_PLAN.md](file:///c:/Users/iaals/Documents/GitHub/gearbeat-V2/docs/GEARBEAT_PATCH_118A_MARKETPLACE_INVENTORY_RESERVATION_ORDER_LIFECYCLE_STALE_PENDING_PLAN.md)
     *   [GEARBEAT_PATCH_118B_BOOKING_ATOMICITY_REFUND_CANCELLATION_SETTLEMENT_PHASE_118_CLOSEOUT.md](file:///c:/Users/iaals/Documents/GitHub/gearbeat-V2/docs/GEARBEAT_PATCH_118B_BOOKING_ATOMICITY_REFUND_CANCELLATION_SETTLEMENT_PHASE_118_CLOSEOUT.md)
@@ -57,7 +57,7 @@ We formally certify that all expected Phase 118 through 121 documentation files 
 | File Path | Description | Status |
 | :--- | :--- | :---: |
 | `docs/GEARBEAT_PATCH_118A_MARKETPLACE_INVENTORY_RESERVATION_ORDER_LIFECYCLE_STALE_PENDING_PLAN.md` | Inventory Lifecycles & Stale Pending Order Cleanups | **VERIFIED** |
-| `docs/GEARBEAT_PATCH_118B_BOOKING_ATOMICITY_REFUND_CANCELLATION_SETTLEMENT_PHASE_118_CLOSEOUT.md` | Booking Cancels, Refunds, & SAMA Settlement Transitions | **VERIFIED** |
+| `docs/GEARBEAT_PATCH_118B_BOOKING_ATOMICITY_REFUND_CANCELLATION_SETTLEMENT_PHASE_118_CLOSEOUT.md` | Booking Cancels, Refunds, & manual sandboxed settlement structures | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_119A_LOCAL_MIGRATION_DRY_RUN_SEED_SQL_SPLIT_VALIDATION.md` | Seed Isolation & Migration Dry-Run Validations | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_119B_MISSING_TABLES_RPC_REALITY_GAP_STAGING_DB_APPROVAL_GATE.md` | Database Schema Gaps & Staging Approval Locks | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_120A_FULL_ROUTE_NAVIGATION_PUBLIC_CUSTOMER_JOURNEY_QA.md` | Public Customer Portal Broken Redirection Log | **VERIFIED** |
@@ -65,7 +65,7 @@ We formally certify that all expected Phase 118 through 121 documentation files 
 | `docs/GEARBEAT_PATCH_120C_MOBILE_RTL_ACCESSIBILITY_TRUST_BOUNDARY_QA.md` | Mobile, RTL dynamic CLS, & Keyboard Tab-Jumps Audit | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_120D_FULL_JOURNEY_QA_FINDINGS_CONSOLIDATION_FIX_DECISION_GATE.md` | Combined Master QA Findings & Fix Decision Register | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_121A_PUBLIC_JOURNEY_FIX_PACK.md` | Routing Redirects, Experiences Footer, & CTA Fixes | **VERIFIED** |
-| `docs/GEARBEAT_PATCH_121B_PARTNER_PORTAL_ADMIN_FIX_PACK.md` | SAMA Bank Terminology & Audited CSV Export Panel | **VERIFIED** |
+| `docs/GEARBEAT_PATCH_121B_PARTNER_PORTAL_ADMIN_FIX_PACK.md` | Manual bank terminology disclaimers & Audited CSV Export Panel | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_121C_MOBILE_RTL_ACCESSIBILITY_FIX_PACK.md` | DOM Header Realignment, Dynamic CLS Script, & Focus Outline | **VERIFIED** |
 | `docs/GEARBEAT_PATCH_121D_INVITE_ONLY_PILOT_READINESS_GATE_PHASE_121_CLOSEOUT.md` | Invite-Only Pilot Rules, Boundaries, & Support Runbook | **VERIFIED** |
 
@@ -109,8 +109,8 @@ To guarantee that the codebase is completely safe and free from runtime compile 
 
 > [!IMPORTANT]
 > **MASTER VERDICT EXPLANATION**:
-> We formally declare that Sprints 118 through 121 are closed with total success. The user experience, accessibility layout, dynamic language pre-paint rendering, and manual sandboxed SAMA disclaimers are thoroughly verified. 
-> 
+> We formally declare that Sprints 118 through 121 are closed with total success. The user experience, accessibility layout, and dynamic language pre-paint rendering are thoroughly verified. 
+> Manual settlement and payment boundaries remain documented for pre-launch review only. No live payment, SAMA-certified checkout, or commercial payment activation is approved in this phase.
 > The build compiles completely with zero errors, making the codebase perfectly optimized for invite-only pilot preparation.
 
 ### 🛑 COMMERCIAL LAUNCH STATUS:
