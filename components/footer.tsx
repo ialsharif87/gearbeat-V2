@@ -42,6 +42,7 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <h4>{lang === "en" ? "Experiences" : "التجارب"}</h4>
             <Link href="/studios">{lang === "en" ? "Book a Studio" : "احجز استوديو"}</Link>
             <Link href="/marketplace">{lang === "en" ? "Shop Gear" : "تسوق معدات"}</Link>
+            <Link href="/services">{lang === "en" ? "Book Services" : "احجز خدمات"}</Link>
             <Link href="/academy">{lang === "en" ? "Join Academy" : "انضم للأكاديمية"}</Link>
             <Link href="/tickets">{lang === "en" ? "Explore Experiences" : "استكشف التجارب"}</Link>
             <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
