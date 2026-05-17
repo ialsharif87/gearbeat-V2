@@ -409,12 +409,46 @@ export default async function AdminVerificationsPage() {
           <T en="Admin Verification Center" ar="مركز تحقق الإدارة" />
         </h1>
 
-        <p>
+        <p style={{ marginBottom: 20 }}>
           <T
             en="Review customer identities, business verifications, and uploaded documents."
             ar="راجع هويات العملاء، وتحقق المنشآت، والوثائق المرفوعة."
           />
         </p>
+
+        {/* Patch 115A compliance banner */}
+        <div style={{
+          background: "rgba(212, 175, 55, 0.05)",
+          border: "1px dashed rgba(212, 175, 55, 0.3)",
+          borderRadius: 12,
+          padding: 20,
+          textAlign: "left",
+          marginBottom: 24
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+            <span style={{ color: "#D4AF37", fontWeight: 700, fontSize: "0.95rem" }}>
+              <T en="Saudi-First Identity Protection & Pre-Launch Operations Gate" ar="بوابة حماية الهوية والعمليات ذات الأولوية السعودية" />
+            </span>
+          </div>
+          <p style={{ color: "#aaa", fontSize: "0.85rem", margin: 0, lineHeight: 1.5 }}>
+            <T
+              en="DOCUMENT COLLECTION DISABLED: To align with Saudi PDPL data residency requirements, public collection of sensitive verification documents is currently disabled in the staging/sandbox environment. All verification records, registration IDs, tax data, and original files are fully masked until sovereign verified cloud hosting is active."
+              ar="تم إيقاف جمع المستندات: تماشياً مع متطلبات تخزين البيانات لنظام PDPL السعودي، تم إيقاف الجمع العام للمستندات الحساسة للتحقق حالياً في بيئة التطوير والبيئة التجريبية. تم حجب كافة سجلات التحقق، وأرقام التسجيل، والبيانات الضريبية، والملفات الأصلية بالكامل حتى تفعيل الاستضافة السحابية السيادية المعتمدة."
+            />
+          </p>
+          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ background: "rgba(255, 77, 77, 0.15)", color: "#ff4d4d", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              SENSITIVE DATA BLOCKED
+            </span>
+            <span style={{ background: "rgba(212, 175, 55, 0.15)", color: "#D4AF37", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              SAUDI-FIRST COMPLIANCE
+            </span>
+            <span style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              DOCUMENT COLLECTION DISABLED
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="stats-grid" style={{ marginTop: 30 }}>
@@ -587,9 +621,9 @@ export default async function AdminVerificationsPage() {
                       </td>
 
                       <td>
-                        <div>{verification.registration_number || "—"}</div>
+                        <div>{verification.registration_number || "—"} <span style={{ color: '#ff4d4d', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED]</span></div>
                         <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                          Tax: {verification.tax_number || "—"}
+                          Tax: {verification.tax_number || "—"} <span style={{ color: '#ff4d4d', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED]</span>
                         </div>
                       </td>
 
@@ -701,14 +735,10 @@ export default async function AdminVerificationsPage() {
 
                       <td>
                         {document.signedUrl ? (
-                          <a
-                            href={document.signedUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="btn btn-small"
-                          >
-                            Open
-                          </a>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700 }}>[MASKED]</span>
+                            <span style={{ color: '#666', fontSize: '0.65rem' }}>Collection Disabled</span>
+                          </div>
                         ) : (
                           "—"
                         )}
