@@ -110,14 +110,14 @@ export default async function VendorDashboardPage() {
         <div className="animate-up">
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
             <p className="gb-eyebrow" style={{ margin: 0 }}><T en="Seller Portal" ar="بوابة التاجر" /></p>
-            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-              LIVE_MARKETPLACE
-            </span>
-            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
-              <T en="PRE-LAUNCH" ar="ما قبل الإطلاق" />
+            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.05)', color: 'var(--gb-gold)', border: '1px solid rgba(212, 175, 55, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              <T en="PRE-LAUNCH PARTNER PORTAL" ar="بوابة الشركاء ما قبل الإطلاق" />
             </span>
             <span className="badge" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
               <T en="PAYMENT ACTIVATION PENDING" ar="معلق تنشيط المدفوعات" />
+            </span>
+            <span className="badge" style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)', fontSize: '0.65rem', fontWeight: 800 }}>
+              <T en="SAUDI-FIRST COMPLIANCE" ar="الامتثال للأولوية السعودية" />
             </span>
           </div>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: '8px 0 0', letterSpacing: '-1.5px', color: 'white' }}>
@@ -150,6 +150,43 @@ export default async function VendorDashboardPage() {
           </Link>
         </div>
       </section>
+
+      {/* Pre-launch compliance warning banner */}
+      <div style={{
+        background: "rgba(212, 175, 55, 0.03)",
+        border: "1px dashed rgba(212, 175, 55, 0.2)",
+        borderRadius: 16,
+        padding: "20px 24px",
+        marginBottom: 32,
+        textAlign: "left"
+      }} className="animate-up">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+          <span style={{ color: "var(--gb-gold)", fontWeight: 800, fontSize: "0.9rem", letterSpacing: "0.5px" }}>
+            <T en="VENDOR SANDBOX COMPLIANCE & PRE-LAUNCH BOUNDARIES" ar="حدود متجر البائع والامتثال ما قبل الإطلاق" />
+          </span>
+        </div>
+        <p style={{ margin: 0, fontSize: "0.85rem", color: "#aaa", lineHeight: 1.6 }}>
+          <T
+            en="Welcome to the GearBeat V2 Seller Extranet Sandbox. Please be advised that automated product approvals, live buyer transactions, checkout payment flows, and financial banking payout transfers are currently simulated. To ensure strict compliance with Saudi PDPL data residency mandates, corporate document upload remains completely deactivated. Sensitive business information will be safely requested only after local sovereign storage provisioning is finalized in Google Cloud Dammam region."
+            ar="مرحباً بك في البيئة التجريبية لإكسترانت التجار لـ GearBeat V2. يرجى العلم أن اعتمادات المنتجات التلقائية، ومعاملات المشتري الحية، وتدفقات مدفوعات الخروج، وعمليات تسوية المدفوعات المالية هي حالياً قيد المحاكاة. لضمان الامتثال الصارم لمتطلبات نظام حماية البيانات الشخصية السعودي (PDPL)، لا يزال تحميل المستندات المؤسسية معطلاً بالكامل. سيتم طلب البيانات الحساسة بأمان فقط بعد إكمال تهيئة التخزين السيادي المحلي في منطقة Google Cloud الدمام."
+          />
+        </p>
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ background: "rgba(255, 77, 77, 0.15)", color: "#ff4d4d", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            DOCUMENT COLLECTION DISABLED
+          </span>
+          <span style={{ background: "rgba(255, 176, 32, 0.15)", color: "#ffb020", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            MANUAL REVIEW REQUIRED
+          </span>
+          <span style={{ background: "rgba(212, 175, 55, 0.15)", color: "var(--gb-gold)", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            SENSITIVE DATA BLOCKED
+          </span>
+          <span style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", padding: "4px 10px", borderRadius: 6, fontSize: "0.7rem", fontWeight: 800 }}>
+            COMMERCIAL VERIFICATION PENDING
+          </span>
+        </div>
+      </div>
 
       {/* SECTION 2: KPI Cards */}
       <section className="gb-dash-grid animate-up" style={{ animationDelay: '0.1s', marginBottom: '32px' }}>
@@ -429,15 +466,15 @@ export default async function VendorDashboardPage() {
                 { label: 'Store Profile', status: '✅' },
                 { label: 'Products', status: '✅' },
                 { label: 'Orders', status: '✅' },
-                { label: 'Documents', status: '✅' },
-                { label: 'Trusted Seller', status: '⏳' },
-                { label: 'Rewards/Kits', status: '⏳' },
-                { label: 'Payouts', status: '⏳' },
-                { label: 'Support', status: '⏳' },
+                { label: 'Document Collection', status: '🚫 DISABLED' },
+                { label: 'Trusted Seller', status: '⏳ PENDING' },
+                { label: 'Rewards/Kits', status: '⏳ PENDING' },
+                { label: 'Payouts & Banking', status: '⏳ DEFERRED' },
+                { label: 'Support Track', status: '⏳ PENDING' },
               ].map(item => (
                 <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #1a1a1a', fontSize: '0.85rem' }}>
                   <span style={{ color: '#888' }}>{item.label}</span>
-                  <span>{item.status}</span>
+                  <span style={{ fontWeight: 700, color: item.status.includes('✅') ? '#10b981' : item.status.includes('🚫') ? '#ff4d4d' : '#ffb020' }}>{item.status}</span>
                 </div>
               ))}
             </div>
