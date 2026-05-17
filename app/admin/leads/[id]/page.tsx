@@ -239,8 +239,17 @@ Studio Limit: 1
             </section>
           )}
 
-          <section className="admin-section">
+          <section className="admin-section" style={{ border: '1px dashed rgba(212, 175, 55, 0.3)', background: 'rgba(212, 175, 55, 0.02)', padding: 24, borderRadius: 16 }}>
             <h3 style={sectionTitleStyle}><T en="Uploaded Documents" ar="المستندات المرفوعة" /></h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(212,175,55,0.08)', padding: '12px 16px', borderRadius: 8, marginBottom: 16, border: '1px solid rgba(212,175,55,0.1)' }}>
+              <span style={{ fontSize: '1.2rem' }}>🛡️</span>
+              <div style={{ fontSize: '0.8rem', lineHeight: 1.4, color: '#D4AF37' }}>
+                <T 
+                  en="PRE-LAUNCH OPS: Sensitive document collection is disabled. No CR, VAT, address proof, or bank documents are collected or displayed here under Saudi-First compliance policies." 
+                  ar="عمليات ما قبل الإطلاق: تم إيقاف جمع المستندات الحساسة. لا يتم جمع أو عرض السجل التجاري، الرقم الضريبي، العنوان الوطني، أو الوثائق البنكية هنا بموجب سياسات الامتثال للأولوية السعودية." 
+                />
+              </div>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <DocCard label={<T en="Commercial Reg." ar="السجل التجاري" />} url={crUrl} loading={docLoading.cr} />
               <DocCard label={<T en="VAT Certificate" ar="شهادة ضريبة القيمة المضافة" />} url={vatUrl} loading={docLoading.vat} />
@@ -415,15 +424,14 @@ function DataItem({ label, value }: any) {
 
 function DocCard({ label, url, loading }: any) {
   return (
-    <div style={{ background: '#111', border: '1px solid #222', padding: 16, borderRadius: 12 }}>
-      <div style={{ fontSize: '0.85rem', marginBottom: 12 }}>{label}</div>
-      {loading ? (
-        <span style={{ fontSize: '0.75rem', color: '#666' }}>Signing...</span>
-      ) : url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#cfa86e', textDecoration: 'underline' }}>View Document</a>
-      ) : (
-        <span style={{ fontSize: '0.75rem', color: '#444' }}>Not uploaded</span>
-      )}
+    <div style={{ background: '#111', border: '1px solid #222', padding: 16, borderRadius: 12, opacity: 0.7 }}>
+      <div style={{ fontSize: '0.85rem', marginBottom: 8 }}>{label}</div>
+      <div style={{ display: 'inline-block', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '2px 8px', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700 }}>
+        <T en="DOCUMENT COLLECTION DISABLED" ar="تم إيقاف جمع المستندات" />
+      </div>
+      <div style={{ fontSize: '0.75rem', color: '#555', marginTop: 8 }}>
+        <T en="Masked (Pre-Launch)" ar="محجوب (قبل الإطلاق)" />
+      </div>
     </div>
   );
 }

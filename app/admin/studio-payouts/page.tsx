@@ -1022,19 +1022,50 @@ export default async function AdminStudioPayoutsPage() {
     <section>
       <div className="section-head">
         <span className="badge">
-          <T en="Admin Finance" ar="إدارة المالية" />
+          <T en="Admin" ar="الإدارة" />
         </span>
 
         <h1>
           <T en="Studio Payouts" ar="بياوت الاستوديو" />
         </h1>
 
-        <p>
+        <p style={{ marginBottom: 20 }}>
           <T
             en="Create, approve, and mark payouts as paid for eligible studio owner settlements."
             ar="أنشئ واعتمد وعلّم البياوت كمدفوع لتسويات أصحاب الاستوديو المؤهلة."
           />
         </p>
+
+        {/* Patch 115A compliance banner */}
+        <div style={{
+          background: "rgba(212, 175, 55, 0.05)",
+          border: "1px dashed rgba(212, 175, 55, 0.3)",
+          borderRadius: 12,
+          padding: 20,
+          textAlign: "left",
+          marginBottom: 24
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+            <span style={{ color: "#D4AF37", fontWeight: 700, fontSize: "0.95rem" }}>
+              <T en="Saudi-First Finance Protection & Pre-Launch Operations Gate" ar="بوابة العمليات المالية وحماية الامتثال للأولوية السعودية" />
+            </span>
+          </div>
+          <p style={{ color: "#aaa", fontSize: "0.85rem", margin: 0, lineHeight: 1.5 }}>
+            <T
+              en="PRE-LAUNCH SANDBOX NOTICE: In compliance with the Saudi PDPL data residency protocols, banking details and settlement histories are masked. Real-time payout routing is currently locked in sandbox mode until Saudi local payment processors are activated."
+              ar="تنويه البيئة التجريبية لما قبل الإطلاق: امتثالاً لبروتوكولات تخزين البيانات السعودية (PDPL)، تم حجب التفاصيل البنكية وسجلات التسويات. عمليات توجيه الدفع الفوري مقفلة حالياً في الوضع التجريبي حتى يتم تنشيط معالجي الدفع المحليين في المملكة."
+            />
+          </p>
+          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ background: "rgba(255, 77, 77, 0.15)", color: "#ff4d4d", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              SENSITIVE DATA BLOCKED
+            </span>
+            <span style={{ background: "rgba(212, 175, 55, 0.15)", color: "#D4AF37", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              SAUDI-FIRST COMPLIANCE
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="actions" style={{ marginBottom: 24 }}>
@@ -1185,7 +1216,9 @@ export default async function AdminStudioPayoutsPage() {
                             <p className="admin-muted-line">
                               {bank.beneficiary_name}
                             </p>
-                            <p className="admin-muted-line">{bank.iban}</p>
+                            <p className="admin-muted-line">
+                              {bank.iban} <span style={{ color: '#ff4d4d', fontSize: '0.7rem' }}>[MASKED]</span>
+                            </p>
                             <span className="badge" style={statusStyle("approved")}>
                               approved
                             </span>

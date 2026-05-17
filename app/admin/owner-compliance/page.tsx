@@ -320,12 +320,46 @@ export default async function AdminOwnerCompliancePage() {
           <T en="Owner Compliance Review" ar="مراجعة بيانات ملاك الاستوديوهات" />
         </h1>
 
-        <p>
+        <p style={{ marginBottom: 20 }}>
           <T
             en="Review company details, official documents, invoicing information, and electronic agreements before activating bookings."
             ar="راجع بيانات الشركة، الوثائق الرسمية، معلومات الفوترة، والعقود الإلكترونية قبل تفعيل الحجوزات."
           />
         </p>
+
+        {/* Patch 115A compliance banner */}
+        <div style={{
+          background: "rgba(212, 175, 55, 0.05)",
+          border: "1px dashed rgba(212, 175, 55, 0.3)",
+          borderRadius: 12,
+          padding: 20,
+          textAlign: "left",
+          marginBottom: 24
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+            <span style={{ color: "#D4AF37", fontWeight: 700, fontSize: "0.95rem" }}>
+              <T en="Saudi-First Compliance Protection & Pre-Launch Operations Gate" ar="بوابة عمليات ما قبل الإطلاق وحماية الامتثال للأولوية السعودية" />
+            </span>
+          </div>
+          <p style={{ color: "#aaa", fontSize: "0.85rem", margin: 0, lineHeight: 1.5 }}>
+            <T
+              en="DOCUMENT COLLECTION DISABLED: In compliance with the Saudi PDPL data protection policies and Saudi-First local storage architecture, all public upload fields for sensitive corporate documents (CR, VAT, Zakat, IBAN proof) are currently disabled. Real-time bank settlements and verified secure hosting are masked until sovereign cloud storage is fully provisioned in Google Cloud Dammam region."
+              ar="تم إيقاف جمع المستندات: امتثالاً لسياسات حماية البيانات لنظام PDPL السعودي وبنية التخزين المحلية ذات الأولوية السعودية، تم إيقاف كافة حقول التحميل العامة للمستندات الحساسة (السجل التجاري، الرقم الضريبي، الزكاة، إثبات الآيبان). تم حجب تسويات البنك الفورية والتخزين المعتمد حتى يتم توفير التخزين السحابي السيادي بالكامل في منطقة Google Cloud الدمام."
+            />
+          </p>
+          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ background: "rgba(255, 77, 77, 0.15)", color: "#ff4d4d", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              SENSITIVE DATA BLOCKED
+            </span>
+            <span style={{ background: "rgba(212, 175, 55, 0.15)", color: "#D4AF37", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              MASKED UNTIL VERIFIED STORAGE
+            </span>
+            <span style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", padding: "2px 8px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700 }}>
+              PAYMENT ACTIVATION PENDING
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="actions" style={{ marginBottom: 24 }}>
@@ -458,21 +492,24 @@ export default async function AdminOwnerCompliancePage() {
                       <strong>
                         <T en="CR number:" ar="رقم السجل التجاري:" />
                       </strong>{" "}
-                      {complianceProfile.commercial_registration_number || "—"}
+                      {complianceProfile.commercial_registration_number || "—"}{" "}
+                      <span style={{ color: '#ff4d4d', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED]</span>
                     </p>
 
                     <p>
                       <strong>
                         <T en="VAT number:" ar="الرقم الضريبي:" />
                       </strong>{" "}
-                      {complianceProfile.vat_number || "—"}
+                      {complianceProfile.vat_number || "—"}{" "}
+                      <span style={{ color: '#ff4d4d', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED]</span>
                     </p>
 
                     <p>
                       <strong>
                         <T en="Zakat certificate:" ar="رقم شهادة الزكاة:" />
                       </strong>{" "}
-                      {complianceProfile.zakat_certificate_number || "—"}
+                      {complianceProfile.zakat_certificate_number || "—"}{" "}
+                      <span style={{ color: '#ff4d4d', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED]</span>
                     </p>
                   </div>
 
@@ -523,7 +560,8 @@ export default async function AdminOwnerCompliancePage() {
                     </p>
 
                     <p>
-                      <strong>IBAN:</strong> {complianceProfile.iban || "—"}
+                      <strong>IBAN:</strong> {complianceProfile.iban || "—"}{" "}
+                      <span style={{ color: '#ff4d4d', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED]</span>
                     </p>
                   </div>
                 </div>
@@ -535,6 +573,12 @@ export default async function AdminOwnerCompliancePage() {
                     </h3>
 
                     <div className="owner-admin-document-list">
+                      <div style={{ display: 'inline-block', background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', padding: '6px 12px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, marginBottom: 12 }}>
+                        ⚠️ <T en="DOCUMENT COLLECTION DISABLED" ar="تم إيقاف جمع المستندات" />
+                      </div>
+                      <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: 12 }}>
+                        <T en="No sensitive files (CR, VAT, IBAN) are requested or displayed in the pre-launch sandbox." ar="لا يتم طلب أو عرض أي ملفات حساسة (السجل التجاري، الضريبة، الآيبان) في البيئة التجريبية لما قبل الإطلاق." />
+                      </p>
                       {ownerDocuments.length ? (
                         ownerDocuments.map((doc) => (
                           <div key={doc.id}>
@@ -542,6 +586,7 @@ export default async function AdminOwnerCompliancePage() {
                             <span className="badge" style={statusStyle(doc.status)}>
                               {doc.status}
                             </span>
+                            <span style={{ color: '#ef4444', fontSize: '0.75rem', marginLeft: 8 }}>[MASKED UNTIL VERIFIED STORAGE]</span>
                             <p className="admin-muted-line">
                               {doc.file_name || doc.file_path}
                             </p>
