@@ -104,7 +104,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: fullName,
-            role,
+            role: role === "studio_owner" ? "owner" : role,
             phone_e164: phoneE164,
           },
         },
@@ -148,7 +148,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         phone: phoneE164,
         country_code: countryCode,
         phone_e164: phoneE164,
-        role,
+        role: role === "studio_owner" ? "owner" : role,
         account_status: "active",
         preferred_currency: selectedCountry.currency_code,
         preferred_language: "ar",
