@@ -43,19 +43,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     preferred_language text DEFAULT 'ar'
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_auth_user_id ON public.profiles(auth_user_id);
-CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
-
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
-CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
-    FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
-CREATE POLICY "Users can update their own profile" ON public.profiles
-    FOR UPDATE USING (auth.uid() = auth_user_id);
-
 -- Safe column backfills for existing profiles table
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email text;
@@ -84,9 +71,21 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS referred_by_code text;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS preferred_currency text;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS preferred_language text DEFAULT 'ar';
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_auth_user_id ON public.profiles(auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
+
+-- Row Level Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
+    FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+CREATE POLICY "Users can update their own profile" ON public.profiles
+    FOR UPDATE USING (auth.uid() = auth_user_id);
 
 -- ============================================================================
 -- 2. Admin Users Table Foundation
@@ -104,22 +103,6 @@ CREATE TABLE IF NOT EXISTS public.admin_users (
     updated_at timestamptz DEFAULT now()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
-CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
-CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
-
-ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can read own admin record" ON public.admin_users;
-CREATE POLICY "Users can read own admin record" ON public.admin_users
-    FOR SELECT TO authenticated
-    USING (auth_user_id = auth.uid());
-
-DROP POLICY IF EXISTS "Active admins can manage admin records" ON public.admin_users;
-CREATE POLICY "Active admins can manage admin records" ON public.admin_users
-    FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active'));
-
 -- Safe column backfills for existing admin_users table
 ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS email text;
@@ -131,10 +114,24 @@ ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_by uuid REFERENC
 ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
 CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
+
+-- Row Level Security
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Users can read own admin record" ON public.admin_users;
+CREATE POLICY "Users can read own admin record" ON public.admin_users
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Active admins can manage admin records" ON public.admin_users;
+CREATE POLICY "Active admins can manage admin records" ON public.admin_users
+    FOR ALL TO authenticated
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active'));
 
 -- ============================================================================
 -- 3. Studios Table Foundation
@@ -143,6 +140,8 @@ CREATE TABLE IF NOT EXISTS public.studios (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_auth_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     name text NOT NULL,
+    name_en text,
+    name_ar text,
     slug text NOT NULL,
     city text NOT NULL,
     district text,
@@ -182,22 +181,7 @@ CREATE TABLE IF NOT EXISTS public.studios (
     application_id uuid
 );
 
-CREATE INDEX IF NOT EXISTS idx_studios_owner_auth_user ON public.studios(owner_auth_user_id);
-CREATE INDEX IF NOT EXISTS idx_studios_status ON public.studios(status);
-CREATE INDEX IF NOT EXISTS idx_studios_slug ON public.studios(slug);
-
-ALTER TABLE public.studios ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public studios are viewable by everyone" ON public.studios;
-CREATE POLICY "Public studios are viewable by everyone" ON public.studios
-    FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Owners can manage their own studios" ON public.studios;
-CREATE POLICY "Owners can manage their own studios" ON public.studios
-    FOR ALL TO authenticated
-    USING (owner_auth_user_id = auth.uid());
-
--- Safe column backfills for existing studios table
+-- Safe column backfills for existing studios table (placed BEFORE indexes/policies)
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name text;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name_en text;
@@ -252,11 +236,24 @@ ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS starting_price numeric DEFAU
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS hourly_rate numeric DEFAULT 0;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS image_url text;
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE INDEX IF NOT EXISTS idx_studios_owner_auth_user ON public.studios(owner_auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_studios_status ON public.studios(status);
 CREATE INDEX IF NOT EXISTS idx_studios_slug ON public.studios(slug);
 CREATE INDEX IF NOT EXISTS idx_studios_name_en ON public.studios(name_en);
+
+-- Row Level Security
+ALTER TABLE public.studios ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Public studios are viewable by everyone" ON public.studios;
+CREATE POLICY "Public studios are viewable by everyone" ON public.studios
+    FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Owners can manage their own studios" ON public.studios;
+CREATE POLICY "Owners can manage their own studios" ON public.studios
+    FOR ALL TO authenticated
+    USING (owner_auth_user_id = auth.uid());
 
 -- ============================================================================
 -- 4. Bookings Table Foundation
@@ -315,17 +312,6 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     owner_decision_at timestamptz
 );
 
-CREATE INDEX IF NOT EXISTS idx_bookings_studio ON public.bookings(studio_id);
-CREATE INDEX IF NOT EXISTS idx_bookings_customer_auth ON public.bookings(customer_auth_user_id);
-CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(status);
-
-ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can read own bookings" ON public.bookings;
-CREATE POLICY "Users can read own bookings" ON public.bookings
-    FOR SELECT TO authenticated
-    USING (customer_auth_user_id = auth.uid() OR owner_auth_user_id = auth.uid());
-
 -- Safe column backfills for existing bookings table
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS studio_id uuid REFERENCES public.studios(id) ON DELETE CASCADE;
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS customer_auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
@@ -378,10 +364,19 @@ ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status_changed_at timestamp
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status_changed_by uuid;
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS owner_decision_at timestamptz;
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE INDEX IF NOT EXISTS idx_bookings_studio ON public.bookings(studio_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_customer_auth ON public.bookings(customer_auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(status);
+
+-- Row Level Security
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Users can read own bookings" ON public.bookings;
+CREATE POLICY "Users can read own bookings" ON public.bookings
+    FOR SELECT TO authenticated
+    USING (customer_auth_user_id = auth.uid() OR owner_auth_user_id = auth.uid());
 
 -- ============================================================================
 -- 5. Loyalty Tiers Foundation
@@ -399,12 +394,6 @@ CREATE TABLE IF NOT EXISTS public.loyalty_tiers (
     created_at timestamptz DEFAULT now()
 );
 
-ALTER TABLE public.loyalty_tiers ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public read for loyalty tiers" ON public.loyalty_tiers;
-CREATE POLICY "Public read for loyalty tiers" ON public.loyalty_tiers
-    FOR SELECT USING (true);
-
 -- Safe column backfills for existing loyalty_tiers table
 ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS name_en text;
 ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS name_ar text;
@@ -415,6 +404,14 @@ ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS redemption_cap_percent
 ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
 ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS is_active boolean DEFAULT true;
 ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+
+-- Row Level Security
+ALTER TABLE public.loyalty_tiers ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Public read for loyalty tiers" ON public.loyalty_tiers;
+CREATE POLICY "Public read for loyalty tiers" ON public.loyalty_tiers
+    FOR SELECT USING (true);
 
 -- ============================================================================
 -- 6. Customer Wallets Foundation
@@ -438,15 +435,6 @@ CREATE TABLE IF NOT EXISTS public.customer_wallets (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_customer_wallets_auth_user ON public.customer_wallets(auth_user_id);
-
-ALTER TABLE public.customer_wallets ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can read own wallet" ON public.customer_wallets;
-CREATE POLICY "Users can read own wallet" ON public.customer_wallets
-    FOR SELECT TO authenticated
-    USING (auth_user_id = auth.uid());
-
 -- Safe column backfills for existing customer_wallets table
 ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS membership_number text;
@@ -464,8 +452,17 @@ ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS joined_at timestamp
 ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE INDEX IF NOT EXISTS idx_customer_wallets_auth_user ON public.customer_wallets(auth_user_id);
+
+-- Row Level Security
+ALTER TABLE public.customer_wallets ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Users can read own wallet" ON public.customer_wallets;
+CREATE POLICY "Users can read own wallet" ON public.customer_wallets
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
 
 -- ============================================================================
 -- 7. Loyalty Points Ledger Foundation
@@ -484,15 +481,6 @@ CREATE TABLE IF NOT EXISTS public.loyalty_points_ledger (
     reason text
 );
 
-CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_auth_user ON public.loyalty_points_ledger(auth_user_id);
-
-ALTER TABLE public.loyalty_points_ledger ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can read own ledger rows" ON public.loyalty_points_ledger;
-CREATE POLICY "Users can read own ledger rows" ON public.loyalty_points_ledger
-    FOR SELECT TO authenticated
-    USING (auth_user_id = auth.uid());
-
 -- Safe column backfills for existing loyalty_points_ledger table
 ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS event_type text;
@@ -505,8 +493,17 @@ ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS amount_basis d
 ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS reason text;
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_auth_user ON public.loyalty_points_ledger(auth_user_id);
+
+-- Row Level Security
+ALTER TABLE public.loyalty_points_ledger ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Users can read own ledger rows" ON public.loyalty_points_ledger;
+CREATE POLICY "Users can read own ledger rows" ON public.loyalty_points_ledger
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
 
 -- ============================================================================
 -- 8. Marketplace Products Foundation
@@ -541,15 +538,6 @@ CREATE TABLE IF NOT EXISTS public.marketplace_products (
     updated_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_marketplace_products_vendor ON public.marketplace_products(vendor_id);
-CREATE INDEX IF NOT EXISTS idx_marketplace_products_slug ON public.marketplace_products(slug);
-
-ALTER TABLE public.marketplace_products ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public products are viewable by everyone" ON public.marketplace_products;
-CREATE POLICY "Public products are viewable by everyone" ON public.marketplace_products
-    FOR SELECT USING (true);
-
 -- Safe column backfills for existing marketplace_products table
 ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS vendor_id uuid;
 ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS category_id uuid;
@@ -578,9 +566,17 @@ ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS specifications 
 ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE INDEX IF NOT EXISTS idx_marketplace_products_vendor ON public.marketplace_products(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_marketplace_products_slug ON public.marketplace_products(slug);
+
+-- Row Level Security
+ALTER TABLE public.marketplace_products ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Public products are viewable by everyone" ON public.marketplace_products;
+CREATE POLICY "Public products are viewable by everyone" ON public.marketplace_products
+    FOR SELECT USING (true);
 
 -- ============================================================================
 -- 9. Marketplace Orders Foundation
@@ -627,16 +623,6 @@ CREATE TABLE IF NOT EXISTS public.marketplace_orders (
     updated_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_marketplace_orders_customer ON public.marketplace_orders(customer_auth_user_id);
-CREATE INDEX IF NOT EXISTS idx_marketplace_orders_number ON public.marketplace_orders(order_number);
-
-ALTER TABLE public.marketplace_orders ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can view their own marketplace orders" ON public.marketplace_orders;
-CREATE POLICY "Users can view their own marketplace orders" ON public.marketplace_orders
-    FOR SELECT TO authenticated
-    USING (customer_auth_user_id = auth.uid());
-
 -- Safe column backfills for existing marketplace_orders table
 ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS customer_auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS order_number text;
@@ -677,6 +663,15 @@ ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS metadata jsonb DE
 ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 
--- Safe indexes backfills
+-- Safe indexes
 CREATE INDEX IF NOT EXISTS idx_marketplace_orders_customer ON public.marketplace_orders(customer_auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_marketplace_orders_number ON public.marketplace_orders(order_number);
+
+-- Row Level Security
+ALTER TABLE public.marketplace_orders ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DROP POLICY IF EXISTS "Users can view their own marketplace orders" ON public.marketplace_orders;
+CREATE POLICY "Users can view their own marketplace orders" ON public.marketplace_orders
+    FOR SELECT TO authenticated
+    USING (customer_auth_user_id = auth.uid());
