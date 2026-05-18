@@ -53,6 +53,22 @@ CREATE POLICY "Active admins can manage admin records" ON public.admin_users
         )
     );
 
+-- Ensure missing columns exist on public.admin_users if the table already existed historically
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS full_name text;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS role text DEFAULT 'admin';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS admin_role text DEFAULT 'admin';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS status text DEFAULT 'active';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Safe indexes backfills
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
+
 -- ============================================================================
 -- MODULE 1: CRM FOUNDATION
 -- ============================================================================

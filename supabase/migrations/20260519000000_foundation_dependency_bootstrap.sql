@@ -56,6 +56,38 @@ DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles
     FOR UPDATE USING (auth.uid() = auth_user_id);
 
+-- Safe column backfills for existing profiles table
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role text DEFAULT 'customer';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_verified boolean DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email_verified boolean DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS identity_verification_status text DEFAULT 'not_started';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS identity_type text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS identity_number text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS identity_locked boolean DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS identity_created_at timestamptz;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS account_status text DEFAULT 'active';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS deletion_requested_at timestamptz;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS deleted_reason text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS country_code text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_country_code text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_e164 text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS membership_number text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS referral_code text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS referred_by_code text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS preferred_currency text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS preferred_language text DEFAULT 'ar';
+
+-- Safe indexes backfills
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_auth_user_id ON public.profiles(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
+
 -- ============================================================================
 -- 2. Admin Users Table Foundation
 -- ============================================================================
@@ -87,6 +119,22 @@ DROP POLICY IF EXISTS "Active admins can manage admin records" ON public.admin_u
 CREATE POLICY "Active admins can manage admin records" ON public.admin_users
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active'));
+
+-- Safe column backfills for existing admin_users table
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS full_name text;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS role text DEFAULT 'admin';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS admin_role text DEFAULT 'admin';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS status text DEFAULT 'active';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Safe indexes backfills
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
 
 -- ============================================================================
 -- 3. Studios Table Foundation
@@ -148,6 +196,67 @@ DROP POLICY IF EXISTS "Owners can manage their own studios" ON public.studios;
 CREATE POLICY "Owners can manage their own studios" ON public.studios
     FOR ALL TO authenticated
     USING (owner_auth_user_id = auth.uid());
+
+-- Safe column backfills for existing studios table
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name_en text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name_ar text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS title text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS slug text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS city text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS district text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS address text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS description_en text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS description_ar text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS price_from numeric DEFAULT 0;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS status text DEFAULT 'approved';
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS verified boolean DEFAULT false;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS cover_image_url text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS google_maps_url text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS google_reviews_url text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS google_place_id text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS google_rating numeric;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS google_user_ratings_total integer;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS google_rating_last_synced_at timestamptz;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS tripadvisor_url text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS tripadvisor_rating numeric;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS tripadvisor_reviews_total integer;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS tripadvisor_rating_last_synced_at timestamptz;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS booking_enabled boolean DEFAULT false;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_compliance_required boolean DEFAULT true;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_compliance_status text DEFAULT 'incomplete';
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS completion_score integer DEFAULT 0;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS country_code text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS city_id uuid;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS city_name text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS address_line text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS latitude numeric;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS longitude numeric;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS minimum_photos_required integer DEFAULT 6;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_trust_summary text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS instant_booking_enabled boolean DEFAULT false;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS verified_location boolean DEFAULT false;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS application_id uuid;
+
+-- Downstream/Fallback/Compatibility Columns
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS country text;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS is_active boolean DEFAULT true;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS starting_price numeric DEFAULT 0;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS hourly_rate numeric DEFAULT 0;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS image_url text;
+
+-- Safe indexes backfills
+CREATE INDEX IF NOT EXISTS idx_studios_owner_auth_user ON public.studios(owner_auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_studios_status ON public.studios(status);
+CREATE INDEX IF NOT EXISTS idx_studios_slug ON public.studios(slug);
+CREATE INDEX IF NOT EXISTS idx_studios_name_en ON public.studios(name_en);
 
 -- ============================================================================
 -- 4. Bookings Table Foundation
@@ -217,6 +326,63 @@ CREATE POLICY "Users can read own bookings" ON public.bookings
     FOR SELECT TO authenticated
     USING (customer_auth_user_id = auth.uid() OR owner_auth_user_id = auth.uid());
 
+-- Safe column backfills for existing bookings table
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS studio_id uuid REFERENCES public.studios(id) ON DELETE CASCADE;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS customer_auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS booking_date date;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS start_time time without time zone;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS end_time time without time zone;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS hours numeric DEFAULT 1;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS total_amount numeric DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status text DEFAULT 'pending';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_status text DEFAULT 'unpaid';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS notes text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS admin_notes text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS admin_notes_updated_at timestamptz;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS admin_notes_updated_by uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS settlement_status text DEFAULT 'not_ready';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payout_status text DEFAULT 'not_started';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_required_at timestamptz;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS paid_at timestamptz;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS completed_at timestamptz;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS cancelled_at timestamptz;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS refund_status text DEFAULT 'none';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS platform_payment_id uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_provider text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_method text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS checkout_session_id uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_transaction_id uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS provider_checkout_id text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS provider_payment_id text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS installment_provider text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS coupon_id uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS coupon_code text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS coupon_discount_amount numeric DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS wallet_credit_used numeric DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS loyalty_points_earned integer DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS loyalty_points_redeemed integer DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS auth_user_id uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS booking_number text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS customer_name text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS customer_email text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS duration_hours numeric DEFAULT 1;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS subtotal_amount numeric DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS discount_amount numeric DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS currency_code text DEFAULT 'SAR';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS owner_notes text;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status_changed_at timestamptz;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status_changed_by uuid;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS owner_decision_at timestamptz;
+
+-- Safe indexes backfills
+CREATE INDEX IF NOT EXISTS idx_bookings_studio ON public.bookings(studio_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_customer_auth ON public.bookings(customer_auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(status);
+
 -- ============================================================================
 -- 5. Loyalty Tiers Foundation
 -- ============================================================================
@@ -238,6 +404,17 @@ ALTER TABLE public.loyalty_tiers ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public read for loyalty tiers" ON public.loyalty_tiers;
 CREATE POLICY "Public read for loyalty tiers" ON public.loyalty_tiers
     FOR SELECT USING (true);
+
+-- Safe column backfills for existing loyalty_tiers table
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS name_en text;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS name_ar text;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS min_points integer DEFAULT 0;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS min_lifetime_spend decimal(12,2) DEFAULT 0.00;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS earn_multiplier decimal(4,2) DEFAULT 1.0;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS redemption_cap_percent integer DEFAULT 100;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS is_active boolean DEFAULT true;
+ALTER TABLE public.loyalty_tiers ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 
 -- ============================================================================
 -- 6. Customer Wallets Foundation
@@ -270,6 +447,26 @@ CREATE POLICY "Users can read own wallet" ON public.customer_wallets
     FOR SELECT TO authenticated
     USING (auth_user_id = auth.uid());
 
+-- Safe column backfills for existing customer_wallets table
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS membership_number text;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS tier_code text DEFAULT 'listener' REFERENCES public.loyalty_tiers(code);
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS points_balance integer DEFAULT 0;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS pending_points integer DEFAULT 0;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS wallet_balance decimal(12,2) DEFAULT 0.00;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS currency_code text DEFAULT 'SAR';
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS lifetime_points integer DEFAULT 0;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS lifetime_spend decimal(12,2) DEFAULT 0.00;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS referral_code text;
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS membership_card_status text DEFAULT 'active';
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS card_style_code text DEFAULT 'default';
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS joined_at timestamptz DEFAULT now();
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.customer_wallets ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Safe indexes backfills
+CREATE INDEX IF NOT EXISTS idx_customer_wallets_auth_user ON public.customer_wallets(auth_user_id);
+
 -- ============================================================================
 -- 7. Loyalty Points Ledger Foundation
 -- ============================================================================
@@ -295,6 +492,21 @@ DROP POLICY IF EXISTS "Users can read own ledger rows" ON public.loyalty_points_
 CREATE POLICY "Users can read own ledger rows" ON public.loyalty_points_ledger
     FOR SELECT TO authenticated
     USING (auth_user_id = auth.uid());
+
+-- Safe column backfills for existing loyalty_points_ledger table
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS event_type text;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS source_type text;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS source_id text;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS points integer;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS status text DEFAULT 'posted';
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS amount_basis decimal(12,2) DEFAULT 0.00;
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS reason text;
+
+-- Safe indexes backfills
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_auth_user ON public.loyalty_points_ledger(auth_user_id);
 
 -- ============================================================================
 -- 8. Marketplace Products Foundation
@@ -337,6 +549,38 @@ ALTER TABLE public.marketplace_products ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public products are viewable by everyone" ON public.marketplace_products;
 CREATE POLICY "Public products are viewable by everyone" ON public.marketplace_products
     FOR SELECT USING (true);
+
+-- Safe column backfills for existing marketplace_products table
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS vendor_id uuid;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS category_id uuid;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS brand_id uuid;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS name_en text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS name_ar text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS slug text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS description_en text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS description_ar text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS short_description_en text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS short_description_ar text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS base_price numeric DEFAULT 0.00;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS currency text DEFAULT 'SAR';
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS status text DEFAULT 'pending_review';
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS tags text[];
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS meta_title text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS meta_description text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS sku text;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS sale_price numeric;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS stock_quantity integer DEFAULT 0;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS currency_code text DEFAULT 'SAR';
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS is_active boolean DEFAULT true;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS images jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS specifications jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.marketplace_products ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Safe indexes backfills
+CREATE INDEX IF NOT EXISTS idx_marketplace_products_vendor ON public.marketplace_products(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_products_slug ON public.marketplace_products(slug);
 
 -- ============================================================================
 -- 9. Marketplace Orders Foundation
@@ -392,3 +636,47 @@ DROP POLICY IF EXISTS "Users can view their own marketplace orders" ON public.ma
 CREATE POLICY "Users can view their own marketplace orders" ON public.marketplace_orders
     FOR SELECT TO authenticated
     USING (customer_auth_user_id = auth.uid());
+
+-- Safe column backfills for existing marketplace_orders table
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS customer_auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS order_number text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS subtotal_amount numeric;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS tax_amount numeric DEFAULT 0.00;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS shipping_amount numeric DEFAULT 0.00;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS total_amount numeric;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS currency text DEFAULT 'SAR';
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS status text DEFAULT 'draft';
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS payment_status text DEFAULT 'unpaid';
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS shipping_address_id uuid;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS shipping_method text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS tracking_number text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS settlement_status text DEFAULT 'pending';
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS payout_status text DEFAULT 'pending';
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS paid_at timestamptz;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS shipped_at timestamptz;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS delivered_at timestamptz;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS payment_provider text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS payment_method text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS installment_provider text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS provider_checkout_id text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS provider_payment_id text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS coupon_id uuid;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS coupon_discount_amount numeric DEFAULT 0;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS wallet_credit_used numeric DEFAULT 0;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS loyalty_points_earned integer DEFAULT 0;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS loyalty_points_redeemed integer DEFAULT 0;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS checkout_session_id uuid;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS payment_transaction_id uuid;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS coupon_code text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS auth_user_id uuid;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS customer_name text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS customer_email text;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS discount_amount numeric DEFAULT 0;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS currency_code text DEFAULT 'SAR';
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.marketplace_orders ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Safe indexes backfills
+CREATE INDEX IF NOT EXISTS idx_marketplace_orders_customer ON public.marketplace_orders(customer_auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_orders_number ON public.marketplace_orders(order_number);
