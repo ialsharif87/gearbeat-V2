@@ -54,7 +54,7 @@ ALTER TABLE IF EXISTS public.admin_users ADD COLUMN IF NOT EXISTS updated_at tim
 -- ============================================================================
 -- 3. Studios Table Column Backfill
 -- ============================================================================
-ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid;
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS name text;
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS name_en text;
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS name_ar text;
@@ -101,8 +101,8 @@ ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS application_id uui
 
 -- Downstream/Fallback/Compatibility Columns
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS country text;
-ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS owner_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
-ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS owner_id uuid;
+ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS user_id uuid;
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS is_active boolean DEFAULT true;
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS starting_price numeric DEFAULT 0;
 ALTER TABLE IF EXISTS public.studios ADD COLUMN IF NOT EXISTS hourly_rate numeric DEFAULT 0;

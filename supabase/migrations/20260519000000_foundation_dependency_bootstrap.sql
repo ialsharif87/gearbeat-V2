@@ -138,7 +138,7 @@ CREATE POLICY "Active admins can manage admin records" ON public.admin_users
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.studios (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_auth_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+    owner_auth_user_id uuid,
     name text NOT NULL,
     name_en text,
     name_ar text,
@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS public.studios (
 );
 
 -- Safe column backfills for existing studios table (placed BEFORE indexes/policies)
-ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_auth_user_id uuid;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name text;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name_en text;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS name_ar text;
@@ -229,8 +229,8 @@ ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS application_id uuid;
 
 -- Downstream/Fallback/Compatibility Columns
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS country text;
-ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
-ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS owner_id uuid;
+ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS user_id uuid;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS is_active boolean DEFAULT true;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS starting_price numeric DEFAULT 0;
 ALTER TABLE public.studios ADD COLUMN IF NOT EXISTS hourly_rate numeric DEFAULT 0;
