@@ -11,6 +11,65 @@
 -- ============================================================================
 
 -- ============================================================================
+-- BOOTSTRAP: ADMIN USERS FOUNDATION (ADDITIVE ONLY)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+    email text UNIQUE,
+    full_name text,
+    role text DEFAULT 'admin',
+    admin_role text DEFAULT 'admin',
+    status text DEFAULT 'active',
+    created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- Safe uniqueness/indexing
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
+
+-- Row Level Security
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Remove existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Users can read own admin record" ON public.admin_users;
+DROP POLICY IF EXISTS "Active admins can manage admin records" ON public.admin_users;
+
+-- Policy: Users can read only their own admin record
+CREATE POLICY "Users can read own admin record" ON public.admin_users
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
+
+-- Policy: Active admins can manage admin records
+CREATE POLICY "Active admins can manage admin records" ON public.admin_users
+    FOR ALL TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.admin_users
+            WHERE auth_user_id = auth.uid() AND status = 'active'
+        )
+    );
+
+-- Ensure missing columns exist on public.admin_users if the table already existed historically
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS full_name text;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS role text DEFAULT 'admin';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS admin_role text DEFAULT 'admin';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS status text DEFAULT 'active';
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Safe indexes backfills
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
+
+-- ============================================================================
 -- MODULE 1: CRM FOUNDATION
 -- ============================================================================
 
@@ -123,7 +182,7 @@ CREATE INDEX IF NOT EXISTS idx_crm_activity_log_account ON public.crm_activity_l
 -- 1. Service Listings
 CREATE TABLE IF NOT EXISTS public.service_listings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    provider_profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    provider_profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
     title text NOT NULL,
     description text,
     price numeric(10,2) NOT NULL DEFAULT 0.00 CHECK (price >= 0.00),
@@ -141,7 +200,7 @@ CREATE INDEX IF NOT EXISTS idx_service_listings_status ON public.service_listing
 CREATE TABLE IF NOT EXISTS public.service_bookings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     service_listing_id uuid REFERENCES public.service_listings(id) ON DELETE CASCADE,
-    customer_profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    customer_profile_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     booking_time timestamptz NOT NULL,
     notes text,
     price_paid numeric(10,2) NOT NULL DEFAULT 0.00 CHECK (price_paid >= 0.00),
@@ -167,7 +226,7 @@ CREATE TABLE IF NOT EXISTS public.events (
     location text,
     start_time timestamptz NOT NULL,
     end_time timestamptz NOT NULL,
-    organizer_profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    organizer_profile_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     status text NOT NULL DEFAULT 'draft'
@@ -198,7 +257,7 @@ CREATE INDEX IF NOT EXISTS idx_ticket_types_event ON public.ticket_types(event_i
 CREATE TABLE IF NOT EXISTS public.ticket_orders (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id uuid REFERENCES public.events(id) ON DELETE CASCADE,
-    buyer_profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    buyer_profile_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     total_price numeric(10,2) NOT NULL DEFAULT 0.00 CHECK (total_price >= 0.00),
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -230,7 +289,7 @@ CREATE INDEX IF NOT EXISTS idx_ticket_order_items_type ON public.ticket_order_it
 -- 1. Academy Instructors
 CREATE TABLE IF NOT EXISTS public.academy_instructors (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE,
+    profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
     bio text,
     specialties text[],
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -263,7 +322,7 @@ CREATE INDEX IF NOT EXISTS idx_academy_lessons_status ON public.academy_lessons(
 CREATE TABLE IF NOT EXISTS public.academy_bookings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     lesson_id uuid REFERENCES public.academy_lessons(id) ON DELETE CASCADE,
-    student_profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    student_profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
     booking_time timestamptz NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -334,7 +393,207 @@ CREATE INDEX IF NOT EXISTS idx_founder_test_issues_status ON public.founder_test
 -- Wiping is blocked, customer_wallets and loyalty_points_ledger exist.
 -- Additive 'reason' column added in case it is required by the rewards system.
 
+-- 1. Loyalty Tiers (Bootstrapped for admin & layout references)
+CREATE TABLE IF NOT EXISTS public.loyalty_tiers (
+    code text PRIMARY KEY,
+    name_en text NOT NULL,
+    name_ar text NOT NULL,
+    min_points integer NOT NULL DEFAULT 0,
+    min_lifetime_spend decimal(12,2) DEFAULT 0.00,
+    earn_multiplier decimal(4,2) NOT NULL DEFAULT 1.0,
+    redemption_cap_percent integer DEFAULT 100,
+    sort_order integer NOT NULL DEFAULT 0,
+    is_active boolean NOT NULL DEFAULT true,
+    created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.loyalty_tiers ENABLE ROW LEVEL SECURITY;
+
+-- Remove existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Public read for loyalty tiers" ON public.loyalty_tiers;
+DROP POLICY IF EXISTS "Admin manage loyalty tiers" ON public.loyalty_tiers;
+
+CREATE POLICY "Public read for loyalty tiers" ON public.loyalty_tiers
+    FOR SELECT USING (true);
+
+CREATE POLICY "Admin manage loyalty tiers" ON public.loyalty_tiers
+    FOR ALL TO authenticated
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active'));
+
+INSERT INTO public.loyalty_tiers (code, name_en, name_ar, min_points, earn_multiplier, sort_order, is_active)
+VALUES
+('listener', 'Listener', 'Ù…Ø³ØªÙ…Ø¹', 0, 1.0, 10, true),
+('creator', 'Creator', 'Ù…Ø¨Ø¯Ø¹', 1000, 1.1, 20, true),
+('producer', 'Producer', 'Ù…Ù†ØªØ¬', 5000, 1.25, 30, true),
+('maestro', 'Maestro', 'Ù…Ø§ÙŠØ³ØªØ±Ùˆ', 15000, 1.5, 40, true),
+('legend', 'Legend', 'Ø£Ø³Ø·ÙˆØ±Ø©', 50000, 2.0, 50, true)
+ON CONFLICT (code) DO NOTHING;
+
+-- 2. Customer Wallets Table Definition
+CREATE TABLE IF NOT EXISTS public.customer_wallets (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+    membership_number text,
+    tier_code text NOT NULL DEFAULT 'listener' REFERENCES public.loyalty_tiers(code),
+    points_balance integer NOT NULL DEFAULT 0 CHECK (points_balance >= 0),
+    pending_points integer NOT NULL DEFAULT 0 CHECK (pending_points >= 0),
+    wallet_balance decimal(12,2) NOT NULL DEFAULT 0.00 CHECK (wallet_balance >= 0.00),
+    currency_code text NOT NULL DEFAULT 'SAR',
+    lifetime_points integer NOT NULL DEFAULT 0 CHECK (lifetime_points >= 0),
+    lifetime_spend decimal(12,2) NOT NULL DEFAULT 0.00 CHECK (lifetime_spend >= 0.00),
+    referral_code text,
+    membership_card_status text NOT NULL DEFAULT 'active',
+    card_style_code text NOT NULL DEFAULT 'default',
+    joined_at timestamptz NOT NULL DEFAULT now(),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_customer_wallets_auth_user ON public.customer_wallets(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_customer_wallets_joined_at ON public.customer_wallets(joined_at);
+
+ALTER TABLE public.customer_wallets ENABLE ROW LEVEL SECURITY;
+
+-- Remove existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Users can read own wallet" ON public.customer_wallets;
+DROP POLICY IF EXISTS "Admins can manage customer wallets" ON public.customer_wallets;
+
+CREATE POLICY "Users can read own wallet" ON public.customer_wallets
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
+
+CREATE POLICY "Admins can manage customer wallets" ON public.customer_wallets
+    FOR ALL TO authenticated
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active'));
+
+-- 3. Loyalty Points Ledger Table Definition
+CREATE TABLE IF NOT EXISTS public.loyalty_points_ledger (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    event_type text NOT NULL,
+    source_type text,
+    source_id text,
+    points integer NOT NULL,
+    status text NOT NULL DEFAULT 'posted',
+    description text,
+    amount_basis decimal(12,2) DEFAULT 0.00,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_auth_user ON public.loyalty_points_ledger(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_created_at ON public.loyalty_points_ledger(created_at);
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_status ON public.loyalty_points_ledger(status);
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_ledger_source ON public.loyalty_points_ledger(source_type, source_id);
+
+ALTER TABLE public.loyalty_points_ledger ENABLE ROW LEVEL SECURITY;
+
+-- Remove existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Users can read own ledger rows" ON public.loyalty_points_ledger;
+DROP POLICY IF EXISTS "Admins can manage loyalty points ledger" ON public.loyalty_points_ledger;
+
+CREATE POLICY "Users can read own ledger rows" ON public.loyalty_points_ledger
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
+
+CREATE POLICY "Admins can manage loyalty points ledger" ON public.loyalty_points_ledger
+    FOR ALL TO authenticated
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active'));
+
 ALTER TABLE public.loyalty_points_ledger ADD COLUMN IF NOT EXISTS reason text;
+
+-- 4. Customer Wallet Summary View
+CREATE OR REPLACE VIEW public.customer_wallet_summary AS
+SELECT
+    w.id AS wallet_id,
+    w.auth_user_id,
+    COALESCE(u.raw_user_meta_data->>'full_name', u.raw_user_meta_data->>'display_name', 'Guest Member') AS full_name,
+    u.email::text AS email,
+    w.membership_number,
+    w.referral_code,
+    w.tier_code,
+    t.name_en AS tier_name_en,
+    t.name_ar AS tier_name_ar,
+    w.points_balance,
+    w.pending_points,
+    w.wallet_balance,
+    w.currency_code,
+    w.lifetime_points,
+    w.lifetime_spend,
+    w.membership_card_status,
+    w.card_style_code,
+    w.joined_at,
+    w.updated_at
+FROM public.customer_wallets w
+JOIN auth.users u ON w.auth_user_id = u.id
+LEFT JOIN public.loyalty_tiers t ON w.tier_code = t.code;
+
+-- 5. Wallet Automation Trigger & Backfill
+CREATE OR REPLACE FUNCTION public.handle_new_user_wallet()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.customer_wallets (
+        auth_user_id,
+        membership_number,
+        tier_code,
+        points_balance,
+        pending_points,
+        wallet_balance,
+        currency_code,
+        lifetime_points,
+        lifetime_spend,
+        membership_card_status,
+        card_style_code
+    ) VALUES (
+        NEW.id,
+        'GB-' || to_char(now(), 'YYYY') || '-' || upper(substring(NEW.id::text from 1 for 8)),
+        'listener',
+        0,
+        0,
+        0.00,
+        COALESCE(NEW.raw_user_meta_data->>'preferred_currency', 'SAR'),
+        0,
+        0.00,
+        'active',
+        'default'
+    ) ON CONFLICT (auth_user_id) DO NOTHING;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Recreate trigger if exists
+DROP TRIGGER IF EXISTS tr_on_auth_user_created_wallet ON auth.users;
+CREATE TRIGGER tr_on_auth_user_created_wallet
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_wallet();
+
+-- Backfill wallets for existing auth.users who do not have one yet
+INSERT INTO public.customer_wallets (
+    auth_user_id,
+    membership_number,
+    tier_code,
+    points_balance,
+    pending_points,
+    wallet_balance,
+    currency_code,
+    lifetime_points,
+    lifetime_spend,
+    membership_card_status,
+    card_style_code
+)
+SELECT
+    id AS auth_user_id,
+    'GB-' || to_char(now(), 'YYYY') || '-' || upper(substring(id::text from 1 for 8)) AS membership_number,
+    'listener' AS tier_code,
+    0 AS points_balance,
+    0 AS pending_points,
+    0.00 AS wallet_balance,
+    COALESCE(raw_user_meta_data->>'preferred_currency', 'SAR') AS currency_code,
+    0 AS lifetime_points,
+    0.00 AS lifetime_spend,
+    'active' AS membership_card_status,
+    'default' AS card_style_code
+FROM auth.users
+ON CONFLICT (auth_user_id) DO NOTHING;
 
 -- ============================================================================
 -- MODULE 7: ADMIN & MANUAL OPERATIONS

@@ -1,0 +1,19 @@
+-- ============================================================================
+-- GEARBEAT PATCH 123L: SUPABASE REMOTE MIGRATION HISTORY PLACEHOLDER
+-- ============================================================================
+-- Description: This file is a purely comment-based local placeholder migration
+--              to satisfy the Supabase CLI migration history for the remote
+--              version '20260518' that is already registered in the remote
+--              database's schema_migrations table.
+--
+-- Safety:      - Contains COMMENTS ONLY.
+--              - Zero SQL statements.
+--              - Zero database changes or state mutations.
+--
+-- Purpose:     By keeping this file locally, we prevent the Supabase CLI error:
+--              "Remote migration versions not found in local migrations directory."
+--              while keeping all actual active database schema changes in the
+--              ordered chronological migration scripts:
+--              - 20260519000001_founder_full_journey_sql_gap_fill.sql
+--              - 20260519000002_internal_crm_founder_self_test_foundation.sql
+-- ============================================================================

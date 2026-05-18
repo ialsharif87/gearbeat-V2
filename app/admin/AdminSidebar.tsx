@@ -47,6 +47,8 @@ export function AdminSidebar({
         </div>
         <NavItem href="/admin" icon="📊" labelEn="Dashboard" labelAr="لوحة التحكم" active={isActive('/admin')} />
         <NavItem href="/admin/operations-crm" icon="🤝" labelEn="Operations CRM" labelAr="إدارة العمليات" active={isActive('/admin/operations-crm')} />
+        <NavItem href="/admin/crm" icon="🛠️" labelEn="Self-Test CRM" labelAr="تجربة العلاقات" active={isActive('/admin/crm')} />
+        <NavItem href="/admin/manual-ops" icon="🔧" labelEn="Manual Ops" labelAr="العمليات اليدوية" active={isActive('/admin/manual-ops')} />
         <NavItem href="/admin/rewards-kits" icon="🎁" labelEn="Rewards & Kits" labelAr="الجوائز والحقائب" active={isActive('/admin/rewards-kits')} />
         <NavItem href="/admin/accounting" icon="💰" labelEn="Accounting" labelAr="المحاسبة" active={isActive('/admin/accounting')} />
         <NavItem href="/admin/promos" icon="🏷️" labelEn="Promos & Ads" labelAr="العروض والإعلانات" active={isActive('/admin/promos')} />
