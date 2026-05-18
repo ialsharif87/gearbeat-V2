@@ -13,8 +13,9 @@ interface SearchParams {
 export default async function AdminCrmConsolePage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
+  const resolvedSearchParams = await searchParams;
   // Ensure the user has active admin rights before proceeding
   const { supabaseAdmin } = await requireAdminLayoutAccess();
 
@@ -89,9 +90,9 @@ export default async function AdminCrmConsolePage({
   };
 
   // 3. Apply Server-Side Filters from Search Params
-  const activeRole = searchParams.role || "all";
-  const activeStatus = searchParams.status || "all";
-  const searchQuery = (searchParams.search || "").toLowerCase();
+  const activeRole = resolvedSearchParams.role || "all";
+  const activeStatus = resolvedSearchParams.status || "all";
+  const searchQuery = (resolvedSearchParams.search || "").toLowerCase();
 
   const filteredLeads = enrichedLeads.filter((lead) => {
     const roleMatch = activeRole === "all" || lead.resolvedRole.toLowerCase() === activeRole.toLowerCase();
@@ -158,7 +159,7 @@ export default async function AdminCrmConsolePage({
   // Render a clean URL with search parameters helper
   const makeFilterUrl = (params: Partial<SearchParams>) => {
     const base = "/admin/crm";
-    const current = { role: activeRole, status: activeStatus, search: searchParams.search || "" };
+    const current = { role: activeRole, status: activeStatus, search: resolvedSearchParams.search || "" };
     const merged = { ...current, ...params };
     const queryParts = [];
     if (merged.role && merged.role !== "all") queryParts.push(`role=${merged.role}`);
@@ -272,7 +273,7 @@ export default async function AdminCrmConsolePage({
               <input 
                 type="text" 
                 name="search" 
-                defaultValue={searchParams.search || ""} 
+                defaultValue={resolvedSearchParams.search || ""} 
                 placeholder="Search leads..." 
                 style={{ 
                   flex: 1, 
