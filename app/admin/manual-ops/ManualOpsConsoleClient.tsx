@@ -38,26 +38,30 @@ export function ManualOpsConsoleClient({
   useEffect(() => {
     try {
       const saved = localStorage.getItem("gb_founder_selftest_checklist");
+      const defaults: Record<string, boolean> = {
+        "user_roles": false,
+        "customer_signup": false,
+        "vendor_signup": false,
+        "studio_signup": false,
+        "booking_simulation": false,
+        "manual_payment_audit": false,
+        "catalog_draft": false,
+        "marketplace_checkout": false,
+        "service_listing": false,
+        "event_ticket": false,
+        "academy_lesson": false,
+        "refund_reconciliation": false,
+        "reconcile_ledger": false,
+        "db_log_run": false,
+        "demo_customer_bind": false,
+        "demo_owner_bind": false,
+        "demo_vendor_bind": false,
+        "demo_organizer_bind": false,
+        "demo_admin_bind": false
+      };
       if (saved) {
-        setChecklist(JSON.parse(saved));
+        setChecklist({ ...defaults, ...JSON.parse(saved) });
       } else {
-        // Initialize with default unchecked items
-        const defaults: Record<string, boolean> = {
-          "user_roles": false,
-          "customer_signup": false,
-          "vendor_signup": false,
-          "studio_signup": false,
-          "booking_simulation": false,
-          "manual_payment_audit": false,
-          "catalog_draft": false,
-          "marketplace_checkout": false,
-          "service_listing": false,
-          "event_ticket": false,
-          "academy_lesson": false,
-          "refund_reconciliation": false,
-          "reconcile_ledger": false,
-          "db_log_run": false
-        };
         setChecklist(defaults);
         localStorage.setItem("gb_founder_selftest_checklist", JSON.stringify(defaults));
       }
@@ -867,6 +871,82 @@ export function ManualOpsConsoleClient({
       {activeTab === "checklist" && (
         <div className="animate-up" style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
           
+          {/* A. FOUNDER DEMO ACCOUNT SETUP & ROLE BINDINGS CARD */}
+          <div className="gb-card animate-up" style={{ border: "1px solid rgba(212, 175, 55, 0.2)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "12px", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--gb-gold)", display: "flex", alignItems: "center", gap: "10px" }}>
+                <span>🔑</span>
+                <T en="Founder Demo Account Setup & Role Bindings" ar="إعداد حسابات المطور التجريبية وربط الأدوار" />
+              </h3>
+              <span className="badge" style={{ background: "rgba(0, 255, 136, 0.1)", color: "#00ff88", border: "1px solid rgba(0, 255, 136, 0.25)" }}>
+                <T en="Sandbox Readiness" ar="جاهزية بيئة التطوير" />
+              </span>
+            </div>
+
+            <p style={{ color: "var(--gb-text-muted)", fontSize: "0.85rem", marginBottom: "24px", lineHeight: "1.5" }}>
+              <T 
+                en="Before starting the Founder Full-Journey Self-Test, prepare isolated local sandbox accounts for each separate platform role. Note: This card acts as a verification checklist. Real profiles are mapped directly using the database CLI during migrations, strictly preserving payment security boundaries."
+                ar="قبل البدء بالفحص الذاتي لرحلة العميل الكاملة للمؤسس، قم بإعداد حسابات معزولة لكل دور في المنصة. ملاحظة: تعمل هذه البطاقة كقائمة تحقق للجاهزية. يتم تعيين الحسابات الحقيقية مباشرة باستخدام واجهة سطر الأوامر لقاعدة البيانات أثناء الهجرات."
+              />
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={checklistGridStyle}>
+                
+                <ChecklistItem 
+                  id="demo_customer_bind"
+                  checked={checklist["demo_customer_bind"]}
+                  onChange={toggleChecklistItem}
+                  titleEn="Customer Sandbox Account Setup"
+                  titleAr="إعداد حساب العميل التجريبي"
+                  descEn="Verify local account customer@gearbeat.com is registered and bound to Customer Profile."
+                  descAr="تأكد من تسجيل الحساب المحلي customer@gearbeat.com وربطه بملف العميل."
+                />
+
+                <ChecklistItem 
+                  id="demo_owner_bind"
+                  checked={checklist["demo_owner_bind"]}
+                  onChange={toggleChecklistItem}
+                  titleEn="Studio Owner Sandbox Account Setup"
+                  titleAr="إعداد حساب صاحب الاستوديو التجريبي"
+                  descEn="Verify local account owner@gearbeat.com is registered and bound to Studio Owner Profile."
+                  descAr="تأكد من تسجيل الحساب المحلي owner@gearbeat.com وربطه بملف صاحب الاستوديو."
+                />
+
+                <ChecklistItem 
+                  id="demo_vendor_bind"
+                  checked={checklist["demo_vendor_bind"]}
+                  onChange={toggleChecklistItem}
+                  titleEn="Merchant / Vendor Sandbox Account Setup"
+                  titleAr="إعداد حساب التاجر التجريبي"
+                  descEn="Verify local account vendor@gearbeat.com is registered and bound to Vendor Profile."
+                  descAr="تأكد من تسجيل الحساب المحلي vendor@gearbeat.com وربطه بملف التاجر."
+                />
+
+                <ChecklistItem 
+                  id="demo_organizer_bind"
+                  checked={checklist["demo_organizer_bind"]}
+                  onChange={toggleChecklistItem}
+                  titleEn="Event Organizer Sandbox Account Setup"
+                  titleAr="إعداد حساب منظم الفعاليات التجريبي"
+                  descEn="Verify local account organizer@gearbeat.com is registered and bound to Ticket Organizer Profile."
+                  descAr="تأكد من تسجيل الحساب المحلي organizer@gearbeat.com وربطه بملف منظم الفعاليات."
+                />
+
+                <ChecklistItem 
+                  id="demo_admin_bind"
+                  checked={checklist["demo_admin_bind"]}
+                  onChange={toggleChecklistItem}
+                  titleEn="Super Admin Operator Account Setup"
+                  titleAr="إعداد حساب مسؤول النظام الخارق"
+                  descEn="Verify local account admin@gearbeat.com is bound to the Admin / Operator Profile."
+                  descAr="تأكد من تسجيل الحساب المحلي admin@gearbeat.com وربطه بملف المسؤول."
+                />
+
+              </div>
+            </div>
+          </div>
+
           <div className="gb-card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "12px", marginBottom: "16px" }}>
               <h3 style={{ fontSize: "1.1rem", fontWeight: 800 }}>📋 <T en="Admin Action Checklist" ar="قائمة مهام المسؤول" /></h3>
