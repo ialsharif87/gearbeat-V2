@@ -47,6 +47,24 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   }
 });
 
+// ============================================================================
+// ⚠️ PRESERVED_BASELINE_TABLES
+// The following reference/system/configuration tables are strictly preserved.
+// Wiping them would break basic application configurations, metadata options,
+// staff access, and lookup operations.
+//   1.  public.countries (Geographic lookup references)
+//   2.  public.cities (Geographic lookup references)
+//   3.  public.marketplace_categories (Baseline store category taxonomy)
+//   4.  public.marketplace_brands (Baseline brands lookup catalog)
+//   5.  public.studio_features (Standard room/studio tag library)
+//   6.  public.studio_tiers (Listing tiers taxonomy)
+//   7.  public.loyalty_tiers (Loyalty reward tiers setup)
+//   8.  public.loyalty_earning_rules (System points calculations setup)
+//   9.  public.commission_settings (Default fee structure config)
+//   10. public.payment_provider_configs (Billing credentials/gateway integrations)
+//   11. public.staff_role_permissions (Access control and staff policy baseline)
+// ============================================================================
+
 // 3. Define the relational tables and cleanup rules in safe dependency order (children deleted before parents)
 const TABLES_TO_CLEAN = [
   // --------------------------------------------------------------------------
@@ -70,22 +88,20 @@ const TABLES_TO_CLEAN = [
   { name: "public.vendor_api_keys", keyColumn: "id" },
 
   // --------------------------------------------------------------------------
-  // Category 7: Loyalty, Wallets & Promotions
+  // Category 7: Loyalty, Wallets & Promotions (Excludes baseline loyalty configs)
   // --------------------------------------------------------------------------
   { name: "public.merch_fulfillment_orders", keyColumn: "id" },
   { name: "public.offer_claims", keyColumn: "id" },
   { name: "public.offer_events", keyColumn: "id" },
   { name: "public.offers", keyColumn: "id" },
-  { name: "public.loyalty_earning_rules", keyColumn: "id" },
   { name: "public.coupon_validation_logs", keyColumn: "id" },
   { name: "public.coupon_redemptions", keyColumn: "id" },
   { name: "public.coupons", keyColumn: "id" },
   { name: "public.loyalty_points_ledger", keyColumn: "id" },
   { name: "public.customer_wallets", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" },
-  { name: "public.loyalty_tiers", keyColumn: "id" },
 
   // --------------------------------------------------------------------------
-  // Category 6: Financials, Settlements & Invoicing
+  // Category 6: Financials, Settlements & Invoicing (Excludes default commission/provider configs)
   // --------------------------------------------------------------------------
   { name: "public.platform_payment_transactions", keyColumn: "id" },
   { name: "public.platform_settlements", keyColumn: "id" },
@@ -95,12 +111,10 @@ const TABLES_TO_CLEAN = [
   { name: "public.platform_invoice_items", keyColumn: "id" },
   { name: "public.platform_invoices", keyColumn: "id" },
   { name: "public.platform_payments", keyColumn: "id" },
-  { name: "public.payment_provider_configs", keyColumn: "id" },
   { name: "public.checkout_payment_sessions", keyColumn: "id" },
   { name: "public.payment_transactions", keyColumn: "id" },
   { name: "public.payment_provider_events", keyColumn: "id" },
   { name: "public.payment_refunds", keyColumn: "id" },
-  { name: "public.commission_settings", keyColumn: "id" },
   { name: "public.studio_commissions", keyColumn: "id" },
   { name: "public.booking_commissions", keyColumn: "id" },
   { name: "public.studio_commission_rules", keyColumn: "id" },
@@ -117,7 +131,7 @@ const TABLES_TO_CLEAN = [
   { name: "public.verification_documents", keyColumn: "id" },
 
   // --------------------------------------------------------------------------
-  // Category 4: Marketplace & E-Commerce
+  // Category 4: Marketplace & E-Commerce (Excludes category & brand lookup baselines)
   // --------------------------------------------------------------------------
   { name: "public.marketplace_order_items", keyColumn: "id" },
   { name: "public.marketplace_orders", keyColumn: "id" },
@@ -133,8 +147,6 @@ const TABLES_TO_CLEAN = [
   { name: "public.marketplace_products", keyColumn: "id" },
   { name: "public.vendor_commission_rules", keyColumn: "id" },
   { name: "public.vendor_profiles", keyColumn: "id" },
-  { name: "public.marketplace_brands", keyColumn: "id" },
-  { name: "public.marketplace_categories", keyColumn: "id" },
 
   // --------------------------------------------------------------------------
   // Category 3: Bookings & Reviews
@@ -146,10 +158,9 @@ const TABLES_TO_CLEAN = [
   { name: "public.bookings", keyColumn: "id" },
 
   // --------------------------------------------------------------------------
-  // Category 2: Studios & Listings
+  // Category 2: Studios & Listings (Excludes studio features & tier taxonomy references)
   // --------------------------------------------------------------------------
   { name: "public.studio_feature_links", keyColumn: "id" },
-  { name: "public.studio_features", keyColumn: "id" },
   { name: "public.studio_equipment", keyColumn: "id" },
   { name: "public.studio_images", keyColumn: "id" },
   { name: "public.studio_availability_exceptions", keyColumn: "id" },
@@ -157,19 +168,17 @@ const TABLES_TO_CLEAN = [
   { name: "public.studio_applications", keyColumn: "id" },
   { name: "public.certified_studios", keyColumn: "id" },
   { name: "public.studio_tier_rules", keyColumn: "id" },
-  { name: "public.studio_tiers", keyColumn: "id" },
   { name: "public.studio_certification_history", keyColumn: "id" },
   { name: "public.qr_verification_links", keyColumn: "id" },
   { name: "public.digital_badges", keyColumn: "id" },
   { name: "public.studios", keyColumn: "id" },
 
   // --------------------------------------------------------------------------
-  // Category 1: User / Profile / Customer (Parents last)
+  // Category 1: User / Profile / Customer (Parents last, excludes role permission definitions)
   // --------------------------------------------------------------------------
   { name: "public.user_verifications", keyColumn: "id" },
   { name: "public.otp_verification_sessions", keyColumn: "id" },
   { name: "public.account_deletion_requests", keyColumn: "id" },
-  { name: "public.staff_role_permissions", keyColumn: "id" },
   { name: "public.admin_users", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" },
   { name: "public.profiles", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" },
   { name: "public.customers", keyColumn: "id" },
