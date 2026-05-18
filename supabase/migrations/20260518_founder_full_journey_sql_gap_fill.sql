@@ -11,6 +11,49 @@
 -- ============================================================================
 
 -- ============================================================================
+-- BOOTSTRAP: ADMIN USERS FOUNDATION (ADDITIVE ONLY)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth_user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+    email text UNIQUE,
+    full_name text,
+    role text DEFAULT 'admin',
+    admin_role text DEFAULT 'admin',
+    status text DEFAULT 'active',
+    created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- Safe uniqueness/indexing
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_auth_user_id ON public.admin_users(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_users_status ON public.admin_users(status);
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON public.admin_users(email);
+
+-- Row Level Security
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Remove existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Users can read own admin record" ON public.admin_users;
+DROP POLICY IF EXISTS "Active admins can manage admin records" ON public.admin_users;
+
+-- Policy: Users can read only their own admin record
+CREATE POLICY "Users can read own admin record" ON public.admin_users
+    FOR SELECT TO authenticated
+    USING (auth_user_id = auth.uid());
+
+-- Policy: Active admins can manage admin records
+CREATE POLICY "Active admins can manage admin records" ON public.admin_users
+    FOR ALL TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.admin_users
+            WHERE auth_user_id = auth.uid() AND status = 'active'
+        )
+    );
+
+-- ============================================================================
 -- MODULE 1: CRM FOUNDATION
 -- ============================================================================
 
