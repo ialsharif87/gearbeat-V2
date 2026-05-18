@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.studio_availability_rules (
     start_time time,
     end_time time,
     is_available boolean DEFAULT true,
+    is_open boolean DEFAULT true,
     status text DEFAULT 'active',
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now()
@@ -102,6 +103,8 @@ ALTER TABLE public.studio_pricing_rules ADD COLUMN IF NOT EXISTS created_at time
 ALTER TABLE public.studio_pricing_rules ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 
 -- Safe compatibility indexes
+ALTER TABLE public.studio_availability_rules ADD COLUMN IF NOT EXISTS is_open boolean DEFAULT true;
+
 CREATE INDEX IF NOT EXISTS idx_studio_availability_rules_studio_id ON public.studio_availability_rules(studio_id);
 CREATE INDEX IF NOT EXISTS idx_studio_availability_rules_day ON public.studio_availability_rules(studio_id, day_of_week);
 CREATE INDEX IF NOT EXISTS idx_studio_availability_exceptions_studio_id ON public.studio_availability_exceptions(studio_id);
