@@ -12,7 +12,7 @@ const confirmReset = process.env.CONFIRM_RESET;
 const modeEnv = process.env.MODE;
 
 console.log("==========================================================");
-console.log("⚙️  GearBeat Pilot Self-Testing Reset Utility");
+console.log("⚙️  GearBeat Founder Full-Journey Self-Test Reset Utility");
 console.log("==========================================================");
 
 if (!superAdminEmail || !supabaseUrl || !serviceRoleKey) {
@@ -47,103 +47,133 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   }
 });
 
-// 3. Define the relational tables and cleanup rules in dependency order
+// 3. Define the relational tables and cleanup rules in safe dependency order (children deleted before parents)
 const TABLES_TO_CLEAN = [
-  // 1. Booking Exceptions, Rules, & Pricing
-  { name: "public.studio_availability_exceptions", keyColumn: "id" },
-  { name: "public.studio_availability_pricing_rules", keyColumn: "id" },
-  { name: "public.studio_availability_rules", keyColumn: "id" },
-  { name: "public.studio_boost_subscriptions", keyColumn: "id" },
-  { name: "public.studio_tier_rules", keyColumn: "id" },
-  { name: "public.studio_certification_history", keyColumn: "id" },
-  { name: "public.certified_studios", keyColumn: "id" },
-  { name: "public.qr_verification_links", keyColumn: "id" },
-  { name: "public.digital_badges", keyColumn: "badge_key" },
+  // --------------------------------------------------------------------------
+  // Category 9: Analytics & Events (Leaves/Logs first)
+  // --------------------------------------------------------------------------
+  { name: "public.audit_logs", keyColumn: "id" },
+  { name: "public.customer_favorites", keyColumn: "id" },
+  { name: "public.share_events", keyColumn: "id" },
+  { name: "public.studio_accelerations", keyColumn: "id" },
+  { name: "public.studio_performance_daily", keyColumn: "id" },
+  { name: "public.marketplace_events", keyColumn: "id" },
   { name: "public.certification_audit_events", keyColumn: "id" },
-  { name: "public.certified_entities", keyColumn: "id" },
+  { name: "public.studio_boost_subscriptions", keyColumn: "id" },
 
-  // 2. Studio bookings & rooms
-  { name: "public.studio_bookings", keyColumn: "id" },
-  { name: "public.rooms", keyColumn: "id" },
-  { name: "public.studios", keyColumn: "id" },
+  // --------------------------------------------------------------------------
+  // Category 8: CRM & Support & Developer Logs
+  // --------------------------------------------------------------------------
+  { name: "public.provider_leads", keyColumn: "id" },
+  { name: "public.vendor_api_request_logs", keyColumn: "id" },
+  { name: "public.vendor_product_sync_logs", keyColumn: "id" },
+  { name: "public.vendor_api_keys", keyColumn: "id" },
 
-  // 3. Marketplace transactional & product tables
+  // --------------------------------------------------------------------------
+  // Category 7: Loyalty, Wallets & Promotions
+  // --------------------------------------------------------------------------
+  { name: "public.merch_fulfillment_orders", keyColumn: "id" },
+  { name: "public.offer_claims", keyColumn: "id" },
+  { name: "public.offer_events", keyColumn: "id" },
+  { name: "public.offers", keyColumn: "id" },
+  { name: "public.loyalty_earning_rules", keyColumn: "id" },
+  { name: "public.coupon_validation_logs", keyColumn: "id" },
+  { name: "public.coupon_redemptions", keyColumn: "id" },
+  { name: "public.coupons", keyColumn: "id" },
+  { name: "public.loyalty_points_ledger", keyColumn: "id" },
+  { name: "public.customer_wallets", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" },
+  { name: "public.loyalty_tiers", keyColumn: "id" },
+
+  // --------------------------------------------------------------------------
+  // Category 6: Financials, Settlements & Invoicing
+  // --------------------------------------------------------------------------
+  { name: "public.platform_payment_transactions", keyColumn: "id" },
+  { name: "public.platform_settlements", keyColumn: "id" },
+  { name: "public.platform_payout_items", keyColumn: "id" },
+  { name: "public.platform_payouts", keyColumn: "id" },
+  { name: "public.platform_refunds", keyColumn: "id" },
+  { name: "public.platform_invoice_items", keyColumn: "id" },
+  { name: "public.platform_invoices", keyColumn: "id" },
+  { name: "public.platform_payments", keyColumn: "id" },
+  { name: "public.payment_provider_configs", keyColumn: "id" },
+  { name: "public.checkout_payment_sessions", keyColumn: "id" },
+  { name: "public.payment_transactions", keyColumn: "id" },
+  { name: "public.payment_provider_events", keyColumn: "id" },
+  { name: "public.payment_refunds", keyColumn: "id" },
+  { name: "public.commission_settings", keyColumn: "id" },
+  { name: "public.studio_commissions", keyColumn: "id" },
+  { name: "public.booking_commissions", keyColumn: "id" },
+  { name: "public.studio_commission_rules", keyColumn: "id" },
+
+  // --------------------------------------------------------------------------
+  // Category 5: Compliance, Agreements & Banking
+  // --------------------------------------------------------------------------
+  { name: "public.owner_compliance_documents", keyColumn: "id" },
+  { name: "public.owner_compliance_profiles", keyColumn: "id", preserveSuperAdmin: true, userColumn: "owner_auth_user_id" },
+  { name: "public.owner_agreements", keyColumn: "id", preserveSuperAdmin: true, userColumn: "owner_auth_user_id" },
+  { name: "public.owner_bank_accounts", keyColumn: "id", preserveSuperAdmin: true, userColumn: "owner_auth_user_id" },
+  { name: "public.vendor_compliance_documents", keyColumn: "id" },
+  { name: "public.business_verifications", keyColumn: "id" },
+  { name: "public.verification_documents", keyColumn: "id" },
+
+  // --------------------------------------------------------------------------
+  // Category 4: Marketplace & E-Commerce
+  // --------------------------------------------------------------------------
   { name: "public.marketplace_order_items", keyColumn: "id" },
   { name: "public.marketplace_orders", keyColumn: "id" },
-  { name: "public.carts", keyColumn: "id" },
-  { name: "public.cart_items", keyColumn: "id" },
-  { name: "public.marketplace_promos", keyColumn: "id" },
+  { name: "public.marketplace_product_reviews", keyColumn: "id" },
+  { name: "public.marketplace_reviews", keyColumn: "id" },
+  { name: "public.marketplace_cart_items", keyColumn: "id" },
+  { name: "public.marketplace_carts", keyColumn: "id" },
+  { name: "public.marketplace_product_images", keyColumn: "id" },
+  { name: "public.marketplace_product_variants", keyColumn: "id" },
+  { name: "public.marketplace_inventory", keyColumn: "id" },
+  { name: "public.marketplace_product_import_rows", keyColumn: "id" },
+  { name: "public.marketplace_product_import_batches", keyColumn: "id" },
   { name: "public.marketplace_products", keyColumn: "id" },
-  { name: "public.marketplace_vendors", keyColumn: "id" },
+  { name: "public.vendor_commission_rules", keyColumn: "id" },
+  { name: "public.vendor_profiles", keyColumn: "id" },
+  { name: "public.marketplace_brands", keyColumn: "id" },
+  { name: "public.marketplace_categories", keyColumn: "id" },
 
-  // 4. Academy & Services
-  { name: "public.academy_enrollments", keyColumn: "id" },
-  { name: "public.academy_lessons", keyColumn: "id" },
-  { name: "public.service_bookings", keyColumn: "id" },
-  { name: "public.service_listings", keyColumn: "id" },
-  { name: "public.services", keyColumn: "id" },
+  // --------------------------------------------------------------------------
+  // Category 3: Bookings & Reviews
+  // --------------------------------------------------------------------------
+  { name: "public.reviews", keyColumn: "id" },
+  { name: "public.studio_reviews", keyColumn: "id" },
+  { name: "public.review_requests", keyColumn: "id" },
+  { name: "public.external_review_sources", keyColumn: "id" },
+  { name: "public.bookings", keyColumn: "id" },
 
-  // 5. Events & Tickets
-  { name: "public.event_tickets", keyColumn: "id" },
-  { name: "public.event_profiles", keyColumn: "id" },
-  { name: "public.events", keyColumn: "id" },
-
-  // 6. Finance, payouts, & batches
-  { name: "public.finance_audit_logs", keyColumn: "id" },
-  { name: "public.finance_adjustments", keyColumn: "id" },
-  { name: "public.settlement_batch_items", keyColumn: "id" },
-  { name: "public.settlement_batches", keyColumn: "id" },
-  { name: "public.payout_requests", keyColumn: "id" },
-  { name: "public.payout_report_notes", keyColumn: "id" },
-  { name: "public.payout_batches", keyColumn: "id" },
-  { name: "public.finance_ledger_entries", keyColumn: "id" },
-  { name: "public.finance_ledger", keyColumn: "id" },
-  { name: "public.payment_transactions", keyColumn: "id" },
-  { name: "public.payment_sessions", keyColumn: "id" },
-  { name: "public.commission_settings", keyColumn: "id" },
-  { name: "public.acceleration_orders", keyColumn: "id" },
-  { name: "public.acceleration_packages", keyColumn: "id" },
-
-  // 7. Rewards, loyalty, & referrals
-  { name: "public.merch_fulfillment_orders", keyColumn: "id" },
-  { name: "public.merch_kits", keyColumn: "id" },
-  { name: "public.creator_seeding", keyColumn: "id" },
-  { name: "public.media_coverage", keyColumn: "id" },
-  { name: "public.pr_campaigns", keyColumn: "id" },
-  { name: "public.customer_tiers", keyColumn: "id" },
-  { name: "public.vendor_tiers", keyColumn: "id" },
+  // --------------------------------------------------------------------------
+  // Category 2: Studios & Listings
+  // --------------------------------------------------------------------------
+  { name: "public.studio_feature_links", keyColumn: "id" },
+  { name: "public.studio_features", keyColumn: "id" },
+  { name: "public.studio_equipment", keyColumn: "id" },
+  { name: "public.studio_images", keyColumn: "id" },
+  { name: "public.studio_availability_exceptions", keyColumn: "id" },
+  { name: "public.studio_availability_rules", keyColumn: "id" },
+  { name: "public.studio_applications", keyColumn: "id" },
+  { name: "public.certified_studios", keyColumn: "id" },
+  { name: "public.studio_tier_rules", keyColumn: "id" },
   { name: "public.studio_tiers", keyColumn: "id" },
-  { name: "public.points_ledger", keyColumn: "id" },
-  { name: "public.wallets", keyColumn: "id", preserveSuperAdmin: true, userColumn: "user_id" },
-  { name: "public.referral_records", keyColumn: "id" },
-  { name: "public.loyalty_reward_accounts", keyColumn: "user_id", preserveSuperAdmin: true, userColumn: "user_id", resetColumn: "current_balance", resetValue: 0 },
-  { name: "public.referral_codes", keyColumn: "id", preserveSuperAdmin: true, userColumn: "user_id" },
+  { name: "public.studio_certification_history", keyColumn: "id" },
+  { name: "public.qr_verification_links", keyColumn: "id" },
+  { name: "public.digital_badges", keyColumn: "id" },
+  { name: "public.studios", keyColumn: "id" },
 
-  // 8. CRM tables
-  { name: "public.crm_accounts", keyColumn: "id" },
-  { name: "public.crm_contacts", keyColumn: "id" },
-  { name: "public.crm_leads", keyColumn: "id" },
-  { name: "public.crm_notes", keyColumn: "id" },
-  { name: "public.crm_tasks", keyColumn: "id" },
-  { name: "public.provider_leads", keyColumn: "id" },
-
-  // 9. Support & Ops
-  { name: "public.support_tickets", keyColumn: "id" },
-  { name: "public.admin_issues", keyColumn: "id" },
-  { name: "public.notification_outbox", keyColumn: "id" },
-  { name: "public.notifications", keyColumn: "id" },
-  { name: "public.system_audit_logs", keyColumn: "id" },
-  { name: "public.admin_audit_logs", keyColumn: "id" },
-  { name: "public.trusted_devices", keyColumn: "id" },
-  { name: "public.user_policy_acceptances", keyColumn: "id" },
-
-  // 10. Partner structures
-  { name: "public.partner_members", keyColumn: "id" },
-  { name: "public.partner_accounts", keyColumn: "id" },
-
-  // 11. Profile & roles (Super Admin preservation enforced)
-  { name: "public.user_roles", keyColumn: "id", preserveSuperAdmin: true, userColumn: "user_id" },
-  { name: "public.profiles", keyColumn: "id", preserveSuperAdmin: true, userColumn: "id" }
+  // --------------------------------------------------------------------------
+  // Category 1: User / Profile / Customer (Parents last)
+  // --------------------------------------------------------------------------
+  { name: "public.user_verifications", keyColumn: "id" },
+  { name: "public.otp_verification_sessions", keyColumn: "id" },
+  { name: "public.account_deletion_requests", keyColumn: "id" },
+  { name: "public.staff_role_permissions", keyColumn: "id" },
+  { name: "public.admin_users", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" },
+  { name: "public.profiles", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" },
+  { name: "public.customers", keyColumn: "id" },
+  { name: "public.users", keyColumn: "id", preserveSuperAdmin: true, userColumn: "auth_user_id" }
 ];
 
 async function runReset() {
@@ -259,21 +289,6 @@ async function runReset() {
         console.error(`   ❌ Failed to delete from ${table.name}: ${deleteError.message}`);
       } else {
         console.log(`   ✅ Cleared ${targetedRows} rows from ${table.name}.`);
-      }
-    }
-
-    // 3. Perform Super Admin value resets if defined
-    if (isExecute && table.preserveSuperAdmin && table.resetColumn) {
-      console.log(`   🔄 Resetting ${table.name} values for Super Admin...`);
-      const { error: resetError } = await supabase
-        .from(tableNameWithoutSchema)
-        .update({ [table.resetColumn]: table.resetValue })
-        .eq(userColumn, superAdminId);
-        
-      if (resetError) {
-        console.warn(`   ⚠️ Warning: Failed to reset Super Admin row in ${table.name}: ${resetError.message}`);
-      } else {
-        console.log(`   ✅ Successfully reset ${table.name}.${table.resetColumn} to ${table.resetValue} for Super Admin.`);
       }
     }
   }
