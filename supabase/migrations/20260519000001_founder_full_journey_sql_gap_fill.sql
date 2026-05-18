@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 -- GEARBEAT PATCH 123A: FOUNDER FULL-JOURNEY SQL GAP FILL MIGRATION DRAFT
 -- ============================================================================
 -- Description: Additive migration draft establishing missing schema pathways
@@ -422,11 +422,11 @@ CREATE POLICY "Admin manage loyalty tiers" ON public.loyalty_tiers
 
 INSERT INTO public.loyalty_tiers (code, name_en, name_ar, min_points, earn_multiplier, sort_order, is_active)
 VALUES
-('listener', 'Listener', 'مستمع', 0, 1.0, 10, true),
-('creator', 'Creator', 'مبدع', 1000, 1.1, 20, true),
-('producer', 'Producer', 'منتج', 5000, 1.25, 30, true),
-('maestro', 'Maestro', 'مايسترو', 15000, 1.5, 40, true),
-('legend', 'Legend', 'أسطورة', 50000, 2.0, 50, true)
+('listener', 'Listener', 'Ù…Ø³ØªÙ…Ø¹', 0, 1.0, 10, true),
+('creator', 'Creator', 'Ù…Ø¨Ø¯Ø¹', 1000, 1.1, 20, true),
+('producer', 'Producer', 'Ù…Ù†ØªØ¬', 5000, 1.25, 30, true),
+('maestro', 'Maestro', 'Ù…Ø§ÙŠØ³ØªØ±Ùˆ', 15000, 1.5, 40, true),
+('legend', 'Legend', 'Ø£Ø³Ø·ÙˆØ±Ø©', 50000, 2.0, 50, true)
 ON CONFLICT (code) DO NOTHING;
 
 -- 2. Customer Wallets Table Definition
@@ -507,7 +507,7 @@ SELECT
     w.id AS wallet_id,
     w.auth_user_id,
     COALESCE(u.raw_user_meta_data->>'full_name', u.raw_user_meta_data->>'display_name', 'Guest Member') AS full_name,
-    u.email,
+    u.email::text AS email,
     w.membership_number,
     w.referral_code,
     w.tier_code,
