@@ -5,6 +5,6 @@
 --
 -- Reason:
 -- Supabase Preview runs supabase/seed.sql after migrations.
--- The old seed contained GENERATED ALWAYS AS expressions that can fail preview builds.
+-- The old seed contained generated-column expressions that can fail preview builds.
 -- Do not place schema DDL, generated columns, demo users, fake studios, fake rewards,
 -- or production-like seed data in this file.
