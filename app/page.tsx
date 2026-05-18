@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import T from "../components/t";
 import AskGearBeatPreview from "../components/ask-gearbeat-preview";
 
@@ -42,73 +41,23 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-visual">
-            {/* Premium Gold Glow Accents */}
-            <div className="ambient-glow glow-1"></div>
-            <div className="ambient-glow glow-2"></div>
+            <div className="ambient-glow"></div>
+            <div className="pulse-halo halo-1"></div>
+            <div className="pulse-halo halo-2"></div>
+            <div className="pulse-ring ring-1"></div>
+            <div className="pulse-ring ring-2"></div>
+            <div className="pulse-ring ring-3"></div>
             
-            {/* Rhythm Waves Background System */}
-            <div className="rhythm-waves">
-              <div className="rhythm-bar bar-1"></div>
-              <div className="rhythm-bar bar-2"></div>
-              <div className="rhythm-bar bar-3"></div>
-              <div className="rhythm-bar bar-4"></div>
-              <div className="rhythm-bar bar-5"></div>
-              <div className="rhythm-bar bar-6"></div>
-              <div className="rhythm-bar bar-7"></div>
-              <div className="rhythm-bar bar-8"></div>
-              <div className="rhythm-bar bar-9"></div>
-              <div className="rhythm-bar bar-10"></div>
-              <div className="rhythm-bar bar-11"></div>
-              <div className="rhythm-bar bar-12"></div>
-            </div>
-
-            {/* Premium Abstract Panel 1: Riyadh Studio Live Status */}
-            <div className="brand-panel panel-main animate-float-slow">
-              <div className="panel-glow"></div>
-              <div className="panel-header">
-                <span className="dot dot-green"></span>
-                <span className="panel-title"><T en="RIYADH STUDIO A" ar="استوديو الرياض A" /></span>
-                <span className="panel-status"><T en="LIVE" ar="مباشر" /></span>
-              </div>
-              <div className="panel-body">
-                {/* Embedded Soundwave Rhythm lines */}
-                <div className="frequency-display">
-                  <div className="freq-bar f-1"></div>
-                  <div className="freq-bar f-2"></div>
-                  <div className="freq-bar f-3"></div>
-                  <div className="freq-bar f-4"></div>
-                  <div className="freq-bar f-5"></div>
-                  <div className="freq-bar f-6"></div>
-                  <div className="freq-bar f-7"></div>
-                  <div className="freq-bar f-8"></div>
-                  <div className="freq-bar f-9"></div>
-                  <div className="freq-bar f-10"></div>
-                </div>
-                <div className="panel-metrics">
-                  <div>
-                    <span className="metric-label"><T en="Latency" ar="زمن الاستجابة" /></span>
-                    <span className="metric-val">1.2ms</span>
-                  </div>
-                  <div>
-                    <span className="metric-label"><T en="Resolution" ar="الدقة" /></span>
-                    <span className="metric-val">192kHz</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Abstract Panel 2: GearBeat Certified Onboarding */}
-            <div className="brand-panel panel-secondary animate-float-delayed">
-              <div className="panel-header">
-                <span className="text-gold font-bold" style={{ fontSize: '0.8rem' }}>🛡️ GearBeat Certified</span>
-              </div>
-              <div className="panel-body">
-                <p className="panel-desc">
-                  <T en="Verified Saudi partners with premium escrow protection." ar="شركاء سعوديون موثقون مع حماية كاملة للمدفوعات." />
-                </p>
-                <div className="gcc-badge-small">
-                  <span>🇸🇦 GCC ACTIVE</span>
-                </div>
+            <div className="abstract-orb">
+              <div className="orb-inner-glow"></div>
+              <div className="soundwave-container">
+                <div className="sw-line sw-1"></div>
+                <div className="sw-line sw-2"></div>
+                <div className="sw-line sw-3"></div>
+                <div className="sw-line sw-4"></div>
+                <div className="sw-line sw-5"></div>
+                <div className="sw-line sw-6"></div>
+                <div className="sw-line sw-7"></div>
               </div>
             </div>
           </div>
@@ -221,17 +170,29 @@ export default function HomePage() {
           <div className="grid grid-3 gap-32">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card-premium studio-preview-card hover-lift p-0 overflow-hidden">
-                <div className="studio-thumb-placeholder relative" style={{ height: 250 }}>
-                   <Image
-                     src="/brand/studio-placeholder.jpg"
-                     alt={`Global Sound Station ${i}`}
-                     fill
-                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                     style={{ objectFit: "cover" }}
-                   />
-                   <div className="absolute top-16 right-16" style={{ zIndex: 1 }}>
+                <div className="studio-thumb-placeholder relative" style={{ 
+                  height: 250, 
+                  background: 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, #080b10 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderBottom: '1px solid rgba(212, 175, 55, 0.15)'
+                }}>
+                  {/* Subtle CSS Abstract soundwave graphic inside placeholder */}
+                  <div className="abstract-card-visual" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}>
+                    <span style={{ width: 4, height: 24, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.4 }}></span>
+                    <span style={{ width: 4, height: 40, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.7 }}></span>
+                    <span style={{ width: 4, height: 64, background: 'var(--gb-gold)', borderRadius: 2, opacity: 1, filter: 'drop-shadow(0 0 8px var(--gb-gold))' }}></span>
+                    <span style={{ width: 4, height: 40, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.7 }}></span>
+                    <span style={{ width: 4, height: 24, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.4 }}></span>
+                  </div>
+                  <div className="absolute top-16 right-16" style={{ zIndex: 1 }}>
                      <span className="badge badge-gold">Certified</span>
-                   </div>
+                  </div>
                 </div>
                 <div style={{ padding: 24 }}>
                   <div className="flex-between mb-8">
@@ -277,51 +238,51 @@ export default function HomePage() {
         </div>
       </section>
  
-       {/* 5B. EXPERIENCES & TICKETING PREVIEW */}
-       <section className="section-padding bg-darker relative overflow-hidden">
-         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--gb-gold) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-         <div className="container relative z-10">
-           <div className="grid grid-2 items-center gap-60">
-             <div className="experience-content">
-               <div className="badge-gold mb-16"><T en="Live Access" ar="وصول مباشر" /></div>
-               <h2 className="text-balance" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', margin: '24px 0', lineHeight: 1.1 }}>
-                 <T en="Beyond the studio walls." ar="خلف جدران الاستوديو." />
-               </h2>
-               <p className="text-muted mb-40" style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
-                 <T 
-                   en="GearBeat Ticketing connects you to masterclasses, product launches, and exclusive studio sessions. Experience the industry, live."
-                   ar="تذاكر جيربيت تربطك بالدورات التدريبية المتقدمة، إطلاق المنتجات، وجلسات الاستوديو الحصرية. اختبر الصناعة، مباشرة."
-                 />
-               </p>
-               <div className="hero-actions">
-                 <Link href="/tickets" className="btn btn-primary btn-lg shadow-gold">
-                   <T en="Explore Hub" ar="استكشف المركز" />
-                 </Link>
-                 <Link href="/partner" className="btn btn-outline btn-lg">
-                   <T en="Host an Event" ar="استضف فعالية" />
-                 </Link>
-               </div>
-             </div>
-             <div className="experience-visual shadow-gold-lg" style={{ 
-               height: 400, 
-               background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)', 
-               borderRadius: 'var(--gb-radius-lg)', 
-               border: '1px solid rgba(212, 175, 55, 0.15)',
-               display: 'grid',
-               placeItems: 'center',
-               position: 'relative'
-             }}>
-               <div style={{ textAlign: 'center' }}>
-                 <span style={{ fontSize: '6rem', display: 'block', marginBottom: 24, filter: 'drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))' }}>🎫</span>
-                 <div className="badge badge-gold" style={{ padding: '10px 24px', fontSize: '0.8rem' }}>
-                   <T en="TICKETING HUB — COMING SOON" ar="مركز التذاكر — قريباً" />
-                 </div>
-               </div>
-               <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gold rounded-full blur-3xl opacity-10"></div>
-             </div>
-           </div>
-         </div>
-       </section>
+      {/* 5B. EXPERIENCES & TICKETING PREVIEW */}
+      <section className="section-padding bg-darker relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--gb-gold) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+        <div className="container relative z-10">
+          <div className="grid grid-2 items-center gap-60">
+            <div className="experience-content">
+              <div className="badge-gold mb-16"><T en="Live Access" ar="وصول مباشر" /></div>
+              <h2 className="text-balance" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', margin: '24px 0', lineHeight: 1.1 }}>
+                <T en="Beyond the studio walls." ar="خلف جدران الاستوديو." />
+              </h2>
+              <p className="text-muted mb-40" style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+                <T 
+                  en="GearBeat Ticketing connects you to masterclasses, product launches, and exclusive studio sessions. Experience the industry, live."
+                  ar="تذاكر جيربيت تربطك بالدورات التدريبية المتقدمة، إطلاق المنتجات، وجلسات الاستوديو الحصرية. اختبر الصناعة، مباشرة."
+                />
+              </p>
+              <div className="hero-actions">
+                <Link href="/tickets" className="btn btn-primary btn-lg shadow-gold">
+                  <T en="Explore Hub" ar="استكشف المركز" />
+                </Link>
+                <Link href="/partner" className="btn btn-outline btn-lg">
+                  <T en="Host an Event" ar="استضف فعالية" />
+                </Link>
+              </div>
+            </div>
+            <div className="experience-visual shadow-gold-lg" style={{ 
+              height: 400, 
+              background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)', 
+              borderRadius: 'var(--gb-radius-lg)', 
+              border: '1px solid rgba(212, 175, 55, 0.15)',
+              display: 'grid',
+              placeItems: 'center',
+              position: 'relative'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '6rem', display: 'block', marginBottom: 24, filter: 'drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))' }}>🎫</span>
+                <div className="badge badge-gold" style={{ padding: '10px 24px', fontSize: '0.8rem' }}>
+                  <T en="TICKETING HUB — COMING SOON" ar="مركز التذاكر — قريباً" />
+                </div>
+              </div>
+              <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gold rounded-full blur-3xl opacity-10"></div>
+            </div>
+          </div>
+        </div>
+      </section>
  
       <section className="section-padding final-cta text-center py-120">
         <div className="container animate-up">
@@ -342,24 +303,11 @@ export default function HomePage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .home-root { overflow-x: hidden; }
         
-        /* HERO - PREMIUM BRANDED BLACK/GOLD & SOUNDWAVE ACCENTS */
+        /* HERO */
         .hero-section {
           padding: 140px 0 100px;
-          background: linear-gradient(135deg, #040609 0%, #0c0f16 50%, #030507 100%);
+          background: radial-gradient(circle at 80% 20%, rgba(201, 162, 77, 0.08) 0%, transparent 40%);
           position: relative;
-          overflow: hidden;
-        }
-
-        /* Subtle horizontal grid lines for premium technical feel */
-        .hero-section::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background-image: linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
-          background-size: 50px 50px;
-          pointer-events: none;
-          z-index: 1;
         }
 
         .hero-container {
@@ -367,15 +315,12 @@ export default function HomePage() {
           grid-template-columns: 1.2fr 0.8fr;
           gap: 60px;
           align-items: center;
-          position: relative;
-          z-index: 2;
         }
 
         .hero-content h1 {
           font-size: clamp(2.5rem, 6vw, 4.8rem);
           margin: 24px 0;
           color: #fff;
-          text-shadow: 0 0 40px rgba(0,0,0,0.5);
         }
 
         .hero-content .lead {
@@ -389,270 +334,116 @@ export default function HomePage() {
 
         .hero-visual {
           position: relative;
-          height: 480px;
+          height: 450px;
           display: flex;
           justify-content: center;
           align-items: center;
-          perspective: 1200px;
+          perspective: 1000px;
         }
 
-        /* Royal Gold Glow Accents */
         .ambient-glow {
           position: absolute;
-          border-radius: 50%;
-          filter: blur(120px);
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+          filter: blur(80px);
           pointer-events: none;
-          opacity: 0.7;
-          z-index: 1;
         }
 
-        .glow-1 {
-          top: 10%;
-          right: 5%;
-          width: 380px;
-          height: 380px;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
-        }
-
-        .glow-2 {
-          bottom: 10%;
-          left: 5%;
-          width: 320px;
-          height: 320px;
-          background: radial-gradient(circle, rgba(15, 160, 138, 0.12) 0%, transparent 70%);
-        }
-
-        /* Rhythm / Soundwave Visual lines in Background */
-        .rhythm-waves {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          justify-content: center;
-          height: 200px;
-          width: 100%;
+        .pulse-halo {
           position: absolute;
-          z-index: 2;
-          opacity: 0.18;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+          animation: halo-pulse 6s infinite ease-in-out;
           pointer-events: none;
         }
+        .halo-1 { width: 500px; height: 500px; animation-delay: 0s; }
+        .halo-2 { width: 500px; height: 500px; animation-delay: -3s; }
 
-        .rhythm-bar {
-          width: 5px;
-          background: linear-gradient(to top, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.8) 50%, rgba(212, 175, 55, 0) 100%);
-          border-radius: 99px;
-          animation: rhythm-pulse 3s infinite ease-in-out;
+        @keyframes halo-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.1); opacity: 0.6; }
         }
 
-        .bar-1 { height: 60px; animation-delay: 0.1s; }
-        .bar-2 { height: 120px; animation-delay: 0.4s; }
-        .bar-3 { height: 80px; animation-delay: 0.2s; }
-        .bar-4 { height: 160px; animation-delay: 0.6s; }
-        .bar-5 { height: 100px; animation-delay: 0.3s; }
-        .bar-6 { height: 180px; animation-delay: 0.8s; }
-        .bar-7 { height: 140px; animation-delay: 0.5s; }
-        .bar-8 { height: 90px; animation-delay: 0.7s; }
-        .bar-9 { height: 150px; animation-delay: 0.15s; }
-        .bar-10 { height: 70px; animation-delay: 0.45s; }
-        .bar-11 { height: 110px; animation-delay: 0.25s; }
-        .bar-12 { height: 50px; animation-delay: 0.35s; }
-
-        @keyframes rhythm-pulse {
-          0%, 100% { transform: scaleY(0.5); opacity: 0.4; }
-          50% { transform: scaleY(1.1); opacity: 1; }
+        .pulse-ring {
+          position: absolute;
+          border: 2px solid rgba(212, 175, 55, 0.3);
+          border-radius: 50%;
+          animation: elegant-pulse 8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
+          box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
         }
 
-        /* Brand Panels (Abstract Glassmorphic Cards) */
-        .brand-panel {
-          background: rgba(15, 22, 33, 0.75);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1.5px solid rgba(212, 175, 55, 0.25);
-          border-radius: 20px;
+        .ring-1 { width: 300px; height: 300px; animation-delay: 0s; }
+        .ring-2 { width: 300px; height: 300px; animation-delay: -2.66s; }
+        .ring-3 { width: 300px; height: 300px; animation-delay: -5.33s; }
+
+        @keyframes elegant-pulse {
+          0% { transform: scale(0.8); opacity: 0; }
+          20% { opacity: 0.6; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .abstract-orb {
+          position: relative;
+          width: 280px;
+          height: 280px;
+          background: radial-gradient(circle at 30% 30%, #151c29 0%, #000 100%);
+          border: 2.5px solid rgba(212, 175, 55, 0.6);
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
           box-shadow: 
-            0 30px 60px rgba(0,0,0,0.8), 
-            0 0 30px rgba(212, 175, 55, 0.05), 
-            inset 0 0 20px rgba(255, 255, 255, 0.02);
-          z-index: 5;
-          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s;
-          padding: 24px;
-          position: absolute;
-        }
-
-        .brand-panel:hover {
-          border-color: rgba(212, 175, 55, 0.75);
-          transform: scale(1.03) translateY(-10px) !important;
+            0 0 60px rgba(0,0,0,0.9),
+            0 0 30px rgba(212, 175, 55, 0.2),
+            inset 0 0 40px rgba(212, 175, 55, 0.15);
           z-index: 10;
-          box-shadow: 0 45px 90px rgba(0,0,0,0.9), 0 0 40px rgba(212,175,55,0.25);
         }
 
-        .panel-main {
-          width: 330px;
-          height: auto;
-          top: 30px;
-          left: 8%;
-        }
-
-        .panel-secondary {
-          width: 260px;
-          height: auto;
-          bottom: 30px;
-          right: 5%;
-        }
-
-        .panel-glow {
+        .orb-inner-glow {
           position: absolute;
-          top: -20px;
-          left: -20px;
-          width: 100px;
-          height: 100px;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
-          pointer-events: none;
-          animation: panel-glow-drift 8s infinite ease-in-out;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
+          animation: orb-drift 12s infinite linear;
         }
 
-        @keyframes panel-glow-drift {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(30px, 30px); }
+        @keyframes orb-drift {
+          0% { transform: translate(-20%, -20%); }
+          50% { transform: translate(10%, 10%); }
+          100% { transform: translate(-20%, -20%); }
         }
 
-        .panel-header {
+        .soundwave-container {
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 10px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          padding-bottom: 12px;
+          gap: 14px;
+          width: 180px;
+          z-index: 20;
         }
 
-        .dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          display: inline-block;
-        }
-
-        .dot-green {
-          background: #0FA08A;
-          box-shadow: 0 0 12px #0FA08A;
-          animation: dot-pulse 1.8s infinite ease-in-out;
-        }
-
-        @keyframes dot-pulse {
-          0%, 100% { opacity: 0.5; transform: scale(0.9); }
-          50% { opacity: 1; transform: scale(1.15); }
-        }
-
-        .panel-title {
-          font-size: 0.75rem;
-          font-weight: 800;
-          color: var(--gb-text-muted);
-          letter-spacing: 1px;
-        }
-
-        .panel-status {
-          margin-inline-start: auto;
-          font-size: 0.65rem;
-          font-weight: 900;
-          color: #0FA08A;
-          background: rgba(15, 160, 138, 0.1);
-          padding: 3px 10px;
+        .sw-line {
+          height: 2.5px;
+          background: linear-gradient(to right, transparent, var(--gb-gold-light), transparent);
           border-radius: 4px;
+          animation: sw-horizontal-vibrate 1.5s infinite ease-in-out;
+          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
         }
 
-        /* Soundwave Frequency Display in panel */
-        .frequency-display {
-          display: flex;
-          align-items: flex-end;
-          gap: 6px;
-          height: 60px;
-          margin-bottom: 20px;
-          justify-content: center;
-          padding: 8px 12px;
-          background: rgba(0, 0, 0, 0.4);
-          border-radius: 12px;
-          border: 1px solid rgba(212, 175, 55, 0.08);
-        }
+        .sw-1 { width: 80px; animation-delay: 0s; opacity: 0.4; }
+        .sw-2 { width: 130px; animation-delay: 0.1s; opacity: 0.6; }
+        .sw-3 { width: 170px; animation-delay: 0.2s; opacity: 0.9; }
+        .sw-4 { width: 140px; animation-delay: 0.3s; opacity: 0.7; }
+        .sw-5 { width: 160px; animation-delay: 0.4s; opacity: 0.8; }
+        .sw-6 { width: 110px; animation-delay: 0.5s; opacity: 0.5; }
+        .sw-7 { width: 70px; animation-delay: 0.6s; opacity: 0.3; }
 
-        .freq-bar {
-          width: 5px;
-          height: 15px;
-          background: linear-gradient(to top, var(--gb-gold), var(--gb-gold-light));
-          border-radius: 3px;
-          animation: freq-pulse-bars 1.2s infinite ease-in-out;
-        }
-
-        .f-1 { height: 12px; animation-delay: 0.1s; }
-        .f-2 { height: 35px; animation-delay: 0.35s; }
-        .f-3 { height: 48px; animation-delay: 0.5s; }
-        .f-4 { height: 22px; animation-delay: 0.2s; }
-        .f-5 { height: 38px; animation-delay: 0.4s; }
-        .f-6 { height: 18px; animation-delay: 0.6s; }
-        .f-7 { height: 32px; animation-delay: 0.15s; }
-        .f-8 { height: 45px; animation-delay: 0.3s; }
-        .f-9 { height: 26px; animation-delay: 0.55s; }
-        .f-10 { height: 20px; animation-delay: 0.25s; }
-
-        @keyframes freq-pulse-bars {
-          0%, 100% { transform: scaleY(0.45); opacity: 0.65; }
-          50% { transform: scaleY(1.15); opacity: 1; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.7)); }
-        }
-
-        .panel-metrics {
-          display: flex;
-          justify-content: space-between;
-          gap: 16px;
-        }
-
-        .metric-label {
-          display: block;
-          font-size: 0.65rem;
-          color: var(--gb-text-muted);
-          text-transform: uppercase;
-        }
-
-        .metric-val {
-          font-size: 0.85rem;
-          font-weight: 800;
-          color: var(--gb-gold-light);
-        }
-
-        .panel-desc {
-          font-size: 0.8rem;
-          color: var(--gb-text-muted);
-          margin-bottom: 16px;
-          line-height: 1.5;
-        }
-
-        .gcc-badge-small {
-          display: inline-flex;
-          align-items: center;
-          font-size: 0.7rem;
-          font-weight: 900;
-          color: #fff;
-          background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(15, 160, 138, 0.15));
-          border: 1px solid rgba(212, 175, 55, 0.25);
-          padding: 4px 12px;
-          border-radius: 6px;
-          letter-spacing: 0.5px;
-        }
-
-        /* FLOAT FLOATING EFFECTS */
-        .animate-float-slow {
-          animation: float-slow-key 8s infinite ease-in-out;
-        }
-
-        .animate-float-delayed {
-          animation: float-delayed-key 8s infinite ease-in-out;
-        }
-
-        @keyframes float-slow-key {
-          0%, 100% { transform: translateY(0) rotate(-3deg); }
-          50% { transform: translateY(-16px) rotate(-1.5deg); }
-        }
-
-        @keyframes float-delayed-key {
-          0%, 100% { transform: translateY(0) rotate(5deg); }
-          50% { transform: translateY(16px) rotate(3.5deg); }
+        @keyframes sw-horizontal-vibrate {
+          0%, 100% { transform: scaleX(1); }
+          50% { transform: scaleX(1.2); }
         }
 
         /* PATH SECTION */
@@ -693,29 +484,8 @@ export default function HomePage() {
           .hero-container { grid-template-columns: 1fr; text-align: center; }
           .hero-content .lead { margin: 24px auto 48px; }
           .hero-actions { justify-content: center; }
-          .hero-visual { 
-            height: 260px; 
-            order: 2; /* Put visual second (secondary) */
-            margin-top: 30px; 
-            width: 100%;
-          }
-          .panel-main {
-            left: 50% !important;
-            top: 20px !important;
-            transform: translateX(-50%) rotate(0deg) !important;
-            width: 92% !important;
-            max-width: 320px !important;
-            animation: float-mobile-key 6s infinite ease-in-out;
-          }
-          .panel-secondary {
-            display: none !important; /* Keep mobile clean by hiding the second panel */
-          }
+          .hero-visual { height: 200px; order: -1; }
           .hero-section { padding-top: 80px; }
-
-          @keyframes float-mobile-key {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-10px); }
-          }
           .grid-2 { grid-template-columns: 1fr; }
           .section-head h2 { font-size: 2.2rem; }
           .final-cta h2 { font-size: 2.2rem; }
