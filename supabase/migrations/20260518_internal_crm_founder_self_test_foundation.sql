@@ -256,7 +256,6 @@ BEGIN
         CREATE POLICY "Admins can manage demo role mappings" ON public.demo_account_role_mappings
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -272,7 +271,6 @@ BEGIN
         CREATE POLICY "Admins can manage CRM pipelines" ON public.crm_pipelines
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -281,7 +279,6 @@ BEGIN
         CREATE POLICY "Admins can manage CRM stages" ON public.crm_stages
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -291,7 +288,6 @@ BEGIN
         CREATE POLICY "Admins can manage founder sessions" ON public.founder_test_sessions
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -307,7 +303,6 @@ BEGIN
         CREATE POLICY "Admins can manage issue assignments" ON public.admin_issue_assignments
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -316,7 +311,6 @@ BEGIN
         CREATE POLICY "Admins can manage issue comments" ON public.admin_issue_comments
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -325,7 +319,6 @@ BEGIN
         CREATE POLICY "Admins can manage issue history" ON public.admin_issue_history
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -335,7 +328,6 @@ BEGIN
         CREATE POLICY "Admins can manage manual operation approvals" ON public.manual_operation_approvals
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -344,7 +336,6 @@ BEGIN
         CREATE POLICY "Admins can manage manual operation impacts" ON public.manual_operation_impacts
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -354,7 +345,6 @@ BEGIN
         CREATE POLICY "Admins can manage CRM status history" ON public.crm_status_history
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -363,7 +353,6 @@ BEGIN
         CREATE POLICY "Admins can manage CRM note revisions" ON public.crm_note_revisions
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;
@@ -372,7 +361,6 @@ BEGIN
         CREATE POLICY "Admins can manage CRM task history" ON public.crm_task_history
         FOR ALL TO authenticated
         USING (
-            EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') OR
             EXISTS (SELECT 1 FROM public.admin_users WHERE auth_user_id = auth.uid() AND status = 'active')
         );
     END IF;

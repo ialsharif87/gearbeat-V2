@@ -123,7 +123,7 @@ CREATE INDEX IF NOT EXISTS idx_crm_activity_log_account ON public.crm_activity_l
 -- 1. Service Listings
 CREATE TABLE IF NOT EXISTS public.service_listings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    provider_profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    provider_profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
     title text NOT NULL,
     description text,
     price numeric(10,2) NOT NULL DEFAULT 0.00 CHECK (price >= 0.00),
@@ -141,7 +141,7 @@ CREATE INDEX IF NOT EXISTS idx_service_listings_status ON public.service_listing
 CREATE TABLE IF NOT EXISTS public.service_bookings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     service_listing_id uuid REFERENCES public.service_listings(id) ON DELETE CASCADE,
-    customer_profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    customer_profile_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     booking_time timestamptz NOT NULL,
     notes text,
     price_paid numeric(10,2) NOT NULL DEFAULT 0.00 CHECK (price_paid >= 0.00),
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS public.events (
     location text,
     start_time timestamptz NOT NULL,
     end_time timestamptz NOT NULL,
-    organizer_profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    organizer_profile_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     status text NOT NULL DEFAULT 'draft'
@@ -198,7 +198,7 @@ CREATE INDEX IF NOT EXISTS idx_ticket_types_event ON public.ticket_types(event_i
 CREATE TABLE IF NOT EXISTS public.ticket_orders (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id uuid REFERENCES public.events(id) ON DELETE CASCADE,
-    buyer_profile_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+    buyer_profile_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     total_price numeric(10,2) NOT NULL DEFAULT 0.00 CHECK (total_price >= 0.00),
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -230,7 +230,7 @@ CREATE INDEX IF NOT EXISTS idx_ticket_order_items_type ON public.ticket_order_it
 -- 1. Academy Instructors
 CREATE TABLE IF NOT EXISTS public.academy_instructors (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE,
+    profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
     bio text,
     specialties text[],
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -263,7 +263,7 @@ CREATE INDEX IF NOT EXISTS idx_academy_lessons_status ON public.academy_lessons(
 CREATE TABLE IF NOT EXISTS public.academy_bookings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     lesson_id uuid REFERENCES public.academy_lessons(id) ON DELETE CASCADE,
-    student_profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    student_profile_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
     booking_time timestamptz NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
