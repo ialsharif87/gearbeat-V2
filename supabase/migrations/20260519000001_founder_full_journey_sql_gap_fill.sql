@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- GEARBEAT PATCH 123A: FOUNDER FULL-JOURNEY SQL GAP FILL MIGRATION DRAFT
 -- ============================================================================
 -- Description: Additive migration draft establishing missing schema pathways
