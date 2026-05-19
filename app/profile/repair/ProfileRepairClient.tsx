@@ -16,12 +16,13 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
   const [user, setUser] = useState<any>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<"customer" | "owner">("customer");
+  const [role, setRole] = useState<"customer" | "owner" | null>(null);
   const [countryCode, setCountryCode] = useState("SA");
   const [phoneE164, setPhoneE164] = useState("");
   
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsSupport, setNeedsSupport] = useState(false);
 
   useEffect(() => {
     async function checkSessionAndProfile() {
@@ -47,13 +48,19 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
           return;
         }
 
+        // Infer original signup intent from auth metadata
+        const rawRole = user.user_metadata?.role;
+        if (rawRole === "customer" || rawRole === "user") {
+          setRole("customer");
+        } else if (rawRole === "owner" || rawRole === "studio_owner") {
+          setRole("owner");
+        } else {
+          setNeedsSupport(true);
+        }
+
         // Prepopulate from auth metadata if available
         if (user.user_metadata?.full_name) {
           setFullName(user.user_metadata.full_name);
-        }
-        if (user.user_metadata?.role) {
-          const rawRole = user.user_metadata.role;
-          setRole(rawRole === "studio_owner" ? "owner" : rawRole === "owner" ? "owner" : "customer");
         }
       } catch (err) {
         console.error("Error checking session/profile:", err);
@@ -71,6 +78,9 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
     setSubmitting(true);
 
     try {
+      if (!role) {
+        throw new Error("Unable to verify account type. Support review required.");
+      }
       if (!fullName || fullName.length < 2) {
         throw new Error("Full name is required.");
       }
@@ -173,59 +183,85 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
 
           {error && <div className="error-box">{error}</div>}
 
-          <form onSubmit={handleRepair} className="form">
-            <div className="field">
-              <label><T en="Full Name" ar="الاسم الكامل" /></label>
-              <input
-                className="gb-input"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Abdullah Ahmed"
-                required
-                minLength={2}
-              />
-            </div>
-
-            <div className="field">
-              <label><T en="Email" ar="البريد الإلكتروني" /></label>
-              <input
-                className="gb-input"
-                type="email"
-                value={user?.email || ""}
-                disabled
-                readOnly
-              />
-            </div>
-
-            <CountryPhoneFields
-              countries={countries}
-              defaultCountryCode="SA"
-              countryName="country_code"
-              phoneLocalName="phone_local"
-              phoneE164Name="phone_e164"
-              onCountryChange={(val) => setCountryCode(val)}
-              onPhoneE164Change={(val) => setPhoneE164(val)}
-            />
-
-            <div className="field">
-              <label><T en="Account Type" ar="نوع الحساب" /></label>
-              <select
-                className="gb-input"
-                value={role}
-                onChange={(e) => setRole(e.target.value as "customer" | "owner")}
+          {needsSupport ? (
+            <div className="support-flow animate-fade-in">
+              <div className="support-step" style={{ textAlign: "center", padding: "12px 0" }}>
+                <div className="s-icon" style={{ fontSize: "2.5rem", marginBottom: 16 }}>⚠️</div>
+                <h3 style={{ fontSize: "1.25rem", color: "#fff", margin: "0 0 12px", fontWeight: 800 }}>
+                  <T en="Support Review Required" ar="مراجعة الدعم مطلوبة" />
+                </h3>
+                <p style={{ color: "#888", fontSize: "0.95rem", lineHeight: 1.6, margin: "0 0 24px" }}>
+                  <T 
+                    en="Your account configuration could not be verified automatically. Please contact support to complete your setup."
+                    ar="تعذر التحقق من تهيئة حسابك تلقائياً. يرجى الاتصال بالدعم لإكمال إعداد حسابك."
+                  />
+                </p>
+              </div>
+              <button 
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  router.replace("/login");
+                }}
+                className="gb-button"
+                style={{ width: "100%" }}
               >
-                <option value="customer">Customer / عميل (للحجز)</option>
-                <option value="owner">Studio Owner / صاحب استوديو (للشركاء)</option>
-              </select>
+                <T en="Sign Out" ar="تسجيل الخروج" />
+              </button>
             </div>
+          ) : (
+            <form onSubmit={handleRepair} className="form">
+              <div className="field">
+                <label><T en="Full Name" ar="الاسم الكامل" /></label>
+                <input
+                  className="gb-input"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. Abdullah Ahmed"
+                  required
+                  minLength={2}
+                />
+              </div>
 
-            <button type="submit" disabled={submitting} className="gb-button">
-              {submitting ? <T en="Activating Account..." ar="جاري تفعيل الحساب..." /> : (
-                <T en="Complete Setup & Enter Dashboard" ar="إكمال الإعداد ودخول لوحة التحكم" />
-              )}
-            </button>
-          </form>
+              <div className="field">
+                <label><T en="Email" ar="البريد الإلكتروني" /></label>
+                <input
+                  className="gb-input"
+                  type="email"
+                  value={user?.email || ""}
+                  disabled
+                  readOnly
+                />
+              </div>
+
+              <CountryPhoneFields
+                countries={countries}
+                defaultCountryCode="SA"
+                countryName="country_code"
+                phoneLocalName="phone_local"
+                phoneE164Name="phone_e164"
+                onCountryChange={(val) => setCountryCode(val)}
+                onPhoneE164Change={(val) => setPhoneE164(val)}
+              />
+
+              <div className="field">
+                <label><T en="Account Type" ar="نوع الحساب" /></label>
+                <div className="gb-input-readonly">
+                  {role === "owner" ? (
+                    <T en="Studio Partner / صاحب استوديو" ar="شريك استوديو / Studio Partner" />
+                  ) : (
+                    <T en="Customer / عميل" ar="عميل / Customer" />
+                  )}
+                </div>
+              </div>
+
+              <button type="submit" disabled={submitting} className="gb-button">
+                {submitting ? <T en="Activating Account..." ar="جاري تفعيل الحساب..." /> : (
+                  <T en="Complete Setup & Enter Dashboard" ar="إكمال الإعداد ودخول لوحة التحكم" />
+                )}
+              </button>
+            </form>
+          )}
         </div>
       </div>
 
@@ -295,6 +331,17 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
           outline: none;
           box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
         }
+        .gb-input-readonly {
+          padding: 12px 16px;
+          background: rgba(212, 175, 55, 0.05);
+          border: 1px solid rgba(212, 175, 55, 0.15);
+          color: #D4AF37;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+        }
         .gb-button {
           background: #D4AF37;
           color: #000;
@@ -338,6 +385,13 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
           background: rgba(212, 175, 55, 0.1);
           color: #D4AF37;
           border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         
         /* RTL support */
