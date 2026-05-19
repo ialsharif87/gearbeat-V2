@@ -74,7 +74,7 @@ async function getProtectedContext(loginPath: string) {
 
 function requireActiveProfile(profile: ProfileRow | null, loginPath: string) {
   if (!profile) {
-    redirect(loginPath);
+    redirect("/profile/repair");
   }
 
   if (profile.account_status === "deleted") {

@@ -11,12 +11,12 @@ import CountryPhoneFields from "@/components/country-phone-fields";
 import { isValidE164 } from "@/lib/phone";
 import { CountryOption } from "@/lib/countries";
 
-export default function SignupClient({ countries }: { countries: CountryOption[] }) {
+export default function StudioOwnerSignupClient({ countries }: { countries: CountryOption[] }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const role = "customer";
+  const role = "owner"; // Hardcoded to owner (canonical DB role for studio_owner)
   const [countryCode, setCountryCode] = useState("SA");
   const [phoneE164, setPhoneE164] = useState("");
   
@@ -70,12 +70,11 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Error("Valid email is required.");
     }
-    const selectedCountry = countries.find(c => c.country_code === countryCode);
-    if (!selectedCountry) {
-      throw new Error("Selected country is invalid.");
-    }
     if (!phoneE164 || !isValidE164(phoneE164)) {
-      throw new Error("Phone number is invalid.");
+      throw new Error("Valid phone number is required.");
+    }
+    if (!isPasswordValid) {
+      throw new Error("Password does not meet requirements.");
     }
   };
 
@@ -87,9 +86,6 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     try {
       validateCommonFields();
 
-      if (!isPasswordValid) {
-        throw new Error("Password does not meet the strength requirements.");
-      }
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match.");
       }
@@ -146,7 +142,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         country_code: countryCode,
         phone_e164: phoneE164,
         role: role,
-        account_status: "active",
+        account_status: "pending", // Studio owners start as pending review or first-login
         preferred_currency: selectedCountry.currency_code,
         preferred_language: "ar",
         updated_at: new Date().toISOString(),
@@ -164,42 +160,48 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         <div className="auth-card">
           <div className="auth-header">
             <h1>
-              <T en="Join GearBeat" ar="انضم إلى GearBeat" />
+              <T en="Join as a Studio Partner" ar="انضم كشريك استوديو" />
             </h1>
             <p>
               {step === "request" ? (
-                <T en="Create your account with email and password" ar="أنشئ حسابك بالبريد وكلمة المرور" />
+                <T 
+                  en="Create an account to list and manage your music studios" 
+                  ar="أنشئ حسابك لإدراج وإدارة استوديوهاتك الموسيقية" 
+                />
               ) : (
-                <T en="Complete Verification" ar="أكمل التحقق" />
+                <T en="Verify your account" ar="التحقق من حسابك" />
               )}
             </p>
           </div>
 
-          {error && <div className="auth-error">{error}</div>}
+          {error && <div className="error-box animate-shake">{error}</div>}
 
           {step === "request" ? (
-            <form onSubmit={handleSignup} className="auth-form">
+            <form onSubmit={handleSignup} className="form">
               <div className="field">
                 <label><T en="Full Name" ar="الاسم الكامل" /></label>
                 <input
+                  className="gb-input"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Your full name"
+                  placeholder="e.g. Abdullah Ahmed"
                   required
-                  className="gb-input"
+                  minLength={2}
+                  autoComplete="name"
                 />
               </div>
 
               <div className="field">
-                <label><T en="Email" ar="البريد الإلكتروني" /></label>
+                <label><T en="Business Email" ar="البريد الإلكتروني للعمل" /></label>
                 <input
+                  className="gb-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@example.com"
+                  placeholder="name@studio.com"
                   required
-                  className="gb-input"
+                  autoComplete="email"
                 />
               </div>
 
@@ -263,7 +265,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
 
               <button type="submit" disabled={loading || !isPasswordValid} className="gb-button">
                 {loading ? <T en="Creating Account..." ar="جاري إنشاء الحساب..." /> : (
-                  <T en="Create Account" ar="إنشاء الحساب" />
+                  <T en="Register as Partner" ar="التسجيل كشريك" />
                 )}
               </button>
             </form>
@@ -274,8 +276,8 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                 <h3><T en="Verify Email" ar="التحقق من البريد" /></h3>
                 <p>
                   <T 
-                    en={`We've sent a confirmation link to ${email}. Please check your inbox (and spam) and click the link to activate your account.`}
-                    ar={`لقد أرسلنا رابط تأكيد إلى ${email}. يرجى التحقق من بريدك (والمهملات) والنقر على الرابط لتفعيل حسابك.`}
+                    en={`We've sent a confirmation link to ${email}. Please check your inbox (and spam) and click the link to activate your partner account.`}
+                    ar={`لقد أرسلنا رابط تأكيد إلى ${email}. يرجى التحقق من بريدك (والمهملات) والنقر على الرابط لتفعيل حساب الشريك الخاص بك.`}
                   />
                 </p>
               </div>
@@ -297,20 +299,20 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
               </div>
 
               <div style={{ marginTop: 32 }}>
-                <Link href="/login" className="gb-button w-full" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
-                  <T en="Go to Login" ar="الذهاب لتسجيل الدخول" />
+                <Link href="/portal/login" className="gb-button w-full" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+                  <T en="Go to Partner Login" ar="الذهاب لتسجيل دخول الشركاء" />
                 </Link>
               </div>
             </div>
           )}
 
           <div className="auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-            <Link href="/login">
-              <T en="Already have an account? Login" ar="لديك حساب بالفعل؟ سجل دخولك" />
+            <Link href="/portal/login">
+              <T en="Already have a partner account? Login" ar="لديك حساب شريك بالفعل؟ سجل دخولك" />
             </Link>
             <div style={{ fontSize: '0.9rem', borderTop: '1px solid var(--gb-border)', width: '100%', paddingTop: 12, textAlign: 'center' }}>
-              <Link href="/studio-owner/signup" style={{ color: '#D4AF37' }}>
-                <T en="Are you a studio owner? Join as a Studio Partner" ar="هل أنت صاحب استوديو؟ انضم كشريك استوديو" />
+              <Link href="/signup" style={{ color: '#D4AF37' }}>
+                <T en="Looking to book studios? Create a customer account" ar="تبحث عن حجز استوديو؟ أنشئ حساب عميل" />
               </Link>
             </div>
           </div>
@@ -350,61 +352,107 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           color: var(--gb-text-muted);
           font-size: 0.95rem;
         }
-        .auth-form {
-          display: grid;
+        .form {
+          display: flex;
+          flex-direction: column;
           gap: 20px;
         }
         .field {
-          display: grid;
+          display: flex;
+          flex-direction: column;
           gap: 8px;
         }
         .field label {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--gb-text-muted);
+        }
+        .gb-input {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--gb-border);
+          color: #fff;
+          padding: 12px 16px;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          transition: all 0.2s;
+        }
+        .gb-input:focus {
+          border-color: #D4AF37;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+        .gb-button {
+          background: #D4AF37;
+          color: #000;
+          padding: 14px;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 1rem;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .gb-button:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        .gb-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .error-box {
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          color: #ef4444;
+          padding: 12px;
+          border-radius: 12px;
+          font-size: 0.9rem;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .password-checklist {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--gb-border);
+          padding: 12px 16px;
+          border-radius: 12px;
+          margin-top: 8px;
+        }
+        .checklist-title {
           font-size: 0.8rem;
           font-weight: 700;
           color: var(--gb-text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
+          margin: 0 0 8px;
         }
-        .gb-input {
-          padding: 12px 16px;
-          background: rgba(0,0,0,0.3);
-          border: 1px solid var(--gb-border);
-          border-radius: 12px;
-          color: #fff;
-          font-size: 1rem;
-          transition: border-color 0.2s;
-          width: 100%;
+        .password-checklist ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
         }
-        .gb-input:focus {
-          outline: none;
-          border-color: var(--gb-gold);
+        .password-checklist li {
+          font-size: 0.75rem;
+          color: #555;
+          display: flex;
+          align-items: flex-start;
+          gap: 6px;
         }
-
-        .gb-button {
-          width: 100%;
-          padding: 14px;
-          background: linear-gradient(135deg, var(--gb-gold-light), var(--gb-gold));
-          color: #000;
-          border: none;
-          border-radius: 12px;
-          font-size: 1rem;
-          font-weight: 800;
-          cursor: pointer;
-          transition: opacity 0.2s;
+        .password-checklist li.valid {
+          color: #22c55e;
         }
-        .gb-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
+        .sub-list {
+          padding-inline-start: 14px !important;
+          margin-top: 4px !important;
+          gap: 4px !important;
         }
-        .auth-error {
-          padding: 12px;
-          background: rgba(255, 77, 77, 0.1);
-          border: 1px solid #ff4d4d;
-          border-radius: 12px;
-          color: #ff4d4d;
-          font-size: 0.85rem;
-          margin-bottom: 24px;
-          text-align: center;
+        .sub-list li {
+          color: #666 !important;
+          list-style-type: disc !important;
+          display: list-item !important;
         }
         .auth-footer {
           margin-top: 24px;
@@ -412,90 +460,79 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           font-size: 0.9rem;
         }
         .auth-footer a {
-          color: var(--gb-gold);
+          color: var(--gb-text-muted);
           text-decoration: none;
+          transition: color 0.2s;
         }
-        .verification-flow {
-          display: grid;
-          gap: 32px;
-          text-align: center;
-        }
-        .verification-step h3 {
-          font-size: 1.25rem;
-          margin: 12px 0 8px;
+        .auth-footer a:hover {
           color: #fff;
         }
-        .verification-step p {
-          font-size: 0.9rem;
-          color: var(--gb-text-muted);
-          line-height: 1.6;
+        .verification-flow {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          padding: 10px 0;
+        }
+        .verification-step {
+          text-align: center;
         }
         .v-icon {
           font-size: 2.5rem;
+          margin-bottom: 12px;
+        }
+        .verification-step h3 {
+          font-size: 1.2rem;
+          color: #fff;
+          margin: 0 0 8px;
+        }
+        .verification-step p {
+          color: var(--gb-text-muted);
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin: 0;
         }
         .v-divider {
           height: 1px;
           background: var(--gb-border);
-          opacity: 0.5;
+        }
+        .badge {
+          display: inline-block;
+          padding: 4px 8px;
+          border-radius: 99px;
+          font-weight: 700;
+        }
+        .badge-gold {
+          background: rgba(212, 175, 55, 0.1);
+          color: #D4AF37;
+          border: 1px solid rgba(212, 175, 55, 0.2);
+          margin-top: 8px;
         }
         .w-full {
           width: 100%;
         }
-        .animate-fade-in {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
         
-        .password-checklist {
-          margin-top: 12px;
-          padding: 16px;
-          background: rgba(255,255,255,0.02);
-          border: 1px solid var(--gb-border);
-          border-radius: 12px;
-        }
-        .checklist-title {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: var(--gb-gold);
-          margin-bottom: 8px;
-        }
-        .password-checklist ul {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: grid;
-          gap: 6px;
-        }
-        .password-checklist li {
-          font-size: 0.8rem;
-          color: var(--gb-text-muted);
-          transition: color 0.2s;
-        }
-        .password-checklist li.valid {
-          color: #22c55e;
-          font-weight: 600;
-        }
-        .sub-list {
-          margin-top: 4px !important;
-          margin-left: 20px !important;
-          opacity: 0.8;
-          font-size: 0.75rem !important;
-        }
-        [dir="rtl"] .sub-list {
-          margin-left: 0 !important;
-          margin-right: 20px !important;
-        }
+        /* Animations */
         .animate-up {
-          animation: slideUp 0.3s ease-out;
+          animation: slideUp 0.2s ease-out forwards;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
         }
         @keyframes slideUp {
-          from { opacity: 0; transform: translateY(5px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { transform: translateY(4px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
-      `,
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        /* RTL support */
+        :global(html[dir="rtl"]) .auth-page {
+          text-align: right;
+          direction: rtl;
+        }
+      `
         }}
       />
     </section>

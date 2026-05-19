@@ -91,7 +91,7 @@ function getDashboardPath({
   if (isVendor) return "/portal/store";
   if (profile?.role === "owner" || profile?.role === "studio_owner") return "/portal/studio";
   if (profile?.role === "customer") return "/customer";
-  return "/login";
+  return "/profile/repair";
 }
 
 export default async function RootLayout({
@@ -146,6 +146,12 @@ export default async function RootLayout({
     redirect("/login");
   }
 
+  const userInitials = profile?.full_name 
+    ? profile.full_name.trim().charAt(0).toUpperCase()
+    : user?.email 
+      ? user.email.trim().charAt(0).toUpperCase()
+      : "U";
+
   const dashboardPath = user ? getDashboardPath({ profile, adminUser, isVendor }) : "/login";
   const isAdmin = Boolean(adminUser);
   const userRole = profile?.role || null;
@@ -188,6 +194,7 @@ export default async function RootLayout({
             userRole={userRole}
             dashboardPath={dashboardPath}
             logoutAction={logout}
+            userInitials={userInitials}
           >
             <main className="main">{children}
         <SpeedInsights /></main>
