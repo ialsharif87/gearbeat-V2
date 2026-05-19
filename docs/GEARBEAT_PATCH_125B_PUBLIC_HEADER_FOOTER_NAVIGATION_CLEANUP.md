@@ -24,20 +24,18 @@ The following changes were made to the primary header links to focus on core, pr
 
 ## 2. Footer Navigation Cleanups
 
-Unfinished verticals were disabled as active navigation links in the footer and replaced with styled, non-clickable placeholders to represent upcoming capabilities without risking routing errors.
+Unfinished verticals and active partner registration entrypoints were disabled as active navigation links in the footer and replaced with styled, non-clickable placeholders to represent upcoming capabilities without risking routing errors.
 
 * **Disabled / Non-Clickable Footer Items (Coming Soon):**
   - **Book Services** -> *Book Services (Coming Soon) / احجز خدمات (قريباً)*
   - **Join Academy** -> *Join Academy (Coming Soon) / انضم للأكاديمية (قريباً)*
   - **Explore Experiences** -> *Explore Experiences (Coming Soon) / استكشف التجارب (قريباً)*
-  - **Become a Partner** -> *Become a Partner (Coming Soon) / انضم كشريك (قريباً)*
+  - **Partner Programs** -> *Partner Programs (Coming Soon) / برامج الشركاء (قريباً)* (replacing all active links for `/join/studio`, `/join/seller`, and `/partner`)
 
 * **Remaining Active Footer Items:**
   - **Book a Studio** (`/studios`)
   - **Shop Gear** (`/marketplace`)
   - **How it Works** (`/how-it-works`)
-  - **Become a Studio Partner** (`/join/studio` -> links to `/studio-owner/signup`)
-  - **Become a Vendor Partner** (`/join/seller`)
   - **Operations Support** (`/support`)
   - All **Legal & Trust** links (Terms, Privacy, Policies, Certified)
 
@@ -45,7 +43,7 @@ Unfinished verticals were disabled as active navigation links in the footer and 
 
 ## 3. Boundary & Scope Confirmation
 
-* **No Page Deletion:** No route directories, page components, or assets were deleted or modified. The pages `/academy`, `/tickets`, `/services`, `/partner` remain intact and functional for future release work.
+* **No Page Deletion:** No route directories, page components, or assets were deleted or modified. The pages `/academy`, `/tickets`, `/services`, `/partner`, `/join/studio`, and `/join/seller` remain intact and functional for administrative or future release use.
 * **No Database/Backend Changes:** No changes were made to SQL migrations, database tables, or Supabase configurations.
 * **No Auth/Payment Changes:** Authentication middleware, role routing logic, security guards, and payment/checkout subsystems were entirely untouched.
 
