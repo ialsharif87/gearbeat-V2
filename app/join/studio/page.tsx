@@ -1,396 +1,309 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
-import { createNotification } from "@/lib/notifications";
-
-import { CountryOption } from "@/lib/countries";
-import { CityOption } from "@/lib/locations";
 
 export default function JoinStudioPage() {
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-
-  // Data State
-  const [countries, setCountries] = useState<CountryOption[]>([]);
-  const [cities, setCities] = useState<CityOption[]>([]);
-  const [fetchingData, setFetchingData] = useState(true);
-
-  // Form State
-  const [fullName, setFullName] = useState("");
-  const [phoneCode, setPhoneCode] = useState("+966");
-  const [mobile, setMobile] = useState("");
-  const [email, setEmail] = useState("");
-  const [companyNameAr, setCompanyNameAr] = useState("");
-  const [companyNameEn, setCompanyNameEn] = useState("");
-  const [commercialRegistration, setCommercialRegistration] = useState("");
-  const [vatNumber, setVatNumber] = useState("");
-  const [country, setCountry] = useState("SA");
-  const [city, setCity] = useState("");
-  const [plannedStudios, setPlannedStudios] = useState("1");
-  const [aboutCompany, setAboutCompany] = useState("");
-  const [termsAccepted, setTermsAccepted] = useState(false);
-
-  // Fetch Countries
-  useEffect(() => {
-    async function fetchCountries() {
-      try {
-        const res = await fetch("/api/countries");
-        if (!res.ok) throw new Error("Failed to load countries");
-        const data = await res.json();
-        setCountries(data);
-        
-        // Update phone code if SA exists
-        const sa = data.find((c: CountryOption) => c.country_code === "SA");
-        if (sa) setPhoneCode(sa.phone_code);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setFetchingData(false);
-      }
-    }
-    fetchCountries();
-  }, []);
-
-  // Fetch Cities when country changes
-  useEffect(() => {
-    if (!country) {
-      setCities([]);
-      return;
-    }
-
-    async function fetchCities() {
-      try {
-        const res = await fetch(`/api/cities?country=${country}`);
-        if (!res.ok) throw new Error("Failed to load cities");
-        const data = await res.json();
-        setCities(data);
-      } catch (err) {
-        console.error(err);
-        setCities([]);
-      }
-    }
-    fetchCities();
-  }, [country]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    
-    if (!termsAccepted) return;
-
-    // Validate VAT Number (15 digits for Saudi Arabia)
-    if (country === "SA" && (vatNumber.length !== 15 || !/^\d+$/.test(vatNumber))) {
-      setError("VAT Number must be exactly 15 digits for Saudi Arabia.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Step 2: Insert into DB
-      const supabase = createClient();
-      const fullMobile = `${phoneCode}${mobile}`;
-      
-      const { error: insertError } = await supabase.from("studio_applications").insert({
-        full_name: fullName,
-        email,
-        phone: fullMobile,
-        company_name_ar: companyNameAr,
-        company_name_en: companyNameEn,
-        commercial_registration: commercialRegistration,
-        vat_number: vatNumber,
-        vat_certificate_url: null,
-        cr_document_url: null,
-        national_address_url: null,
-        bank_document_url: null,
-        country: countries.find(c => c.country_code === country)?.name_en || country,
-        city: cities.find(c => c.id === city)?.name_en || city,
-        planned_studios_count: parseInt(plannedStudios),
-        about_company: aboutCompany,
-        terms_accepted: termsAccepted,
-        terms_accepted_at: new Date().toISOString(),
-        status: "pending",
-        submitted_at: new Date().toISOString(),
-      });
-
-      if (insertError) throw new Error("Database submission failed: " + insertError.message);
-
-      // Step 3: Notify Admin
-      try {
-        await createNotification(supabase, {
-          audience: "admin",
-          title: `New Studio Application: ${companyNameEn}`,
-          body: `${fullName} has applied for ${companyNameEn}.`,
-          actionUrl: `/admin/leads`, // Redirect to leads list or specific lead detail if we have ID
-          entityType: "studio_application",
-          metadata: {
-            email: email,
-            company: companyNameEn
-          }
-        });
-      } catch (notifyErr) {
-        console.warn("Notification failed, but application was saved.", notifyErr);
-      }
-
-      setSuccess(true);
-    } catch (err: any) {
-      console.error("Submission Error:", err);
-      setError(err.message || "Failed to submit application. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (success) {
-    return (
-      <main style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-        <div style={{ maxWidth: 640, width: "100%", background: "#111", borderRadius: 24, border: "1px solid #1e1e1e", padding: 60, textAlign: "center" }}>
-          <div style={{ fontSize: "3rem", color: "#D4AF37", marginBottom: 24 }}>✓</div>
-          <h1 style={{ fontSize: "2rem", marginBottom: 16 }}>
-            <T en="Application Submitted!" ar="تم إرسال طلبك!" />
+  return (
+    <main className="landing-page">
+      {/* Hero Section */}
+      <section className="hero-section animate-fade-in">
+        <div className="hero-content">
+          <div className="brand-tag">GearBeat</div>
+          <div className="badge badge-gold">
+            <T en="Studio Partner Program" ar="برنامج شركاء الاستوديوهات" />
+          </div>
+          <h1>
+            <T en="Elevate Your Studio Business" ar="ارتقِ بأعمال استوديو الصوت الخاص بك" />
           </h1>
-          <p style={{ color: "#888", fontSize: "1.1rem", marginBottom: 40, lineHeight: 1.6 }}>
-            <T en="We will review your company details and contact you within 2 business days." ar="سنراجع بيانات شركتك ونتواصل معك خلال يومي عمل." />
+          <p className="hero-desc">
+            <T 
+              en="Join the region's premium music and audio marketplace. List your rooms, control your schedule, and connect with thousands of artists and creators." 
+              ar="انضم إلى منصة استوديوهات الصوت والموسيقى الفاخرة في المنطقة. اعرض غرفك، وتحكم بجدول حوزاتك، وتواصل مع آلاف الفنانين والمبدعين." 
+            />
           </p>
-          <Link href="/" className="btn btn-primary" style={{ height: 54, fontSize: "1.1rem", fontWeight: 700, padding: "0 40px" }}>
-            <T en="Back to Home" ar="العودة للرئيسية" />
+          <div className="hero-actions">
+            <Link href="/studio-owner/signup" className="gb-button btn-large">
+              <T en="Register as a Partner" ar="التسجيل كشريك استوديو" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="features-section">
+        <div className="section-header">
+          <h2>
+            <T en="Why Partner with GearBeat?" ar="لماذا تنضم كشريك في GearBeat؟" />
+          </h2>
+          <p>
+            <T en="Everything you need to scale your recording and production space." ar="كل ما تحتاجه لتوسيع نطاق أعمال التسجيل والإنتاج الصوتي الخاصة بك." />
+          </p>
+        </div>
+
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">📅</div>
+            <h3><T en="Automated Booking Management" ar="إدارة حجوزات مؤتمتة" /></h3>
+            <p>
+              <T 
+                en="Say goodbye to double bookings. Our calendar system handles reservations, availability, and session planning in real time." 
+                ar="وداعاً للحجوزات المزدوجة. يتولى نظام التقويم لدينا إدارة الحجوزات والتوافر وتخطيط الجلسات في الوقت الفعلي." 
+              />
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <div className="feature-icon">💰</div>
+            <h3><T en="Secure Invoicing & Payouts" ar="فواتير ومدفوعات آمنة" /></h3>
+            <p>
+              <T 
+                en="Accept online payments securely. Automated payouts are wired directly to your local Saudi business bank account." 
+                ar="اقبل المدفوعات عبر الإنترنت بشكل آمن. يتم تحويل المدفوعات التلقائية مباشرة إلى حسابك البنكي التجاري السعودي المحلي." 
+              />
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <div className="feature-icon">📈</div>
+            <h3><T en="Grow Your Audience" ar="نمو قاعدة عملائك" /></h3>
+            <p>
+              <T 
+                en="Get discovered by musicians, podcasters, and voice actors. Boost your studio's occupancy rate with our targeted marketing." 
+                ar="اجعل الموسيقيين وصانعي البودكاست ومؤدي الأصوات يكتشفون استوديوهاتك. ضاعف نسبة إشغال غرفك عبر تسويقنا المستهدف." 
+              />
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <div className="feature-icon">🛡️</div>
+            <h3><T en="Saudi PDPL Compliance First" ar="الامتثال لنظام حماية البيانات السعودي أولاً" /></h3>
+            <p>
+              <T 
+                en="Rest easy knowing partner verification and contract data comply strictly with Saudi PDPL and financial guidelines." 
+                ar="اطمئن تماماً؛ حيث تتوافق عملية التحقق من الشركاء وبيانات العقود بدقة مع نظام حماية البيانات الشخصية السعودي (PDPL) والأنظمة المالية." 
+              />
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Saudi Compliance Callout */}
+      <section className="compliance-section">
+        <div className="compliance-card">
+          <div className="badge badge-gold">🛡️ <T en="Pre-Launch Phase Notice" ar="تنويه مرحلة ما قبل الإطلاق" /></div>
+          <h3><T en="Saudi-First Secure Compliance" ar="امتثال آمن ذو أولوية سعودية" /></h3>
+          <p>
+            <T 
+              en="To protect sensitive partner credentials, GearBeat does not collect official government IDs, CR, VAT certificates, or IBAN numbers on public web pages. Commercial verification and contracting happen through a secure, direct process." 
+              ar="لحماية مستندات الشركاء الحساسة، لا يقوم GearBeat بجمع الهويات الحكومية الرسمية، أو السجل التجاري، أو شهادات القيمة المضافة، أو أرقام الآيبان على الصفحات العامة. سيتم التحقق والتعاقد لاحقاً عبر قنوات آمنة ومباشرة." 
+            />
+          </p>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="cta-section">
+        <div className="cta-card">
+          <h2><T en="Ready to List Your Studio?" ar="هل أنت جاهز لعرض الاستوديو الخاص بك؟" /></h2>
+          <p>
+            <T en="Create your free partner account today and start listing in under 10 minutes." ar="أنشئ حسابك المجاني كشريك اليوم وابدأ في إدراج غرفك خلال أقل من 10 دقائق." />
+          </p>
+          <Link href="/studio-owner/signup" className="gb-button btn-large">
+            <T en="Join as a Studio Partner Now" ar="انضم كشريك استوديو الآن" />
           </Link>
         </div>
-      </main>
-    );
-  }
-
-  if (fetchingData) {
-    return (
-      <main style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <T en="Loading..." ar="جاري التحميل..." />
-      </main>
-    );
-  }
-
-  return (
-    <main style={{ minHeight: "100vh", background: "#0a0a0a", padding: "60px 20px" }}>
-      <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center", marginBottom: 40 }}>
-        <div style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "-1px", marginBottom: 24, color: "#D4AF37" }}>GearBeat</div>
-        <div style={{ display: "inline-block", background: "rgba(212, 175, 55, 0.1)", color: "#D4AF37", padding: "4px 12px", borderRadius: 99, fontSize: "0.85rem", fontWeight: 700, marginBottom: 16 }}>
-          <T en="Studio Partner Onboarding" ar="انضمام شركاء الاستوديوهات" />
-        </div>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: 16 }}>
-          <T en="Apply for GearBeat Partnership" ar="قدم لطلب شراكة GearBeat" />
-        </h1>
-        <p style={{ color: "#888", fontSize: "1.1rem" }}>
-          <T en="Submit your company details for verification. Once approved, you can list and manage your studios on our premium marketplace." ar="قدم بيانات شركتك للتحقق. بمجرد الموافقة، يمكنك عرض وإدارة استوديوهاتك على منصتنا الفاخرة." />
-        </p>
-      </div>
-
-      <div style={{ maxWidth: 640, margin: "0 auto", background: "#111", borderRadius: 24, border: "1px solid #1e1e1e", padding: 40 }}>
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 32 }}>
-          {/* Section 1: Authorized Person Info */}
-          <section>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 20, color: "#D4AF37" }}>
-              <T en="Authorized Person" ar="الشخص المفوض" />
-            </h3>
-            <div style={{ display: "grid", gap: 20 }}>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Full Name" ar="الاسم الكامل" /> *</label>
-                <input className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-              </div>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Mobile Number" ar="رقم الجوال" /> *</label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <select 
-                    className="input" 
-                    style={{ width: "auto", minWidth: 120, padding: "0 8px" }} 
-                    value={phoneCode} 
-                    onChange={(e) => setPhoneCode(e.target.value)}
-                  >
-                    {countries.map(c => (
-                      <option key={c.country_code} value={c.phone_code}>{c.phone_code}</option>
-                    ))}
-                  </select>
-                  <input className="input" style={{ flex: 1 }} placeholder="5XXXXXXXX" value={mobile} onChange={(e) => setMobile(e.target.value)} required />
-                </div>
-              </div>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Email" ar="البريد الإلكتروني" /> *</label>
-                <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-            </div>
-          </section>
-
-          {/* Section 2: Company Info */}
-          <section>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 20, color: "#D4AF37" }}>
-              <T en="Company Information" ar="معلومات الشركة" />
-            </h3>
-            <div style={{ display: "grid", gap: 20 }}>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (Arabic)" ar="اسم الشركة (بالعربي)" /> *</label>
-                <input className="input" value={companyNameAr} onChange={(e) => setCompanyNameAr(e.target.value)} required />
-              </div>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Company Name (English)" ar="اسم الشركة (بالإنجليزي)" /> *</label>
-                <input className="input" value={companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} required />
-              </div>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Commercial Registration Number" ar="رقم السجل التجاري" /> *</label>
-                <input className="input" value={commercialRegistration} onChange={(e) => setCommercialRegistration(e.target.value)} required />
-              </div>
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="VAT Number" ar="الرقم الضريبي" /> *</label>
-                <input className="input" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} required placeholder={country === "SA" ? "15 digits" : ""} />
-              </div>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div style={{ display: "grid", gap: 8 }}>
-                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Country" ar="الدولة" /> *</label>
-                  <select className="input" value={country} onChange={(e) => { setCountry(e.target.value); setCity(""); }} required>
-                    {countries.map(c => (
-                      <option key={c.country_code} value={c.country_code}>
-                        <T en={c.name_en} ar={c.name_ar} />
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div style={{ display: "grid", gap: 8 }}>
-                  <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="City" ar="المدينة" /> *</label>
-                  {cities.length > 0 ? (
-                    <select className="input" value={city} onChange={(e) => setCity(e.target.value)} required>
-                      <option value=""><T en="Select City" ar="اختر المدينة" /></option>
-                      {cities.map(c => (
-                        <option key={c.id} value={c.id}>
-                          <T en={c.name_en} ar={c.name_ar} />
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input 
-                      className="input" 
-                      value={city} 
-                      onChange={(e) => setCity(e.target.value)} 
-                      required 
-                      placeholder={country === "SA" ? "أدخل اسم المدينة" : "Enter city name"}
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: "grid", gap: 8 }}>
-                <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="Studios Planned" ar="عدد الاستوديوهات المخططة" /> *</label>
-                <input className="input" type="number" min="1" value={plannedStudios} onChange={(e) => setPlannedStudios(e.target.value)} required />
-              </div>
-            </div>
-          </section>
-
-          {/* Section 3: Documents Compliance Warning */}
-          <section style={{ 
-            background: "rgba(212, 175, 55, 0.05)", 
-            border: "1px dashed rgba(212, 175, 55, 0.3)", 
-            borderRadius: 16, 
-            padding: 24 
-          }}>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 8, color: "#D4AF37", display: "flex", alignItems: "center", gap: 8 }}>
-              <span>🛡️</span>
-              <T en="Saudi-First Compliance Protection" ar="حماية الامتثال للأولوية السعودية" />
-            </h3>
-            <p style={{ color: "#fff", fontSize: "0.95rem", fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
-              <T 
-                en="Sensitive partner documents are not collected through this public flow during pre-launch." 
-                ar="لا يتم جمع وثائق الشركاء الحساسة من خلال هذا التدفق العام خلال مرحلة ما قبل الإطلاق." 
-              />
-            </p>
-            <p style={{ color: "#aaa", fontSize: "0.85rem", marginBottom: 16, lineHeight: 1.5 }}>
-              <T 
-                en="Commercial verification will happen later through an approved secure Saudi-first compliance process." 
-                ar="سيتم التحقق التجاري لاحقاً من خلال عملية امتثال معتمدة وآمنة ذات أولوية سعودية." 
-              />
-            </p>
-            <div style={{ 
-              background: "rgba(255, 77, 77, 0.1)", 
-              border: "1px solid rgba(255, 77, 77, 0.2)", 
-              borderRadius: 8, 
-              padding: "12px 16px", 
-              color: "#ff4d4d", 
-              fontSize: "0.85rem", 
-              fontWeight: 700 
-            }}>
-              ⚠️ <T 
-                en="Do not upload IDs, CR, VAT, IBAN, contracts, or bank documents here." 
-                ar="يرجى عدم تحميل الهويات، السجل التجاري، شهادة الضريبة، الآيبان (IBAN)، العقود، أو الوثائق البنكية هنا." 
-              />
-            </div>
-          </section>
-
-          {/* Section 4: About */}
-          <section>
-            <div style={{ display: "grid", gap: 8 }}>
-              <label style={{ fontSize: "0.85rem", color: "#888" }}><T en="About the company" ar="نبذة عن الشركة" /> *</label>
-              <textarea className="input" style={{ minHeight: 100, paddingTop: 12 }} maxLength={1000} placeholder="..." value={aboutCompany} onChange={(e) => setAboutCompany(e.target.value)} required />
-            </div>
-          </section>
-
-          {/* Section 5: Terms */}
-          <section>
-            <label style={{ display: "flex", gap: 12, cursor: "pointer", alignItems: "flex-start" }}>
-              <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} style={{ width: 20, height: 20, marginTop: 4 }} />
-              <div style={{ fontSize: "0.9rem", color: "#aaa", lineHeight: 1.6 }}>
-                <T 
-                  en="I agree to the Terms & Conditions and allow GearBeat to review my data for verification and contracting purposes. I understand my data is protected under our Privacy Policy and Saudi PDPL." 
-                  ar="أوافق على الشروط والأحكام وأتيح لـ GearBeat الاطلاع على بياناتي لأغراض التحقق والتعاقد. أفهم أن بياناتي محفوظة ومحمية وفقاً لسياسة الخصوصية ونظام PDPL السعودي." 
-                />
-                <div style={{ marginTop: 8 }}>
-                  <Link 
-                    href="/terms" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="terms-link"
-                  >
-                    <T en="Terms & Conditions" ar="الشروط والأحكام" />
-                  </Link>
-                  <Link 
-                    href="/privacy" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="terms-link"
-                    style={{ marginLeft: 16 }}
-                  >
-                    <T en="Privacy Policy" ar="سياسة الخصوصية" />
-                  </Link>
-                </div>
-              </div>
-            </label>
-          </section>
-
-          {error && (
-            <div style={{ color: "#ff4d4d", background: "rgba(255,77,77,0.1)", padding: 12, borderRadius: 8, fontSize: "0.9rem", textAlign: "center" }}>
-              {error}
-            </div>
-          )}
-
-          <button type="submit" className="btn btn-primary" style={{ height: 60, fontSize: "1.2rem", fontWeight: 800, borderRadius: 12 }} disabled={loading || !termsAccepted}>
-            {loading ? "..." : <T en="Submit Application" ar="إرسال الطلب" />}
-          </button>
-        </form>
-      </div>
+      </section>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .terms-link {
-          color: #D4AF37;
-          text-decoration: underline;
-          font-weight: 500;
-          transition: color 0.2s;
+        .landing-page {
+          min-height: 100vh;
+          background: #080706;
+          color: #fff;
+          font-family: 'Inter', system-ui, sans-serif;
+          padding: 80px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 100px;
         }
-        .terms-link:hover {
-          color: #f0c94d;
+        
+        .hero-section {
+          max-width: 900px;
+          margin: 0 auto;
+          text-align: center;
+          padding: 40px 0;
+        }
+        .brand-tag {
+          font-size: 1.5rem;
+          font-weight: 900;
+          letter-spacing: -1px;
+          color: #D4AF37;
+          margin-bottom: 24px;
+        }
+        .hero-section h1 {
+          font-size: 3rem;
+          font-weight: 900;
+          line-height: 1.2;
+          margin: 16px 0 24px;
+          color: #fff;
+          letter-spacing: -1px;
+        }
+        .hero-desc {
+          font-size: 1.2rem;
+          color: #aaa;
+          line-height: 1.6;
+          max-width: 700px;
+          margin: 0 auto 40px;
+        }
+        
+        .gb-button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #D4AF37;
+          color: #000;
+          font-weight: 700;
+          text-decoration: none;
+          border-radius: 12px;
+          transition: all 0.2s ease-in-out;
+        }
+        .btn-large {
+          padding: 18px 40px;
+          font-size: 1.15rem;
+        }
+        .gb-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+        }
+
+        .badge {
+          display: inline-block;
+          padding: 6px 16px;
+          border-radius: 99px;
+          font-weight: 800;
+          font-size: 0.8rem;
+        }
+        .badge-gold {
+          background: rgba(212, 175, 55, 0.1);
+          color: #D4AF37;
+          border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        /* Features */
+        .features-section {
+          max-width: 1100px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        .section-header {
+          text-align: center;
+          margin-bottom: 60px;
+        }
+        .section-header h2 {
+          font-size: 2.2rem;
+          font-weight: 800;
+          margin-bottom: 16px;
+        }
+        .section-header p {
+          color: #888;
+          font-size: 1.05rem;
+        }
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 24px;
+        }
+        .feature-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 20px;
+          padding: 32px;
+          transition: border-color 0.2s;
+        }
+        .feature-card:hover {
+          border-color: rgba(212, 175, 55, 0.2);
+        }
+        .feature-icon {
+          font-size: 2.5rem;
+          margin-bottom: 20px;
+        }
+        .feature-card h3 {
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+          color: #fff;
+        }
+        .feature-card p {
+          color: #888;
+          font-size: 0.95rem;
+          line-height: 1.6;
+        }
+
+        /* Compliance */
+        .compliance-section {
+          max-width: 800px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        .compliance-card {
+          background: rgba(212, 175, 55, 0.03);
+          border: 1px dashed rgba(212, 175, 55, 0.2);
+          border-radius: 24px;
+          padding: 40px;
+          text-align: center;
+        }
+        .compliance-card h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 16px 0 12px;
+        }
+        .compliance-card p {
+          color: #aaa;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          margin: 0;
+        }
+
+        /* Final CTA */
+        .cta-section {
+          max-width: 900px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        .cta-card {
+          background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(10, 10, 10, 0.9) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 24px;
+          padding: 60px 40px;
+          text-align: center;
+          box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+        }
+        .cta-card h2 {
+          font-size: 2rem;
+          font-weight: 800;
+          margin-bottom: 16px;
+        }
+        .cta-card p {
+          color: #888;
+          font-size: 1.1rem;
+          margin-bottom: 32px;
+        }
+
+        /* Animations */
+        .animate-fade-in {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RTL Support */
+        html[dir="rtl"] .landing-page {
+          text-align: right;
+          direction: rtl;
         }
       `}} />
     </main>
   );
 }
-
