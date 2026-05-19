@@ -1,6 +1,7 @@
 import Link from "next/link";
 import T from "../components/t";
 import AskGearBeatPreview from "../components/ask-gearbeat-preview";
+import { publicFeatureFlags } from "../lib/public-feature-flags";
 
 export default function HomePage() {
   return (
@@ -258,105 +259,27 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-3 gap-24 coming-soon-grid">
-            {/* Card 1: Academy */}
-            <div className="card-premium coming-soon-card">
-              <div className="coming-soon-badge-container">
-                <span className="badge badge-gold">
-                  <T en="Coming Soon" ar="قريباً" />
-                </span>
-              </div>
-              <div className="card-icon-emoji">🎓</div>
-              <h3><T en="GearBeat Academy" ar="أكاديمية جيربيت" /></h3>
-              <p>
-                <T 
-                  en="Unlock masterclasses, certified sound training, and direct mentoring from industry-leading producers." 
-                  ar="استكشف ورش العمل، التدريب الصوتي المعتمد، والتوجيه المباشر من منتجي الصوت الرائدين في المجال." 
-                />
-              </p>
-              <div className="card-status-indicator">
-                <T en="Stay tuned" ar="قريباً" />
-              </div>
-            </div>
-
-            {/* Card 2: Services */}
-            <div className="card-premium coming-soon-card">
-              <div className="coming-soon-badge-container">
-                <span className="badge badge-gold">
-                  <T en="Under Development" ar="قيد التطوير" />
-                </span>
-              </div>
-              <div className="card-icon-emoji">🎚️</div>
-              <h3><T en="Professional Services" ar="الخدمات الاحترافية" /></h3>
-              <p>
-                <T 
-                  en="Hire verified mixing engineers, session musicians, voice talent, and master producers directly." 
-                  ar="وظّف مهندسي مزج صوتي موثقين، عازفين، مؤدي أصوات، ومنتجين محترفين مباشرة لمشروعك القادم." 
-                />
-              </p>
-              <div className="card-status-indicator">
-                <T en="Launching in Phase 2" ar="الإطلاق في المرحلة الثانية" />
-              </div>
-            </div>
-
-            {/* Card 3: Tickets */}
-            <div className="card-premium coming-soon-card">
-              <div className="coming-soon-badge-container">
-                <span className="badge badge-gold">
-                  <T en="Coming Soon" ar="قريباً" />
-                </span>
-              </div>
-              <div className="card-icon-emoji">🎫</div>
-              <h3><T en="Event Ticketing" ar="حجز تذاكر الفعاليات" /></h3>
-              <p>
-                <T 
-                  en="Browse and book entry to live recording sessions, gear demo workshops, and local sound experiences." 
-                  ar="تصفح واحجز تذاكر حضور جلسات التسجيل الحية، وورش عمل تجربة المعدات، والتجارب الصوتية المحلية." 
-                />
-              </p>
-              <div className="card-status-indicator">
-                <T en="Stay tuned" ar="قريباً" />
-              </div>
-            </div>
-
-            {/* Card 4: Experiences */}
-            <div className="card-premium coming-soon-card">
-              <div className="coming-soon-badge-container">
-                <span className="badge badge-gold">
-                  <T en="Coming Soon" ar="قريباً" />
-                </span>
-              </div>
-              <div className="card-icon-emoji">🎧</div>
-              <h3><T en="Creative Experiences" ar="التجارب الإبداعية" /></h3>
-              <p>
-                <T 
-                  en="Immerse yourself in specialized listening sessions, community meetups, and studio tours across the region." 
-                  ar="انغمس في جلسات استماع متخصصة، لقاءات مجتمعية، وجولات استوديو فريدة من نوعها في المنطقة." 
-                />
-              </p>
-              <div className="card-status-indicator">
-                <T en="Stay tuned" ar="قريباً" />
-              </div>
-            </div>
-
-            {/* Card 5: Partner Programs */}
-            <div className="card-premium coming-soon-card">
-              <div className="coming-soon-badge-container">
-                <span className="badge badge-gold">
-                  <T en="Under Development" ar="قيد التطوير" />
-                </span>
-              </div>
-              <div className="card-icon-emoji">🤝</div>
-              <h3><T en="Partner Programs" ar="برامج الشركاء" /></h3>
-              <p>
-                <T 
-                  en="Unified registration for hardware vendors, educators, and organizers to offer products and services." 
-                  ar="تسجيل موحد لموردي الأجهزة والمعلمين ومنظمي الفعاليات لتقديم منتجاتهم وخدماتهم الإبداعية." 
-                />
-              </p>
-              <div className="card-status-indicator">
-                <T en="Launching soon" ar="قريباً" />
-              </div>
-            </div>
+            {publicFeatureFlags
+              .filter((flag) => flag.showOnHomepage)
+              .map((flag) => (
+                <div key={flag.key} className="card-premium coming-soon-card">
+                  <div className="coming-soon-badge-container">
+                    <span className="badge badge-gold">
+                      <T en={flag.safeStatusLabel.en} ar={flag.safeStatusLabel.ar} />
+                    </span>
+                  </div>
+                  <div className="card-icon-emoji">{flag.iconEmoji}</div>
+                  <h3>
+                    <T en={flag.enLabel} ar={flag.arLabel} />
+                  </h3>
+                  <p>
+                    <T en={flag.description.en} ar={flag.description.ar} />
+                  </p>
+                  <div className="card-status-indicator">
+                    <T en={flag.safeStatusIndicator.en} ar={flag.safeStatusIndicator.ar} />
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
       </section>
