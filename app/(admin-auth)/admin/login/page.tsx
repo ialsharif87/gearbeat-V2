@@ -7,6 +7,63 @@ import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { PasswordInput } from "@/components/ui/password-input";
 
+const ADMIN_LOGIN_TIMEOUT_MS = 15000;
+
+type AdminLoginCheckResponse =
+  | {
+      ok: true;
+      role: string;
+    }
+  | {
+      ok: false;
+      code: string;
+      message: string;
+    };
+
+function safeLogDetails(details: unknown) {
+  if (!details || typeof details !== "object") {
+    return undefined;
+  }
+
+  const record = details as Record<string, unknown>;
+  const safeDetails: Record<string, unknown> = {};
+
+  for (const key of ["name", "message", "code", "status"]) {
+    if (
+      typeof record[key] === "string" ||
+      typeof record[key] === "number" ||
+      typeof record[key] === "boolean"
+    ) {
+      safeDetails[key] = record[key];
+    }
+  }
+
+  return Object.keys(safeDetails).length > 0 ? safeDetails : undefined;
+}
+
+function warnAdminLogin(reason: string, details?: unknown) {
+  console.warn("[admin-login]", reason, safeLogDetails(details));
+}
+
+function withTimeout<T>(
+  promise: PromiseLike<T>,
+  timeoutMessage: string
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, ADMIN_LOGIN_TIMEOUT_MS);
+  });
+
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  });
+}
+
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,34 +78,78 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error: authError } = await withTimeout(
+        supabase.auth.signInWithPassword({
+          email,
+          password,
+        }),
+        "Admin sign-in timed out. Please try again."
+      );
 
       if (authError) {
+        warnAdminLogin("Supabase password sign-in failed", authError);
         throw new Error("Invalid email or password");
       }
 
       const user = data.user;
-      if (!user) throw new Error("Login failed");
-
-      // Check admin_users table for active staff status
-      const { data: adminUser, error: adminError } = await supabase
-        .from("admin_users")
-        .select("id")
-        .eq("auth_user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-
-      if (adminError || !adminUser) {
-        await supabase.auth.signOut();
-        throw new Error("Access denied. Admin authorization required.");
+      if (!user) {
+        warnAdminLogin("Password sign-in completed without a user");
+        throw new Error("Login failed. Please try again.");
       }
 
-      router.push("/admin");
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+      const response = await withTimeout(
+        fetch("/api/admin/login-check", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            Accept: "application/json",
+          },
+        }),
+        "Admin authorization check timed out. Please try again."
+      );
+
+      let payload: AdminLoginCheckResponse | null = null;
+
+      try {
+        payload = (await response.json()) as AdminLoginCheckResponse;
+      } catch (parseError) {
+        warnAdminLogin("Admin authorization check returned an unreadable response", parseError);
+      }
+
+      if (!response.ok || !payload?.ok) {
+        const message =
+          payload && "message" in payload
+            ? payload.message
+            : "We could not verify administrative access. Please try again.";
+
+        warnAdminLogin("Admin authorization check failed", {
+          status: response.status,
+          code: payload && "code" in payload ? payload.code : "unknown",
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          try {
+            await withTimeout(
+              supabase.auth.signOut(),
+              "Sign out timed out while clearing unauthorized admin session."
+            );
+          } catch (signOutError) {
+            warnAdminLogin("Could not clear unauthorized admin session", signOutError);
+          }
+        }
+
+        throw new Error(message);
+      }
+
+      router.replace("/admin");
+      router.refresh();
+    } catch (err) {
+      warnAdminLogin("Admin login flow ended with an error", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred. Please try again."
+      );
     } finally {
       setLoading(false);
     }

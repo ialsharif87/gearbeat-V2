@@ -1,24 +1,10 @@
-import { redirect } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import T from "@/components/t";
 import Link from "next/link";
 
 export default async function AccountRegistryPage() {
-  const supabase = createAdminClient();
+  const { supabaseAdmin: supabase } = await requireAdminLayoutAccess();
 
-  // 1. Fetch current admin for permission check
-  const { data: { user: authUser } } = await supabase.auth.getUser();
-  if (!authUser) redirect("/login");
-
-  const { data: currentAdmin } = await supabase
-    .from("admin_users")
-    .select("admin_role")
-    .eq("auth_user_id", authUser.id)
-    .maybeSingle();
-
-  if (!currentAdmin) redirect("/");
-
-  // 2. Fetch profiles
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
     .select("id, auth_user_id, full_name, email, phone, role, account_status, created_at")
