@@ -13,6 +13,7 @@ export default function ConditionalLayout({
   userRole,
   dashboardPath,
   logoutAction,
+  userInitials,
 }: {
   children: React.ReactNode;
   isLoggedIn: boolean;
@@ -21,6 +22,7 @@ export default function ConditionalLayout({
   userRole: string | null;
   dashboardPath: string;
   logoutAction?: () => Promise<void>;
+  userInitials?: string;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -56,6 +58,7 @@ export default function ConditionalLayout({
           logoutAction={logoutAction}
           lang={lang as "en" | "ar"}
           isAppMode={isAppMode}
+          userInitials={userInitials}
         />
       )}
       {children}

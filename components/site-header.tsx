@@ -14,6 +14,7 @@ type SiteHeaderProps = {
   logoutAction?: () => Promise<void>;
   lang?: "en" | "ar";
   isAppMode?: boolean;
+  userInitials?: string;
 };
 
 export default function SiteHeader({
@@ -25,6 +26,7 @@ export default function SiteHeader({
   logoutAction,
   lang = "ar",
   isAppMode = false,
+  userInitials,
 }: SiteHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -111,7 +113,7 @@ export default function SiteHeader({
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
                 <div className="user-avatar-placeholder">
-                  {userRole?.[0]?.toUpperCase() || "U"}
+                  {userInitials || userRole?.[0]?.toUpperCase() || "U"}
                 </div>
               </button>
 

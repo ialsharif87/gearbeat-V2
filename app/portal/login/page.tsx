@@ -43,6 +43,11 @@ export default function PortalLoginPage() {
 
     if (profileError) console.error("Profile fetch error:", profileError);
 
+    if (!profile) {
+      router.push("/profile/repair");
+      return;
+    }
+
     const role = profile?.role;
     const status = profile?.account_status;
 

@@ -45,8 +45,11 @@ export default function LoginPage() {
           .eq("id", user.id)
           .maybeSingle();
         
-        const role = profile?.role;
-        router.replace(dashboardPathForRole(role));
+        if (!profile) {
+          router.replace("/profile/repair");
+        } else {
+          router.replace(dashboardPathForRole(profile.role));
+        }
       }
     }
     checkUser();
@@ -83,8 +86,11 @@ export default function LoginPage() {
         .eq("id", user.id)
         .maybeSingle();
 
-      const role = profile?.role;
-      router.push(dashboardPathForRole(role));
+      if (!profile) {
+        router.push("/profile/repair");
+      } else {
+        router.push(dashboardPathForRole(profile.role));
+      }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
     } finally {
@@ -144,8 +150,11 @@ export default function LoginPage() {
         .eq("id", user.id)
         .maybeSingle();
 
-      const role = profile?.role;
-      router.push(dashboardPathForRole(role));
+      if (!profile) {
+        router.push("/profile/repair");
+      } else {
+        router.push(dashboardPathForRole(profile.role));
+      }
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
     } finally {
