@@ -24,6 +24,7 @@ type AdminUserRow = {
 };
 
 const ALL_ADMIN_ROLES = [
+  "admin",
   "super_admin",
   "operations",
   "support",
