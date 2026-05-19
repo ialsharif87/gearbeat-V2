@@ -238,47 +238,124 @@ export default function HomePage() {
         </div>
       </section>
  
-      {/* 5B. EXPERIENCES & TICKETING PREVIEW */}
+      {/* 5B. COMING SOON PRODUCT SECTIONS */}
       <section className="section-padding bg-darker relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--gb-gold) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         <div className="container relative z-10">
-          <div className="grid grid-2 items-center gap-60">
-            <div className="experience-content">
-              <div className="badge-gold mb-16"><T en="Live Access" ar="وصول مباشر" /></div>
-              <h2 className="text-balance" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', margin: '24px 0', lineHeight: 1.1 }}>
-                <T en="Beyond the studio walls." ar="خلف جدران الاستوديو." />
-              </h2>
-              <p className="text-muted mb-40" style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
+          <div className="section-head text-center mb-60">
+            <span className="badge-gold">
+              <T en="Ecosystem Expansion" ar="توسيع النظام البيئي" />
+            </span>
+            <h2 className="mt-8">
+              <T en="Coming Soon at GearBeat" ar="قادم قريبًا في GearBeat" />
+            </h2>
+            <p className="text-muted mt-12" style={{ maxWidth: 600, marginInline: 'auto' }}>
+              <T 
+                en="We are building the ultimate creative home for music and sound. The following verticals are currently in active preparation and will launch in upcoming phases." 
+                ar="نحن نبني الموطن الإبداعي الأمثل للموسيقى والصوت. القطاعات التالية قيد التحضير النشط حالياً وسيتم إطلاقها في المراحل القادمة." 
+              />
+            </p>
+          </div>
+
+          <div className="grid grid-3 gap-24 coming-soon-grid">
+            {/* Card 1: Academy */}
+            <div className="card-premium coming-soon-card">
+              <div className="coming-soon-badge-container">
+                <span className="badge badge-gold">
+                  <T en="Coming Soon" ar="قريباً" />
+                </span>
+              </div>
+              <div className="card-icon-emoji">🎓</div>
+              <h3><T en="GearBeat Academy" ar="أكاديمية جيربيت" /></h3>
+              <p>
                 <T 
-                  en="GearBeat Ticketing connects you to masterclasses, product launches, and exclusive studio sessions. Experience the industry, live."
-                  ar="تذاكر جيربيت تربطك بالدورات التدريبية المتقدمة، إطلاق المنتجات، وجلسات الاستوديو الحصرية. اختبر الصناعة، مباشرة."
+                  en="Unlock masterclasses, certified sound training, and direct mentoring from industry-leading producers." 
+                  ar="استكشف ورش العمل، التدريب الصوتي المعتمد، والتوجيه المباشر من منتجي الصوت الرائدين في المجال." 
                 />
               </p>
-              <div className="hero-actions">
-                <Link href="/tickets" className="btn btn-primary btn-lg shadow-gold">
-                  <T en="Explore Hub" ar="استكشف المركز" />
-                </Link>
-                <Link href="/partner" className="btn btn-outline btn-lg">
-                  <T en="Host an Event" ar="استضف فعالية" />
-                </Link>
+              <div className="card-status-indicator">
+                <T en="Stay tuned" ar="قريباً" />
               </div>
             </div>
-            <div className="experience-visual shadow-gold-lg" style={{ 
-              height: 400, 
-              background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)', 
-              borderRadius: 'var(--gb-radius-lg)', 
-              border: '1px solid rgba(212, 175, 55, 0.15)',
-              display: 'grid',
-              placeItems: 'center',
-              position: 'relative'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <span style={{ fontSize: '6rem', display: 'block', marginBottom: 24, filter: 'drop-shadow(0 0 20px rgba(212, 175, 55, 0.3))' }}>🎫</span>
-                <div className="badge badge-gold" style={{ padding: '10px 24px', fontSize: '0.8rem' }}>
-                  <T en="TICKETING HUB — COMING SOON" ar="مركز التذاكر — قريباً" />
-                </div>
+
+            {/* Card 2: Services */}
+            <div className="card-premium coming-soon-card">
+              <div className="coming-soon-badge-container">
+                <span className="badge badge-gold">
+                  <T en="Under Development" ar="قيد التطوير" />
+                </span>
               </div>
-              <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gold rounded-full blur-3xl opacity-10"></div>
+              <div className="card-icon-emoji">🎚️</div>
+              <h3><T en="Professional Services" ar="الخدمات الاحترافية" /></h3>
+              <p>
+                <T 
+                  en="Hire verified mixing engineers, session musicians, voice talent, and master producers directly." 
+                  ar="وظّف مهندسي مزج صوتي موثقين، عازفين، مؤدي أصوات، ومنتجين محترفين مباشرة لمشروعك القادم." 
+                />
+              </p>
+              <div className="card-status-indicator">
+                <T en="Launching in Phase 2" ar="الإطلاق في المرحلة الثانية" />
+              </div>
+            </div>
+
+            {/* Card 3: Tickets */}
+            <div className="card-premium coming-soon-card">
+              <div className="coming-soon-badge-container">
+                <span className="badge badge-gold">
+                  <T en="Coming Soon" ar="قريباً" />
+                </span>
+              </div>
+              <div className="card-icon-emoji">🎫</div>
+              <h3><T en="Event Ticketing" ar="حجز تذاكر الفعاليات" /></h3>
+              <p>
+                <T 
+                  en="Browse and book entry to live recording sessions, gear demo workshops, and local sound experiences." 
+                  ar="تصفح واحجز تذاكر حضور جلسات التسجيل الحية، وورش عمل تجربة المعدات، والتجارب الصوتية المحلية." 
+                />
+              </p>
+              <div className="card-status-indicator">
+                <T en="Stay tuned" ar="قريباً" />
+              </div>
+            </div>
+
+            {/* Card 4: Experiences */}
+            <div className="card-premium coming-soon-card">
+              <div className="coming-soon-badge-container">
+                <span className="badge badge-gold">
+                  <T en="Coming Soon" ar="قريباً" />
+                </span>
+              </div>
+              <div className="card-icon-emoji">🎧</div>
+              <h3><T en="Creative Experiences" ar="التجارب الإبداعية" /></h3>
+              <p>
+                <T 
+                  en="Immerse yourself in specialized listening sessions, community meetups, and studio tours across the region." 
+                  ar="انغمس في جلسات استماع متخصصة، لقاءات مجتمعية، وجولات استوديو فريدة من نوعها في المنطقة." 
+                />
+              </p>
+              <div className="card-status-indicator">
+                <T en="Stay tuned" ar="قريباً" />
+              </div>
+            </div>
+
+            {/* Card 5: Partner Programs */}
+            <div className="card-premium coming-soon-card">
+              <div className="coming-soon-badge-container">
+                <span className="badge badge-gold">
+                  <T en="Under Development" ar="قيد التطوير" />
+                </span>
+              </div>
+              <div className="card-icon-emoji">🤝</div>
+              <h3><T en="Partner Programs" ar="برامج الشركاء" /></h3>
+              <p>
+                <T 
+                  en="Unified registration for hardware vendors, educators, and organizers to offer products and services." 
+                  ar="تسجيل موحد لموردي الأجهزة والمعلمين ومنظمي الفعاليات لتقديم منتجاتهم وخدماتهم الإبداعية." 
+                />
+              </p>
+              <div className="card-status-indicator">
+                <T en="Launching soon" ar="قريباً" />
+              </div>
             </div>
           </div>
         </div>
@@ -458,6 +535,67 @@ export default function HomePage() {
         .path-cta { color: var(--gb-gold); font-weight: 800; font-size: 0.9rem; }
         
         .active-border { border-color: var(--gb-gold); }
+
+        /* COMING SOON SECTION */
+        .coming-soon-grid {
+          justify-content: center;
+        }
+        .coming-soon-card {
+          position: relative;
+          padding: 48px 32px 32px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid rgba(255, 255, 255, 0.04);
+          transition: border-color 0.3s, transform 0.3s;
+        }
+        .coming-soon-card:hover {
+          border-color: rgba(212, 175, 55, 0.15);
+          transform: translateY(-4px);
+        }
+        .coming-soon-badge-container {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+        }
+        [dir="rtl"] .coming-soon-badge-container {
+          right: auto;
+          left: 16px;
+        }
+        .card-icon-emoji {
+          font-size: 3rem;
+          margin-bottom: 24px;
+        }
+        .coming-soon-card h3 {
+          font-size: 1.35rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+          color: #fff;
+        }
+        .coming-soon-card p {
+          color: var(--gb-text-muted);
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin-bottom: 24px;
+          flex-grow: 1;
+        }
+        .card-status-indicator {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 99px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.4);
+          cursor: default;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
 
         /* TRUST SECTION */
         .trust-section { background: #080b0e; }
