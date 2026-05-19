@@ -39,6 +39,19 @@ export default function LoginPage() {
     async function checkUser() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Query admin_users table for staff status
+        const { data: adminUser } = await supabase
+          .from("admin_users")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (adminUser) {
+          router.replace("/admin");
+          return;
+        }
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -47,6 +60,8 @@ export default function LoginPage() {
         
         if (!profile) {
           router.replace("/profile/repair");
+        } else if (profile.role === "admin" || profile.role === "super_admin") {
+          router.replace("/admin");
         } else {
           router.replace(dashboardPathForRole(profile.role));
         }
@@ -80,6 +95,19 @@ export default function LoginPage() {
         return;
       }
 
+      // Query admin_users table for staff status
+      const { data: adminUser } = await supabase
+        .from("admin_users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (adminUser) {
+        router.push("/admin");
+        return;
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -88,6 +116,8 @@ export default function LoginPage() {
 
       if (!profile) {
         router.push("/profile/repair");
+      } else if (profile.role === "admin" || profile.role === "super_admin") {
+        router.push("/admin");
       } else {
         router.push(dashboardPathForRole(profile.role));
       }
@@ -143,6 +173,18 @@ export default function LoginPage() {
       if (rememberDevice) {
         await trustDevice(user.id);
       }
+      // Query admin_users table for staff status
+      const { data: adminUser } = await supabase
+        .from("admin_users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (adminUser) {
+        router.push("/admin");
+        return;
+      }
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -152,6 +194,8 @@ export default function LoginPage() {
 
       if (!profile) {
         router.push("/profile/repair");
+      } else if (profile.role === "admin" || profile.role === "super_admin") {
+        router.push("/admin");
       } else {
         router.push(dashboardPathForRole(profile.role));
       }
