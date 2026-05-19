@@ -53,10 +53,6 @@ export default function SiteHeader({
   const navLinks = [
     { href: "/studios", en: "Book a Studio", ar: "احجز استوديو" },
     { href: "/marketplace", en: "Shop Gear", ar: "تسوق معدات" },
-    { href: "/academy", en: "Join Academy", ar: "انضم للأكاديمية" },
-    { href: "/tickets", en: "Explore Experiences", ar: "استكشف التجارب" },
-    { href: "/services", en: "Services", ar: "الخدمات" },
-    { href: "/partner", en: "Become a Partner", ar: "انضم كشريك" },
     { href: "/support", en: "Support", ar: "الدعم" },
   ];
 
