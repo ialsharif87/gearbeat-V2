@@ -10,9 +10,14 @@ The registration flows, role mappings, and dashboard entrypoints are configured 
 
 | Dimension | Customer | Studio Owner |
 | :--- | :--- | :--- |
+| **Marketing Landing Page** | — | `/join/studio` |
 | **Signup Route** | `/signup` | `/studio-owner/signup` |
 | **Canonical Role Value** | `customer` | `owner` |
 | **Dashboard Path** | `/customer` | `/portal/studio` |
+
+> [!IMPORTANT]
+> - `/join/studio` acts purely as a public marketing and landing page. It does **not** create auth users, **not** insert profiles, and **not** execute any signup/database mutations. All CTA buttons on this page link directly to `/studio-owner/signup`.
+> - `/studio-owner/signup` is the **only** entry point for Studio Owner account creation.
 
 ---
 
