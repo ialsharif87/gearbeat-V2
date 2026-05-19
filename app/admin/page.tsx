@@ -121,10 +121,11 @@ export default async function AdminDashboard() {
 
       {/* SECTION 5: PLATFORM TOOLS */}
       <h2 style={sectionTitleStyle}><T en="Platform Configuration" ar="إعدادات المنصة" /></h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
         <QuickActionCard titleEn="Reviews Management" titleAr="إدارة التقييمات" href="/admin/reviews" icon="⭐" />
         <QuickActionCard titleEn="Platform Reports" titleAr="التقارير المالية" href="/admin/reports" icon="📊" />
         <QuickActionCard titleEn="System Settings" titleAr="إعدادات النظام" href="/admin/settings" icon="⚙️" />
+        <QuickActionCard titleEn="Launch Controls (Preview)" titleAr="ضوابط الإطلاق (معاينة)" href="/admin/launch-controls" icon="🚀" statusLabel="CONFIG_DRIVEN" />
       </div>
     </main>
   );
