@@ -42,17 +42,15 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <h4>{lang === "en" ? "Experiences" : "التجارب"}</h4>
             <Link href="/studios">{lang === "en" ? "Book a Studio" : "احجز استوديو"}</Link>
             <Link href="/marketplace">{lang === "en" ? "Shop Gear" : "تسوق معدات"}</Link>
-            <Link href="/services">{lang === "en" ? "Book Services" : "احجز خدمات"}</Link>
-            <Link href="/academy">{lang === "en" ? "Join Academy" : "انضم للأكاديمية"}</Link>
-            <Link href="/tickets">{lang === "en" ? "Explore Experiences" : "استكشف التجارب"}</Link>
+            <span className="footer-coming-soon">{lang === "en" ? "Book Services (Coming Soon)" : "احجز خدمات (قريباً)"}</span>
+            <span className="footer-coming-soon">{lang === "en" ? "Join Academy (Coming Soon)" : "انضم للأكاديمية (قريباً)"}</span>
+            <span className="footer-coming-soon">{lang === "en" ? "Explore Experiences (Coming Soon)" : "استكشف التجارب (قريباً)"}</span>
             <Link href="/how-it-works">{lang === "en" ? "How it Works" : "كيف يعمل"}</Link>
           </div>
 
           <div className="footer-col">
             <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
-            <Link href="/join/studio">{lang === "en" ? "Become a Studio Partner" : "انضم كاستوديو شريك"}</Link>
-            <Link href="/join/seller">{lang === "en" ? "Become a Vendor Partner" : "انضم كتاجر شريك"}</Link>
-            <Link href="/partner">{lang === "en" ? "Become a Partner" : "انضم كشريك"}</Link>
+            <span className="footer-coming-soon">{lang === "en" ? "Partner Programs (Coming Soon)" : "برامج الشركاء (قريباً)"}</span>
             <Link href="/support">{lang === "en" ? "Operations Support" : "دعم العمليات"}</Link>
           </div>
 
@@ -133,6 +131,14 @@ export default function Footer({ lang = "ar" }: FooterProps) {
 
         [dir="rtl"] .footer-col a:hover {
           --hover-translate: -5px;
+        }
+
+        .footer-coming-soon {
+          display: block;
+          color: rgba(255, 255, 255, 0.25);
+          margin-bottom: 12px;
+          font-size: 0.95rem;
+          cursor: default;
         }
 
         .footer-bottom {
