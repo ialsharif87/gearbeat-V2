@@ -151,7 +151,7 @@ export async function requireOwnerLayoutAccess() {
 export async function requireAdminLayoutAccess(
   allowedRoles: string[] = ALL_ADMIN_ROLES
 ) {
-  const context = await getProtectedContext("/staff-access");
+  const context = await getProtectedContext("/admin/login");
 
   if (!context.adminUser) {
     const role = context.profile?.role as GearBeatRole;
@@ -160,7 +160,7 @@ export async function requireAdminLayoutAccess(
       redirect(dashboardPathForRole(role));
     }
 
-    redirect("/staff-access");
+    redirect("/admin/login");
   }
 
   if (context.adminUser.admin_role !== "super_admin" && !allowedRoles.includes(context.adminUser.admin_role)) {
