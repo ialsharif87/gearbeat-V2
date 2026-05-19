@@ -90,6 +90,8 @@ export function AdminSidebar({
         <div style={sectionHeaderStyle}>
           <T en="General" ar="عام" />
         </div>
+        <NavItem href="/admin/users" icon="👥" labelEn="User Management" labelAr="إدارة المستخدمين" active={isActive('/admin/users')} />
+        <NavItem href="/admin/account-registry" icon="📋" labelEn="Account Registry" labelAr="سجل الحسابات" active={isActive('/admin/account-registry')} />
         <NavItem href="/admin/reviews" icon="⭐" labelEn="Reviews" labelAr="التقييمات" active={isActive('/admin/reviews')} />
         <NavItem href="/admin/launch-controls" icon="🚀" labelEn="Launch Controls" labelAr="ضوابط الإطلاق" active={isActive('/admin/launch-controls')} />
         <NavItem href="/admin/reports" icon="📈" labelEn="Reports" labelAr="التقارير" active={isActive('/admin/reports')} />

@@ -112,7 +112,7 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
           country_code: countryCode,
           phone_e164: phoneE164,
           role: role,
-          account_status: role === "owner" ? "pending" : "active",
+          account_status: "active",
           preferred_currency: selectedCountry.currency_code,
           preferred_language: "ar",
           updated_at: new Date().toISOString(),

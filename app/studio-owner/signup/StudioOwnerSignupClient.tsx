@@ -142,7 +142,7 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
         country_code: countryCode,
         phone_e164: phoneE164,
         role: role,
-        account_status: "pending", // Studio owners start as pending review or first-login
+        account_status: "active", // Studio owners start as active to satisfy check constraint, onboarding status tracks in provider_leads
         preferred_currency: selectedCountry.currency_code,
         preferred_language: "ar",
         updated_at: new Date().toISOString(),
