@@ -211,7 +211,7 @@ export default async function AdminVendorsPage() {
       .from("profiles")
       .update({
         role: "vendor",
-        account_status: status === "suspended" ? "active" : "active",
+        account_status: status === "suspended" ? "suspended" : "active",
         updated_at: new Date().toISOString(),
       })
       .eq("auth_user_id", vendorId);

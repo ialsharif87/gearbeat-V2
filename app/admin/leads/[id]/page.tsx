@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 
 import { 
@@ -13,8 +12,37 @@ import {
   getLeadOrApplicationDetail, 
   giveFinalApproval, 
   getSignedContractAction,
-  getSignedDocumentUrlAction
+  getSignedDocumentUrlAction,
+  deleteLeadApplication
 } from "../actions";
+
+const ADMIN_ACTION_ERROR =
+  "We could not complete this admin action. Please review the application and try again.";
+
+function safeLogDetails(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  const record = error as Record<string, unknown>;
+  const details: Record<string, unknown> = {};
+
+  for (const key of ["name", "message", "code", "status"]) {
+    if (
+      typeof record[key] === "string" ||
+      typeof record[key] === "number" ||
+      typeof record[key] === "boolean"
+    ) {
+      details[key] = record[key];
+    }
+  }
+
+  return Object.keys(details).length ? details : undefined;
+}
+
+function warnAdminAction(reason: string, error?: unknown) {
+  console.warn("[admin-leads-ui]", reason, safeLogDetails(error));
+}
 
 export default function LeadDetailPage() {
   const { id } = useParams();
@@ -26,6 +54,8 @@ export default function LeadDetailPage() {
   const [signedContractUrl, setSignedContractUrl] = useState<string | null>(null);
   const [linkError, setLinkError] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   
   // Document URLs (Secured)
   const [crUrl, setCrUrl] = useState<string | null>(null);
@@ -126,47 +156,73 @@ Studio Limit: 1
   async function handleApprove() {
     if (!confirm("Are you sure? This will create a user and send the contract email.")) return;
     setActionLoading("approve");
+    setActionError(null);
+    setActionSuccess(null);
     try {
       if (studioApp) {
         const result = await approveStudioApplication(studioApp.id, 15, 1, contractDraft);
         if (result.success) {
-          alert(`Studio Owner Approved!\n\nCredentials sent to client.\nTemporary Password: ${result.tempPassword}`);
+          setActionSuccess("Studio owner approved. Credentials were sent to the client.");
           router.refresh();
         } else {
-          alert("Error: " + result.error);
+          warnAdminAction("Approve action returned an error", result);
+          setActionError(result.error || ADMIN_ACTION_ERROR);
         }
       }
       fetchData();
     } catch (e: any) {
-      alert("Error: " + e.message);
+      warnAdminAction("Approve action failed", e);
+      setActionError(ADMIN_ACTION_ERROR);
     } finally {
       setActionLoading(null);
     }
   }
 
   async function handleRequestUpdate() {
-    if (!updateMessage) return alert("Please enter the missing requirements.");
+    if (!updateMessage) {
+      setActionError("Please enter the missing requirements before requesting an update.");
+      return;
+    }
     setActionLoading("update");
+    setActionError(null);
+    setActionSuccess(null);
     try {
-      await requestLeadUpdate(id as string, updateMessage);
-      alert("Modification request sent to client.");
+      const result = await requestLeadUpdate(id as string, updateMessage);
+      if (!result.success) {
+        warnAdminAction("Request update returned an error", result);
+        setActionError(result.error || ADMIN_ACTION_ERROR);
+        return;
+      }
+      setActionSuccess("Modification request sent to the client.");
       fetchData();
     } catch (e: any) {
-      alert("Error: " + e.message);
+      warnAdminAction("Request update failed", e);
+      setActionError(ADMIN_ACTION_ERROR);
     } finally {
       setActionLoading(null);
     }
   }
 
   async function handleReject() {
-    if (!rejectionReason) return alert("Please enter a reason.");
+    if (!rejectionReason) {
+      setActionError("Please enter a reason before rejecting the application.");
+      return;
+    }
     setActionLoading("reject");
+    setActionError(null);
+    setActionSuccess(null);
     try {
-      await rejectLeadApplication(id as string, rejectionReason);
-      alert("Application Rejected.");
+      const result = await rejectLeadApplication(id as string, rejectionReason);
+      if (!result.success) {
+        warnAdminAction("Reject action returned an error", result);
+        setActionError(result.error || ADMIN_ACTION_ERROR);
+        return;
+      }
+      setActionSuccess("Application rejected and notification sent.");
       fetchData();
     } catch (e: any) {
-      alert("Error: " + e.message);
+      warnAdminAction("Reject action failed", e);
+      setActionError(ADMIN_ACTION_ERROR);
     } finally {
       setActionLoading(null);
     }
@@ -175,10 +231,48 @@ Studio Limit: 1
   async function handleDelete() {
     if (!confirm("DANGER: This will permanently delete the application. Continue?")) return;
     setActionLoading("delete");
-    const supabase = createClient();
-    await supabase.from("provider_leads").delete().eq("id", id);
-    if (studioApp) await supabase.from("studio_applications").delete().eq("id", studioApp.id);
-    router.push("/admin/leads");
+    setActionError(null);
+    setActionSuccess(null);
+    try {
+      const result = await deleteLeadApplication(id as string, studioApp?.id);
+      if (!result.success) {
+        warnAdminAction("Delete action returned an error", result);
+        setActionError(result.error || ADMIN_ACTION_ERROR);
+        return;
+      }
+      router.push("/admin/leads");
+    } catch (e) {
+      warnAdminAction("Delete action failed", e);
+      setActionError(ADMIN_ACTION_ERROR);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleFinalApproval() {
+    if (!studioApp) return;
+    if(!confirm(lead.language === 'ar' ? "هل أنت متأكد من منح الموافقة النهائية وتفعيل هذا الحساب؟" : "Grant final approval and activate this account?")) return;
+
+    setActionLoading("final");
+    setActionError(null);
+    setActionSuccess(null);
+
+    try {
+      const res = await giveFinalApproval(studioApp.id);
+      if (!res.success) {
+        warnAdminAction("Final approval returned an error", res);
+        setActionError(ADMIN_ACTION_ERROR);
+        return;
+      }
+
+      setActionSuccess(lead.language === 'ar' ? "تم تفعيل الحساب. الشريك لديه الآن وصول كامل." : "Account activated. The partner now has full access.");
+      fetchData();
+    } catch (e) {
+      warnAdminAction("Final approval failed", e);
+      setActionError(ADMIN_ACTION_ERROR);
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   if (loading) return <div style={{ padding: 100, textAlign: 'center', color: '#888' }}>Loading...</div>;
@@ -293,6 +387,18 @@ Studio Limit: 1
       <div style={{ marginTop: 60, borderTop: '1px solid #1a1a1a', paddingTop: 60 }}>
         <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: 40 }}><T en="Management Actions" ar="إجراءات الإدارة" /></h2>
         
+        {actionError && (
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#ef4444', padding: 16, borderRadius: 12, marginBottom: 20, fontSize: '0.9rem' }}>
+            {actionError}
+          </div>
+        )}
+
+        {actionSuccess && (
+          <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', color: '#22c55e', padding: 16, borderRadius: 12, marginBottom: 20, fontSize: '0.9rem' }}>
+            {actionSuccess}
+          </div>
+        )}
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
           {/* NEW: Final Activation Box */}
           {studioApp?.contract_url && !studioApp?.final_approved_at && (
@@ -320,16 +426,7 @@ Studio Limit: 1
                 <T en="The client has uploaded the signed contract. Review it and click below to grant full dashboard access and move to the Approved Partners list." ar="قام العميل برفع العقد الموقع. يرجى مراجعته والضغط أدناه لمنح الوصول الكامل للوحة التحكم والنقل إلى قائمة الشركاء المعتمدين." />
               </p>
               <button 
-                onClick={async () => {
-                  if(!confirm(lead.language === 'ar' ? "هل أنت متأكد من منح الموافقة النهائية وتفعيل هذا الحساب؟" : "Grant final approval and activate this account?")) return;
-                  setActionLoading("final");
-                  const res = await giveFinalApproval(studioApp.id);
-                  if(res.success) {
-                    alert(lead.language === 'ar' ? "تم تفعيل الحساب! الشريك لديه الآن وصول كامل." : "Account Activated! The partner now has full access.");
-                    fetchData();
-                  }
-                  setActionLoading(null);
-                }}
+                onClick={handleFinalApproval}
                 disabled={!!actionLoading}
                 style={{ ...btnStyle, background: '#D4AF37', color: '#000', width: '100%' }}
               >

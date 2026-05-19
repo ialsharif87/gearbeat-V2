@@ -59,7 +59,8 @@ export default async function AdminSellersPage({
     full_name: l.full_name,
     email: l.email,
     phone: l.phone,
-    account_status: 'approved',
+    account_status: null,
+    lead_status: 'approved',
     created_at: l.created_at,
     productsCount: 0,
     ordersCount: 0,
@@ -200,11 +201,34 @@ const tdStyle: React.CSSProperties = { padding: '16px 24px', fontSize: '0.9rem' 
 const statCardStyle: React.CSSProperties = { background: '#111', padding: 24, borderRadius: 16, border: '1px solid #1e1e1e' };
 const statLabelStyle: React.CSSProperties = { color: '#666', fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 };
 
+function isSellerProfileAccountStatus(status: string | undefined): status is "active" | "suspended" {
+  return status === "active" || status === "suspended";
+}
+
 async function updateStatusAction(formData: FormData) {
   "use server";
   const id = formData.get("id")?.toString();
   const status = formData.get("status")?.toString();
+
+  if (!id || !isSellerProfileAccountStatus(status)) {
+    console.warn("[admin-sellers] Blocked invalid seller profile status update", {
+      code: "invalid_account_status",
+    });
+    return;
+  }
+
   const supabaseAdmin = createAdminClient();
-  await supabaseAdmin.from("profiles").update({ account_status: status }).eq("id", id);
+  const { error } = await supabaseAdmin
+    .from("profiles")
+    .update({ account_status: status })
+    .eq("id", id);
+
+  if (error) {
+    console.warn("[admin-sellers] Seller profile status update failed", {
+      code: error.code,
+      message: error.message,
+    });
+  }
+
   revalidatePath("/admin/sellers");
 }
