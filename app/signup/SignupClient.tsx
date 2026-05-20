@@ -99,11 +99,13 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         throw new Error("Selected country is invalid.");
       }
 
+      const emailRedirectTo = new URL("/auth/confirm", window.location.origin).toString();
+
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo,
           data: {
             full_name: fullName,
             role: role,
@@ -120,8 +122,6 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
 
       if (authError) throw authError;
       if (!data.user) throw new Error("Signup failed.");
-
-      await createProfile(data.user.id);
 
       if (data.session) {
         const { error: signOutError } = await supabase.auth.signOut();
@@ -143,51 +143,6 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
       }
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function createProfile(userId: string) {
-    const selectedCountry = countries.find(c => c.country_code === countryCode)!;
-    
-    const { data: existing, error: lookupError } = await supabase
-      .from("profiles")
-      .select("id")
-      .or(`auth_user_id.eq.${userId},id.eq.${userId}`)
-      .maybeSingle();
-
-    if (lookupError) {
-      console.warn("Customer signup profile lookup deferred", {
-        message: lookupError.message,
-      });
-      return;
-    }
-
-    if (existing) return;
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .upsert({
-        id: userId,
-        auth_user_id: userId,
-        email,
-        full_name: fullName,
-        phone: phoneE164,
-        country_code: countryCode,
-        phone_country_code: selectedCountry.phone_code,
-        phone_e164: phoneE164,
-        role: role,
-        account_status: "active",
-        preferred_currency: selectedCountry.currency_code,
-        preferred_language: "ar",
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: "auth_user_id",
-      });
-
-    if (profileError) {
-      console.warn("Customer signup profile creation deferred", {
-        message: profileError.message,
-      });
     }
   }
 
