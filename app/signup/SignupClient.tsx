@@ -164,11 +164,11 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         <div className="auth-card">
           <div className="auth-header">
             <h1>
-              <T en="Join GearBeat" ar="انضم إلى GearBeat" />
+              <T en="Create Your Customer Account" ar="أنشئ حساب العميل الخاص بك" />
             </h1>
             <p>
               {step === "request" ? (
-                <T en="Create your account with email and password" ar="أنشئ حسابك بالبريد وكلمة المرور" />
+                <T en="Book studios, manage your profile, and shop marketplace gear." ar="احجز الاستوديوهات، وأدر ملفك، وتسوق معدات الموسيقى." />
               ) : (
                 <T en="Complete Verification" ar="أكمل التحقق" />
               )}
@@ -309,8 +309,8 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
               <T en="Already have an account? Login" ar="لديك حساب بالفعل؟ سجل دخولك" />
             </Link>
             <div style={{ fontSize: '0.9rem', borderTop: '1px solid var(--gb-border)', width: '100%', paddingTop: 12, textAlign: 'center' }}>
-              <Link href="/studio-owner/signup" style={{ color: '#D4AF37' }}>
-                <T en="Are you a studio owner? Join as a Studio Partner" ar="هل أنت صاحب استوديو؟ انضم كشريك استوديو" />
+              <Link href="/partners/apply" style={{ color: '#D4AF37' }}>
+                <T en="Studio owner or seller? Apply as a partner" ar="هل أنت صاحب استوديو أو بائع؟ قدّم كشريك" />
               </Link>
             </div>
           </div>

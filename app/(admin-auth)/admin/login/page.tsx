@@ -168,7 +168,7 @@ export default function AdminLoginPage() {
             <T en="Operator Command Center" ar="مركز تحكم العمليات" />
           </h1>
           <p className="admin-auth-subtitle">
-            <T en="Secure portal for platform administrators" ar="بوابة آمنة لمديري المنصة" />
+            <T en="Internal access only for GearBeat platform administrators." ar="دخول داخلي فقط لمديري منصة GearBeat." />
           </p>
         </div>
 

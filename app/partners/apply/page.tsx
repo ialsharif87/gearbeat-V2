@@ -3,8 +3,8 @@ import Link from "next/link";
 import T from "../../../components/t";
 
 export const metadata: Metadata = {
-  title: "Partner Application Intake Architecture Preview",
-  description: "Unified partner application intake architecture and domain routing directory preview.",
+  title: "Partner Application Intake",
+  description: "Studio owner and seller application intake for GearBeat partners.",
 };
 
 export default function PartnerApplyPage() {
@@ -14,7 +14,7 @@ export default function PartnerApplyPage() {
       <div className="support-hero card" style={{ position: "relative", overflow: "hidden", marginBottom: 40 }}>
         <div className="support-hero-content">
           <span className="badge" style={{ background: "var(--gb-gold)", color: "#000" }}>
-            <T en="Pre-Launch Architecture Map" ar="خريطة هيكلية ما قبل الإطلاق" />
+            <T en="Partner Application Intake" ar="استقبال طلبات الشركاء" />
           </span>
 
           <h1 style={{ marginTop: 12 }}>
@@ -23,8 +23,8 @@ export default function PartnerApplyPage() {
 
           <p>
             <T
-              en="This page demonstrates the planned unified partner intake directory for GearBeat. In the future, this flow will live at partners.gearbeat.app."
-              ar="توضح هذه الصفحة المسار الموحد المخطط له لتقديم طلبات الشركاء في GearBeat. مستقبلاً، سيعمل هذا المسار تحت النطاق partners.gearbeat.app."
+              en="Start here to understand the studio owner and seller application paths. Portal access is granted only after admin review and approval."
+              ar="ابدأ هنا لفهم مسارات طلبات ملاك الاستوديو والبائعين. يتم منح صلاحية البوابة فقط بعد مراجعة الإدارة والموافقة."
             />
           </p>
 
@@ -39,8 +39,8 @@ export default function PartnerApplyPage() {
             color: "var(--gb-gold)"
           }}>
             ⚠️ <T 
-              en="Application intake architecture preview only — No database inserts, document uploads, or account creation are active." 
-              ar="معاينة للهيكل التنظيمي فقط — لا توجد عمليات تسجيل، رفع مستندات، أو حفظ في قاعدة البيانات." 
+              en="Submitting interest does not grant portal access — GearBeat reviews partner applications within 2 business days and sends secure next steps after approval." 
+              ar="إبداء الاهتمام لا يمنح صلاحية البوابة — تراجع GearBeat طلبات الشركاء خلال يومي عمل وترسل الخطوات الآمنة بعد الموافقة." 
             />
           </div>
         </div>
@@ -72,15 +72,15 @@ export default function PartnerApplyPage() {
 
         <h1>
           <T
-            en="Choose your partner profile type."
-            ar="اختر نوع ملف الشريك الخاص بك."
+            en="Choose the partner path that matches your business."
+            ar="اختر مسار الشريك المناسب لنشاطك."
           />
         </h1>
 
         <p>
           <T
-            en="GearBeat offers specialized roles and subdomains tailored to different audio industry ecosystems."
-            ar="تقدم GearBeat أدواراً ونطاقات فرعية متخصصة ومصممة لتناسب مختلف مجالات قطاع الصوتيات."
+            en="Studio owners and sellers apply through partner intake first, then use their assigned portal only after approval."
+            ar="يتقدم ملاك الاستوديو والبائعون عبر استقبال الشركاء أولاً، ثم يستخدمون بوابتهم المخصصة فقط بعد الموافقة."
           />
         </p>
       </div>
@@ -199,10 +199,10 @@ export default function PartnerApplyPage() {
               <strong>2. <T en="Review" ar="المراجعة" />:</strong> <T en="Admin verifies Saudi identity, CR, commercial permits." ar="يراجع المسؤول الهوية السعودية، السجل التجاري، والتراخيص." />
             </span>
             <span>
-              <strong>3. <T en="Approval" ar="الموافقة" />:</strong> <T en="Secure email triggers activation and role provisioning." ar="يرسل إشعار تفعيل آمن ويتم تخصيص صلاحية الدور المناسب." />
+              <strong>3. <T en="Approval" ar="الموافقة" />:</strong> <T en="Approved partners receive secure access instructions for their assigned portal." ar="يتلقى الشركاء المعتمدون تعليمات وصول آمنة للبوابة المخصصة لهم." />
             </span>
             <span>
-              <strong>4. <T en="Onboarding" ar="الانضمام" />:</strong> <T en="Partner logs in to their designated subdomain dashboard." ar="يسجل الشريك الدخول إلى لوحة التحكم الخاصة بنطاقه الفرعي." />
+              <strong>4. <T en="Onboarding" ar="الانضمام" />:</strong> <T en="Approved partners log in to portal.gearbeat.app or seller.gearbeat.app." ar="يسجل الشركاء المعتمدون الدخول عبر portal.gearbeat.app أو seller.gearbeat.app." />
             </span>
           </div>
         </div>
@@ -229,8 +229,8 @@ export default function PartnerApplyPage() {
             </strong>
             <p>
               <T
-                en="All approvals are manually reviewed. Public registration forms do not auto-authorize administrative roles or platform operator access."
-                ar="تتم مراجعة جميع الموافقات يدوياً. لا تمنح نماذج التسجيل العامة صلاحيات إدارية أو وصولاً لمشغلي المنصة تلقائياً."
+                en="All applications are manually reviewed within 2 business days. Public forms do not auto-authorize portal, administrative, or platform operator access."
+                ar="تتم مراجعة جميع الطلبات يدوياً خلال يومي عمل. لا تمنح النماذج العامة صلاحية البوابة أو الإدارة أو تشغيل المنصة تلقائياً."
               />
             </p>
           </div>

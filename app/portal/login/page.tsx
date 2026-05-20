@@ -221,8 +221,8 @@ export default function PortalLoginPage() {
             <p className="subtitle">
               {authMode === "password" ? (
                 <T 
-                  en="Access your studio management dashboard" 
-                  ar="ادخل إلى لوحة التحكم الخاصة باستوديو الخاص بك" 
+                  en="Approved studio owners and sellers can access their assigned portal." 
+                  ar="دخول الشركاء المعتمدين فقط إلى بوابة الاستوديو أو المتجر." 
                 />
               ) : step === "request" ? (
                 <T en="Login securely with a one-time code" ar="سجل دخولك بأمان عبر رمز لمرة واحدة" />
@@ -291,7 +291,7 @@ export default function PortalLoginPage() {
                     setError(null);
                   }}
                 >
-                  <T en="Login with OTP" ar="تسجيل الدخول برمز مؤقت" />
+                  <T en="Login with verification code" ar="تسجيل الدخول برمز تحقق" />
                 </button>
               </form>
             ) : (
@@ -381,11 +381,11 @@ export default function PortalLoginPage() {
 
         <footer className="login-footer">
           <Link href="/login" className="footer-link">
-            <T en="Customer Portal" ar="بوابة العملاء" />
+            <T en="Customer Login" ar="تسجيل دخول العملاء" />
           </Link>
           <div className="footer-dot"></div>
-          <Link href="/join/studio" className="footer-link highlighted">
-            <T en="Become a Partner" ar="كن شريكاً معنا" />
+          <Link href="/partners/apply" className="footer-link highlighted">
+            <T en="Apply as a Partner" ar="قدّم كشريك" />
           </Link>
         </footer>
       </div>
