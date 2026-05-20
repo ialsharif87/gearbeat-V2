@@ -39,7 +39,8 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
-          .eq("id", user.id)
+          .or(`auth_user_id.eq.${user.id},id.eq.${user.id}`)
+          .limit(1)
           .maybeSingle();
 
         if (profile) {
@@ -51,6 +52,27 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
         // Infer original signup intent from auth metadata
         const rawRole = user.user_metadata?.role;
         if (rawRole === "customer" || rawRole === "user") {
+          const repairResponse = await fetch("/api/customer/profile/ensure", {
+            method: "POST",
+          });
+
+          if (repairResponse.ok) {
+            router.replace("/customer");
+            return;
+          }
+
+          let reason = "unknown";
+
+          try {
+            const body = await repairResponse.json();
+            reason = body?.reason || reason;
+          } catch {
+            reason = "invalid_response";
+          }
+
+          console.warn("Customer profile repair automatic attempt failed", {
+            reason,
+          });
           setRole("customer");
         } else if (rawRole === "owner" || rawRole === "studio_owner") {
           setRole("owner");
@@ -61,6 +83,21 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
         // Prepopulate from auth metadata if available
         if (user.user_metadata?.full_name) {
           setFullName(user.user_metadata.full_name);
+        }
+
+        if (user.user_metadata?.country_code) {
+          setCountryCode(user.user_metadata.country_code);
+        }
+
+        const metadataPhone =
+          user.user_metadata?.phone_e164 ||
+          user.user_metadata?.phone ||
+          user.user_metadata?.phone_number ||
+          user.phone ||
+          "";
+
+        if (metadataPhone) {
+          setPhoneE164(metadataPhone);
         }
       } catch (err) {
         console.error("Error checking session/profile:", err);

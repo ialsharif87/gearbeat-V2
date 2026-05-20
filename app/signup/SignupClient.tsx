@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -54,7 +54,6 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
 
   const isPasswordValid = passRules.length && passRules.variety && passRules.consecutive;
 
-  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
 
@@ -94,6 +93,12 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         throw new Error("Passwords do not match.");
       }
 
+      const selectedCountry = countries.find(c => c.country_code === countryCode);
+
+      if (!selectedCountry) {
+        throw new Error("Selected country is invalid.");
+      }
+
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -102,7 +107,13 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           data: {
             full_name: fullName,
             role: role,
+            account_type: "customer",
+            country_code: countryCode,
+            phone: phoneE164,
             phone_e164: phoneE164,
+            phone_country_code: selectedCountry.phone_code,
+            preferred_currency: selectedCountry.currency_code,
+            preferred_language: "ar",
           },
         },
       });
@@ -138,34 +149,45 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
   async function createProfile(userId: string) {
     const selectedCountry = countries.find(c => c.country_code === countryCode)!;
     
-    const { data: existing } = await supabase
+    const { data: existing, error: lookupError } = await supabase
       .from("profiles")
       .select("id")
-      .eq("id", userId)
+      .or(`auth_user_id.eq.${userId},id.eq.${userId}`)
       .maybeSingle();
+
+    if (lookupError) {
+      console.warn("Customer signup profile lookup deferred", {
+        message: lookupError.message,
+      });
+      return;
+    }
 
     if (existing) return;
 
     const { error: profileError } = await supabase
       .from("profiles")
-      .insert({
+      .upsert({
         id: userId,
         auth_user_id: userId,
         email,
         full_name: fullName,
         phone: phoneE164,
         country_code: countryCode,
+        phone_country_code: selectedCountry.phone_code,
         phone_e164: phoneE164,
         role: role,
         account_status: "active",
         preferred_currency: selectedCountry.currency_code,
         preferred_language: "ar",
         updated_at: new Date().toISOString(),
+      }, {
+        onConflict: "auth_user_id",
       });
 
     if (profileError) {
-      console.error("Profile creation error:", profileError);
-      throw new Error("Account created but profile setup failed. Please contact support.");
+      console.warn("Customer signup profile creation deferred", {
+        message: profileError.message,
+      });
     }
   }
 
@@ -280,6 +302,13 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
             </form>
           ) : (
             <div className="verification-flow animate-fade-in">
+              <div className="auth-success">
+                <T
+                  en="Your account was created. Please check your email to activate it."
+                  ar="تم إنشاء حسابك. تحقق من بريدك الإلكتروني لتفعيل الحساب."
+                />
+              </div>
+
               <div className="verification-step">
                 <div className="v-icon">📧</div>
                 <h3><T en="Check Your Email" ar="تحقق من بريدك الإلكتروني" /></h3>
@@ -416,6 +445,16 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           font-size: 0.85rem;
           margin-bottom: 24px;
           text-align: center;
+        }
+        .auth-success {
+          padding: 12px;
+          background: rgba(16, 160, 138, 0.1);
+          border: 1px solid rgba(16, 160, 138, 0.35);
+          border-radius: 12px;
+          color: #10a08a;
+          font-size: 0.9rem;
+          text-align: center;
+          line-height: 1.6;
         }
         .auth-footer {
           margin-top: 24px;
