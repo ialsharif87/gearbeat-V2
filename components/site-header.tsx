@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import LanguageSwitcher from "./language-switcher";
-import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import CartBadge from "./cart-badge";
+import { createClient } from "@/lib/supabase/client";
 
 type SiteHeaderProps = {
   isLoggedIn: boolean;
@@ -30,8 +31,110 @@ export default function SiteHeader({
 }: SiteHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [clientAuthState, setClientAuthState] = useState({
+    isLoggedIn,
+    userRole,
+    userInitials: userInitials || null,
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    setClientAuthState({
+      isLoggedIn,
+      userRole,
+      userInitials: userInitials || null,
+    });
+  }, [isLoggedIn, userRole, userInitials]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncUserState(authUser?: {
+      id: string;
+      email?: string | null;
+      user_metadata?: Record<string, unknown>;
+    } | null) {
+      const user = authUser || null;
+
+      if (!user) {
+        const {
+          data: { user: currentUser },
+          error,
+        } = await supabase.auth.getUser();
+
+        if (!isMounted) return;
+
+        if (error || !currentUser) {
+          setClientAuthState({
+            isLoggedIn: false,
+            userRole: null,
+            userInitials: null,
+          });
+          return;
+        }
+
+        return syncUserState(currentUser);
+      }
+
+      let profileRole =
+        typeof user.user_metadata?.role === "string" ? user.user_metadata.role : null;
+      let fullName =
+        typeof user.user_metadata?.full_name === "string"
+          ? user.user_metadata.full_name
+          : null;
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      if (!isMounted) return;
+
+      if (profileError) {
+        console.warn("Header customer session profile lookup failed", {
+          message: profileError.message,
+        });
+      }
+
+      profileRole = profile?.role || profileRole || "customer";
+      fullName = profile?.full_name || fullName;
+
+      setClientAuthState({
+        isLoggedIn: true,
+        userRole: profileRole,
+        userInitials:
+          fullName?.trim()?.charAt(0)?.toUpperCase() ||
+          user.email?.trim()?.charAt(0)?.toUpperCase() ||
+          "U",
+      });
+    }
+
+    void syncUserState();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        setClientAuthState({
+          isLoggedIn: false,
+          userRole: null,
+          userInitials: null,
+        });
+        return;
+      }
+
+      void syncUserState(session.user);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   // Close menus on route change
   useEffect(() => {
@@ -55,6 +158,41 @@ export default function SiteHeader({
     { href: "/marketplace", en: "Shop Gear", ar: "تسوق معدات" },
     { href: "/support", en: "Support", ar: "الدعم" },
   ];
+
+  const effectiveIsLoggedIn = clientAuthState.isLoggedIn;
+  const effectiveUserRole = clientAuthState.userRole;
+  const effectiveInitials =
+    clientAuthState.userInitials ||
+    userInitials ||
+    effectiveUserRole?.[0]?.toUpperCase() ||
+    "U";
+  const effectiveDashboardPath =
+    effectiveUserRole === "customer" ? "/customer" : dashboardPath;
+  const roleLabel =
+    effectiveUserRole === "customer"
+      ? lang === "en"
+        ? "Customer Account"
+        : "حساب العميل"
+      : effectiveUserRole || "User";
+  const dashboardLabel = lang === "en" ? "Customer Dashboard" : "لوحة العميل";
+  const accountLabel = lang === "en" ? "My Account" : "حسابي";
+  const logoutLabel = lang === "en" ? "Logout" : "تسجيل الخروج";
+
+  async function handleClientLogout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.warn("Header customer sign out failed", { message: error.message });
+    }
+
+    setClientAuthState({
+      isLoggedIn: false,
+      userRole: null,
+      userInitials: null,
+    });
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <header className="site-header glass">
@@ -102,32 +240,40 @@ export default function SiteHeader({
           {!isAppMode && <LanguageSwitcher />}
           <CartBadge />
 
-          {isLoggedIn ? (
+          {effectiveIsLoggedIn ? (
             <div className="user-dropdown-container" ref={dropdownRef}>
               <button 
                 className="user-menu-trigger"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
                 <div className="user-avatar-placeholder">
-                  {userInitials || userRole?.[0]?.toUpperCase() || "U"}
+                  {effectiveInitials}
                 </div>
               </button>
 
               {isUserMenuOpen && (
                 <div className="user-dropdown-menu glass animate-fade-in">
                   <div className="dropdown-info">
-                    <p className="user-role-badge">{userRole || "User"}</p>
+                    <p className="user-role-badge">{roleLabel}</p>
                   </div>
                   <hr className="dropdown-divider" />
-                  <Link href={dashboardPath} className="dropdown-item">
-                    {lang === "en" ? "Dashboard" : "لوحة التحكم"}
+                  <Link href={effectiveDashboardPath} className="dropdown-item">
+                    {dashboardLabel}
+                  </Link>
+                  <Link href="/profile" className="dropdown-item">
+                    {accountLabel}
                   </Link>
                   {logoutAction && (
                     <form action={logoutAction}>
                       <button type="submit" className="dropdown-item logout-btn">
-                        {lang === "en" ? "Logout" : "خروج"}
+                        {logoutLabel}
                       </button>
                     </form>
+                  )}
+                  {!logoutAction && (
+                    <button type="button" className="dropdown-item logout-btn" onClick={handleClientLogout}>
+                      {logoutLabel}
+                    </button>
                   )}
                 </div>
               )}
@@ -157,7 +303,27 @@ export default function SiteHeader({
                 <span className="link-text">{lang === "en" ? link.en : link.ar}</span>
               </Link>
             ))}
-            {!isLoggedIn && (
+            {effectiveIsLoggedIn ? (
+              <>
+                <Link href={effectiveDashboardPath} className="mobile-nav-link auth-link">
+                  <span className="link-text">{dashboardLabel}</span>
+                </Link>
+                <Link href="/profile" className="mobile-nav-link auth-link">
+                  <span className="link-text">{accountLabel}</span>
+                </Link>
+                {logoutAction ? (
+                  <form action={logoutAction}>
+                    <button type="submit" className="mobile-nav-link mobile-nav-button auth-link">
+                      <span className="link-text">{logoutLabel}</span>
+                    </button>
+                  </form>
+                ) : (
+                  <button type="button" className="mobile-nav-link mobile-nav-button auth-link" onClick={handleClientLogout}>
+                    <span className="link-text">{logoutLabel}</span>
+                  </button>
+                )}
+              </>
+            ) : (
               <>
                 <Link href="/login" className="mobile-nav-link auth-link">
                   <span className="link-text">{lang === "en" ? "Sign In" : "تسجيل الدخول"}</span>
@@ -312,6 +478,13 @@ export default function SiteHeader({
           display: flex;
           justify-content: space-between;
           align-items: center;
+        }
+
+        .mobile-nav-button {
+          font-family: inherit;
+          text-align: start;
+          width: 100%;
+          cursor: pointer;
         }
 
         .mobile-nav-link::after {

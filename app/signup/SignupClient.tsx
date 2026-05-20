@@ -111,6 +111,17 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
       if (!data.user) throw new Error("Signup failed.");
 
       await createProfile(data.user.id);
+
+      if (data.session) {
+        const { error: signOutError } = await supabase.auth.signOut();
+
+        if (signOutError) {
+          console.warn("Customer signup immediate session clear failed", {
+            message: signOutError.message,
+          });
+        }
+      }
+
       setStep("verification");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
@@ -170,7 +181,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
               {step === "request" ? (
                 <T en="Book studios, manage your profile, and shop marketplace gear." ar="احجز الاستوديوهات، وأدر ملفك، وتسوق معدات الموسيقى." />
               ) : (
-                <T en="Complete Verification" ar="أكمل التحقق" />
+                <T en="Check your email to continue." ar="تحقق من بريدك الإلكتروني للمتابعة." />
               )}
             </p>
           </div>
@@ -271,7 +282,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
             <div className="verification-flow animate-fade-in">
               <div className="verification-step">
                 <div className="v-icon">📧</div>
-                <h3><T en="Verify Email" ar="التحقق من البريد" /></h3>
+                <h3><T en="Check Your Email" ar="تحقق من بريدك الإلكتروني" /></h3>
                 <p>
                   <T 
                     en={`We've sent a confirmation link to ${email}. Please check your inbox (and spam) and click the link to activate your account.`}
