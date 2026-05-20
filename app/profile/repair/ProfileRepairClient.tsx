@@ -130,11 +130,37 @@ export default function ProfileRepairClient({ countries }: { countries: CountryO
         data: {
           full_name: fullName,
           role: role,
+          account_type: role,
+          country_code: countryCode,
+          phone: phoneE164,
           phone_e164: phoneE164,
         }
       });
 
       if (authError) throw authError;
+
+      if (role === "customer") {
+        const repairResponse = await fetch("/api/customer/profile/ensure", {
+          method: "POST",
+        });
+
+        if (!repairResponse.ok) {
+          let reason = "unknown";
+
+          try {
+            const body = await repairResponse.json();
+            reason = body?.reason || reason;
+          } catch {
+            reason = "invalid_response";
+          }
+
+          console.warn("Customer profile repair submit failed", { reason });
+          throw new Error("Could not complete your customer profile. Please try again.");
+        }
+
+        router.replace("/customer");
+        return;
+      }
 
       // Insert profile
       const selectedCountry = countries.find(c => c.country_code === countryCode)!;
