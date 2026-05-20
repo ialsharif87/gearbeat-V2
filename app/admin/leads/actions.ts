@@ -114,7 +114,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       await supabaseAdmin.from("studio_applications").update({ contract_draft: contractDraft }).eq("id", appId);
     }
 
-    // 2. Generate a secure temporary password
+    // 2. Generate a random initial password; do not email it in plain text.
     const tempPassword = generatePassword();
 
     // 3. Create or Get Auth User
@@ -196,11 +196,11 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
             <p style="font-size: 1.1rem; line-height: 1.6; text-align: right; direction: rtl;">تمت الموافقة على طلب انضمام شركتكم <strong>${app.company_name_ar}</strong>!</p>
           </div>
           <div style="background: rgba(212, 175, 55, 0.05); padding: 24px; border-radius: 16px; border: 1px solid rgba(212, 175, 55, 0.2); margin-bottom: 30px;">
-            <h3 style="color: #D4AF37; margin-top: 0;">Login Credentials / بيانات الدخول</h3>
-            <p><strong>Login URL:</strong> <a href="https://gearbeat.app/portal/login" style="color: #D4AF37;">gearbeat.app/portal/login</a></p>
+            <h3 style="color: #D4AF37; margin-top: 0;">Portal Access Instructions / تعليمات الوصول إلى البوابة</h3>
+            <p><strong>Login URL:</strong> <a href="https://portal.gearbeat.app" style="color: #D4AF37;">portal.gearbeat.app</a></p>
             <p><strong>Email:</strong> ${app.email}</p>
-            <p><strong>Temporary Password:</strong> <code style="background: #222; padding: 4px 8px; border-radius: 4px;">${tempPassword}</code></p>
-            <p style="font-size: 0.85rem; color: #888;">* Please change your password upon first login.</p>
+            <p style="font-size: 0.95rem; color: #ddd;">Use the secure password reset flow on the portal login page to set your password before first access.</p>
+            <p style="font-size: 0.85rem; color: #888;">GearBeat will never send plain temporary passwords by email.</p>
           </div>
           <div style="margin-bottom: 30px;">
             <h3 style="color: #D4AF37;">Next Steps / الخطوات القادمة</h3>
@@ -223,7 +223,7 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
     }
 
     revalidatePath("/admin/leads");
-    return { success: true, tempPassword };
+    return { success: true };
   } catch (err: any) {
     warnAdminLeadAction("Approve studio application failed", err);
     return { success: false, error: ADMIN_LEAD_ACTION_ERROR };

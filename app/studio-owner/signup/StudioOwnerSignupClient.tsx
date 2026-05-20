@@ -165,8 +165,8 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
             <p>
               {step === "request" ? (
                 <T 
-                  en="Create an account to list and manage your music studios" 
-                  ar="أنشئ حسابك لإدراج وإدارة استوديوهاتك الموسيقية" 
+                  en="Create a studio application account. Admin approval is required before portal access." 
+                  ar="أنشئ حساب طلب استوديو. تتطلب صلاحية البوابة موافقة الإدارة أولاً." 
                 />
               ) : (
                 <T en="Verify your account" ar="التحقق من حسابك" />
@@ -265,7 +265,7 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
 
               <button type="submit" disabled={loading || !isPasswordValid} className="gb-button">
                 {loading ? <T en="Creating Account..." ar="جاري إنشاء الحساب..." /> : (
-                  <T en="Register as Partner" ar="التسجيل كشريك" />
+                  <T en="Submit Studio Account Setup" ar="إرسال إعداد حساب الاستوديو" />
                 )}
               </button>
             </form>
@@ -276,8 +276,8 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
                 <h3><T en="Verify Email" ar="التحقق من البريد" /></h3>
                 <p>
                   <T 
-                    en={`We've sent a confirmation link to ${email}. Please check your inbox (and spam) and click the link to activate your partner account.`}
-                    ar={`لقد أرسلنا رابط تأكيد إلى ${email}. يرجى التحقق من بريدك (والمهملات) والنقر على الرابط لتفعيل حساب الشريك الخاص بك.`}
+                    en={`We've sent a confirmation link to ${email}. Please check your inbox (and spam) and click the link to confirm your email. Portal access is granted only after admin review and approval.`}
+                    ar={`لقد أرسلنا رابط تأكيد إلى ${email}. يرجى التحقق من بريدك (والمهملات) والنقر على الرابط لتأكيد بريدك. يتم منح صلاحية البوابة فقط بعد مراجعة الإدارة والموافقة.`}
                   />
                 </p>
               </div>
@@ -289,8 +289,8 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
                 <h3><T en="Phone Verification" ar="التحقق من الجوال" /></h3>
                 <p>
                   <T 
-                    en="Once you activate your email and log in, you will be prompted to verify your phone number via SMS OTP."
-                    ar="بمجرد تفعيل بريدك الإلكتروني وتسجيل الدخول، سيُطلب منك التحقق من رقم جوالك عبر رمز التحقق (SMS OTP)."
+                    en="After email confirmation, complete the partner review steps. Approved studio owners receive portal access instructions."
+                    ar="بعد تأكيد البريد، أكمل خطوات مراجعة الشريك. يحصل ملاك الاستوديو المعتمدون على تعليمات الوصول إلى البوابة."
                   />
                 </p>
                 <div className="badge badge-gold" style={{ fontSize: '0.7rem' }}>
@@ -300,7 +300,7 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
 
               <div style={{ marginTop: 32 }}>
                 <Link href="/portal/login" className="gb-button w-full" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
-                  <T en="Go to Partner Login" ar="الذهاب لتسجيل دخول الشركاء" />
+                  <T en="Go to Portal Login" ar="الذهاب إلى تسجيل دخول البوابة" />
                 </Link>
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function StudioOwnerSignupClient({ countries }: { countries: Coun
 
           <div className="auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <Link href="/portal/login">
-              <T en="Already have a partner account? Login" ar="لديك حساب شريك بالفعل؟ سجل دخولك" />
+              <T en="Approved partner? Log in to the portal" ar="شريك معتمد؟ سجّل دخولك إلى البوابة" />
             </Link>
             <div style={{ fontSize: '0.9rem', borderTop: '1px solid var(--gb-border)', width: '100%', paddingTop: 12, textAlign: 'center' }}>
               <Link href="/signup" style={{ color: '#D4AF37' }}>

@@ -154,7 +154,7 @@ Studio Limit: 1
 
 
   async function handleApprove() {
-    if (!confirm("Are you sure? This will create a user and send the contract email.")) return;
+    if (!confirm("Approve this application and send secure portal access instructions?")) return;
     setActionLoading("approve");
     setActionError(null);
     setActionSuccess(null);
@@ -162,7 +162,7 @@ Studio Limit: 1
       if (studioApp) {
         const result = await approveStudioApplication(studioApp.id, 15, 1, contractDraft);
         if (result.success) {
-          setActionSuccess("Studio owner approved. Credentials were sent to the client.");
+          setActionSuccess("Studio owner approved. Secure portal access instructions were sent to the client.");
           router.refresh();
         } else {
           warnAdminAction("Approve action returned an error", result);
@@ -443,7 +443,7 @@ Studio Limit: 1
           <div style={{ ...boxStyle, border: '1px solid #22c55e33', background: '#22c55e05' }}>
             <h4 style={{ color: '#22c55e', margin: '0 0 12px 0' }}><T en="Approve & Send Contract" ar="موافقة وإرسال العقد" /></h4>
             <p style={{ fontSize: '0.85rem', color: '#666', flex: 1 }}>
-              <T en="Creates credentials, sends welcome email with temp password, and attaches the modified contract draft." ar="ينشئ بيانات الاعتماد، ويرسل بريد الترحيب مع كلمة مرور مؤقتة، ويرفق مسودة العقد المعدلة." />
+              <T en="Provisions the account and sends secure portal setup instructions. No plain temporary password is shown here." ar="يجهز الحساب ويرسل تعليمات إعداد آمنة للبوابة. لا يتم عرض كلمة مرور مؤقتة هنا." />
             </p>
             <button 
               onClick={handleApprove}
