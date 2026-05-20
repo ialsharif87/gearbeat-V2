@@ -38,7 +38,8 @@ export default function PortalLoginPage() {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role, account_status")
-      .eq("id", user.id)
+      .or(`auth_user_id.eq.${user.id},id.eq.${user.id}`)
+      .limit(1)
       .maybeSingle();
 
     if (profileError) console.error("Profile fetch error:", profileError);
@@ -51,9 +52,44 @@ export default function PortalLoginPage() {
     const role = profile?.role;
     const status = profile?.account_status;
 
-    if (status === "pending" || status === "under_review") {
+    if (status === "deleted") {
+      await supabase.auth.signOut();
+      throw new Error("This account is not available. Please contact support.");
+    }
+
+    if (status === "pending_deletion") {
+      router.push("/account/delete");
+      return;
+    }
+
+    if (status && status !== "active") {
       router.push("/portal/pending");
       return;
+    }
+
+    if (role === "vendor") {
+      const { data: vendorProfile, error: vendorProfileError } = await supabase
+        .from("vendor_profiles")
+        .select("status")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (vendorProfileError) {
+        console.warn("[portal-login] Vendor status lookup failed", {
+          code: vendorProfileError.code,
+          message: vendorProfileError.message,
+        });
+      }
+
+      if (
+        !vendorProfile ||
+        vendorProfile.status === "pending" ||
+        vendorProfile.status === "rejected" ||
+        vendorProfile.status === "suspended"
+      ) {
+        router.push("/vendor-pending");
+        return;
+      }
     }
 
     const { data: lead } = await supabase

@@ -1,15 +1,31 @@
-import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdminLayoutAccess } from "@/lib/route-guards";
 import T from "@/components/t";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 
-export default async function UserManagementPage() {
-  const supabase = createAdminClient();
+const ALLOWED_PROFILE_ACCOUNT_STATUSES = ["active", "suspended", "pending_deletion", "deleted"] as const;
+type ProfileAccountStatus = (typeof ALLOWED_PROFILE_ACCOUNT_STATUSES)[number];
 
-  // 1. Fetch current admin for permission check
-  const { data: { user: authUser } } = await supabase.auth.getUser();
-  if (!authUser) redirect("/login");
+function isAllowedProfileAccountStatus(value: string): value is ProfileAccountStatus {
+  return ALLOWED_PROFILE_ACCOUNT_STATUSES.includes(value as ProfileAccountStatus);
+}
+
+function warnUserLifecycle(reason: string, details?: unknown) {
+  if (!details || typeof details !== "object") {
+    console.warn("[admin-users]", reason);
+    return;
+  }
+
+  const record = details as Record<string, unknown>;
+  console.warn("[admin-users]", reason, {
+    code: typeof record.code === "string" ? record.code : undefined,
+    message: typeof record.message === "string" ? record.message : undefined,
+  });
+}
+
+export default async function UserManagementPage() {
+  const { supabaseAdmin: supabase, user: authUser } = await requireAdminLayoutAccess();
 
   const { data: currentAdmin } = await supabase
     .from("admin_users")
@@ -17,9 +33,7 @@ export default async function UserManagementPage() {
     .eq("auth_user_id", authUser.id)
     .maybeSingle();
 
-  if (!currentAdmin) redirect("/");
-
-  const isSuperAdmin = currentAdmin.admin_role === "super_admin";
+  const isSuperAdmin = currentAdmin?.admin_role === "super_admin";
 
   // 2. Fetch all profiles
   const { data: profiles, error: profilesError } = await supabase
@@ -50,6 +64,13 @@ export default async function UserManagementPage() {
     "use server";
     const targetUserId = String(formData.get("userId"));
     const newStatus = String(formData.get("status"));
+
+    if (!isAllowedProfileAccountStatus(newStatus)) {
+      warnUserLifecycle("Blocked invalid profile account status update", {
+        code: "invalid_account_status",
+      });
+      return;
+    }
     
     const supabaseAdmin = createAdminClient();
     const { error } = await supabaseAdmin
@@ -57,25 +78,48 @@ export default async function UserManagementPage() {
       .update({ account_status: newStatus })
       .eq("auth_user_id", targetUserId);
 
-    if (error) console.error("Status update failed:", error);
+    if (error) warnUserLifecycle("Status update failed", error);
     revalidatePath("/admin/users");
   }
 
-  // Server Action for Deletion
+  // Server Action for soft deletion marker. This does not delete auth users.
   async function deleteUser(formData: FormData) {
     "use server";
-    const targetUserId = String(formData.get("userId"));
     const targetAuthId = String(formData.get("authId"));
     
     const supabaseAdmin = createAdminClient();
-    
-    // Delete from profiles
-    await supabaseAdmin.from("profiles").delete().eq("auth_user_id", targetAuthId);
-    
-    // Delete from auth (Supabase Admin SDK)
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(targetAuthId);
 
-    if (error) console.error("Auth deletion failed:", error);
+    const { data: linkedAdminUser, error: adminLookupError } = await supabaseAdmin
+      .from("admin_users")
+      .select("id")
+      .eq("auth_user_id", targetAuthId)
+      .maybeSingle();
+
+    if (adminLookupError) {
+      warnUserLifecycle("Admin lookup failed before soft delete", adminLookupError);
+      revalidatePath("/admin/users");
+      return;
+    }
+
+    if (linkedAdminUser) {
+      warnUserLifecycle("Blocked admin account soft delete from user management", {
+        code: "admin_account_delete_blocked",
+      });
+      revalidatePath("/admin/users");
+      return;
+    }
+    
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        account_status: "deleted",
+        deleted_at: new Date().toISOString(),
+        deleted_reason: "Marked deleted from admin user management.",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("auth_user_id", targetAuthId);
+
+    if (error) warnUserLifecycle("Soft delete marker failed", error);
     revalidatePath("/admin/users");
   }
 

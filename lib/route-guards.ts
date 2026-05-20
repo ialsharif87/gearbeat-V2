@@ -56,7 +56,8 @@ async function getProtectedContext(loginPath: string) {
     supabaseAdmin
       .from("profiles")
       .select("id, auth_user_id, email, full_name, phone, role, account_status")
-      .eq("id", user.id)
+      .or(`auth_user_id.eq.${user.id},id.eq.${user.id}`)
+      .limit(1)
       .maybeSingle()
   ]);
 
@@ -194,7 +195,11 @@ export async function requireVendorLayoutAccess() {
     redirect("/portal/store/onboarding");
   }
 
-  if (vendorProfile.status === "pending" || vendorProfile.status === "rejected") {
+  if (
+    vendorProfile.status === "pending" ||
+    vendorProfile.status === "rejected" ||
+    vendorProfile.status === "suspended"
+  ) {
     redirect("/vendor-pending");
   }
 

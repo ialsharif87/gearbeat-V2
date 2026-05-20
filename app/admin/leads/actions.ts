@@ -8,6 +8,34 @@ import { getCurrentUserRole, isAdminRole } from "@/lib/auth-guards";
 import { sendEmail } from "@/lib/emails";
 import { revalidatePath } from "next/cache";
 
+const ADMIN_LEAD_ACTION_ERROR =
+  "We could not complete this admin action. Please review the application and try again.";
+
+function safeLogDetails(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  const record = error as Record<string, unknown>;
+  const details: Record<string, unknown> = {};
+
+  for (const key of ["name", "message", "code", "status"]) {
+    if (
+      typeof record[key] === "string" ||
+      typeof record[key] === "number" ||
+      typeof record[key] === "boolean"
+    ) {
+      details[key] = record[key];
+    }
+  }
+
+  return Object.keys(details).length ? details : undefined;
+}
+
+function warnAdminLeadAction(reason: string, error?: unknown) {
+  console.warn("[admin-leads]", reason, safeLogDetails(error));
+}
+
 function generatePassword(length = 12) {
   const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
   let retVal = "";
@@ -129,11 +157,14 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
       email: app.email,
       phone: app.phone,
       role: "studio_owner",
-      account_status: "approved", 
+      account_status: "active",
       updated_at: new Date().toISOString()
     });
 
-    if (profileError) throw new Error(`Profile Update Error: ${profileError.message}`);
+    if (profileError) {
+      warnAdminLeadAction("Profile upsert failed during studio approval", profileError);
+      throw new Error("profile_update_failed");
+    }
 
     // 5. Update Application Status
     const { error: updateError } = await supabaseAdmin
@@ -194,8 +225,8 @@ export async function approveStudioApplication(appId: string, commissionRate: nu
     revalidatePath("/admin/leads");
     return { success: true, tempPassword };
   } catch (err: any) {
-    console.error("Approve Studio Error:", err);
-    return { success: false, error: err.message || "An unexpected error occurred during approval." };
+    warnAdminLeadAction("Approve studio application failed", err);
+    return { success: false, error: ADMIN_LEAD_ACTION_ERROR };
   }
 }
 
@@ -298,50 +329,124 @@ export async function giveFinalApproval(appId: string) {
 }
 
 export async function requestLeadUpdate(leadId: string, message: string) {
-  const supabaseAdmin = createAdminClient();
-  await supabaseAdmin.from("provider_leads").update({ status: "needs_update" }).eq("id", leadId);
-  const { data: lead } = await supabaseAdmin.from("provider_leads").select("email").eq("id", leadId).single();
+  try {
+    const supabaseAdmin = createAdminClient();
+    const { error: updateError } = await supabaseAdmin
+      .from("provider_leads")
+      .update({ status: "needs_update" })
+      .eq("id", leadId);
 
-  if (lead) {
-    await sendEmail({
-      to: lead.email,
-      subject: "Action Required: Update your GearBeat application",
-      html: `
-        <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #cfa86e; border-radius: 20px;">
-          <h2 style="color: #cfa86e;">Modification Requested</h2>
-          <p>Our team reviewed your application and found some missing or incorrect information:</p>
-          <div style="background: #111; padding: 20px; border-radius: 10px; margin: 20px 0;">${message}</div>
-          <p>Please log in or contact support to provide the requested updates.</p>
-        </div>
-      `
-    });
+    if (updateError) {
+      throw updateError;
+    }
+
+    const { data: lead, error: leadError } = await supabaseAdmin
+      .from("provider_leads")
+      .select("email")
+      .eq("id", leadId)
+      .single();
+
+    if (leadError) {
+      throw leadError;
+    }
+
+    if (lead) {
+      await sendEmail({
+        to: lead.email,
+        subject: "Action Required: Update your GearBeat application",
+        html: `
+          <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #cfa86e; border-radius: 20px;">
+            <h2 style="color: #cfa86e;">Modification Requested</h2>
+            <p>Our team reviewed your application and found some missing or incorrect information:</p>
+            <div style="background: #111; padding: 20px; border-radius: 10px; margin: 20px 0;">${message}</div>
+            <p>Please log in or contact support to provide the requested updates.</p>
+          </div>
+        `
+      });
+    }
+
+    revalidatePath("/admin/leads");
+    return { success: true };
+  } catch (error) {
+    warnAdminLeadAction("Request lead update failed", error);
+    return { success: false, error: ADMIN_LEAD_ACTION_ERROR };
   }
-
-  revalidatePath("/admin/leads");
-  return { success: true };
 }
 
 export async function rejectLeadApplication(leadId: string, reason: string) {
-  const supabaseAdmin = createAdminClient();
-  await supabaseAdmin.from("provider_leads").update({ status: "rejected" }).eq("id", leadId);
-  const { data: lead } = await supabaseAdmin.from("provider_leads").select("email").eq("id", leadId).single();
+  try {
+    const supabaseAdmin = createAdminClient();
+    const { error: updateError } = await supabaseAdmin
+      .from("provider_leads")
+      .update({ status: "rejected" })
+      .eq("id", leadId);
 
-  if (lead) {
-    await sendEmail({
-      to: lead.email,
-      subject: "Update regarding your GearBeat application",
-      html: `
-        <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #ef4444; border-radius: 20px;">
-          <h2 style="color: #ef4444;">Application Declined</h2>
-          <p>Thank you for your interest in GearBeat. Unfortunately, we cannot proceed with your application at this time.</p>
-          <p><strong>Reason:</strong> ${reason}</p>
-        </div>
-      `
-    });
+    if (updateError) {
+      throw updateError;
+    }
+
+    const { data: lead, error: leadError } = await supabaseAdmin
+      .from("provider_leads")
+      .select("email")
+      .eq("id", leadId)
+      .single();
+
+    if (leadError) {
+      throw leadError;
+    }
+
+    if (lead) {
+      await sendEmail({
+        to: lead.email,
+        subject: "Update regarding your GearBeat application",
+        html: `
+          <div style="font-family: sans-serif; padding: 40px; background: #000; color: #fff; border: 1px solid #ef4444; border-radius: 20px;">
+            <h2 style="color: #ef4444;">Application Declined</h2>
+            <p>Thank you for your interest in GearBeat. Unfortunately, we cannot proceed with your application at this time.</p>
+            <p><strong>Reason:</strong> ${reason}</p>
+          </div>
+        `
+      });
+    }
+
+    revalidatePath("/admin/leads");
+    return { success: true };
+  } catch (error) {
+    warnAdminLeadAction("Reject lead application failed", error);
+    return { success: false, error: ADMIN_LEAD_ACTION_ERROR };
   }
+}
 
-  revalidatePath("/admin/leads");
-  return { success: true };
+export async function deleteLeadApplication(leadId: string, studioAppId?: string) {
+  try {
+    const supabaseAdmin = createAdminClient();
+
+    const { error: leadDeleteError } = await supabaseAdmin
+      .from("provider_leads")
+      .delete()
+      .eq("id", leadId);
+
+    if (leadDeleteError) {
+      throw leadDeleteError;
+    }
+
+    if (studioAppId) {
+      const { error: studioDeleteError } = await supabaseAdmin
+        .from("studio_applications")
+        .delete()
+        .eq("id", studioAppId);
+
+      if (studioDeleteError) {
+        throw studioDeleteError;
+      }
+    }
+
+    revalidatePath("/admin/leads");
+    return { success: true };
+  } catch (error) {
+    warnAdminLeadAction("Delete lead application failed", error);
+    return { success: false, error: ADMIN_LEAD_ACTION_ERROR };
+  }
 }
 
 export async function getSignedContractAction(contractUrl: string) {
