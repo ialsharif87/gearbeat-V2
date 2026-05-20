@@ -7,6 +7,64 @@ import { createClient } from "@/lib/supabase/client";
 import T from "@/components/t";
 import { isDeviceTrusted, trustDevice } from "@/lib/device-trust";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+  GEARBEAT_SELLER_PORTAL_DOMAIN,
+  GEARBEAT_STUDIO_PORTAL_DOMAIN,
+  normalizeSubdomainHost,
+} from "@/lib/subdomain-routing";
+
+type PortalLoginSurface = "studio" | "seller" | "partner";
+
+const PORTAL_LOGIN_COPY: Record<
+  PortalLoginSurface,
+  {
+    badgeEn: string;
+    badgeAr: string;
+    titleEn: string;
+    titleAr: string;
+    helperEn: string;
+    helperAr: string;
+  }
+> = {
+  studio: {
+    badgeEn: "STUDIO OWNER PORTAL",
+    badgeAr: "بوابة أصحاب الاستوديوهات",
+    titleEn: "Studio Owner Login",
+    titleAr: "دخول أصحاب الاستوديوهات",
+    helperEn: "Approved studio owners only.",
+    helperAr: "هذه البوابة مخصصة لأصحاب الاستوديوهات المعتمدين فقط.",
+  },
+  seller: {
+    badgeEn: "SELLER CENTER",
+    badgeAr: "مركز التجار",
+    titleEn: "Seller Center Login",
+    titleAr: "دخول التجار",
+    helperEn: "Approved sellers only.",
+    helperAr: "هذه البوابة مخصصة للتجار المعتمدين لإدارة المنتجات والطلبات.",
+  },
+  partner: {
+    badgeEn: "PROVIDER PORTAL",
+    badgeAr: "بوابة المزودين",
+    titleEn: "Partner Portal Login",
+    titleAr: "دخول بوابة الشركاء",
+    helperEn: "Approved partners only.",
+    helperAr: "هذه البوابة مخصصة للشركاء المعتمدين فقط.",
+  },
+};
+
+function getPortalLoginSurface(hostname: string | null | undefined): PortalLoginSurface {
+  const host = normalizeSubdomainHost(hostname);
+
+  if (host === GEARBEAT_STUDIO_PORTAL_DOMAIN) {
+    return "studio";
+  }
+
+  if (host === GEARBEAT_SELLER_PORTAL_DOMAIN) {
+    return "seller";
+  }
+
+  return "partner";
+}
 
 function normalizeOtpCode(value: string) {
   return value.replace(/\D/g, "").slice(0, 8);
@@ -27,10 +85,16 @@ export default function PortalLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
+  const [loginSurface, setLoginSurface] = useState<PortalLoginSurface>("partner");
 
   const [pendingUser, setPendingUser] = useState<any>(null);
   const router = useRouter();
   const supabase = createClient();
+  const loginCopy = PORTAL_LOGIN_COPY[loginSurface];
+
+  useEffect(() => {
+    setLoginSurface(getPortalLoginSurface(window.location.hostname));
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -209,20 +273,20 @@ export default function PortalLoginPage() {
         <header className="login-header">
           <div className="brand-logo">GearBeat</div>
           <div className="portal-badge">
-            <T en="PROVIDER PORTAL" ar="بوابة المزودين" />
+            <T en={loginCopy.badgeEn} ar={loginCopy.badgeAr} />
           </div>
         </header>
 
         <section className="login-card">
           <div className="card-top">
             <h1>
-              <T en="Welcome Back" ar="مرحباً بعودتك" />
+              <T en={loginCopy.titleEn} ar={loginCopy.titleAr} />
             </h1>
             <p className="subtitle">
               {authMode === "password" ? (
                 <T 
-                  en="Approved studio owners and sellers can access their assigned portal." 
-                  ar="دخول الشركاء المعتمدين فقط إلى بوابة الاستوديو أو المتجر." 
+                  en={loginCopy.helperEn}
+                  ar={loginCopy.helperAr}
                 />
               ) : step === "request" ? (
                 <T en="Login securely with a one-time code" ar="سجل دخولك بأمان عبر رمز لمرة واحدة" />
