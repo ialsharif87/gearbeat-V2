@@ -24,12 +24,25 @@ export const SUBDOMAIN_ROOT_ROUTE_MAP: Record<string, string> = {
   [GEARBEAT_SELLER_PORTAL_DOMAIN]: "/portal/store",
 };
 
-function normalizeHost(hostname: string) {
-  return String(hostname || "").toLowerCase().split(":")[0];
+export function normalizeSubdomainHost(hostname: string | null | undefined) {
+  const firstHost = String(hostname || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+
+  if (firstHost.startsWith("[") && firstHost.includes("]")) {
+    return firstHost.slice(1, firstHost.indexOf("]"));
+  }
+
+  if (firstHost === "::1") {
+    return firstHost;
+  }
+
+  return firstHost.split(":")[0];
 }
 
 function isLocalHost(hostname: string) {
-  const host = normalizeHost(hostname);
+  const host = normalizeSubdomainHost(hostname);
 
   return (
     host === "localhost" ||
@@ -40,16 +53,42 @@ function isLocalHost(hostname: string) {
   );
 }
 
-export function getSubdomainRootRewritePath(hostname: string, pathname: string) {
+export function getSubdomainRootRedirectPath(options: {
+  forwardedHostHeader?: string | null;
+  hostHeader?: string | null;
+  nextUrlHostname?: string | null;
+  pathname: string;
+}) {
+  const {
+    forwardedHostHeader,
+    hostHeader,
+    nextUrlHostname,
+    pathname,
+  } = options;
+
   if (pathname !== "/") {
     return null;
   }
 
-  if (isLocalHost(hostname)) {
-    return null;
+  const hostCandidates = [
+    forwardedHostHeader,
+    hostHeader,
+    nextUrlHostname,
+  ];
+
+  for (const candidate of hostCandidates) {
+    const host = normalizeSubdomainHost(candidate);
+
+    if (!host || isLocalHost(host)) {
+      continue;
+    }
+
+    const redirectPath = SUBDOMAIN_ROOT_ROUTE_MAP[host];
+    if (redirectPath) {
+      return redirectPath;
+    }
   }
 
-  const host = normalizeHost(hostname);
-  return SUBDOMAIN_ROOT_ROUTE_MAP[host] || null;
+  return null;
 }
 
