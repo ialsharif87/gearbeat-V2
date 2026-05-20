@@ -10,6 +10,7 @@ import type {
 import { sendMockOtp } from "@/lib/otp/mock-provider";
 
 const OTP_LENGTH = 6;
+const OTP_ALLOWED_LENGTHS = [6, 8] as const;
 
 export function generateOtpCode(length = OTP_LENGTH) {
   const min = 10 ** (length - 1);
@@ -84,7 +85,8 @@ export function isValidOtpTargetValue({
 }
 
 export function isValidOtpCode(code: string) {
-  return /^\d{6}$/.test(String(code || "").trim());
+  const value = String(code || "").trim();
+  return /^\d+$/.test(value) && OTP_ALLOWED_LENGTHS.includes(value.length as (typeof OTP_ALLOWED_LENGTHS)[number]);
 }
 
 export function shouldReturnDevOtpCode() {

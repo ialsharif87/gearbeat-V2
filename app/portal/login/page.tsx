@@ -8,6 +8,14 @@ import T from "@/components/t";
 import { isDeviceTrusted, trustDevice } from "@/lib/device-trust";
 import { PasswordInput } from "@/components/ui/password-input";
 
+function normalizeOtpCode(value: string) {
+  return value.replace(/\D/g, "").slice(0, 8);
+}
+
+function isOtpCodeLengthValid(value: string) {
+  return value.length === 6 || value.length === 8;
+}
+
 
 export default function PortalLoginPage() {
   const [email, setEmail] = useState("");
@@ -219,7 +227,7 @@ export default function PortalLoginPage() {
               ) : step === "request" ? (
                 <T en="Login securely with a one-time code" ar="سجل دخولك بأمان عبر رمز لمرة واحدة" />
               ) : (
-                <T en="Enter the 6-digit code sent to your email" ar="أدخل الرمز المكون من 6 أرقام المرسل لبريدك" />
+                <T en="Enter the verification code sent to your email (6 or 8 digits)" ar="أدخل رمز التحقق المرسل لبريدك (6 أو 8 أرقام)" />
               )}
             </p>
           </div>
@@ -318,10 +326,10 @@ export default function PortalLoginPage() {
                       <input
                         type="text"
                         inputMode="numeric"
-                        maxLength={6}
+                        maxLength={8}
                         value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                        placeholder="000 000"
+                        onChange={(e) => setOtpCode(normalizeOtpCode(e.target.value))}
+                        placeholder="00000000"
                         required
                         className="otp-input"
                       />
@@ -339,7 +347,7 @@ export default function PortalLoginPage() {
                       </label>
                     </div>
 
-                    <button type="submit" disabled={loading} className="submit-btn primary">
+                    <button type="submit" disabled={loading || !isOtpCodeLengthValid(otpCode)} className="submit-btn primary">
                       {loading ? <span className="loader"></span> : <T en="Verify & Access" ar="تحقق ودخول" />}
                     </button>
 
