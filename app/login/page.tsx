@@ -17,6 +17,19 @@ function isOtpCodeLengthValid(value: string) {
   return value.length === 6 || value.length === 8;
 }
 
+type LoginUser = {
+  id: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+};
+
+function readRole(user: LoginUser) {
+  const appRole = user.app_metadata?.role;
+  const userRole = user.user_metadata?.role || user.user_metadata?.account_type;
+  const role = typeof appRole === "string" ? appRole : userRole;
+
+  return typeof role === "string" ? role.trim().toLowerCase() : "customer";
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,6 +41,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [confirmationError, setConfirmationError] = useState(false);
 
   const router = useRouter();
   const supabase = createClient();
@@ -43,35 +58,92 @@ export default function LoginPage() {
   }, [cooldown]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setConfirmed(params.get("confirmed") === "1");
+    setConfirmationError(params.get("confirmation_error") === "1");
+  }, []);
+
+  async function ensureCustomerProfile() {
+    const response = await fetch("/api/customer/profile/ensure", {
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      let reason = "unknown";
+
+      try {
+        const body = await response.json();
+        reason = body?.reason || reason;
+      } catch {
+        reason = "invalid_response";
+      }
+
+      console.warn("Customer profile auto-repair from login failed", { reason });
+      return false;
+    }
+
+    return true;
+  }
+
+  async function routeAuthenticatedUser(
+    user: LoginUser,
+    mode: "push" | "replace" = "push"
+  ) {
+    const navigate = (path: string) => {
+      if (mode === "replace") {
+        router.replace(path);
+      } else {
+        router.push(path);
+      }
+    };
+
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (adminUser) {
+      navigate("/admin");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .or(`auth_user_id.eq.${user.id},id.eq.${user.id}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (!profile) {
+      const role = readRole(user);
+
+      if (role === "customer" || role === "user") {
+        const repaired = await ensureCustomerProfile();
+
+        if (repaired) {
+          navigate("/customer");
+          return;
+        }
+      }
+
+      navigate("/profile/repair");
+      return;
+    }
+
+    if (profile.role === "admin" || profile.role === "super_admin") {
+      navigate("/admin");
+    } else {
+      navigate(dashboardPathForRole(profile.role));
+    }
+  }
+
+  useEffect(() => {
     async function checkUser() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Query admin_users table for staff status
-        const { data: adminUser } = await supabase
-          .from("admin_users")
-          .select("id")
-          .eq("auth_user_id", user.id)
-          .eq("status", "active")
-          .maybeSingle();
-
-        if (adminUser) {
-          router.replace("/admin");
-          return;
-        }
-
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle();
-        
-        if (!profile) {
-          router.replace("/profile/repair");
-        } else if (profile.role === "admin" || profile.role === "super_admin") {
-          router.replace("/admin");
-        } else {
-          router.replace(dashboardPathForRole(profile.role));
-        }
+        await routeAuthenticatedUser(user, "replace");
       }
     }
     checkUser();
@@ -102,32 +174,7 @@ export default function LoginPage() {
         return;
       }
 
-      // Query admin_users table for staff status
-      const { data: adminUser } = await supabase
-        .from("admin_users")
-        .select("id")
-        .eq("auth_user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-
-      if (adminUser) {
-        router.push("/admin");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!profile) {
-        router.push("/profile/repair");
-      } else if (profile.role === "admin" || profile.role === "super_admin") {
-        router.push("/admin");
-      } else {
-        router.push(dashboardPathForRole(profile.role));
-      }
+      await routeAuthenticatedUser(user);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
     } finally {
@@ -180,32 +227,7 @@ export default function LoginPage() {
       if (rememberDevice) {
         await trustDevice(user.id);
       }
-      // Query admin_users table for staff status
-      const { data: adminUser } = await supabase
-        .from("admin_users")
-        .select("id")
-        .eq("auth_user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-
-      if (adminUser) {
-        router.push("/admin");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!profile) {
-        router.push("/profile/repair");
-      } else if (profile.role === "admin" || profile.role === "super_admin") {
-        router.push("/admin");
-      } else {
-        router.push(dashboardPathForRole(profile.role));
-      }
+      await routeAuthenticatedUser(user);
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
     } finally {
@@ -230,6 +252,24 @@ export default function LoginPage() {
             )}
           </p>
         </div>
+
+        {confirmationError && (
+          <div className="auth-error">
+            <T
+              en="The confirmation link is invalid or expired. Please request a new login code."
+              ar="رابط التفعيل غير صالح أو منتهي. يرجى طلب رمز دخول جديد."
+            />
+          </div>
+        )}
+
+        {confirmed && !confirmationError && (
+          <div className="auth-success">
+            <T
+              en="Email confirmed. You can continue to your GearBeat account."
+              ar="تم تفعيل البريد الإلكتروني. يمكنك المتابعة إلى حسابك في GearBeat."
+            />
+          </div>
+        )}
 
         {error && <div className="auth-error">{error}</div>}
 
@@ -486,6 +526,17 @@ export default function LoginPage() {
           font-size: 0.85rem;
           margin-bottom: 24px;
           text-align: center;
+        }
+        .auth-success {
+          padding: 12px;
+          background: rgba(16, 160, 138, 0.1);
+          border: 1px solid rgba(16, 160, 138, 0.35);
+          border-radius: 12px;
+          color: #10a08a;
+          font-size: 0.85rem;
+          margin-bottom: 24px;
+          text-align: center;
+          line-height: 1.6;
         }
         .auth-footer {
           margin-top: 24px;
