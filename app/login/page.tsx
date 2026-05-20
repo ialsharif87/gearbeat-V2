@@ -9,6 +9,13 @@ import { isDeviceTrusted, trustDevice } from "@/lib/device-trust";
 import { PasswordInput } from "@/components/ui/password-input";
 import { dashboardPathForRole } from "@/lib/role-routing";
 
+function normalizeOtpCode(value: string) {
+  return value.replace(/\D/g, "").slice(0, 8);
+}
+
+function isOtpCodeLengthValid(value: string) {
+  return value.length === 6 || value.length === 8;
+}
 
 
 export default function LoginPage() {
@@ -219,7 +226,7 @@ export default function LoginPage() {
             ) : step === "request" ? (
               <T en="Enter your email to receive a code" ar="أدخل بريدك الإلكتروني لاستلام رمز الدخول" />
             ) : (
-              <T en="Enter the 6-digit code sent to your email" ar="أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك" />
+              <T en="Enter the verification code sent to your email (6 or 8 digits)" ar="أدخل رمز التحقق المرسل إلى بريدك (6 أو 8 أرقام)" />
             )}
           </p>
         </div>
@@ -316,10 +323,10 @@ export default function LoginPage() {
                   <input
                     type="text"
                     inputMode="numeric"
-                    maxLength={6}
+                    maxLength={8}
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="000000"
+                    onChange={(e) => setOtpCode(normalizeOtpCode(e.target.value))}
+                    placeholder="00000000"
                     required
                     className="gb-input"
                     style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '1.5rem' }}
@@ -338,7 +345,7 @@ export default function LoginPage() {
                   </label>
                 </div>
 
-                <button type="submit" disabled={loading} className="gb-button">
+                <button type="submit" disabled={loading || !isOtpCodeLengthValid(otpCode)} className="gb-button">
                   {loading ? <T en="Verifying..." ar="جاري التحقق..." /> : <T en="Verify & Login" ar="تحقق ودخول" />}
                 </button>
 

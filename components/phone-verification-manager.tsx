@@ -9,6 +9,14 @@ interface PhoneVerificationManagerProps {
   isVerified: boolean;
 }
 
+function normalizeOtpCode(value: string) {
+  return value.replace(/\D/g, "").slice(0, 8);
+}
+
+function isOtpCodeLengthValid(value: string) {
+  return value.length === 6 || value.length === 8;
+}
+
 export default function PhoneVerificationManager({ phone, isVerified }: PhoneVerificationManagerProps) {
   const [step, setStep] = useState<"idle" | "requesting" | "verifying" | "success">("idle");
   const [otp, setOtp] = useState("");
@@ -86,23 +94,23 @@ export default function PhoneVerificationManager({ phone, isVerified }: PhoneVer
       {(step === "requesting" || step === "verifying") && (
         <div style={{ display: 'grid', gap: '12px' }}>
           <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--gb-gold)' }}>
-            <T en="Enter the 6-digit code sent to your phone" ar="أدخل الرمز المكون من 6 أرقام المرسل لجوالك" />
+            <T en="Enter the verification code sent to your phone (6 or 8 digits)" ar="أدخل رمز التحقق المرسل لجوالك (6 أو 8 أرقام)" />
           </label>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input 
               type="text" 
               className="gb-input" 
-              placeholder="000000" 
-              maxLength={6}
+              placeholder="00000000" 
+              maxLength={8}
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(e) => setOtp(normalizeOtpCode(e.target.value))}
               style={{ textAlign: 'center', letterSpacing: '4px', flex: 1 }}
             />
             <button 
               type="button"
               className="btn btn-gold" 
               onClick={handleVerifyOTP}
-              disabled={otp.length !== 6 || step === "requesting"}
+              disabled={!isOtpCodeLengthValid(otp) || step === "requesting"}
             >
               <T en="Verify" ar="تحقق" />
             </button>
