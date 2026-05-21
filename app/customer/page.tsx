@@ -219,7 +219,7 @@ export default async function CustomerDashboardPage() {
   const maxTierPoints = 5000;
   const currentPoints = Number(wallet?.points_balance || 0);
   const percentage = Math.min((currentPoints / maxTierPoints) * 100, 100);
-  const radius = 22;
+  const radius = 25;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
@@ -229,10 +229,10 @@ export default async function CustomerDashboardPage() {
     <main className="gb-dashboard-page">
       <style dangerouslySetInnerHTML={{ __html: `
         .gb-dashboard-page {
-          padding: 32px 24px;
+          padding: 34px 24px 40px;
           display: flex;
           flex-direction: column;
-          gap: 28px;
+          gap: 30px;
           min-height: 100vh;
         }
         .gb-premium-hero-card {
@@ -240,12 +240,12 @@ export default async function CustomerDashboardPage() {
                       linear-gradient(135deg, rgba(15, 22, 33, 0.95), rgba(11, 15, 22, 0.98));
           border: 1px solid rgba(212, 175, 55, 0.2);
           box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 35px rgba(212, 175, 55, 0.02);
-          border-radius: 24px;
-          padding: 32px;
+          border-radius: 26px;
+          padding: clamp(24px, 3vw, 40px);
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          gap: 24px;
+          align-items: stretch;
+          gap: 28px;
           flex-wrap: wrap;
           position: relative;
           overflow: hidden;
@@ -265,16 +265,19 @@ export default async function CustomerDashboardPage() {
           position: relative;
           z-index: 1;
           display: flex;
-          align-items: center;
-          gap: 20px;
+          align-items: flex-start;
+          gap: 18px;
           flex-wrap: wrap;
+          flex: 1 1 560px;
+          min-width: 0;
         }
         .gb-avatar-circle {
-          width: 80px;
-          height: 80px;
+          width: clamp(72px, 7vw, 88px);
+          height: clamp(72px, 7vw, 88px);
           border-radius: 50%;
           background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.05));
           border: 2px solid var(--gb-gold);
+          flex: 0 0 auto;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -283,8 +286,9 @@ export default async function CustomerDashboardPage() {
           font-weight: 800;
           color: var(--gb-gold-light);
           text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-          box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+          box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), inset 0 0 18px rgba(255, 255, 255, 0.04);
           animation: gbAvatarPulse 3s infinite ease-in-out;
+          margin-top: 2px;
         }
         @keyframes gbAvatarPulse {
           0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); border-color: var(--gb-gold); }
@@ -293,7 +297,9 @@ export default async function CustomerDashboardPage() {
         .gb-hero-info {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 10px;
+          min-width: 0;
+          max-width: 760px;
         }
         .gb-hero-name {
           font-size: clamp(1.6rem, 4vw, 2.4rem);
@@ -306,13 +312,15 @@ export default async function CustomerDashboardPage() {
         .gb-badge-row {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
+          row-gap: 8px;
           flex-wrap: wrap;
-          margin-top: 2px;
+          margin-top: 0;
         }
         .gb-premium-badge {
-          padding: 4px 12px;
-          border-radius: 8px;
+          min-height: 28px;
+          padding: 5px 12px;
+          border-radius: 999px;
           font-size: 0.7rem;
           font-weight: 800;
           text-transform: uppercase;
@@ -320,22 +328,28 @@ export default async function CustomerDashboardPage() {
           background: rgba(212, 175, 55, 0.1);
           border: 1px solid rgba(212, 175, 55, 0.4);
           color: var(--gb-gold-light);
+          display: inline-flex;
+          align-items: center;
         }
         [dir="rtl"] .gb-premium-badge {
           letter-spacing: 0;
         }
         .gb-status-badge {
-          padding: 4px 12px;
-          border-radius: 8px;
+          min-height: 28px;
+          padding: 5px 12px;
+          border-radius: 999px;
           font-size: 0.7rem;
           font-weight: 700;
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.1);
           color: #ccc;
+          display: inline-flex;
+          align-items: center;
         }
         .gb-verified-chip {
-          padding: 4px 12px;
-          border-radius: 8px;
+          min-height: 28px;
+          padding: 5px 12px;
+          border-radius: 999px;
           font-size: 0.7rem;
           font-weight: 700;
           background: rgba(15, 160, 138, 0.15);
@@ -346,8 +360,9 @@ export default async function CustomerDashboardPage() {
           gap: 4px;
         }
         .gb-unverified-chip {
-          padding: 4px 12px;
-          border-radius: 8px;
+          min-height: 28px;
+          padding: 5px 12px;
+          border-radius: 999px;
           font-size: 0.7rem;
           font-weight: 700;
           background: rgba(239, 68, 68, 0.1);
@@ -362,15 +377,31 @@ export default async function CustomerDashboardPage() {
           color: var(--gb-text-muted);
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           flex-wrap: wrap;
-          margin-top: 4px;
+          margin-top: 2px;
         }
         .gb-hero-actions {
           display: flex;
-          gap: 12px;
+          gap: 10px;
           z-index: 1;
           flex-wrap: wrap;
+          align-items: stretch;
+          align-self: center;
+          justify-content: flex-end;
+          min-width: 190px;
+          margin-left: auto;
+        }
+        [dir="rtl"] .gb-hero-actions {
+          margin-left: 0;
+          margin-right: auto;
+        }
+        .gb-hero-actions .btn {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
         }
         .gb-referral-widget {
           background: rgba(212, 175, 55, 0.08);
@@ -381,7 +412,8 @@ export default async function CustomerDashboardPage() {
           align-items: center;
           gap: 8px;
           font-size: 0.8rem;
-          margin-top: 4px;
+          margin-top: 0;
+          min-height: 32px;
         }
         .gb-referral-code {
           font-weight: 800;
@@ -390,22 +422,24 @@ export default async function CustomerDashboardPage() {
         }
         .gb-metric-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 20px;
+          grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+          gap: 18px;
         }
         .gb-metric-card {
           background: linear-gradient(135deg, rgba(15, 22, 33, 0.85), rgba(11, 15, 22, 0.95));
           border: 1px solid rgba(212, 175, 55, 0.1);
-          border-radius: 20px;
-          padding: 20px;
+          border-radius: 18px;
+          padding: 20px 20px 18px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          gap: 16px;
+          gap: 18px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
-          min-height: 140px;
+          min-height: 154px;
+          color: inherit;
+          text-decoration: none;
         }
         .gb-metric-card:hover {
           transform: translateY(-5px);
@@ -422,6 +456,7 @@ export default async function CustomerDashboardPage() {
           background: linear-gradient(to bottom, rgba(212, 175, 55, 0.02), transparent);
           opacity: 0;
           transition: opacity 0.3s ease;
+          pointer-events: none;
         }
         .gb-metric-card:hover::after {
           opacity: 1;
@@ -429,7 +464,9 @@ export default async function CustomerDashboardPage() {
         .gb-metric-header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          gap: 12px;
+          min-height: 38px;
         }
         .gb-metric-title {
           font-size: 0.7rem;
@@ -437,6 +474,7 @@ export default async function CustomerDashboardPage() {
           color: var(--gb-text-muted);
           text-transform: uppercase;
           letter-spacing: 1.5px;
+          line-height: 1.35;
         }
         [dir="rtl"] .gb-metric-title {
           letter-spacing: 0;
@@ -464,9 +502,10 @@ export default async function CustomerDashboardPage() {
           align-items: flex-end;
           justify-content: space-between;
           gap: 12px;
+          margin-top: auto;
         }
         .gb-metric-value {
-          font-size: 2.2rem;
+          font-size: clamp(1.9rem, 3vw, 2.25rem);
           font-weight: 900;
           color: #fff;
           line-height: 1;
@@ -479,37 +518,40 @@ export default async function CustomerDashboardPage() {
         .gb-metric-subtext {
           font-size: 0.75rem;
           color: var(--gb-text-muted);
-          margin-top: 4px;
+          margin-top: 6px;
+          line-height: 1.35;
+          min-height: 1.1em;
         }
         .gb-points-ring-container {
           position: relative;
-          width: 54px;
-          height: 54px;
+          width: 64px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: center;
+          flex: 0 0 64px;
         }
         .gb-points-ring-svg {
           transform: rotate(-90deg);
-          width: 54px;
-          height: 54px;
+          width: 64px;
+          height: 64px;
         }
         .gb-points-ring-circle-bg {
           fill: none;
           stroke: rgba(255, 255, 255, 0.05);
-          stroke-width: 4;
+          stroke-width: 5;
         }
         .gb-points-ring-circle-fill {
           fill: none;
           stroke: url(#goldGradientDashboard);
-          stroke-width: 4;
+          stroke-width: 5;
           stroke-linecap: round;
           transition: stroke-dashoffset 0.6s ease;
         }
         .gb-points-ring-pulse {
           position: absolute;
-          width: 46px;
-          height: 46px;
+          width: 54px;
+          height: 54px;
           border-radius: 50%;
           border: 1px solid rgba(212, 175, 55, 0.3);
           animation: ringPulseDashboard 2s infinite ease-out;
@@ -521,23 +563,26 @@ export default async function CustomerDashboardPage() {
         }
         .gb-action-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-          gap: 14px;
-          margin-top: 16px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 14px;
         }
         .gb-action-card {
-          background: rgba(15, 22, 33, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 16px;
-          padding: 16px;
+          background: linear-gradient(145deg, rgba(15, 22, 33, 0.72), rgba(8, 12, 18, 0.92));
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 14px;
+          padding: 12px;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
-          gap: 10px;
+          gap: 8px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           cursor: pointer;
           position: relative;
+          min-height: 124px;
+          color: inherit;
+          text-decoration: none;
         }
         .gb-action-card:hover {
           transform: translateY(-4px);
@@ -546,10 +591,10 @@ export default async function CustomerDashboardPage() {
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
         .gb-action-icon {
-          font-size: 1.5rem;
-          width: 42px;
-          height: 42px;
-          border-radius: 12px;
+          font-size: 1.25rem;
+          width: 38px;
+          height: 38px;
+          border-radius: 11px;
           display: grid;
           place-items: center;
           background: rgba(255, 255, 255, 0.03);
@@ -564,32 +609,55 @@ export default async function CustomerDashboardPage() {
         }
         .gb-action-label {
           font-weight: 800;
-          font-size: 0.9rem;
+          font-size: 0.84rem;
           color: #fff;
+          line-height: 1.25;
         }
         .gb-action-desc {
-          font-size: 0.7rem;
+          font-size: 0.68rem;
           color: var(--gb-text-muted);
+          line-height: 1.35;
         }
         .gb-premium-empty {
           text-align: center;
-          padding: 32px 20px;
-          background: rgba(15, 22, 33, 0.4);
-          border-radius: 20px;
-          border: 1px dashed rgba(212, 175, 55, 0.15);
+          padding: 30px 24px;
+          background: linear-gradient(145deg, rgba(15, 22, 33, 0.46), rgba(7, 11, 18, 0.76));
+          border-radius: 18px;
+          border: 1px dashed rgba(212, 175, 55, 0.22);
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
+          justify-content: center;
+          gap: 11px;
           transition: all 0.3s;
+          min-height: 218px;
+          position: relative;
+          overflow: hidden;
+        }
+        .gb-premium-empty::before {
+          content: '';
+          position: absolute;
+          inset: 12px;
+          border-radius: 14px;
+          background: radial-gradient(circle at top, rgba(212, 175, 55, 0.08), transparent 55%);
+          pointer-events: none;
         }
         .gb-premium-empty:hover {
           border-color: rgba(212, 175, 55, 0.3);
           background: rgba(15, 22, 33, 0.5);
         }
         .gb-empty-icon {
-          font-size: 2.5rem;
+          width: 52px;
+          height: 52px;
+          border-radius: 16px;
+          display: grid;
+          place-items: center;
+          font-size: 1.85rem;
+          background: rgba(212, 175, 55, 0.08);
+          border: 1px solid rgba(212, 175, 55, 0.18);
           animation: floatEmptyDashboard 4s infinite ease-in-out;
+          position: relative;
+          z-index: 1;
         }
         @keyframes floatEmptyDashboard {
           0%, 100% { transform: translateY(0); }
@@ -599,18 +667,26 @@ export default async function CustomerDashboardPage() {
           font-size: 1.1rem;
           font-weight: 800;
           color: #fff;
+          position: relative;
+          z-index: 1;
         }
         .gb-empty-desc {
           font-size: 0.85rem;
           color: var(--gb-text-muted);
-          max-width: 320px;
-          line-height: 1.5;
+          max-width: 360px;
+          line-height: 1.6;
+          position: relative;
+          z-index: 1;
+        }
+        .gb-premium-empty .btn {
+          position: relative;
+          z-index: 1;
         }
         .gb-trust-card {
           background: linear-gradient(135deg, rgba(15, 22, 33, 0.9), rgba(11, 15, 22, 0.95));
           border: 1px solid rgba(212, 175, 55, 0.15);
-          border-radius: 24px;
-          padding: 24px;
+          border-radius: 22px;
+          padding: 22px;
           display: flex;
           flex-direction: column;
           gap: 16px;
@@ -629,7 +705,7 @@ export default async function CustomerDashboardPage() {
         }
         .gb-trust-header {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 12px;
         }
         .gb-trust-icon {
@@ -647,26 +723,117 @@ export default async function CustomerDashboardPage() {
           font-size: 1.1rem;
           font-weight: 800;
           color: #fff;
+          line-height: 1.25;
         }
         .gb-trust-desc {
           font-size: 0.85rem;
           color: var(--gb-text-muted);
           line-height: 1.6;
+          margin: 0;
+        }
+        .gb-trust-list {
+          display: grid;
+          gap: 10px;
         }
         .gb-trust-item {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px 16px;
+          padding: 12px 14px;
           background: rgba(0, 0, 0, 0.2);
           border: 1px solid rgba(255, 255, 255, 0.04);
-          border-radius: 14px;
+          border-radius: 13px;
           gap: 12px;
+          min-height: 48px;
+        }
+        .gb-trust-item .badge {
+          flex: 0 0 auto;
+          white-space: nowrap;
         }
         .gb-trust-item-label {
           font-weight: 700;
           font-size: 0.85rem;
           color: #eee;
+          line-height: 1.35;
+        }
+        .gb-trust-phone-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+        }
+        .gb-dashboard-stack {
+          width: 100%;
+        }
+        @media (max-width: 980px) {
+          .gb-dashboard-stack {
+            grid-template-columns: 1fr !important;
+          }
+          .gb-hero-actions {
+            width: 100%;
+            justify-content: flex-start;
+            margin-left: 0;
+            margin-right: 0;
+          }
+        }
+        @media (max-width: 680px) {
+          .gb-dashboard-page {
+            padding: 22px 14px 32px;
+            gap: 22px;
+          }
+          .gb-premium-hero-card {
+            padding: 22px;
+            gap: 22px;
+          }
+          .gb-avatar-container {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+          }
+          .gb-badge-row,
+          .gb-hero-meta {
+            justify-content: center;
+          }
+          .gb-referral-widget {
+            width: 100%;
+            justify-content: center;
+          }
+          .gb-hero-actions {
+            flex-direction: column;
+          }
+          .gb-hero-actions .btn {
+            width: 100%;
+          }
+          .gb-metric-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+          .gb-metric-card {
+            min-height: 136px;
+          }
+          .gb-action-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .gb-trust-phone-row,
+          .gb-trust-item {
+            align-items: stretch;
+          }
+          .gb-trust-item {
+            flex-direction: column;
+          }
+          .gb-trust-phone-row {
+            flex-direction: column;
+          }
+        }
+        @media (max-width: 420px) {
+          .gb-action-grid {
+            grid-template-columns: 1fr;
+          }
+          .gb-metric-body {
+            align-items: flex-start;
+            flex-direction: column;
+          }
         }
       `}} />
 
@@ -743,18 +910,18 @@ export default async function CustomerDashboardPage() {
             </span>
             <div className="gb-points-ring-container">
               <div className="gb-points-ring-pulse"></div>
-              <svg className="gb-points-ring-svg">
+              <svg className="gb-points-ring-svg" viewBox="0 0 64 64" aria-hidden="true">
                 <defs>
                   <linearGradient id="goldGradientDashboard" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#F4D47A" />
                     <stop offset="100%" stopColor="#D4AF37" />
                   </linearGradient>
                 </defs>
-                <circle className="gb-points-ring-circle-bg" cx="27" cy="27" r={radius} />
+                <circle className="gb-points-ring-circle-bg" cx="32" cy="32" r={radius} />
                 <circle
                   className="gb-points-ring-circle-fill"
-                  cx="27"
-                  cy="27"
+                  cx="32"
+                  cy="32"
                   r={radius}
                   strokeDasharray={circumference}
                   strokeDashoffset={strokeDashoffset}
@@ -1000,7 +1167,7 @@ export default async function CustomerDashboardPage() {
               </Link>
             </div>
 
-            <div style={{ display: "grid", gap: 12 }}>
+            <div className="gb-trust-list">
               {offerRows.length === 0 ? (
                 <div className="gb-premium-empty">
                   <div className="gb-empty-icon">🎁</div>
@@ -1118,7 +1285,7 @@ export default async function CustomerDashboardPage() {
               </div>
 
               <div className="gb-trust-item" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div className="gb-trust-phone-row">
                   <span className="gb-trust-item-label">
                     <T en="Phone Verification" ar="توثيق رقم الجوال" />
                   </span>
