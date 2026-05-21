@@ -11,6 +11,24 @@ import CountryPhoneFields from "@/components/country-phone-fields";
 import { isValidE164 } from "@/lib/phone";
 import { CountryOption } from "@/lib/countries";
 
+type ResendStatus = "idle" | "sending" | "sent" | "failed" | "missing_email";
+
+function customerConfirmationRedirectUrl() {
+  return new URL("/auth/confirm", window.location.origin).toString();
+}
+
+function isExistingAccountError(message: string) {
+  const normalized = message.trim().toLowerCase();
+
+  return (
+    normalized.includes("email_exists") ||
+    normalized.includes("already registered") ||
+    normalized.includes("already exists") ||
+    normalized.includes("user already") ||
+    normalized.includes("email address is already")
+  );
+}
+
 export default function SignupClient({ countries }: { countries: CountryOption[] }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,7 +41,10 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
   const [step, setStep] = useState<"request" | "verification">("request");
   
   const [error, setError] = useState<string | null>(null);
+  const [existingAccount, setExistingAccount] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [canResendAfterSignup, setCanResendAfterSignup] = useState(false);
+  const [resendStatus, setResendStatus] = useState<ResendStatus>("idle");
 
   // Password validation state
   const [passRules, setPassRules] = useState({
@@ -62,6 +83,19 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     if (errorParam) setError(decodeURIComponent(errorParam));
   }, [searchParams]);
 
+  useEffect(() => {
+    if (step !== "verification") {
+      setCanResendAfterSignup(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCanResendAfterSignup(true);
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [step]);
+
   const validateCommonFields = () => {
     if (!fullName || fullName.length < 2) {
       throw new Error("Full name is required.");
@@ -78,9 +112,43 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
     }
   };
 
+  async function handleResendConfirmation() {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    setError(null);
+    setResendStatus("idle");
+
+    if (!normalizedEmail) {
+      setResendStatus("missing_email");
+      return;
+    }
+
+    setResendStatus("sending");
+
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo: customerConfirmationRedirectUrl(),
+      },
+    });
+
+    if (resendError) {
+      console.warn("Customer signup confirmation resend failed", {
+        reason: resendError.message,
+      });
+      setResendStatus("failed");
+      return;
+    }
+
+    setResendStatus("sent");
+  }
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setExistingAccount(false);
+    setResendStatus("idle");
     setLoading(true);
 
     try {
@@ -99,7 +167,7 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
         throw new Error("Selected country is invalid.");
       }
 
-      const emailRedirectTo = new URL("/auth/confirm", window.location.origin).toString();
+      const emailRedirectTo = customerConfirmationRedirectUrl();
 
       const { data, error: authError } = await supabase.auth.signUp({
         email,
@@ -123,6 +191,11 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
       if (authError) throw authError;
       if (!data.user) throw new Error("Signup failed.");
 
+      if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setExistingAccount(true);
+        return;
+      }
+
       if (data.session) {
         const { error: signOutError } = await supabase.auth.signOut();
 
@@ -136,8 +209,8 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
       setStep("verification");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("email_exists")) {
-        setError("هذا البريد مسجل مسبقاً / Email already registered");
+      if (isExistingAccountError(msg)) {
+        setExistingAccount(true);
       } else {
         setError(msg || "An unexpected error occurred");
       }
@@ -164,6 +237,55 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           </div>
 
           {error && <div className="auth-error">{error}</div>}
+          {existingAccount && (
+            <div className="auth-warning">
+              <T
+                en="An account already exists with this email. If it is not confirmed, resend the confirmation link or sign in."
+                ar="يوجد حساب بهذا البريد. إذا لم يتم التفعيل، أعد إرسال رابط التفعيل أو سجل الدخول."
+              />
+              <div className="recovery-actions">
+                <button
+                  type="button"
+                  className="secondary-action"
+                  disabled={resendStatus === "sending"}
+                  onClick={handleResendConfirmation}
+                >
+                  {resendStatus === "sending" ? (
+                    <T en="Sending..." ar="جارٍ الإرسال..." />
+                  ) : (
+                    <T en="Resend confirmation email" ar="إعادة إرسال رابط التفعيل" />
+                  )}
+                </button>
+                <Link href="/login" className="inline-link">
+                  <T en="Sign in" ar="تسجيل الدخول" />
+                </Link>
+              </div>
+            </div>
+          )}
+          {resendStatus === "sent" && (
+            <div className="auth-success compact">
+              <T
+                en="Confirmation email sent. Check your inbox and spam folder."
+                ar="تم إرسال رابط التفعيل. تحقق من بريدك الوارد ومجلد الرسائل غير المرغوب فيها."
+              />
+            </div>
+          )}
+          {resendStatus === "failed" && (
+            <div className="auth-error compact">
+              <T
+                en="We could not resend the confirmation email right now. Try again shortly."
+                ar="تعذر إعادة إرسال رابط التفعيل الآن. حاول مرة أخرى بعد قليل."
+              />
+            </div>
+          )}
+          {resendStatus === "missing_email" && (
+            <div className="auth-error compact">
+              <T
+                en="Enter your email first so we can resend the confirmation link."
+                ar="أدخل بريدك الإلكتروني أولاً حتى نتمكن من إعادة إرسال رابط التفعيل."
+              />
+            </div>
+          )}
 
           {step === "request" ? (
             <form onSubmit={handleSignup} className="auth-form">
@@ -184,7 +306,11 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setExistingAccount(false);
+                    setResendStatus("idle");
+                  }}
                   placeholder="email@example.com"
                   required
                   className="gb-input"
@@ -273,6 +399,30 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
                     ar={`لقد أرسلنا رابط تأكيد إلى ${email}. يرجى التحقق من بريدك (والمهملات) والنقر على الرابط لتفعيل حسابك.`}
                   />
                 </p>
+              </div>
+
+              <div className="resend-panel">
+                {canResendAfterSignup ? (
+                  <button
+                    type="button"
+                    className="secondary-action"
+                    disabled={resendStatus === "sending"}
+                    onClick={handleResendConfirmation}
+                  >
+                    {resendStatus === "sending" ? (
+                      <T en="Sending..." ar="جارٍ الإرسال..." />
+                    ) : (
+                      <T en="Resend confirmation email" ar="إعادة إرسال رابط التفعيل" />
+                    )}
+                  </button>
+                ) : (
+                  <p>
+                    <T
+                      en="If the email is delayed, the resend option will appear shortly."
+                      ar="إذا تأخر البريد، سيظهر خيار إعادة الإرسال بعد قليل."
+                    />
+                  </p>
+                )}
               </div>
 
               <div className="v-divider" />
@@ -410,6 +560,52 @@ export default function SignupClient({ countries }: { countries: CountryOption[]
           font-size: 0.9rem;
           text-align: center;
           line-height: 1.6;
+        }
+        .auth-success.compact,
+        .auth-error.compact {
+          margin-bottom: 16px;
+        }
+        .auth-warning {
+          padding: 14px;
+          background: rgba(212, 175, 55, 0.08);
+          border: 1px solid rgba(212, 175, 55, 0.32);
+          border-radius: 12px;
+          color: #f8e7a1;
+          font-size: 0.88rem;
+          margin-bottom: 18px;
+          text-align: center;
+          line-height: 1.6;
+        }
+        .recovery-actions,
+        .resend-panel {
+          display: grid;
+          gap: 10px;
+          margin-top: 14px;
+        }
+        .resend-panel p {
+          margin: 0;
+          color: var(--gb-text-muted);
+          font-size: 0.85rem;
+          line-height: 1.6;
+        }
+        .secondary-action {
+          width: 100%;
+          padding: 12px 14px;
+          border: 1px solid rgba(212, 175, 55, 0.45);
+          border-radius: 12px;
+          background: rgba(212, 175, 55, 0.1);
+          color: var(--gb-gold);
+          cursor: pointer;
+          font-weight: 800;
+        }
+        .secondary-action:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .inline-link {
+          color: var(--gb-gold);
+          text-decoration: none;
+          font-weight: 700;
         }
         .auth-footer {
           margin-top: 24px;
