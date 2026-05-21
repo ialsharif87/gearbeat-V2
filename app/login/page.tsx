@@ -256,8 +256,8 @@ export default function LoginPage() {
         {confirmationError && (
           <div className="auth-error">
             <T
-              en="The confirmation link is invalid or expired. Please request a new login code."
-              ar="رابط التفعيل غير صالح أو منتهي. يرجى طلب رمز دخول جديد."
+              en="The confirmation link expired. Request a new login code or sign up again if registration was not completed."
+              ar="انتهت صلاحية رابط التأكيد. اطلب كود دخول جديد أو أعد إنشاء الحساب إذا لم يكتمل التسجيل."
             />
           </div>
         )}
