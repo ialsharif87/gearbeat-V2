@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import CustomerAccountNav from "../../components/customer-account-nav";
 import { requireCustomerLayoutAccess } from "../../lib/route-guards";
 
 export default async function CustomerLayout({
@@ -8,5 +9,10 @@ export default async function CustomerLayout({
 }) {
   await requireCustomerLayoutAccess();
 
-  return <>{children}</>;
+  return (
+    <>
+      <CustomerAccountNav />
+      {children}
+    </>
+  );
 }

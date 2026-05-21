@@ -1,4 +1,5 @@
 import Link from "next/link";
+import T from "../../../components/t";
 import CustomerPaymentsReport, {
   type CustomerPaymentRow,
 } from "../../../components/customer-payments-report";
@@ -325,16 +326,22 @@ export default async function CustomerPaymentsPage() {
     <main className="gb-customer-page">
       <section className="gb-customer-header">
         <div>
-          <p className="gb-eyebrow">Customer dashboard</p>
-          <h1>Payments & Receipts</h1>
+          <p className="gb-eyebrow">
+            <T en="Customer dashboard" ar="لوحة العميل" />
+          </p>
+          <h1>
+            <T en="Payments & Receipts" ar="المدفوعات والإيصالات" />
+          </h1>
           <p className="gb-muted-text">
-            View your marketplace order payments, studio booking payments, and
-            internal GearBeat receipts.
+            <T
+              en="View your marketplace order payments, studio booking payments, and internal GearBeat receipts."
+              ar="راجع مدفوعات طلبات المتجر وحجوزات الاستوديو وإيصالات GearBeat الداخلية."
+            />
           </p>
         </div>
 
         <Link href="/customer" className="btn">
-          Back to customer dashboard
+          <T en="Back to customer dashboard" ar="العودة إلى لوحة العميل" />
         </Link>
       </section>
 

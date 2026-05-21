@@ -136,6 +136,9 @@ export default async function CustomerMarketplaceOrdersPage() {
                   ar="ستظهر طلبات المتجر هنا بعد إتمام الطلب."
                 />
               </p>
+              <Link href="/marketplace" className="btn btn-primary" style={{ marginTop: 18 }}>
+                <T en="Open marketplace" ar="فتح المتجر" />
+              </Link>
             </div>
           ) : (
             orders.map((order: any) => (

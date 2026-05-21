@@ -426,6 +426,23 @@ export default async function CustomerBookingsPage() {
       </section>
 
       <div className="gb-customer-shell">
+        {bookingRows.length === 0 ? (
+          <section className="gb-empty-state" style={{ marginBottom: 24 }}>
+            <h2>
+              <T en="No studio bookings yet" ar="لا توجد حجوزات استوديو بعد" />
+            </h2>
+            <p>
+              <T
+                en="Discover verified studios and reserve your first creative session."
+                ar="استكشف الاستوديوهات الموثقة واحجز أول جلسة إبداعية لك."
+              />
+            </p>
+            <Link href="/studios" className="btn btn-primary" style={{ marginTop: 18 }}>
+              <T en="Explore studios" ar="استكشف الاستوديوهات" />
+            </Link>
+          </section>
+        ) : null}
+
         <section className="gb-customer-grid">
           <div className="gb-customer-card">
             <div style={{ fontSize: "1.5rem" }}>🟢</div>
