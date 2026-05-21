@@ -247,15 +247,7 @@ export default async function CustomerRewardsPage() {
           </div>
         </section>
 
-        <section
-          style={{
-            marginTop: 28,
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 360px",
-            gap: 22,
-            alignItems: "start",
-          }}
-        >
+        <section className="gb-rewards-detail-grid">
           <div style={{ display: "grid", gap: 22 }}>
             <div className="card">
               <h2>
@@ -490,9 +482,6 @@ export default async function CustomerRewardsPage() {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .gb-customer-page { padding: 40px; color: #fff; }
-        .gb-customer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .gb-customer-card { padding: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; display: flex; align-items: center; gap: 20px; }
         .foundation-badge { background: rgba(207, 168, 110, 0.1); border: 1px solid var(--gb-gold); color: var(--gb-gold); padding: 6px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: 900; }
         .badge-beta { font-weight: 900; letter-spacing: 1px; color: var(--gb-gold); }
       `}} />

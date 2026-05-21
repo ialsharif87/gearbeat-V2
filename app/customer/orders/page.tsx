@@ -159,6 +159,44 @@ export default async function CustomerOrdersPage() {
       </section>
 
       <div className="gb-customer-shell">
+        <section className="gb-customer-grid" style={{ marginBottom: 24 }}>
+          <div className="gb-customer-card">
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Total orders" ar="إجمالي الطلبات" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {orderRows.length}
+              </div>
+            </div>
+          </div>
+
+          <div className="gb-customer-card">
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Paid or processing" ar="مدفوعة أو قيد التجهيز" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {orderRows.filter((order: any) => ["paid", "processing", "shipped", "delivered"].includes(String(order.status || "").toLowerCase())).length}
+              </div>
+            </div>
+          </div>
+
+          <div className="gb-customer-card">
+            <div>
+              <label style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                <T en="Order value" ar="قيمة الطلبات" />
+              </label>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--gb-gold)" }}>
+                {formatMoney(
+                  orderRows.reduce((sum: number, order: any) => sum + Number(order.total_amount || 0), 0),
+                  orderRows[0]?.currency_code || "SAR"
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div style={{ display: "grid", gap: 20 }}>
           {orderRows.length === 0 ? (
             <div
