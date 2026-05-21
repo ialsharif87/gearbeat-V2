@@ -204,419 +204,1032 @@ export default async function CustomerDashboardPage() {
     profile.referral_code ||
     membershipNumber.replace("GB-", "REF-");
 
+  const userInitials =
+    (profile.full_name || "")
+      .trim()
+      .split(/\s+/)
+      .map((part: string) => part.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() ||
+    profile.email?.charAt(0)?.toUpperCase() ||
+    user.email?.charAt(0)?.toUpperCase() ||
+    "U";
+
+  const maxTierPoints = 5000;
+  const currentPoints = Number(wallet?.points_balance || 0);
+  const percentage = Math.min((currentPoints / maxTierPoints) * 100, 100);
+  const radius = 22;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  const tierCodeClean = String(wallet?.tier_code || "listener").toLowerCase();
+
   return (
     <main className="gb-dashboard-page">
-      <section className="gb-dashboard-header">
-        <div className="animate-up">
-          <p className="gb-eyebrow">
-            <T en="Customer Dashboard" ar="لوحة العميل" />
-          </p>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .gb-dashboard-page {
+          padding: 32px 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+          min-height: 100vh;
+        }
+        .gb-premium-hero-card {
+          background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), transparent 45%),
+                      linear-gradient(135deg, rgba(15, 22, 33, 0.95), rgba(11, 15, 22, 0.98));
+          border: 1px solid rgba(212, 175, 55, 0.2);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 35px rgba(212, 175, 55, 0.02);
+          border-radius: 24px;
+          padding: 32px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 24px;
+          flex-wrap: wrap;
+          position: relative;
+          overflow: hidden;
+        }
+        .gb-premium-hero-card::before {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: 250px;
+          height: 250px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.04) 0%, transparent 70%);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .gb-avatar-container {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        .gb-avatar-circle {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.05));
+          border: 2px solid var(--gb-gold);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 2rem;
+          font-weight: 800;
+          color: var(--gb-gold-light);
+          text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+          animation: gbAvatarPulse 3s infinite ease-in-out;
+        }
+        @keyframes gbAvatarPulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); border-color: var(--gb-gold); }
+          50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.25); border-color: var(--gb-gold-light); }
+        }
+        .gb-hero-info {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .gb-hero-name {
+          font-size: clamp(1.6rem, 4vw, 2.4rem);
+          font-weight: 900;
+          color: #fff;
+          letter-spacing: -0.5px;
+          margin: 0;
+          line-height: 1.2;
+        }
+        .gb-badge-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 2px;
+        }
+        .gb-premium-badge {
+          padding: 4px 12px;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          background: rgba(212, 175, 55, 0.1);
+          border: 1px solid rgba(212, 175, 55, 0.4);
+          color: var(--gb-gold-light);
+        }
+        [dir="rtl"] .gb-premium-badge {
+          letter-spacing: 0;
+        }
+        .gb-status-badge {
+          padding: 4px 12px;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 700;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #ccc;
+        }
+        .gb-verified-chip {
+          padding: 4px 12px;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 700;
+          background: rgba(15, 160, 138, 0.15);
+          border: 1px solid rgba(15, 160, 138, 0.4);
+          color: #4ade80;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .gb-unverified-chip {
+          padding: 4px 12px;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 700;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: #f87171;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .gb-hero-meta {
+          font-size: 0.85rem;
+          color: var(--gb-text-muted);
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-top: 4px;
+        }
+        .gb-hero-actions {
+          display: flex;
+          gap: 12px;
+          z-index: 1;
+          flex-wrap: wrap;
+        }
+        .gb-referral-widget {
+          background: rgba(212, 175, 55, 0.08);
+          border: 1px dashed rgba(212, 175, 55, 0.25);
+          border-radius: 10px;
+          padding: 6px 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.8rem;
+          margin-top: 4px;
+        }
+        .gb-referral-code {
+          font-weight: 800;
+          color: var(--gb-gold-light);
+          letter-spacing: 1px;
+        }
+        .gb-metric-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 20px;
+        }
+        .gb-metric-card {
+          background: linear-gradient(135deg, rgba(15, 22, 33, 0.85), rgba(11, 15, 22, 0.95));
+          border: 1px solid rgba(212, 175, 55, 0.1);
+          border-radius: 20px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 16px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          min-height: 140px;
+        }
+        .gb-metric-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(212, 175, 55, 0.35);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.05);
+        }
+        .gb-metric-card::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to bottom, rgba(212, 175, 55, 0.02), transparent);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .gb-metric-card:hover::after {
+          opacity: 1;
+        }
+        .gb-metric-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .gb-metric-title {
+          font-size: 0.7rem;
+          font-weight: 800;
+          color: var(--gb-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+        }
+        [dir="rtl"] .gb-metric-title {
+          letter-spacing: 0;
+        }
+        .gb-metric-icon-wrap {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(212, 175, 55, 0.08);
+          border: 1px solid rgba(212, 175, 55, 0.15);
+          color: var(--gb-gold);
+          font-size: 1.1rem;
+          transition: all 0.3s;
+        }
+        .gb-metric-card:hover .gb-metric-icon-wrap {
+          background: rgba(212, 175, 55, 0.18);
+          color: var(--gb-gold-light);
+          transform: scale(1.1);
+        }
+        .gb-metric-body {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .gb-metric-value {
+          font-size: 2.2rem;
+          font-weight: 900;
+          color: #fff;
+          line-height: 1;
+          font-family: 'Space Grotesk', 'Cairo', sans-serif;
+        }
+        .gb-metric-value-gold {
+          color: var(--gb-gold-light);
+          text-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+        }
+        .gb-metric-subtext {
+          font-size: 0.75rem;
+          color: var(--gb-text-muted);
+          margin-top: 4px;
+        }
+        .gb-points-ring-container {
+          position: relative;
+          width: 54px;
+          height: 54px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .gb-points-ring-svg {
+          transform: rotate(-90deg);
+          width: 54px;
+          height: 54px;
+        }
+        .gb-points-ring-circle-bg {
+          fill: none;
+          stroke: rgba(255, 255, 255, 0.05);
+          stroke-width: 4;
+        }
+        .gb-points-ring-circle-fill {
+          fill: none;
+          stroke: url(#goldGradientDashboard);
+          stroke-width: 4;
+          stroke-linecap: round;
+          transition: stroke-dashoffset 0.6s ease;
+        }
+        .gb-points-ring-pulse {
+          position: absolute;
+          width: 46px;
+          height: 46px;
+          border-radius: 50%;
+          border: 1px solid rgba(212, 175, 55, 0.3);
+          animation: ringPulseDashboard 2s infinite ease-out;
+          pointer-events: none;
+        }
+        @keyframes ringPulseDashboard {
+          0% { transform: scale(0.9); opacity: 1; }
+          100% { transform: scale(1.3); opacity: 0; }
+        }
+        .gb-action-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 14px;
+          margin-top: 16px;
+        }
+        .gb-action-card {
+          background: rgba(15, 22, 33, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 16px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 10px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          position: relative;
+        }
+        .gb-action-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(212, 175, 55, 0.25);
+          background: rgba(212, 175, 55, 0.03);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        .gb-action-icon {
+          font-size: 1.5rem;
+          width: 42px;
+          height: 42px;
+          border-radius: 12px;
+          display: grid;
+          place-items: center;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          transition: all 0.3s;
+        }
+        .gb-action-card:hover .gb-action-icon {
+          background: rgba(212, 175, 55, 0.1);
+          border-color: rgba(212, 175, 55, 0.3);
+          color: var(--gb-gold-light);
+          transform: rotate(5deg) scale(1.05);
+        }
+        .gb-action-label {
+          font-weight: 800;
+          font-size: 0.9rem;
+          color: #fff;
+        }
+        .gb-action-desc {
+          font-size: 0.7rem;
+          color: var(--gb-text-muted);
+        }
+        .gb-premium-empty {
+          text-align: center;
+          padding: 32px 20px;
+          background: rgba(15, 22, 33, 0.4);
+          border-radius: 20px;
+          border: 1px dashed rgba(212, 175, 55, 0.15);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          transition: all 0.3s;
+        }
+        .gb-premium-empty:hover {
+          border-color: rgba(212, 175, 55, 0.3);
+          background: rgba(15, 22, 33, 0.5);
+        }
+        .gb-empty-icon {
+          font-size: 2.5rem;
+          animation: floatEmptyDashboard 4s infinite ease-in-out;
+        }
+        @keyframes floatEmptyDashboard {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        .gb-empty-title {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #fff;
+        }
+        .gb-empty-desc {
+          font-size: 0.85rem;
+          color: var(--gb-text-muted);
+          max-width: 320px;
+          line-height: 1.5;
+        }
+        .gb-trust-card {
+          background: linear-gradient(135deg, rgba(15, 22, 33, 0.9), rgba(11, 15, 22, 0.95));
+          border: 1px solid rgba(212, 175, 55, 0.15);
+          border-radius: 24px;
+          padding: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          position: relative;
+          overflow: hidden;
+        }
+        .gb-trust-card::before {
+          content: '';
+          position: absolute;
+          top: -40px;
+          right: -40px;
+          width: 120px;
+          height: 120px;
+          background: radial-gradient(circle, rgba(15, 160, 138, 0.08) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .gb-trust-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .gb-trust-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          background: rgba(15, 160, 138, 0.1);
+          border: 1px solid rgba(15, 160, 138, 0.25);
+          color: #0fa08a;
+          display: grid;
+          place-items: center;
+          font-size: 1.2rem;
+        }
+        .gb-trust-title {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #fff;
+        }
+        .gb-trust-desc {
+          font-size: 0.85rem;
+          color: var(--gb-text-muted);
+          line-height: 1.6;
+        }
+        .gb-trust-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.04);
+          border-radius: 14px;
+          gap: 12px;
+        }
+        .gb-trust-item-label {
+          font-weight: 700;
+          font-size: 0.85rem;
+          color: #eee;
+        }
+      `}} />
 
-          <h1 style={{ fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3rem)', letterSpacing: '-1px' }}>
-            <T en="Welcome back" ar="أهلًا بعودتك" />,{" "}
-            {profile.full_name || "Creator"}
-          </h1>
+      {/* 1. Premium Profile Hero Card */}
+      <section className="gb-premium-hero-card animate-up">
+        <div className="gb-avatar-container">
+          <div className="gb-avatar-circle">
+            {userInitials}
+          </div>
 
-          <p className="text-muted" style={{ maxWidth: 600, fontSize: '1.1rem' }}>
-            <T
-              en="Manage your bookings, rewards, and verified studio sessions from your premium dashboard."
-              ar="تابع حجوزاتك، مكافآتك، وجلسات الاستوديو الموثقة من لوحتك الفخمة."
-            />
-          </p>
+          <div className="gb-hero-info">
+            <h1 className="gb-hero-name">
+              <T en="Welcome back" ar="أهلاً بعودتك" />, {profile.full_name || "Creator"}
+            </h1>
+
+            <div className="gb-badge-row">
+              <span className="gb-premium-badge">
+                {tierCodeClean === "listener" && <T en="Listener" ar="مستمع" />}
+                {tierCodeClean === "creator" && <T en="Creator" ar="مبدع" />}
+                {tierCodeClean === "producer" && <T en="Producer" ar="منتج" />}
+                {tierCodeClean === "maestro" && <T en="Maestro" ar="مايسترو" />}
+                {tierCodeClean === "legend" && <T en="Legend" ar="أسطورة" />}
+              </span>
+
+              <span className="gb-status-badge">
+                {profile.account_status === "active" ? (
+                  <T en="Active" ar="نشط" />
+                ) : (
+                  profile.account_status || "Active"
+                )}
+              </span>
+
+              {user.email_confirmed_at ? (
+                <span className="gb-verified-chip">
+                  ✓ <T en="Email Verified" ar="البريد موثق" />
+                </span>
+              ) : (
+                <span className="gb-unverified-chip">
+                  ○ <T en="Email Unverified" ar="البريد غير موثق" />
+                </span>
+              )}
+            </div>
+
+            <div className="gb-hero-meta">
+              <span>
+                <strong><T en="Member No." ar="رقم العضوية" />:</strong> {membershipNumber}
+              </span>
+              <div className="gb-referral-widget">
+                <span><T en="Referral Code:" ar="كود الإحالة:" /></span>
+                <strong className="gb-referral-code">{referralCode}</strong>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex gap-12" style={{ flexWrap: "wrap" }}>
-          <Link href="/studios/near-me" className="btn btn-primary shadow-gold">
-            <T en="Studios near me" ar="استوديوهات قريبة مني" />
+        <div className="gb-hero-actions">
+          <Link href="/studios" className="btn btn-primary shadow-gold">
+            <T en="Explore Studios" ar="استكشف الاستوديوهات" />
           </Link>
 
-          <Link href="/offers" className="btn btn-outline">
-            <T en="View Offers" ar="عرض العروض" />
+          <Link href="/profile" className="btn btn-outline">
+            <T en="Manage Profile" ar="إدارة الملف الشخصي" />
           </Link>
         </div>
       </section>
 
-      <div className="gb-customer-shell">
-        <section style={{ marginTop: 28 }}>
-          <CustomerMembershipCard
-            fullName={profile.full_name}
-            membershipNumber={membershipNumber}
-            tierCode={wallet?.tier_code || "listener"}
-            pointsBalance={wallet?.points_balance || 0}
-            pendingPoints={wallet?.pending_points || 0}
-            walletBalance={wallet?.wallet_balance || 0}
-            currencyCode={currency}
-            referralCode={referralCode}
-            showRewardsLink={true}
-          />
-        </section>
-
-        <section className="gb-dash-grid animate-up" style={{ animationDelay: '0.1s' }}>
-          <div className="gb-dash-card">
-            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>🎙️</div>
-            <div>
-              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
-                <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
-              </p>
-              <div style={{ fontSize: "2rem", fontWeight: 900, color: "white" }}>{upcomingBookings.length}</div>
+      {/* 2. Interactive Metric Cards */}
+      <section className="gb-metric-grid animate-up" style={{ animationDelay: '0.1s' }}>
+        {/* Rewards points card */}
+        <Link href="/customer/rewards" className="gb-metric-card">
+          <div className="gb-metric-header">
+            <span className="gb-metric-title">
+              <T en="Rewards Points" ar="نقاط المكافآت" />
+            </span>
+            <div className="gb-points-ring-container">
+              <div className="gb-points-ring-pulse"></div>
+              <svg className="gb-points-ring-svg">
+                <defs>
+                  <linearGradient id="goldGradientDashboard" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#F4D47A" />
+                    <stop offset="100%" stopColor="#D4AF37" />
+                  </linearGradient>
+                </defs>
+                <circle className="gb-points-ring-circle-bg" cx="27" cy="27" r={radius} />
+                <circle
+                  className="gb-points-ring-circle-fill"
+                  cx="27"
+                  cy="27"
+                  r={radius}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                />
+              </svg>
+              <span style={{ position: 'absolute', fontSize: '0.85rem', fontWeight: 900, color: 'var(--gb-gold-light)' }}>
+                ★
+              </span>
             </div>
           </div>
-
-          <div className="gb-dash-card">
-            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>❤️</div>
+          <div className="gb-metric-body">
             <div>
-              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
-                <T en="Saved Items" ar="المفضلة" />
-              </p>
-              <div style={{ fontSize: "2rem", fontWeight: 900, color: "white" }}>{favoriteRows.length}</div>
-            </div>
-          </div>
-
-          <div className="gb-dash-card">
-            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>⭐</div>
-            <div>
-              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
-                <T en="Rewards Points" ar="نقاط المكافآت" />
-              </p>
-              <div style={{ fontSize: "2rem", fontWeight: 900, color: "var(--gb-gold)" }}>
+              <div className="gb-metric-value gb-metric-value-gold">
                 {Number(wallet?.points_balance || 0).toLocaleString()}
               </div>
+              <div className="gb-metric-subtext">
+                <T en="Available Points" ar="النقاط المتاحة" />
+              </div>
             </div>
+            {Number(wallet?.pending_points || 0) > 0 && (
+              <span className="badge badge-gold" style={{ fontSize: '0.65rem', padding: '4px 8px' }}>
+                +{Number(wallet?.pending_points).toLocaleString()} <T en="pending" ar="معلقة" />
+              </span>
+            )}
           </div>
+        </Link>
 
-          <div className="gb-dash-card">
-            <div style={{ fontSize: "1.8rem", marginBottom: 12 }}>🪪</div>
+        {/* Upcoming bookings card */}
+        <a href="#bookings-section" className="gb-metric-card">
+          <div className="gb-metric-header">
+            <span className="gb-metric-title">
+              <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
+            </span>
+            <div className="gb-metric-icon-wrap">🎙️</div>
+          </div>
+          <div className="gb-metric-body">
             <div>
-              <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
-                <T en="Verification" ar="التحقق" />
-              </p>
-              <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "white", textTransform: 'uppercase', letterSpacing: 1 }}>
-                {profile.identity_verification_status || "not_started"}
+              <div className="gb-metric-value">
+                {upcomingBookings.length}
+              </div>
+              <div className="gb-metric-subtext">
+                <T en="Active Sessions" ar="جلسات نشطة" />
               </div>
             </div>
           </div>
-        </section>
+        </a>
 
-        <section
-          style={{
-            marginTop: 28,
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1.35fr) minmax(320px, 0.65fr)",
-            gap: 22,
-            alignItems: "start",
-          }}
-          className="gb-dashboard-stack"
-        >
-          <div style={{ display: "grid", gap: 22 }}>
-            <div className="card-premium">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  marginBottom: 24
-                }}
-              >
-                <div>
-                  <h2 style={{ fontWeight: 800 }}>
-                    <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
-                  </h2>
-                  <p className="text-muted">
-                    <T
-                      en="Your confirmed studio sessions."
-                      ar="جلسات الاستوديو المؤكدة."
-                    />
-                  </p>
-                </div>
-
-                <Link href="/customer/bookings" className="btn btn-outline btn-sm">
-                  <T en="View all" ar="عرض الكل" />
-                </Link>
+        {/* Favorites card */}
+        <a href="#saved-section" className="gb-metric-card">
+          <div className="gb-metric-header">
+            <span className="gb-metric-title">
+              <T en="Favorites" ar="المفضلة" />
+            </span>
+            <div className="gb-metric-icon-wrap">❤️</div>
+          </div>
+          <div className="gb-metric-body">
+            <div>
+              <div className="gb-metric-value">
+                {favoriteRows.length}
               </div>
-
-              <div style={{ display: "grid", gap: 12 }}>
-                {upcomingBookings.length === 0 ? (
-                  <div className="gb-empty-state" style={{ textAlign: "center", padding: '40px 20px' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: 16 }}>🔇</div>
-                    <h3>
-                      <T en="No upcoming bookings" ar="لا توجد حجوزات قادمة" />
-                    </h3>
-
-                    <p className="text-muted mb-24">
-                      <T
-                        en="Find your next creative space and start booking."
-                        ar="اكتشف مساحتك الإبداعية القادمة وابدأ الحجز."
-                      />
-                    </p>
-
-                    <Link
-                      href="/studios"
-                      className="btn btn-primary shadow-gold"
-                    >
-                      <T en="Explore studios" ar="استكشف الاستوديوهات" />
-                    </Link>
-                  </div>
-                ) : (
-                  upcomingBookings.slice(0, 3).map((booking: any) => {
-                    const studio = Array.isArray(booking.studio)
-                      ? booking.studio[0]
-                      : booking.studio;
-
-                    const studioName =
-                      studio?.name_en ||
-                      studio?.name ||
-                      studio?.name_ar ||
-                      "Studio";
-
-                    const location = [studio?.district, studio?.city_name || studio?.city]
-                      .filter(Boolean)
-                      .join(", ");
-
-                    return (
-                      <div
-                        key={booking.id}
-                        className="gb-dash-card"
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 16,
-                          flexWrap: "wrap",
-                          padding: 16
-                        }}
-                      >
-                        <div style={{ flex: 1, minWidth: 200 }}>
-                          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{studioName}</h3>
-                          <p className="text-muted" style={{ marginTop: 4, fontSize: '0.9rem' }}>
-                            📅 {formatDate(booking.booking_date || booking.created_at)}
-                            {booking.start_time ? ` · ${booking.start_time}` : ""}
-                          </p>
-                          {location ? (
-                            <p className="text-muted" style={{ marginTop: 2, fontSize: '0.85rem' }}>
-                              📍 {location}
-                            </p>
-                          ) : null}
-                        </div>
-
-                        <div className="text-end">
-                          <span className={`badge ${booking.status === 'confirmed' ? 'badge-success' : ''}`}>{booking.status || "pending"}</span>
-                          <div style={{ marginTop: 8, fontWeight: 900, color: 'var(--gb-gold)' }}>
-                            {formatMoney(booking.total_amount, currency)}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+              <div className="gb-metric-subtext">
+                <T en="Saved Items" ar="عناصر محفوظة" />
               </div>
             </div>
+          </div>
+        </a>
 
-            <div className="card">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div>
-                  <h2>
-                    <T en="Offers for you" ar="عروض لك" />
-                  </h2>
-                  <p style={{ color: "var(--muted)" }}>
-                    <T
-                      en="Featured offers, coupons, and rewards."
-                      ar="عروض مميزة، قسائم، ومكافآت."
-                    />
-                  </p>
-                </div>
+        {/* Wallet balance card */}
+        <Link href="/customer/payments" className="gb-metric-card">
+          <div className="gb-metric-header">
+            <span className="gb-metric-title">
+              <T en="Wallet Balance" ar="رصيد المحفظة" />
+            </span>
+            <div className="gb-metric-icon-wrap">💳</div>
+          </div>
+          <div className="gb-metric-body">
+            <div>
+              <div className="gb-metric-value gb-metric-value-gold" style={{ fontSize: '1.8rem' }}>
+                {formatMoney(wallet?.wallet_balance, currency)}
+              </div>
+              <div className="gb-metric-subtext">
+                <T en="Available Balance" ar="الرصيد المتاح" />
+              </div>
+            </div>
+          </div>
+        </Link>
 
-                <Link href="/offers" className="btn">
-                  <T en="All offers" ar="كل العروض" />
-                </Link>
+        {/* Total Bookings / Sessions Count */}
+        <Link href="/customer/bookings" className="gb-metric-card">
+          <div className="gb-metric-header">
+            <span className="gb-metric-title">
+              <T en="Total Bookings" ar="إجمالي الحجوزات" />
+            </span>
+            <div className="gb-metric-icon-wrap">📅</div>
+          </div>
+          <div className="gb-metric-body">
+            <div>
+              <div className="gb-metric-value">
+                {bookingRows.length}
+              </div>
+              <div className="gb-metric-subtext">
+                <T en="All Sessions" ar="كل الجلسات" />
+              </div>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      {/* 3. Main Stack & Sidebar */}
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1.35fr) minmax(320px, 0.65fr)",
+          gap: 24,
+          alignItems: "start",
+        }}
+        className="gb-dashboard-stack"
+      >
+        {/* Main Content Column */}
+        <div style={{ display: "grid", gap: 24 }}>
+          {/* Upcoming bookings list */}
+          <div className="card-premium" id="bookings-section">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "center",
+                flexWrap: "wrap",
+                marginBottom: 20
+              }}
+            >
+              <div>
+                <h2 style={{ fontWeight: 800 }}>
+                  <T en="Upcoming Bookings" ar="الحجوزات القادمة" />
+                </h2>
+                <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+                  <T en="Your confirmed studio sessions." ar="جلسات الاستوديو المؤكدة." />
+                </p>
               </div>
 
-              <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
-                {offerRows.length === 0 ? (
-                  <p style={{ color: "var(--muted)" }}>
+              <Link href="/customer/bookings" className="btn btn-outline btn-sm">
+                <T en="View all" ar="عرض الكل" />
+              </Link>
+            </div>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              {upcomingBookings.length === 0 ? (
+                <div className="gb-premium-empty">
+                  <div className="gb-empty-icon">🔇</div>
+                  <h3 className="gb-empty-title">
+                    <T en="No upcoming bookings" ar="لا توجد حجوزات قادمة" />
+                  </h3>
+                  <p className="gb-empty-desc">
                     <T
-                      en="Offers will appear here soon."
-                      ar="ستظهر العروض هنا قريبًا."
+                      en="Find your next creative space, book high-end gear, and start recording."
+                      ar="اكتشف مساحتك الإبداعية القادمة، واحجز معدات فاخرة، وابدأ التسجيل."
                     />
                   </p>
-                ) : (
-                  offerRows.map((offer: any) => (
+                  <Link href="/studios" className="btn btn-primary shadow-gold" style={{ marginTop: 8 }}>
+                    <T en="Explore studios" ar="استكشف الاستوديوهات" />
+                  </Link>
+                </div>
+              ) : (
+                upcomingBookings.slice(0, 3).map((booking: any) => {
+                  const studio = Array.isArray(booking.studio)
+                    ? booking.studio[0]
+                    : booking.studio;
+
+                  const studioName =
+                    studio?.name_en ||
+                    studio?.name ||
+                    studio?.name_ar ||
+                    "Studio";
+
+                  const location = [studio?.district, studio?.city_name || studio?.city]
+                    .filter(Boolean)
+                    .join(", ");
+
+                  return (
                     <div
-                      key={offer.id}
+                      key={booking.id}
+                      className="gb-dash-card"
                       style={{
-                        padding: 16,
-                        borderRadius: 16,
-                        border: "1px solid rgba(207,167,98,0.18)",
-                        background: "rgba(207,167,98,0.08)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 16,
+                        flexWrap: "wrap",
+                        padding: 16
                       }}
                     >
-                      <span className="badge badge-gold">
-                        {offer.offer_type || "offer"}
-                      </span>
+                      <div style={{ flex: 1, minWidth: 200 }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{studioName}</h3>
+                        <p className="text-muted" style={{ marginTop: 4, fontSize: '0.9rem' }}>
+                          📅 {formatDate(booking.booking_date || booking.created_at)}
+                          {booking.start_time ? ` · ${booking.start_time}` : ""}
+                        </p>
+                        {location ? (
+                          <p className="text-muted" style={{ marginTop: 2, fontSize: '0.85rem' }}>
+                            📍 {location}
+                          </p>
+                        ) : null}
+                      </div>
 
-                      <h3 style={{ marginTop: 10 }}>
-                        {offer.title_en || offer.title_ar}
-                      </h3>
-
-                      <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-                        {offer.description_en ||
-                          offer.description_ar ||
-                          "Special GearBeat offer."}
-                      </p>
+                      <div className="text-end">
+                        <span className={`badge ${booking.status === 'confirmed' ? 'badge-success' : ''}`}>
+                          {booking.status || "pending"}
+                        </span>
+                        <div style={{ marginTop: 8, fontWeight: 900, color: 'var(--gb-gold)' }}>
+                          {formatMoney(booking.total_amount, currency)}
+                        </div>
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
-          <aside style={{ display: "grid", gap: 22 }}>
-            <section className="card-premium">
-              <div className="gb-card-header mb-24">
-                <p className="gb-eyebrow"><T en="Quick access" ar="وصول سريع" /></p>
-                <h2 style={{ fontWeight: 800 }}>
+          {/* Offers list */}
+          <div className="card-premium">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "center",
+                flexWrap: "wrap",
+                marginBottom: 20
+              }}
+            >
+              <div>
+                <h2>
+                  <T en="Offers for you" ar="عروض لك" />
+                </h2>
+                <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+                  <T en="Featured offers, coupons, and rewards." ar="عروض مميزة، قسائم، ومكافآت." />
+                </p>
+              </div>
+
+              <Link href="/offers" className="btn btn-outline btn-sm">
+                <T en="All offers" ar="كل العروض" />
+              </Link>
+            </div>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              {offerRows.length === 0 ? (
+                <div className="gb-premium-empty">
+                  <div className="gb-empty-icon">🎁</div>
+                  <h3 className="gb-empty-title">
+                    <T en="No Active Offers" ar="لا توجد عروض نشطة" />
+                  </h3>
+                  <p className="gb-empty-desc">
+                    <T
+                      en="Personalized discounts and studio rewards will appear here soon."
+                      ar="ستظهر الخصومات الشخصية ومكافآت الاستوديو هنا قريباً."
+                    />
+                  </p>
+                </div>
+              ) : (
+                offerRows.map((offer: any) => (
+                  <div
+                    key={offer.id}
+                    style={{
+                      padding: 16,
+                      borderRadius: 16,
+                      border: "1px solid rgba(207,167,98,0.18)",
+                      background: "rgba(207,167,98,0.08)",
+                      transition: "border-color 0.3s",
+                    }}
+                    className="gb-dash-card"
+                  >
+                    <span className="badge badge-gold">
+                      {offer.offer_type || "offer"}
+                    </span>
+
+                    <h3 style={{ marginTop: 10, fontSize: '1.1rem', fontWeight: 800 }}>
+                      {offer.title_en || offer.title_ar}
+                    </h3>
+
+                    <p style={{ color: "var(--muted)", lineHeight: 1.6, marginTop: 4, fontSize: '0.9rem' }}>
+                      {offer.description_en ||
+                        offer.description_ar ||
+                        "Special GearBeat offer."}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Content Column */}
+        <div style={{ display: "grid", gap: 24 }}>
+          {/* Quick Actions Card */}
+          <section className="card-premium">
+            <div className="gb-card-header mb-16">
+              <div>
+                <p className="gb-eyebrow" style={{ fontSize: '0.65rem' }}>
+                  <T en="Quick access" ar="وصول سريع" />
+                </p>
+                <h2 style={{ fontWeight: 800, fontSize: '1.3rem' }}>
                   <T en="Account Hub" ar="مركز الحساب" />
                 </h2>
               </div>
-
-              <div className="grid grid-2 gap-16">
-                <Link href="/customer/bookings" className="gb-dash-card" style={{ padding: 20 }}>
-                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🎙️</div>
-                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="My Bookings" ar="حجوزاتي" /></strong>
-                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="View sessions." ar="عرض الجلسات." /></span>
-                </Link>
-
-                <Link href="/customer/marketplace-orders" className="gb-dash-card" style={{ padding: 20 }}>
-                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🛒</div>
-                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="My Orders" ar="طلباتي" /></strong>
-                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Marketplace." ar="المتجر." /></span>
-                </Link>
-
-                <Link href="/customer/payments" className="gb-dash-card" style={{ padding: 20 }}>
-                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>💳</div>
-                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="Payments" ar="المدفوعات" /></strong>
-                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Receipts." ar="الإيصالات." /></span>
-                </Link>
-
-                <Link href="/customer/rewards" className="gb-dash-card" style={{ padding: 20 }}>
-                  <div style={{ fontSize: '1.2rem', marginBottom: 8 }}>🎁</div>
-                  <strong style={{ display: 'block', marginBottom: 4 }}><T en="Rewards" ar="المكافآت" /></strong>
-                  <span className="text-muted" style={{ fontSize: '0.8rem' }}><T en="Points." ar="النقاط." /></span>
-                </Link>
-              </div>
-            </section>
-
-            <div className="card">
-              <h2>
-                <T en="Account Verification" ar="توثيق الحساب" />
-              </h2>
-
-              <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-                <T
-                  en="Verified customers may unlock better trust, faster bookings, and future loyalty benefits."
-                  ar="توثيق الحساب قد يفتح مزايا ثقة أعلى، حجوزات أسرع، ومزايا ولاء مستقبلية."
-                />
-              </p>
-
-              <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-                <span className={user.email_confirmed_at ? "badge badge-success" : "badge"}>
-                  {user.email_confirmed_at ? "✓" : "○"} Email verified
-                </span>
-
-                <span className={user.phone_confirmed_at ? "badge badge-success" : "badge"}>
-                  {user.phone_confirmed_at ? "✓" : "○"} Phone verified
-                </span>
-
-                <span
-                  className={
-                    profile.identity_verification_status === "verified"
-                      ? "badge badge-success"
-                      : "badge"
-                  }
-                >
-                  {profile.identity_verification_status === "verified" ? "✓" : "○"}{" "}
-                  Identity {profile.identity_verification_status || "not_started"}
-                </span>
-              </div>
-
-              {!user.phone_confirmed_at && (
-                <PhoneVerificationManager 
-                  phone={profile.phone_e164 || profile.phone || user.phone || ""} 
-                  isVerified={false} 
-                />
-              )}
-
-              <Link
-                href="/profile"
-                className="btn btn-primary"
-                style={{ marginTop: 18 }}
-              >
-                <T en="Manage verification" ar="إدارة التحقق" />
-              </Link>
             </div>
 
-            <div className="card">
-              <h2>
-                <T en="Saved" ar="المفضلة" />
-              </h2>
+            <div className="gb-action-grid">
+              <Link href="/customer/bookings" className="gb-action-card">
+                <div className="gb-action-icon">🎙️</div>
+                <div className="gb-action-label"><T en="My Bookings" ar="حجوزاتي" /></div>
+                <div className="gb-action-desc"><T en="View sessions" ar="عرض الجلسات" /></div>
+              </Link>
 
-              <p style={{ color: "var(--muted)", lineHeight: 1.7 }}>
-                <T
-                  en="Your saved studios, gear, and vendors will appear here."
-                  ar="ستظهر هنا الاستوديوهات والمعدات والتجار المحفوظة."
-                />
-              </p>
+              <Link href="/customer/marketplace-orders" className="gb-action-card">
+                <div className="gb-action-icon">🛒</div>
+                <div className="gb-action-label"><T en="My Orders" ar="طلباتي" /></div>
+                <div className="gb-action-desc"><T en="Marketplace" ar="طلبات المتجر" /></div>
+              </Link>
 
-              <div style={{ marginTop: 16, display: "grid", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>Studios</span>
-                  <strong>
-                    {
-                      favoriteRows.filter(
-                        (item: any) => item.favorite_type === "studio"
-                      ).length
-                    }
-                  </strong>
-                </div>
+              <Link href="/customer/payments" className="gb-action-card">
+                <div className="gb-action-icon">💳</div>
+                <div className="gb-action-label"><T en="Payments" ar="المدفوعات" /></div>
+                <div className="gb-action-desc"><T en="Receipts & credit" ar="الإيصالات والرصيد" /></div>
+              </Link>
 
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>Gear</span>
-                  <strong>
-                    {
-                      favoriteRows.filter(
-                        (item: any) => item.favorite_type === "product"
-                      ).length
-                    }
-                  </strong>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>Vendors</span>
-                  <strong>
-                    {
-                      favoriteRows.filter(
-                        (item: any) => item.favorite_type === "vendor"
-                      ).length
-                    }
-                  </strong>
-                </div>
-              </div>
-
-              <Link href="/customer/saved" className="btn" style={{ marginTop: 18 }}>
-                <T en="Open saved" ar="فتح المفضلة" />
+              <Link href="/customer/rewards" className="gb-action-card">
+                <div className="gb-action-icon">🎁</div>
+                <div className="gb-action-label"><T en="Rewards" ar="المكافآت" /></div>
+                <div className="gb-action-desc"><T en="Points & tier" ar="النقاط والمستوى" /></div>
               </Link>
             </div>
-          </aside>
-        </section>
-      </div>
+          </section>
+
+          {/* Account Verification Redesigned Security Card */}
+          <div className="gb-trust-card">
+            <div className="gb-trust-header">
+              <div className="gb-trust-icon">🛡️</div>
+              <h2 className="gb-trust-title">
+                <T en="Trust & Verification" ar="التوثيق والأمان" />
+              </h2>
+            </div>
+
+            <p className="gb-trust-desc">
+              <T
+                en="Verified members secure instant booking approvals, exclusive platform trust, and elite rewards tier access."
+                ar="الأعضاء الموثقون يحصلون على موافقة فورية للحجوزات، وثقة إضافية في المنصة، ومكافآت حصرية."
+              />
+            </p>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              <div className="gb-trust-item">
+                <span className="gb-trust-item-label">
+                  <T en="Email Verification" ar="توثيق البريد الإلكتروني" />
+                </span>
+                {user.email_confirmed_at ? (
+                  <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>✓ <T en="Verified" ar="موثق" /></span>
+                ) : (
+                  <span className="badge" style={{ fontSize: '0.75rem', background: '#333' }}><T en="Pending" ar="معلق" /></span>
+                )}
+              </div>
+
+              <div className="gb-trust-item" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span className="gb-trust-item-label">
+                    <T en="Phone Verification" ar="توثيق رقم الجوال" />
+                  </span>
+                  {user.phone_confirmed_at ? (
+                    <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>✓ <T en="Verified" ar="موثق" /></span>
+                  ) : (
+                    <span className="badge" style={{ fontSize: '0.75rem', background: '#333' }}><T en="Unverified" ar="غير موثق" /></span>
+                  )}
+                </div>
+
+                {!user.phone_confirmed_at && (
+                  <div style={{ marginTop: 4 }}>
+                    <PhoneVerificationManager 
+                      phone={profile.phone_e164 || profile.phone || user.phone || ""} 
+                      isVerified={false} 
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="gb-trust-item">
+                <span className="gb-trust-item-label">
+                  <T en="Identity Verification" ar="توثيق الهوية" />
+                </span>
+                {profile.identity_verification_status === "verified" ? (
+                  <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>✓ <T en="Verified" ar="موثق" /></span>
+                ) : profile.identity_verification_status === "pending" ? (
+                  <span className="badge" style={{ fontSize: '0.75rem', background: '#c9a24d', color: '#000' }}>
+                    <T en="In Review" ar="قيد المراجعة" />
+                  </span>
+                ) : (
+                  <span className="badge" style={{ fontSize: '0.75rem', background: '#333' }}>
+                    <T en="Not Started" ar="لم يبدأ" />
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <Link
+              href="/profile"
+              className="btn btn-primary"
+              style={{ marginTop: 8, width: "100%", textAlign: "center" }}
+            >
+              <T en="Manage Verification" ar="إدارة التحقق والتوثيق" />
+            </Link>
+          </div>
+
+          {/* Saved Items card list */}
+          <div className="card-premium" id="saved-section">
+            <div className="gb-card-header mb-16">
+              <div>
+                <h2>
+                  <T en="Favorites" ar="المفضلة" />
+                </h2>
+              </div>
+            </div>
+
+            {favoriteRows.length === 0 ? (
+              <div className="gb-premium-empty" style={{ padding: '24px 16px' }}>
+                <div className="gb-empty-icon" style={{ fontSize: '2rem' }}>❤️</div>
+                <h3 className="gb-empty-title" style={{ fontSize: '1rem' }}>
+                  <T en="Favorites List Empty" ar="المفضلة فارغة" />
+                </h3>
+                <p className="gb-empty-desc" style={{ fontSize: '0.8rem' }}>
+                  <T en="Bookmark studios, gear, and vendors to easily find them here." ar="احفظ الاستوديوهات والمعدات والتجار لتجدها بسهولة هنا." />
+                </p>
+                <Link href="/studios" className="btn btn-outline" style={{ marginTop: 8, padding: '8px 16px', fontSize: '0.85rem' }}>
+                  <T en="Browse Studios" ar="تصفح الاستوديوهات" />
+                </Link>
+              </div>
+            ) : (
+              <>
+                <p className="text-muted" style={{ fontSize: '0.85rem', lineHeight: 1.6, marginBottom: 12 }}>
+                  <T
+                    en="Quick overview of your bookmarked items."
+                    ar="نظرة سريعة على العناصر المحفوظة في مفضلتك."
+                  />
+                </p>
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: 10 }}>
+                    <span style={{ fontSize: '0.9rem' }}><T en="Studios" ar="الاستوديوهات" /></span>
+                    <strong style={{ color: 'var(--gb-gold-light)' }}>
+                      {favoriteRows.filter((item: any) => item.favorite_type === "studio").length}
+                    </strong>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: 10 }}>
+                    <span style={{ fontSize: '0.9rem' }}><T en="Gear" ar="المعدات" /></span>
+                    <strong style={{ color: 'var(--gb-gold-light)' }}>
+                      {favoriteRows.filter((item: any) => item.favorite_type === "product").length}
+                    </strong>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: 10 }}>
+                    <span style={{ fontSize: '0.9rem' }}><T en="Vendors" ar="التجار" /></span>
+                    <strong style={{ color: 'var(--gb-gold-light)' }}>
+                      {favoriteRows.filter((item: any) => item.favorite_type === "vendor").length}
+                    </strong>
+                  </div>
+                </div>
+
+                <Link href="/customer/saved" className="btn btn-outline" style={{ marginTop: 16, width: "100%", textAlign: "center" }}>
+                  <T en="Open Saved" ar="فتح المفضلة كاملة" />
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
+
