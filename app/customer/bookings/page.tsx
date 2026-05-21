@@ -148,6 +148,60 @@ function isUpcomingBooking(booking: any) {
   return Number.isNaN(bookingDate.getTime()) || bookingDate >= today;
 }
 
+async function fetchCustomerBookings(supabaseAdmin: any, userId: string) {
+  const baseColumns = `
+    id,
+    studio_id,
+    status,
+    booking_date,
+    start_time,
+    end_time,
+    total_amount,
+    currency_code,
+    created_at
+  `;
+
+  const withStudio = await supabaseAdmin
+    .from("bookings")
+    .select(`
+      ${baseColumns},
+      studio:studios(
+        id,
+        slug,
+        name,
+        name_en,
+        name_ar,
+        city,
+        city_name,
+        district,
+        address_line,
+        google_maps_url,
+        latitude,
+        longitude,
+        cover_image_url
+      )
+    `)
+    .eq("customer_auth_user_id", userId)
+    .order("booking_date", { ascending: false })
+    .limit(100);
+
+  if (!withStudio.error) {
+    return withStudio;
+  }
+
+  console.warn("Customer bookings studio join failed; falling back to booking rows only.", {
+    code: withStudio.error.code,
+    message: withStudio.error.message,
+  });
+
+  return supabaseAdmin
+    .from("bookings")
+    .select(baseColumns)
+    .eq("customer_auth_user_id", userId)
+    .order("booking_date", { ascending: false })
+    .limit(100);
+}
+
 function BookingCard({
   booking,
   currency,
@@ -158,6 +212,7 @@ function BookingCard({
   const studio = getStudioFromBooking(booking);
   const studioName = getStudioName(studio);
   const studioHref = getStudioHref(studio);
+  const bookingId = String(booking?.id || "");
 
   const location = [studio?.district, studio?.city_name || studio?.city]
     .filter(Boolean)
@@ -225,9 +280,11 @@ function BookingCard({
           flexWrap: "wrap",
         }}
       >
-        <Link href={`/customer/bookings/${booking.id}`} className="btn btn-primary">
-          <T en="View details" ar="عرض التفاصيل" />
-        </Link>
+        {bookingId ? (
+          <Link href={`/customer/bookings/${bookingId}/review`} className="btn btn-primary">
+            <T en="Review booking" ar="مراجعة الحجز" />
+          </Link>
+        ) : null}
 
         <Link href={studioHref} className="btn">
           <T en="View studio" ar="عرض الاستوديو" />
@@ -347,38 +404,10 @@ export default async function CustomerBookingsPage() {
     redirect("/forbidden");
   }
 
-  const { data: bookings, error: bookingsError } = await supabaseAdmin
-    .from("bookings")
-    .select(`
-      id,
-      status,
-      booking_date,
-      date,
-      start_time,
-      end_time,
-      total_amount,
-      total_price,
-      amount,
-      created_at,
-      studio:studios(
-        id,
-        slug,
-        name,
-        name_en,
-        name_ar,
-        city,
-        city_name,
-        district,
-        address_line,
-        google_maps_url,
-        latitude,
-        longitude,
-        cover_image_url
-      )
-    `)
-    .eq("customer_auth_user_id", user.id)
-    .order("booking_date", { ascending: false })
-    .limit(100);
+  const { data: bookings, error: bookingsError } = await fetchCustomerBookings(
+    supabaseAdmin,
+    user.id
+  );
 
   if (bookingsError) {
     throw new Error(bookingsError.message);
