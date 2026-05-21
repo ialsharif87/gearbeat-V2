@@ -14,6 +14,18 @@ const EMAIL_OTP_TYPES = new Set([
   "email_change",
 ]);
 
+const EXPIRED_MESSAGE_EN =
+  "The confirmation link expired. Request a new login code or sign up again if registration was not completed.";
+const EXPIRED_MESSAGE_AR =
+  "انتهت صلاحية رابط التأكيد. اطلب كود دخول جديد أو أعد إنشاء الحساب إذا لم يكتمل التسجيل.";
+
+type ConfirmationStatus = "checking" | "ready" | "working" | "failed";
+
+type PendingTokenConfirmation = {
+  tokenHash: string;
+  otpType: EmailOtpType;
+};
+
 function readHashParams() {
   if (typeof window === "undefined" || !window.location.hash) {
     return new URLSearchParams();
@@ -41,52 +53,55 @@ function technicalReason(error: unknown) {
 export default function AuthConfirmClient() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-  const [message, setMessage] = useState("Confirming your email...");
+  const [status, setStatus] = useState<ConfirmationStatus>("checking");
+  const [message, setMessage] = useState("Checking your confirmation link...");
+  const [pendingToken, setPendingToken] = useState<PendingTokenConfirmation | null>(null);
+
+  async function ensureCustomerProfile() {
+    const response = await fetch("/api/customer/profile/ensure", {
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      let reason = "unknown";
+
+      try {
+        const body = await response.json();
+        reason = body?.reason || reason;
+      } catch {
+        reason = "invalid_response";
+      }
+
+      console.warn("Customer confirmation profile ensure failed", { reason });
+    }
+  }
+
+  async function finishConfirmedSession() {
+    setStatus("working");
+    setMessage("Email confirmed. Preparing your account...");
+
+    await ensureCustomerProfile();
+
+    const { error: signOutError } = await supabase.auth.signOut();
+
+    if (signOutError) {
+      console.warn("Customer confirmation session clear failed", {
+        message: signOutError.message,
+      });
+    }
+
+    router.replace("/login?confirmed=1");
+  }
+
+  function failConfirmation(reason: string) {
+    console.warn("Customer email confirmation failed", { reason });
+    setPendingToken(null);
+    setStatus("failed");
+    setMessage("Confirmation link expired.");
+  }
 
   useEffect(() => {
     let isMounted = true;
-
-    async function ensureCustomerProfile() {
-      const response = await fetch("/api/customer/profile/ensure", {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        let reason = "unknown";
-
-        try {
-          const body = await response.json();
-          reason = body?.reason || reason;
-        } catch {
-          reason = "invalid_response";
-        }
-
-        console.warn("Customer confirmation profile ensure failed", { reason });
-      }
-    }
-
-    async function finishConfirmedSession() {
-      if (isMounted) {
-        setMessage("Email confirmed. Preparing your account...");
-      }
-
-      await ensureCustomerProfile();
-
-      const { error: signOutError } = await supabase.auth.signOut();
-
-      if (signOutError) {
-        console.warn("Customer confirmation session clear failed", {
-          message: signOutError.message,
-        });
-      }
-
-      router.replace("/login?confirmed=1");
-    }
-
-    async function failConfirmation(reason: string) {
-      console.warn("Customer email confirmation failed", { reason });
-      router.replace("/login?confirmation_error=1");
-    }
 
     async function confirmEmail() {
       try {
@@ -100,21 +115,7 @@ export default function AuthConfirmClient() {
           hashParams.get("error");
 
         if (errorDescription) {
-          await failConfirmation(errorDescription);
-          return;
-        }
-
-        const code = searchParams.get("code") || hashParams.get("code");
-
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-          if (error) {
-            await failConfirmation(error.message);
-            return;
-          }
-
-          await finishConfirmedSession();
+          failConfirmation(errorDescription);
           return;
         }
 
@@ -125,13 +126,21 @@ export default function AuthConfirmClient() {
         );
 
         if (tokenHash && otpType) {
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: otpType,
-          });
+          if (!isMounted) return;
+
+          setPendingToken({ tokenHash, otpType });
+          setStatus("ready");
+          setMessage("Ready to confirm your email.");
+          return;
+        }
+
+        const code = searchParams.get("code") || hashParams.get("code");
+
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
 
           if (error) {
-            await failConfirmation(error.message);
+            failConfirmation(error.message);
             return;
           }
 
@@ -149,7 +158,7 @@ export default function AuthConfirmClient() {
           });
 
           if (error) {
-            await failConfirmation(error.message);
+            failConfirmation(error.message);
             return;
           }
 
@@ -163,7 +172,7 @@ export default function AuthConfirmClient() {
         } = await supabase.auth.getSession();
 
         if (sessionError) {
-          await failConfirmation(sessionError.message);
+          failConfirmation(sessionError.message);
           return;
         }
 
@@ -172,9 +181,9 @@ export default function AuthConfirmClient() {
           return;
         }
 
-        await failConfirmation("missing_confirmation_parameters");
+        failConfirmation("missing_confirmation_parameters");
       } catch (error) {
-        await failConfirmation(technicalReason(error));
+        failConfirmation(technicalReason(error));
       }
     }
 
@@ -185,12 +194,51 @@ export default function AuthConfirmClient() {
     };
   }, [router, supabase]);
 
+  async function handleTokenConfirmation() {
+    if (!pendingToken || status === "working") {
+      return;
+    }
+
+    setStatus("working");
+    setMessage("Confirming your email...");
+
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: pendingToken.tokenHash,
+      type: pendingToken.otpType,
+    });
+
+    if (error) {
+      failConfirmation(error.message);
+      return;
+    }
+
+    await finishConfirmedSession();
+  }
+
   return (
     <main className="auth-page">
       <section className="auth-card">
         <span className="badge badge-gold">GearBeat</span>
         <h1>{message}</h1>
-        <p>Please keep this page open while we finish your confirmation.</p>
+        {status === "ready" ? (
+          <>
+            <p>Tap the button below to activate your customer account.</p>
+            <button type="button" className="confirm-button" onClick={handleTokenConfirmation}>
+              <span>تأكيد البريد الإلكتروني</span>
+              <span>Confirm email</span>
+            </button>
+          </>
+        ) : status === "failed" ? (
+          <>
+            <p className="arabic-message">{EXPIRED_MESSAGE_AR}</p>
+            <p>{EXPIRED_MESSAGE_EN}</p>
+            <a className="secondary-link" href="/login">
+              Go to login
+            </a>
+          </>
+        ) : (
+          <p>Please keep this page open while we finish your confirmation.</p>
+        )}
       </section>
       <style jsx>{`
         .auth-page {
@@ -231,6 +279,33 @@ export default function AuthConfirmClient() {
           margin: 0;
           color: #94a3b8;
           line-height: 1.6;
+        }
+        .arabic-message {
+          margin-bottom: 8px;
+          direction: rtl;
+        }
+        .confirm-button {
+          width: 100%;
+          margin-top: 24px;
+          padding: 14px 18px;
+          border: 0;
+          border-radius: 12px;
+          background: #d4af37;
+          color: #000;
+          cursor: pointer;
+          font-weight: 900;
+          display: grid;
+          gap: 2px;
+        }
+        .confirm-button:hover {
+          filter: brightness(1.05);
+        }
+        .secondary-link {
+          display: inline-block;
+          margin-top: 24px;
+          color: #d4af37;
+          text-decoration: none;
+          font-weight: 800;
         }
       `}</style>
     </main>
