@@ -17,6 +17,8 @@ function isOtpCodeLengthValid(value: string) {
   return value.length === 6 || value.length === 8;
 }
 
+type ResendStatus = "idle" | "sending" | "sent" | "failed" | "missing_email";
+
 type LoginUser = {
   id: string;
   app_metadata?: Record<string, unknown>;
@@ -31,6 +33,21 @@ function readRole(user: LoginUser) {
   return typeof role === "string" ? role.trim().toLowerCase() : "customer";
 }
 
+function customerConfirmationRedirectUrl() {
+  return new URL("/auth/confirm", window.location.origin).toString();
+}
+
+function isEmailConfirmationError(message: string) {
+  const normalized = message.trim().toLowerCase();
+
+  return (
+    normalized.includes("email not confirmed") ||
+    normalized.includes("email_not_confirmed") ||
+    normalized.includes("not confirmed") ||
+    normalized.includes("confirm your email")
+  );
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +60,7 @@ export default function LoginPage() {
   const [rememberDevice, setRememberDevice] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [confirmationError, setConfirmationError] = useState(false);
+  const [resendStatus, setResendStatus] = useState<ResendStatus>("idle");
 
   const router = useRouter();
   const supabase = createClient();
@@ -59,8 +77,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const hasConfirmationError =
+      params.get("confirmation_error") === "1" ||
+      params.get("confirmation_expired") === "1" ||
+      params.get("expired") === "1" ||
+      params.get("confirmation") === "expired";
+
     setConfirmed(params.get("confirmed") === "1");
-    setConfirmationError(params.get("confirmation_error") === "1");
+    setConfirmationError(hasConfirmationError);
   }, []);
 
   async function ensureCustomerProfile() {
@@ -83,6 +107,38 @@ export default function LoginPage() {
     }
 
     return true;
+  }
+
+  async function handleResendConfirmation() {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    setError(null);
+    setResendStatus("idle");
+
+    if (!normalizedEmail) {
+      setResendStatus("missing_email");
+      return;
+    }
+
+    setResendStatus("sending");
+
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo: customerConfirmationRedirectUrl(),
+      },
+    });
+
+    if (resendError) {
+      console.warn("Customer login confirmation resend failed", {
+        reason: resendError.message,
+      });
+      setResendStatus("failed");
+      return;
+    }
+
+    setResendStatus("sent");
   }
 
   async function routeAuthenticatedUser(
@@ -160,7 +216,17 @@ export default function LoginPage() {
         password,
       });
 
-      if (authError) throw new Error("Invalid email or password");
+      if (authError) {
+        if (isEmailConfirmationError(authError.message)) {
+          console.warn("Customer password login blocked pending confirmation", {
+            reason: authError.message,
+          });
+          setConfirmationError(true);
+          return;
+        }
+
+        throw new Error("Invalid email or password");
+      }
 
       const user = data.user;
       if (!user) throw new Error("Login failed");
@@ -195,7 +261,17 @@ export default function LoginPage() {
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        if (isEmailConfirmationError(authError.message)) {
+          console.warn("Customer OTP request blocked pending confirmation", {
+            reason: authError.message,
+          });
+          setConfirmationError(true);
+          return;
+        }
+
+        throw authError;
+      }
 
       setStep("verify");
       setCooldown(60);
@@ -262,11 +338,59 @@ export default function LoginPage() {
           </div>
         )}
 
+        {confirmationError && (
+          <div className="confirmation-recovery">
+            <p>
+              <T
+                en="Enter your email, then resend the customer confirmation email."
+                ar="أدخل بريدك الإلكتروني ثم أعد إرسال رابط تفعيل حساب العميل."
+              />
+            </p>
+            <button
+              type="button"
+              className="secondary-action"
+              disabled={resendStatus === "sending"}
+              onClick={handleResendConfirmation}
+            >
+              {resendStatus === "sending" ? (
+                <T en="Sending..." ar="جارٍ الإرسال..." />
+              ) : (
+                <T en="Resend confirmation email" ar="إعادة إرسال رابط التفعيل" />
+              )}
+            </button>
+          </div>
+        )}
+
         {confirmed && !confirmationError && (
           <div className="auth-success">
             <T
               en="Email confirmed. You can continue to your GearBeat account."
               ar="تم تفعيل البريد الإلكتروني. يمكنك المتابعة إلى حسابك في GearBeat."
+            />
+          </div>
+        )}
+
+        {resendStatus === "sent" && (
+          <div className="auth-success compact">
+            <T
+              en="Confirmation email sent. Check your inbox and spam folder."
+              ar="تم إرسال رابط التفعيل. تحقق من بريدك الوارد ومجلد الرسائل غير المرغوب فيها."
+            />
+          </div>
+        )}
+        {resendStatus === "failed" && (
+          <div className="auth-error compact">
+            <T
+              en="We could not resend the confirmation email right now. Try again shortly."
+              ar="تعذر إعادة إرسال رابط التفعيل الآن. حاول مرة أخرى بعد قليل."
+            />
+          </div>
+        )}
+        {resendStatus === "missing_email" && (
+          <div className="auth-error compact">
+            <T
+              en="Enter your email first so we can resend the confirmation link."
+              ar="أدخل بريدك الإلكتروني أولاً حتى نتمكن من إعادة إرسال رابط التفعيل."
             />
           </div>
         )}
@@ -280,7 +404,10 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setResendStatus("idle");
+                }}
                 placeholder="email@example.com"
                 required
                 className="gb-input"
@@ -336,7 +463,10 @@ export default function LoginPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setResendStatus("idle");
+                    }}
                     placeholder="email@example.com"
                     required
                     className="gb-input"
@@ -418,6 +548,29 @@ export default function LoginPage() {
                 </div>
               </form>
             )}
+          </div>
+        )}
+
+        {!confirmed && !confirmationError && (
+          <div className="confirmation-recovery subtle">
+            <p>
+              <T
+                en="Need a new activation email? Enter your email above and resend it here."
+                ar="تحتاج رابط تفعيل جديد؟ أدخل بريدك أعلاه ثم أعد إرساله من هنا."
+              />
+            </p>
+            <button
+              type="button"
+              className="secondary-action"
+              disabled={!email.trim() || resendStatus === "sending"}
+              onClick={handleResendConfirmation}
+            >
+              {resendStatus === "sending" ? (
+                <T en="Sending..." ar="جارٍ الإرسال..." />
+              ) : (
+                <T en="Resend confirmation email" ar="إعادة إرسال رابط التفعيل" />
+              )}
+            </button>
           </div>
         )}
 
@@ -537,6 +690,45 @@ export default function LoginPage() {
           margin-bottom: 24px;
           text-align: center;
           line-height: 1.6;
+        }
+        .auth-success.compact,
+        .auth-error.compact {
+          margin-bottom: 16px;
+        }
+        .confirmation-recovery {
+          display: grid;
+          gap: 12px;
+          margin: -8px 0 20px;
+          padding: 14px;
+          border: 1px solid rgba(212, 175, 55, 0.32);
+          border-radius: 12px;
+          background: rgba(212, 175, 55, 0.08);
+          text-align: center;
+        }
+        .confirmation-recovery.subtle {
+          margin: 20px 0 0;
+          border-color: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.03);
+        }
+        .confirmation-recovery p {
+          margin: 0;
+          color: #cbd5e1;
+          font-size: 0.85rem;
+          line-height: 1.6;
+        }
+        .secondary-action {
+          width: 100%;
+          padding: 11px 14px;
+          border: 1px solid rgba(212, 175, 55, 0.45);
+          border-radius: 12px;
+          background: rgba(212, 175, 55, 0.1);
+          color: #D4AF37;
+          cursor: pointer;
+          font-weight: 800;
+        }
+        .secondary-action:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
         }
         .auth-footer {
           margin-top: 24px;
