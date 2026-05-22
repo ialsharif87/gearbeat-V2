@@ -6,6 +6,7 @@ import { createAdminClient } from "../../lib/supabase/admin";
 import T from "../../components/t";
 import PhoneVerificationManager from "../../components/phone-verification-manager";
 import CustomerAccountNav from "../../components/customer-account-nav";
+import ProfileSocialLinksClient from "./ProfileSocialLinksClient";
 
 function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").trim();
@@ -67,16 +68,6 @@ function getIdentityLabel(identityType: string) {
   if (identityType === "gcc_id") return "GCC ID / هوية خليجية";
   return "-";
 }
-
-const socialLinks = [
-  "Instagram",
-  "TikTok",
-  "X / Twitter",
-  "YouTube",
-  "LinkedIn",
-  "Facebook",
-  "Website",
-];
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -593,31 +584,7 @@ export default async function ProfilePage() {
                 )}
               </section>
 
-              <section className="gb-account-section">
-                <span className="badge badge-gold">
-                  <T en="Social links" ar="روابط التواصل" />
-                </span>
-                <p className="admin-muted-line" style={{ marginTop: 10 }}>
-                  <T
-                    en="Social links are prepared for a future profile update and are not saved yet."
-                    ar="روابط التواصل جاهزة لمرحلة لاحقة ولا يتم حفظها حاليًا."
-                  />
-                </p>
-
-                <div className="gb-social-link-grid">
-                  {socialLinks.map((label) => (
-                    <label key={label}>
-                      {label}
-                      <input
-                        className="input"
-                        type="url"
-                        placeholder="Coming soon / سيتم تفعيلها قريبًا"
-                        disabled
-                      />
-                    </label>
-                  ))}
-                </div>
-              </section>
+              <ProfileSocialLinksClient />
 
               {accountStatus !== "pending_deletion" ? (
                 <button
