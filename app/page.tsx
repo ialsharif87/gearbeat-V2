@@ -104,8 +104,9 @@ const trustItems = [
 
 const discoveryPrompts = [
   { en: "Find a vocal room", ar: "ابحث عن غرفة صوت" },
-  { en: "Compare studio gear", ar: "قارن تجهيز الاستوديو" },
+  { en: "Compare studio prices", ar: "قارن أسعار الاستوديوهات" },
   { en: "Plan a podcast setup", ar: "خطط لتجهيز بودكاست" },
+  { en: "Discover trusted gear", ar: "اكتشف معدات موثوقة" },
 ];
 
 function CinematicWave() {
@@ -127,6 +128,35 @@ function PulseOrb() {
         <div className="beat-center" />
       </div>
     </div>
+  );
+}
+
+function VerticalAiDiscoveryRail() {
+  return (
+    <aside className="ai-discovery-rail" aria-label="Ask GearBeat discovery rail">
+      <div className="ai-rail-heading">
+        <span>
+          <T en="Ask GearBeat" ar="اسأل GearBeat" />
+        </span>
+        <h3>
+          <T en="Discovery assistant" ar="مساعد الاكتشاف" />
+        </h3>
+        <p>
+          <T
+            en="Start with what you need, then explore studios, gear, and creator paths."
+            ar="ابدأ بما تحتاجه، ثم استكشف الاستوديوهات والمعدات ومسارات المبدعين."
+          />
+        </p>
+      </div>
+
+      <div className="ai-rail-items">
+        {discoveryPrompts.map((prompt) => (
+          <span key={prompt.en}>
+            <T en={prompt.en} ar={prompt.ar} />
+          </span>
+        ))}
+      </div>
+    </aside>
   );
 }
 
@@ -155,8 +185,8 @@ export default function HomePage() {
 
             <p className="hero-lead">
               <T
-                en="GearBeat brings studio discovery and audio marketplace exploration into one premium sound-driven experience for creators across Saudi Arabia and the GCC."
-                ar="تجمع GearBeat اكتشاف الاستوديوهات واستكشاف سوق معدات الصوت في تجربة فاخرة تقودها روح الصوت للمبدعين في السعودية والخليج."
+                en="GearBeat connects creators with trusted studios, curated gear discovery, and premium music experiences across Saudi Arabia and the GCC."
+                ar="تربط GearBeat المبدعين باستوديوهات موثوقة، واكتشاف معدات منتقاة، وتجارب موسيقية فاخرة في السعودية والخليج."
               />
             </p>
 
@@ -167,27 +197,6 @@ export default function HomePage() {
               <Link href="/marketplace" className="btn btn-outline hero-btn">
                 <T en="Explore Marketplace" ar="استكشف السوق" />
               </Link>
-            </div>
-
-            <div className="hero-discovery-layer" aria-label="GearBeat guided discovery preview">
-              <div>
-                <span className="discovery-label">
-                  <T en="Ask GearBeat discovery" ar="اكتشاف عبر GearBeat" />
-                </span>
-                <p>
-                  <T
-                    en="Start with a creative goal, then move into studios, gear, and services with a clearer path."
-                    ar="ابدأ بهدفك الإبداعي، ثم انتقل إلى الاستوديوهات والمعدات والخدمات بمسار أوضح."
-                  />
-                </p>
-              </div>
-              <div className="discovery-prompts">
-                {discoveryPrompts.map((prompt) => (
-                  <span key={prompt.en}>
-                    <T en={prompt.en} ar={prompt.ar} />
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -201,24 +210,10 @@ export default function HomePage() {
               <div className="wave-ribbon">
                 <CinematicWave />
               </div>
-              <div className="floating-card studio-float">
-                <span>
-                  <T en="Studio rooms" ar="مساحات استوديو" />
-                </span>
-                <strong>
-                  <T en="Browse before booking" ar="تصفح قبل الحجز" />
-                </strong>
-              </div>
-              <div className="floating-card gear-float">
-                <span>
-                  <T en="Audio gear" ar="معدات صوت" />
-                </span>
-                <strong>
-                  <T en="Explore before buying" ar="استكشف قبل الشراء" />
-                </strong>
-              </div>
             </div>
           </div>
+
+          <VerticalAiDiscoveryRail />
         </div>
       </section>
 
@@ -390,14 +385,14 @@ export default function HomePage() {
         .wow-home {
           position: relative;
           overflow: hidden;
-          --home-display: clamp(3.35rem, 7.4vw, 7.35rem);
-          --home-section-title: clamp(2.35rem, 4.8vw, 4.65rem);
+          --home-display: clamp(3rem, 5.7vw, 4.75rem);
+          --home-section-title: clamp(2rem, 3.7vw, 3.75rem);
           --home-card-title: clamp(1.35rem, 1.65vw, 1.68rem);
           --home-body: clamp(1rem, 1.1vw, 1.1rem);
           background:
-            radial-gradient(circle at 20% -10%, rgba(212, 175, 55, 0.16), transparent 34%),
-            radial-gradient(circle at 88% 10%, rgba(15, 160, 138, 0.08), transparent 32%),
-            linear-gradient(180deg, #020304 0%, #080b10 42%, #020304 100%);
+            radial-gradient(circle at 18% 18%, rgba(242, 201, 76, 0.16), transparent 34%),
+            radial-gradient(circle at 74% 22%, rgba(212, 175, 55, 0.18), transparent 32%),
+            linear-gradient(180deg, #070a0b 0%, #030506 55%, #010203 100%);
         }
 
         .wow-home::before {
@@ -407,11 +402,13 @@ export default function HomePage() {
           pointer-events: none;
           z-index: 0;
           background:
-            linear-gradient(115deg, transparent 0 14%, rgba(212,175,55,0.055) 14.2%, transparent 14.7% 42%, rgba(255,255,255,0.035) 42.2%, transparent 42.8%),
-            repeating-linear-gradient(90deg, rgba(212,175,55,0.035) 0 1px, transparent 1px 92px);
+            linear-gradient(115deg, transparent 0 14%, rgba(242,201,76,0.08) 14.2%, transparent 14.9% 42%, rgba(255,255,255,0.045) 42.2%, transparent 42.9%),
+            linear-gradient(90deg, transparent, rgba(242,201,76,0.09), transparent),
+            repeating-linear-gradient(90deg, rgba(242,201,76,0.035) 0 1px, transparent 1px 72px),
+            repeating-linear-gradient(0deg, rgba(212,175,55,0.026) 0 1px, transparent 1px 72px);
           mask-image: linear-gradient(to bottom, black 0%, transparent 86%);
-          opacity: 0.68;
-          animation: atmosphereDrift 22s ease-in-out infinite alternate;
+          opacity: 0.76;
+          animation: atmosphereDrift 22s ease-in-out infinite alternate, gbHaze 12s ease-in-out infinite;
         }
 
         .wow-home > * {
@@ -434,11 +431,24 @@ export default function HomePage() {
           inset: 0;
           z-index: -3;
           background:
-            radial-gradient(ellipse at 63% 42%, rgba(212,175,55,0.13), transparent 38%),
-            linear-gradient(115deg, rgba(255,255,255,0.05), transparent 24%),
+            radial-gradient(ellipse at 52% 48%, rgba(242,201,76,0.2), transparent 42%),
+            linear-gradient(104deg, transparent 8%, rgba(242,201,76,0.1) 31%, transparent 58%),
             repeating-linear-gradient(90deg, rgba(212,175,55,0.08) 0 1px, transparent 1px 74px);
-          mask-image: radial-gradient(circle at 58% 42%, black, transparent 74%);
-          opacity: 0.72;
+          mask-image: radial-gradient(circle at 50% 42%, black, transparent 78%);
+          opacity: 0.8;
+        }
+
+        .wow-hero::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -4;
+          background:
+            linear-gradient(90deg, rgba(3,5,7,0.92), rgba(3,5,7,0.72) 44%, rgba(3,5,7,0.86)),
+            linear-gradient(180deg, rgba(3,5,7,0.76), rgba(3,5,7,0.98)),
+            url("/brand/studio-placeholder.jpg") center / cover no-repeat;
+          opacity: 0.34;
+          filter: saturate(0.72) contrast(1.1);
         }
 
         .hero-light {
@@ -514,10 +524,15 @@ export default function HomePage() {
           100% { transform: translate3d(0, -18px, 0) scale(1.04); opacity: 0.44; }
         }
 
+        @keyframes gbHaze {
+          0%, 100% { transform: translate3d(-2%, 0, 0); opacity: 0.35; }
+          50% { transform: translate3d(2%, -1%, 0); opacity: 0.65; }
+        }
+
         .wow-hero-inner {
           display: grid;
-          grid-template-columns: minmax(0, 0.92fr) minmax(380px, 1.08fr);
-          gap: clamp(34px, 6vw, 88px);
+          grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.15fr) minmax(240px, 0.66fr);
+          gap: clamp(24px, 4vw, 56px);
           align-items: center;
         }
 
@@ -543,7 +558,7 @@ export default function HomePage() {
           margin: 26px 0 18px;
           color: #fff;
           font-size: var(--home-display);
-          line-height: 0.92;
+          line-height: 0.96;
           letter-spacing: 0;
         }
 
@@ -604,85 +619,114 @@ export default function HomePage() {
           transform: translateY(-4px);
         }
 
-        .hero-discovery-layer {
+        .ai-discovery-rail {
           position: relative;
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 18px;
-          align-items: center;
-          max-width: 720px;
-          margin-top: 24px;
-          padding: 18px;
           overflow: hidden;
-          border-radius: 24px;
-          border: 1px solid rgba(212,175,55,0.18);
+          align-self: center;
+          padding: 18px;
+          border-radius: 28px;
+          border: 1px solid rgba(242,201,76,0.2);
           background:
-            linear-gradient(120deg, rgba(212,175,55,0.1), transparent 34%),
-            rgba(255,255,255,0.035);
-          box-shadow: 0 20px 60px rgba(0,0,0,0.28), inset 0 0 36px rgba(212,175,55,0.035);
+            linear-gradient(145deg, rgba(242,201,76,0.09), transparent 38%),
+            rgba(0,0,0,0.35);
+          box-shadow: 0 0 60px rgba(212,175,55,0.1), 0 28px 80px rgba(0,0,0,0.32);
           backdrop-filter: blur(18px);
         }
 
-        .hero-discovery-layer::before {
+        .ai-discovery-rail::before {
           content: "";
           position: absolute;
-          inset: auto -12% 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(244,212,122,0.62), transparent);
-          box-shadow: 0 0 26px rgba(212,175,55,0.4);
+          inset: 0 auto 0 0;
+          width: 1px;
+          background: linear-gradient(180deg, transparent, rgba(242,201,76,0.62), transparent);
+          box-shadow: 0 0 28px rgba(242,201,76,0.44);
         }
 
-        .discovery-label {
+        [dir="rtl"] .ai-discovery-rail::before {
+          left: auto;
+          right: 0;
+        }
+
+        .ai-rail-heading span {
           display: block;
-          margin-bottom: 6px;
           color: var(--gb-gold-light);
-          font-size: 0.9rem;
+          font-size: 0.82rem;
           font-weight: 900;
+          text-transform: uppercase;
         }
 
-        .hero-discovery-layer p {
+        .ai-rail-heading h3 {
+          margin: 8px 0 8px;
+          color: #fff;
+          font-size: clamp(1.15rem, 1.45vw, 1.35rem);
+          line-height: 1.18;
+          letter-spacing: 0;
+        }
+
+        .ai-rail-heading p {
           margin: 0;
-          color: rgba(248,249,250,0.68);
-          font-size: 0.98rem;
-          line-height: 1.65;
+          color: rgba(248,249,250,0.66);
+          font-size: 0.95rem;
+          line-height: 1.6;
         }
 
-        .discovery-prompts {
+        .ai-rail-items {
+          display: grid;
+          gap: 10px;
+          margin-top: 18px;
+        }
+
+        .ai-rail-items span {
           display: flex;
-          flex-wrap: wrap;
-          justify-content: flex-end;
-          gap: 8px;
-          max-width: 300px;
+          min-height: 48px;
+          align-items: center;
+          justify-content: space-between;
+          border-radius: 18px;
+          padding: 12px 14px;
+          color: rgba(248,249,250,0.82);
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
+          font-size: 0.95rem;
+          font-weight: 800;
+          transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
         }
 
-        .discovery-prompts span {
-          display: inline-flex;
-          min-height: 34px;
-          align-items: center;
-          border-radius: 999px;
-          padding: 7px 11px;
-          color: rgba(248,249,250,0.82);
-          background: rgba(0,0,0,0.28);
-          border: 1px solid rgba(255,255,255,0.08);
-          font-size: 0.86rem;
-          font-weight: 800;
+        .ai-rail-items span::after {
+          content: "→";
+          color: var(--gb-gold-light);
+          transition: transform 0.3s ease;
+        }
+
+        [dir="rtl"] .ai-rail-items span::after {
+          content: "←";
+        }
+
+        .ai-rail-items span:hover {
+          transform: translateX(4px);
+          border-color: rgba(242,201,76,0.4);
+          background: rgba(242,201,76,0.1);
+          color: #fff;
+        }
+
+        [dir="rtl"] .ai-rail-items span:hover {
+          transform: translateX(-4px);
         }
 
         .wow-stage {
           position: relative;
-          min-height: min(70vw, 620px);
+          min-height: min(54vw, 540px);
           display: grid;
           place-items: center;
         }
 
         .hero-wave-field {
           position: absolute;
-          left: -18%;
-          right: -18%;
+          left: -42%;
+          right: -42%;
           top: 48%;
           z-index: 1;
-          transform: translateY(-50%) rotate(-7deg);
-          opacity: 0.34;
+          transform: translateY(-50%) rotate(-5deg);
+          opacity: 0.38;
           filter: blur(0.2px);
           mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
         }
@@ -693,25 +737,25 @@ export default function HomePage() {
 
         .stage-frame {
           position: relative;
-          width: min(100%, 740px);
-          min-height: min(68vw, 580px);
+          width: min(100%, 620px);
+          min-height: min(52vw, 520px);
           overflow: visible;
           border: 0;
-          border-radius: clamp(28px, 5vw, 54px);
+          border-radius: 999px;
           background:
-            radial-gradient(circle at 50% 47%, rgba(244, 212, 122, 0.2), transparent 28%),
-            radial-gradient(circle at 72% 22%, rgba(15, 160, 138, 0.1), transparent 30%);
+            radial-gradient(circle at 50% 47%, rgba(242, 201, 76, 0.18), transparent 28%),
+            radial-gradient(circle at 72% 22%, rgba(212, 175, 55, 0.1), transparent 30%);
           box-shadow:
-            0 42px 130px rgba(0,0,0,0.46),
-            0 0 110px rgba(212,175,55,0.14);
+            0 0 120px rgba(242,201,76,0.14),
+            0 40px 130px rgba(0,0,0,0.38);
         }
 
         .stage-frame::before {
           content: "";
           position: absolute;
-          inset: 10% 4% 8%;
+          inset: 12% 8%;
           border-radius: 50%;
-          border: 1px solid rgba(244,212,122,0.12);
+          border: 1px solid rgba(244,212,122,0.16);
           background:
             radial-gradient(circle at 50% 46%, rgba(212,175,55,0.12), transparent 46%),
             linear-gradient(135deg, rgba(255,255,255,0.08), transparent 28%, rgba(212,175,55,0.05));
@@ -734,7 +778,7 @@ export default function HomePage() {
         .beat-orb {
           position: absolute;
           inset: 50% auto auto 50%;
-          width: min(48vw, 360px);
+          width: min(32vw, 340px);
           aspect-ratio: 1;
           transform: translate(-50%, -50%);
           display: grid;
@@ -784,9 +828,14 @@ export default function HomePage() {
           animation-delay: -2.7s;
         }
 
-        @keyframes coreBreath {
+        @keyframes gbPulse {
           0%, 100% { transform: scale(0.96); }
           50% { transform: scale(1.045); }
+        }
+
+        @keyframes coreBreath {
+          0%, 100% { transform: scale(0.94); opacity: 0.72; }
+          50% { transform: scale(1.06); opacity: 1; }
         }
 
         @keyframes ringBreath {
@@ -796,13 +845,19 @@ export default function HomePage() {
 
         .wave-ribbon {
           position: absolute;
-          left: -18%;
-          right: -18%;
+          left: -44%;
+          right: -44%;
           top: 50%;
           z-index: 4;
           transform: translateY(-50%) rotate(-8deg);
           padding: 42px 0;
           mask-image: linear-gradient(90deg, transparent, black 16%, black 84%, transparent);
+          animation: gbWaveDrift 7s ease-in-out infinite;
+        }
+
+        @keyframes gbWaveDrift {
+          0%, 100% { transform: translateY(-50%) translateX(-2%) rotate(-8deg) scaleX(0.98); opacity: 0.74; }
+          50% { transform: translateY(-50%) translateX(2%) rotate(-8deg) scaleX(1.04); opacity: 1; }
         }
 
         .wow-wave {
@@ -1245,8 +1300,9 @@ export default function HomePage() {
           .beat-orb-core,
           .beat-orb-ring,
           .wow-wave span,
+          .wave-ribbon,
           .gear-object,
-          .floating-card,
+          .ai-rail-items span,
           .pathway-card,
           .studio-panel,
           .gear-podium-card,
@@ -1263,20 +1319,16 @@ export default function HomePage() {
 
           .wow-stage {
             order: 2;
-            min-height: 480px;
+            min-height: 470px;
           }
 
-          .hero-discovery-layer {
-            grid-template-columns: 1fr;
-          }
-
-          .discovery-prompts {
-            max-width: none;
-            justify-content: flex-start;
+          .ai-discovery-rail {
+            order: 3;
+            max-width: 640px;
           }
 
           .stage-frame {
-            min-height: 460px;
+            min-height: 450px;
           }
 
           .pathway-stage,
@@ -1308,7 +1360,7 @@ export default function HomePage() {
           }
 
           .wow-hero-copy h1 {
-            font-size: clamp(2.85rem, 16vw, 4.4rem);
+            font-size: clamp(2.9rem, 13vw, 3.55rem);
             line-height: 0.98;
           }
 
@@ -1323,52 +1375,41 @@ export default function HomePage() {
           }
 
           .wow-stage {
-            min-height: 410px;
+            min-height: 370px;
           }
 
           .stage-frame {
-            min-height: 370px;
-            border-radius: 28px;
+            width: 100%;
+            min-height: 340px;
           }
 
           .hero-wave-field {
-            left: -42%;
-            right: -42%;
-            opacity: 0.22;
+            left: -58%;
+            right: -58%;
+            opacity: 0.24;
           }
 
-          .hero-discovery-layer {
+          .beat-orb {
+            width: min(72vw, 280px);
+          }
+
+          .wave-ribbon {
+            left: -58%;
+            right: -58%;
+          }
+
+          .ai-discovery-rail {
             padding: 15px;
             border-radius: 20px;
           }
 
-          .discovery-prompts {
+          .ai-rail-items {
             gap: 7px;
           }
 
-          .discovery-prompts span {
-            min-height: 32px;
-            font-size: 0.82rem;
-          }
-
-          .floating-card {
-            width: min(56%, 190px);
-            padding: 12px;
-          }
-
-          .studio-float {
-            left: 14px;
-            bottom: 16px;
-          }
-
-          .gear-float {
-            right: 14px;
-            top: 16px;
-          }
-
-          .wave-ribbon {
-            left: -22%;
-            right: -22%;
+          .ai-rail-items span {
+            min-height: 44px;
+            font-size: 0.9rem;
           }
 
           .pathway-stage,
@@ -1395,7 +1436,7 @@ export default function HomePage() {
           .section-title-row h2,
           .split-heading h2,
           .final-wow h2 {
-            font-size: clamp(2.1rem, 11vw, 3.2rem);
+            font-size: clamp(1.95rem, 9vw, 2.6rem);
             line-height: 1.05;
           }
         }
