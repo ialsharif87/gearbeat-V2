@@ -67,39 +67,6 @@ h1, h2, h3, h4 {
   letter-spacing: -0.02em;
 }
 
-@keyframes gbHaze {
-  0%, 100% {
-    transform: translate3d(-2%, 0, 0) rotate(12deg);
-    opacity: 0.35;
-  }
-  50% {
-    transform: translate3d(2%, -1%, 0) rotate(12deg);
-    opacity: 0.65;
-  }
-}
-
-@keyframes gbPulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(0.94);
-    opacity: 0.72;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.06);
-    opacity: 1;
-  }
-}
-
-@keyframes gbWaveDrift {
-  0%, 100% {
-    transform: translate(-52%, -50%) scaleX(0.98);
-    opacity: 0.72;
-  }
-  50% {
-    transform: translate(-48%, -50%) scaleX(1.04);
-    opacity: 1;
-  }
-}
-
 .text-gold { color: var(--gb-gold); }
 .text-muted { color: var(--gb-text-muted); }
 .text-center { text-align: center; }

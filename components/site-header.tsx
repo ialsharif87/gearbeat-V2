@@ -351,10 +351,7 @@ export default function SiteHeader({
           height: 80px;
           display: flex;
           align-items: center;
-          background: rgba(3, 5, 6, 0.6) !important;
-          backdrop-filter: blur(24px);
-          border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-          box-shadow: 0 1px 0 rgba(242, 201, 76, 0.04), 0 18px 60px rgba(0, 0, 0, 0.18);
+          border-bottom: 1px solid var(--gb-border);
         }
 
         .header-shell {
@@ -453,9 +450,9 @@ export default function SiteHeader({
           left: 0;
           width: 100%;
           min-height: calc(100vh - 80px);
-          background: rgba(3, 5, 6, 0.92);
-          backdrop-filter: blur(24px);
-          border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+          background: rgba(0, 0, 0, 0.98);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid var(--gb-border);
           padding: 40px 24px;
           z-index: 999;
           display: flex;
