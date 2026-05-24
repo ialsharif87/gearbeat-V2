@@ -1,570 +1,1189 @@
 import Link from "next/link";
 import T from "../components/t";
-import AskGearBeatPreview from "../components/ask-gearbeat-preview";
 import { publicFeatureFlags } from "../lib/public-feature-flags";
+
+const pathways = [
+  {
+    href: "/studios",
+    eyebrow: { en: "Rooms", ar: "مساحات" },
+    title: { en: "Book Studios", ar: "حجز الاستوديوهات" },
+    body: {
+      en: "Step into rooms shaped for vocals, podcasts, production, and focused sound work.",
+      ar: "ادخل إلى مساحات مصممة للأداء الصوتي والبودكاست والإنتاج والعمل الصوتي المركز.",
+    },
+    cta: { en: "Browse rooms", ar: "تصفح المساحات" },
+  },
+  {
+    href: "/marketplace",
+    eyebrow: { en: "Gear", ar: "معدات" },
+    title: { en: "Marketplace", ar: "السوق" },
+    body: {
+      en: "Explore audio tools and creative setup categories prepared for GearBeat creators.",
+      ar: "استكشف أدوات الصوت وفئات التجهيز الإبداعي المجهزة لمبدعي GearBeat.",
+    },
+    cta: { en: "Explore gear", ar: "استكشف المعدات" },
+  },
+  {
+    href: "/gearbeat-certified",
+    eyebrow: { en: "Trust", ar: "ثقة" },
+    title: { en: "Certified Studios", ar: "استوديوهات موثقة" },
+    body: {
+      en: "A premium review layer for studios ready to build deeper creator confidence.",
+      ar: "طبقة مراجعة مميزة للاستوديوهات الجاهزة لبناء ثقة أعمق مع المبدعين.",
+    },
+    cta: { en: "See the standard", ar: "شاهد المعيار" },
+  },
+  {
+    href: "/customer/rewards",
+    eyebrow: { en: "Membership", ar: "عضوية" },
+    title: { en: "Rewards", ar: "المكافآت" },
+    body: {
+      en: "A customer experience foundation for future loyalty, access, and creator benefits.",
+      ar: "أساس تجربة عملاء لمزايا مستقبلية للولاء والوصول ودعم المبدعين.",
+    },
+    cta: { en: "View membership", ar: "عرض العضوية" },
+  },
+];
+
+const studioPreviews = [
+  {
+    href: "/studios",
+    title: { en: "Vocal-ready rooms", ar: "غرف جاهزة للأداء الصوتي" },
+    body: {
+      en: "Preview the mood, room type, and creative fit before opening studio details.",
+      ar: "عاين الأجواء ونوع الغرفة وملاءمتها الإبداعية قبل فتح تفاصيل الاستوديو.",
+    },
+  },
+  {
+    href: "/studios",
+    title: { en: "Production suites", ar: "أجنحة إنتاج" },
+    body: {
+      en: "Move from idea to arrangement with spaces built for longer creative focus.",
+      ar: "انتقل من الفكرة إلى التوزيع داخل مساحات مصممة للتركيز الإبداعي الطويل.",
+    },
+  },
+  {
+    href: "/gearbeat-certified",
+    title: { en: "Certified discovery", ar: "اكتشاف موثق" },
+    body: {
+      en: "A cleaner path to compare studios with review-ready presentation and trust cues.",
+      ar: "مسار أنظف لمقارنة الاستوديوهات بعرض جاهز للمراجعة وإشارات ثقة واضحة.",
+    },
+  },
+];
+
+const gearPreviews = [
+  {
+    href: "/marketplace",
+    title: { en: "Microphones", ar: "ميكروفونات" },
+    body: { en: "Voice, podcast, and recording essentials.", ar: "أساسيات الصوت والبودكاست والتسجيل." },
+  },
+  {
+    href: "/marketplace",
+    title: { en: "Studio monitors", ar: "سماعات استوديو" },
+    body: { en: "Reference listening and room-building categories.", ar: "فئات للاستماع المرجعي وتجهيز المساحات." },
+  },
+  {
+    href: "/marketplace",
+    title: { en: "Interfaces", ar: "واجهات صوتية" },
+    body: { en: "Signal flow tools for modern creator setups.", ar: "أدوات تدفق الإشارة لتجهيزات المبدعين الحديثة." },
+  },
+  {
+    href: "/marketplace",
+    title: { en: "Accessories", ar: "إكسسوارات" },
+    body: { en: "Practical details that make sessions smoother.", ar: "تفاصيل عملية تجعل الجلسات أكثر سلاسة." },
+  },
+];
+
+const trustItems = [
+  { en: "Verified listings", ar: "قوائم موثقة" },
+  { en: "Manual review readiness", ar: "جاهزية مراجعة يدوية" },
+  { en: "Creator-first experience", ar: "تجربة تبدأ من المبدع" },
+  { en: "Support-ready journey", ar: "مسار جاهز للدعم" },
+];
+
+function CinematicWave() {
+  return (
+    <div className="wow-wave" aria-hidden="true">
+      {Array.from({ length: 18 }).map((_, index) => (
+        <span key={index} />
+      ))}
+    </div>
+  );
+}
+
+function PulseOrb() {
+  return (
+    <div className="beat-orb" aria-hidden="true">
+      <div className="beat-orb-ring ring-one" />
+      <div className="beat-orb-ring ring-two" />
+      <div className="beat-orb-core">
+        <div className="beat-center" />
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
-    <main className="home-root">
-      {/* 1. CINEMATIC HERO */}
-      <section className="hero-section">
-        <div className="container hero-container animate-up">
-          <div className="hero-content">
-            <div className="badge-gold mb-16">
-              <T en="Saudi-First Creative Marketplace" ar="منصة إبداعية صوتية سعودية أولاً" />
-            </div>
-            <h1 className="text-balance" style={{ fontWeight: 900 }}>
-              <T
-                en="The global pulse of studio sound."
-                ar="النبض العالمي لصوت الاستوديوهات."
-              />
+    <main className="home-root wow-home">
+      <section className="wow-hero">
+        <div className="hero-light hero-light-a" />
+        <div className="hero-light hero-light-b" />
+
+        <div className="container wow-hero-inner">
+          <div className="wow-hero-copy">
+            <span className="wow-kicker">
+              <T en="Saudi-first studio marketplace" ar="سوق استوديوهات سعودي أولًا" />
+            </span>
+
+            <h1>
+              <span>Book the space.</span>
+              <span className="gold-shimmer">Buy the gear.</span>
+              <span>Create the sound.</span>
             </h1>
-            <p className="lead mb-40">
+
+            <p className="arabic-line">احجز المكان، اشترِ المعدات، وابدأ الإبداع</p>
+
+            <p className="hero-lead">
               <T
-                en="Built for Saudi launch, GCC expansion, and global reach. Explore now. Full commercial activation coming in controlled phases. Payments and sensitive onboarding are activated only after compliance readiness."
-                ar="مصممة للإطلاق في المملكة العربية السعودية، والتوسع في الخليج، والوصول العالمي. استكشف الآن. التفعيل التجاري الكامل يأتي في مراحل خاضعة للرقابة. يتم تنشيط المدفوعات والتسجيل الحساس للمعلومات فقط بعد جاهزية الامتثال."
+                en="GearBeat brings studio discovery and audio marketplace exploration into one premium sound-driven experience for creators across Saudi Arabia and the GCC."
+                ar="تجمع GearBeat اكتشاف الاستوديوهات واستكشاف سوق معدات الصوت في تجربة فاخرة تقودها روح الصوت للمبدعين في السعودية والخليج."
               />
             </p>
+
             <div className="hero-actions">
-              <Link href="/studios" className="btn btn-primary btn-lg shadow-gold">
+              <Link href="/studios" className="btn btn-primary hero-btn">
                 <T en="Book a Studio" ar="احجز استوديو" />
               </Link>
-              <Link href="/marketplace" className="btn btn-outline btn-lg">
-                <T en="Shop Gear" ar="تسوق معدات" />
+              <Link href="/marketplace" className="btn btn-outline hero-btn">
+                <T en="Explore Marketplace" ar="استكشف السوق" />
               </Link>
             </div>
-            <div style={{ marginTop: 24, fontSize: '0.8rem', color: 'var(--gb-gold-light)', display: 'flex', alignItems: 'center', gap: 8, opacity: 0.8 }}>
-              <span>🛡️</span>
-              <T 
-                en="Verified listings and partner review before full activation." 
-                ar="قوائم موثقة ومراجعة للشركاء قبل التفعيل الكامل للخدمات." 
-              />
-            </div>
           </div>
-          <div className="hero-visual">
-            <div className="ambient-glow"></div>
-            <div className="pulse-halo halo-1"></div>
-            <div className="pulse-halo halo-2"></div>
-            <div className="pulse-ring ring-1"></div>
-            <div className="pulse-ring ring-2"></div>
-            <div className="pulse-ring ring-3"></div>
-            
-            <div className="abstract-orb">
-              <div className="orb-inner-glow"></div>
-              <div className="soundwave-container">
-                <div className="sw-line sw-1"></div>
-                <div className="sw-line sw-2"></div>
-                <div className="sw-line sw-3"></div>
-                <div className="sw-line sw-4"></div>
-                <div className="sw-line sw-5"></div>
-                <div className="sw-line sw-6"></div>
-                <div className="sw-line sw-7"></div>
+
+          <div className="wow-stage">
+            <div className="stage-frame">
+              <div className="stage-depth-lines" aria-hidden="true" />
+              <PulseOrb />
+              <div className="wave-ribbon">
+                <CinematicWave />
+              </div>
+              <div className="floating-card studio-float">
+                <span>
+                  <T en="Studio rooms" ar="مساحات استوديو" />
+                </span>
+                <strong>
+                  <T en="Browse before booking" ar="تصفح قبل الحجز" />
+                </strong>
+              </div>
+              <div className="floating-card gear-float">
+                <span>
+                  <T en="Audio gear" ar="معدات صوت" />
+                </span>
+                <strong>
+                  <T en="Explore before buying" ar="استكشف قبل الشراء" />
+                </strong>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <AskGearBeatPreview />
-
-      {/* 2. CHOOSE YOUR PATH */}
-      <section className="section-padding">
+      <section className="pathway-section">
         <div className="container">
-          <div className="section-head text-center">
-            <span className="badge-gold"><T en="Network Status: Operational" ar="حالة الشبكة: تعمل" /></span>
-            <h2><T en="Join the Ecosystem" ar="انضم إلى النظام البيئي" /></h2>
-          </div>
-
-          <div className="grid grid-3 path-grid">
-            <Link href="/studios" className="card-premium path-card hover-lift">
-              <div className="path-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                  <line x1="12" y1="19" x2="12" y2="22"></line>
-                </svg>
-              </div>
-              <h3><T en="Creators & Artists" ar="المبدعون والفنانون" /></h3>
-              <p><T en="Discover world-class studios, browse verified equipment, and book your next session with confidence." ar="اكتشف استوديوهات عالمية، تصفح معدات موثقة، واحجز جلستك القادمة بكل ثقة." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Book a Studio" ar="احجز استوديو" /> →</span>
-            </Link>
-
-            <Link href="/join/studio" className="card-premium path-card active-border hover-lift">
-              <div className="path-icon text-gold">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2v-6H5v-3a7 7 0 0 1 14 0v3h-2v6h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/>
-                </svg>
-              </div>
-              <h3><T en="Studio Owners" ar="أصحاب الاستوديوهات" /></h3>
-              <p><T en="Monetize your space, simplify bookings, and apply for 'GearBeat Certified' status." ar="استثمر مساحتك، بسط حجوزاتك، وقدم طلباً للحصول على حالة 'GearBeat Certified'." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Become a Partner" ar="انضم كشريك" /> →</span>
-            </Link>
-
-            <Link href="/join/seller" className="card-premium path-card hover-lift">
-              <div className="path-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                </svg>
-              </div>
-              <h3><T en="Certified Vendors" ar="التجار المعتمدون" /></h3>
-              <p><T en="Join the elite marketplace. List professional audio gear with integrated logistics and verified status." ar="انضم إلى السوق المتميز. اعرض معدات الصوت الاحترافية مع خدمات لوجستية متكاملة وحالة موثقة." /></p>
-              <span className="path-cta text-gold font-bold"><T en="Become a Partner" ar="انضم كشريك" /> →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. TRUST / WHY GEARBEAT */}
-      <section className="trust-section border-y border-white/5" style={{ padding: '60px 0' }}>
-        <div className="container">
-          <div className="grid grid-2 items-center gap-40">
-            <div className="trust-text">
-              <div className="badge-gold mb-12"><T en="Verified Integrity" ar="نزاهة موثقة" /></div>
-              <h2 className="mb-16 text-balance" style={{ fontSize: '2.2rem' }}><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
-              <p className="text-muted leading-relaxed" style={{ maxWidth: 450, fontSize: '0.95rem' }}>
-                <T 
-                  en="GearBeat is setting the global standard for studio operations. From verified equipment to secure session booking, we ensure a seamless professional environment for every artist."
-                  ar="تضع GearBeat المعيار العالمي لعمليات الاستوديو. من المعدات الموثقة إلى حجز الجلسات الآمن، نضمن بيئة احترافية سلسة لكل فنان."
-                />
-              </p>
-            </div>
-            <div className="grid grid-3 gap-12">
-              {[
-                { icon: '🛡️', en: 'Verified Gear', ar: 'معدات موثقة' },
-                { icon: '🎚️', en: 'Studio Grade', ar: 'جودة استوديو' },
-                { icon: '⭐', en: 'Top Talent', ar: 'مواهب متميزة' },
-                { icon: '🔒', en: 'Secure Escrow', ar: 'ضمان آمن' },
-                { icon: '🌍', en: 'Global Reach', ar: 'وصول عالمي' },
-                { icon: '🏛️', en: 'Certified Network', ar: 'شبكة معتمدة' },
-              ].map(item => (
-                <div key={item.en} className="trust-item-compact hover-lift" style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  padding: '16px 12px',
-                  background: 'rgba(212, 175, 55, 0.03)',
-                  border: '1px solid rgba(212, 175, 55, 0.1)',
-                  borderRadius: '16px',
-                  textAlign: 'center'
-                }}>
-                  <div className="trust-icon-mini" style={{ fontSize: '1.2rem', marginBottom: 8 }}>{item.icon}</div>
-                  <h4 style={{ fontSize: '0.65rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--gb-gold-light)' }}>
-                    <T en={item.en} ar={item.ar} />
-                  </h4>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. FEATURED STUDIOS PREVIEW */}
-      <section className="section-padding bg-darker overflow-hidden">
-        <div className="container">
-          <div className="flex-between section-head items-center mb-60">
-            <div>
-              <span className="badge-gold"><T en="Curated Selection" ar="مختارات مختارة" /></span>
-              <h2 className="mt-8"><T en="Elite Studios" ar="استوديوهات النخبة" /></h2>
-            </div>
-            <Link href="/studios" className="btn btn-outline btn-sm"><T en="Book a Studio" ar="احجز استوديو" /> →</Link>
-          </div>
-          <div className="grid grid-3 gap-32">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card-premium studio-preview-card hover-lift p-0 overflow-hidden">
-                <div className="studio-thumb-placeholder relative" style={{ 
-                  height: 250, 
-                  background: 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, #080b10 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderBottom: '1px solid rgba(212, 175, 55, 0.15)'
-                }}>
-                  {/* Subtle CSS Abstract soundwave graphic inside placeholder */}
-                  <div className="abstract-card-visual" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6
-                  }}>
-                    <span style={{ width: 4, height: 24, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.4 }}></span>
-                    <span style={{ width: 4, height: 40, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.7 }}></span>
-                    <span style={{ width: 4, height: 64, background: 'var(--gb-gold)', borderRadius: 2, opacity: 1, filter: 'drop-shadow(0 0 8px var(--gb-gold))' }}></span>
-                    <span style={{ width: 4, height: 40, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.7 }}></span>
-                    <span style={{ width: 4, height: 24, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.4 }}></span>
-                  </div>
-                  <div className="absolute top-16 right-16" style={{ zIndex: 1 }}>
-                     <span className="badge badge-gold">Certified</span>
-                  </div>
-                </div>
-                <div style={{ padding: 24 }}>
-                  <div className="flex-between mb-8">
-                    <h4 className="m-0">Global Sound Station {i}</h4>
-                    <span className="text-gold font-bold">5.0 ★</span>
-                  </div>
-                  <p className="text-muted text-sm mb-20">Verified Partner • Riyadh</p>
-                  <Link href="/studios" className="btn btn-outline btn-sm w-full">
-                    <T en="Book a Studio" ar="احجز استوديو" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. GEAR MARKETPLACE PREVIEW */}
-      <section className="section-padding">
-        <div className="container">
-          <div className="flex-between section-head items-center mb-60">
-             <div>
-               <span className="badge-gold"><T en="Boutique Inventory" ar="مخزون فاخر" /></span>
-               <h2 className="mt-8"><T en="Verified Marketplace" ar="سوق موثق" /></h2>
-             </div>
-             <Link href="/marketplace" className="btn btn-outline btn-sm"><T en="Shop Gear" ar="تسوق معدات" /> →</Link>
-          </div>
-          <div className="grid grid-4 category-grid gap-24">
-            {[
-              { name: 'Microphones', ar: 'ميكروفونات', icon: '🎙️' },
-              { name: 'Analog Outboard', ar: 'أجهزة تماثلية', icon: '🎛️' },
-              { name: 'Studio Monitors', ar: 'سماعات استوديو', icon: '🔊' },
-              { name: 'Instruments', ar: 'آلات موسيقية', icon: '🎸' }
-            ].map((cat) => (
-              <div key={cat.name} className="card-premium cat-card hover-lift text-center" style={{ padding: 40 }}>
-                <div className="cat-icon" style={{ fontSize: '2.5rem', marginBottom: 20 }}>
-                  {cat.icon}
-                </div>
-                <h4 className="m-0"><T en={cat.name} ar={cat.ar} /></h4>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
- 
-      {/* 5B. COMING SOON PRODUCT SECTIONS */}
-      <section className="section-padding bg-darker relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--gb-gold) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-        <div className="container relative z-10">
-          <div className="section-head text-center mb-60">
-            <span className="badge-gold">
-              <T en="Ecosystem Expansion" ar="توسيع النظام البيئي" />
+          <div className="section-title-row">
+            <span className="wow-kicker">
+              <T en="Choose your next move" ar="اختر خطوتك التالية" />
             </span>
-            <h2 className="mt-8">
-              <T en="Coming Soon at GearBeat" ar="قادم قريبًا في GearBeat" />
+            <h2>
+              <T en="Four ways into the GearBeat world." ar="أربع بوابات إلى عالم GearBeat." />
             </h2>
-            <p className="text-muted mt-12" style={{ maxWidth: 600, marginInline: 'auto' }}>
-              <T 
-                en="We are building the ultimate creative home for music and sound. The following verticals are currently in active preparation and will launch in upcoming phases." 
-                ar="نحن نبني الموطن الإبداعي الأمثل للموسيقى والصوت. القطاعات التالية قيد التحضير النشط حالياً وسيتم إطلاقها في المراحل القادمة." 
-              />
-            </p>
           </div>
 
-          <div className="grid grid-3 gap-24 coming-soon-grid">
+          <div className="pathway-stage">
+            {pathways.map((pathway, index) => (
+              <Link href={pathway.href} className="pathway-card" key={pathway.title.en}>
+                <span className="path-index">0{index + 1}</span>
+                <span className="path-eyebrow">
+                  <T en={pathway.eyebrow.en} ar={pathway.eyebrow.ar} />
+                </span>
+                <h3>
+                  <T en={pathway.title.en} ar={pathway.title.ar} />
+                </h3>
+                <p>
+                  <T en={pathway.body.en} ar={pathway.body.ar} />
+                </p>
+                <strong>
+                  <T en={pathway.cta.en} ar={pathway.cta.ar} />
+                </strong>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="studios-cinema">
+        <div className="container">
+          <div className="split-heading">
+            <div>
+              <span className="wow-kicker">
+                <T en="Featured studios preview" ar="معاينة الاستوديوهات" />
+              </span>
+              <h2>
+                <T en="Browse the atmosphere before booking." ar="تصفح الأجواء قبل الحجز." />
+              </h2>
+            </div>
+            <Link href="/studios" className="btn btn-outline">
+              <T en="View Studios" ar="عرض الاستوديوهات" />
+            </Link>
+          </div>
+
+          <div className="studio-showcase">
+            {studioPreviews.map((studio, index) => (
+              <Link href={studio.href} className="studio-panel" key={studio.title.en}>
+                <div className="studio-visual">
+                  <div className={`studio-room room-${index + 1}`} />
+                  <CinematicWave />
+                </div>
+                <div className="panel-copy">
+                  <h3>
+                    <T en={studio.title.en} ar={studio.title.ar} />
+                  </h3>
+                  <p>
+                    <T en={studio.body.en} ar={studio.body.ar} />
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="gear-cinema">
+        <div className="container">
+          <div className="split-heading">
+            <div>
+              <span className="wow-kicker">
+                <T en="Featured gear preview" ar="معاينة المعدات" />
+              </span>
+              <h2>
+                <T en="Audio gear discovery with a premium pulse." ar="اكتشاف معدات صوت بنبض فاخر." />
+              </h2>
+            </div>
+            <Link href="/marketplace" className="btn btn-outline">
+              <T en="Explore Marketplace" ar="استكشف السوق" />
+            </Link>
+          </div>
+
+          <div className="gear-podium">
+            {gearPreviews.map((gear, index) => (
+              <Link href={gear.href} className="gear-podium-card" key={gear.title.en}>
+                <span className={`gear-object object-${index + 1}`} />
+                <h3>
+                  <T en={gear.title.en} ar={gear.title.ar} />
+                </h3>
+                <p>
+                  <T en={gear.body.en} ar={gear.body.ar} />
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="trust-cinema">
+        <div className="container trust-band">
+          {trustItems.map((item) => (
+            <span key={item.en}>
+              <T en={item.en} ar={item.ar} />
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="ecosystem-cinema">
+        <div className="container">
+          <div className="section-title-row centered">
+            <span className="wow-kicker">
+              <T en="Controlled expansion" ar="توسع مضبوط" />
+            </span>
+            <h2>
+              <T en="More creative paths are being prepared." ar="يتم تجهيز مسارات إبداعية إضافية." />
+            </h2>
+          </div>
+
+          <div className="ecosystem-dock">
             {publicFeatureFlags
               .filter((flag) => flag.showOnHomepage)
               .map((flag) => (
-                <div key={flag.key} className="card-premium coming-soon-card">
-                  <div className="coming-soon-badge-container">
-                    <span className="badge badge-gold">
-                      <T en={flag.safeStatusLabel.en} ar={flag.safeStatusLabel.ar} />
-                    </span>
-                  </div>
-                  <div className="card-icon-emoji">{flag.iconEmoji}</div>
+                <article className="dock-card" key={flag.key}>
+                  <span className="dock-status">
+                    <T en={flag.safeStatusLabel.en} ar={flag.safeStatusLabel.ar} />
+                  </span>
                   <h3>
                     <T en={flag.enLabel} ar={flag.arLabel} />
                   </h3>
                   <p>
                     <T en={flag.description.en} ar={flag.description.ar} />
                   </p>
-                  <div className="card-status-indicator">
-                    <T en={flag.safeStatusIndicator.en} ar={flag.safeStatusIndicator.ar} />
-                  </div>
-                </div>
+                </article>
               ))}
           </div>
         </div>
       </section>
- 
-      <section className="section-padding final-cta text-center py-120">
-        <div className="container animate-up">
-          <div className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></div>
-          <h2 className="mb-60 text-balance" style={{ marginInline: 'auto' }}><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
-          <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
-            <Link href="/signup" className="btn btn-primary btn-lg shadow-gold">
+
+      <section className="final-wow">
+        <div className="container final-wow-inner">
+          <span className="wow-kicker">
+            <T en="Ready when the beat starts" ar="جاهز عندما يبدأ الإيقاع" />
+          </span>
+          <h2>
+            <T en="Your sound deserves a better stage." ar="صوتك يستحق منصة أفضل." />
+          </h2>
+          <div className="hero-actions center">
+            <Link href="/signup" className="btn btn-primary hero-btn">
               <T en="Create Account" ar="إنشاء حساب" />
             </Link>
-            <Link href="/support" className="btn btn-outline btn-lg">
-               <T en="Speak to an Expert" ar="تحدث مع خبير" />
+            <Link href="/support" className="btn btn-outline hero-btn">
+              <T en="Talk to GearBeat" ar="تحدث مع GearBeat" />
             </Link>
           </div>
         </div>
       </section>
 
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .home-root { overflow-x: hidden; }
-        
-        /* HERO */
-        .hero-section {
-          padding: 140px 0 100px;
-          background: radial-gradient(circle at 80% 20%, rgba(201, 162, 77, 0.08) 0%, transparent 40%);
-          position: relative;
-        }
-
-        .hero-container {
-          display: grid;
-          grid-template-columns: 1.2fr 0.8fr;
-          gap: 60px;
-          align-items: center;
-        }
-
-        .hero-content h1 {
-          font-size: clamp(2.5rem, 6vw, 4.8rem);
-          margin: 24px 0;
-          color: #fff;
-        }
-
-        .hero-content .lead {
-          font-size: 1.25rem;
-          color: var(--gb-text-muted);
-          margin-bottom: 48px;
-          max-width: 600px;
-        }
-
-        .hero-actions { display: flex; gap: 16px; }
-
-        .hero-visual {
-          position: relative;
-          height: 450px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          perspective: 1000px;
-        }
-
-        .ambient-glow {
-          position: absolute;
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
-          filter: blur(80px);
-          pointer-events: none;
-        }
-
-        .pulse-halo {
-          position: absolute;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
-          animation: halo-pulse 6s infinite ease-in-out;
-          pointer-events: none;
-        }
-        .halo-1 { width: 500px; height: 500px; animation-delay: 0s; }
-        .halo-2 { width: 500px; height: 500px; animation-delay: -3s; }
-
-        @keyframes halo-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.3; }
-          50% { transform: scale(1.1); opacity: 0.6; }
-        }
-
-        .pulse-ring {
-          position: absolute;
-          border: 2px solid rgba(212, 175, 55, 0.3);
-          border-radius: 50%;
-          animation: elegant-pulse 8s infinite cubic-bezier(0.4, 0, 0.2, 1);
-          pointer-events: none;
-          box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
-        }
-
-        .ring-1 { width: 300px; height: 300px; animation-delay: 0s; }
-        .ring-2 { width: 300px; height: 300px; animation-delay: -2.66s; }
-        .ring-3 { width: 300px; height: 300px; animation-delay: -5.33s; }
-
-        @keyframes elegant-pulse {
-          0% { transform: scale(0.8); opacity: 0; }
-          20% { opacity: 0.6; }
-          100% { transform: scale(1.8); opacity: 0; }
-        }
-
-        .abstract-orb {
-          position: relative;
-          width: 280px;
-          height: 280px;
-          background: radial-gradient(circle at 30% 30%, #151c29 0%, #000 100%);
-          border: 2.5px solid rgba(212, 175, 55, 0.6);
-          border-radius: 50%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        .wow-home {
           overflow: hidden;
-          box-shadow: 
-            0 0 60px rgba(0,0,0,0.9),
-            0 0 30px rgba(212, 175, 55, 0.2),
-            inset 0 0 40px rgba(212, 175, 55, 0.15);
-          z-index: 10;
+          background:
+            radial-gradient(circle at 20% -10%, rgba(212, 175, 55, 0.16), transparent 34%),
+            radial-gradient(circle at 88% 10%, rgba(15, 160, 138, 0.08), transparent 32%),
+            linear-gradient(180deg, #020304 0%, #080b10 42%, #020304 100%);
         }
 
-        .orb-inner-glow {
-          position: absolute;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
-          animation: orb-drift 12s infinite linear;
-        }
-
-        @keyframes orb-drift {
-          0% { transform: translate(-20%, -20%); }
-          50% { transform: translate(10%, 10%); }
-          100% { transform: translate(-20%, -20%); }
-        }
-
-        .soundwave-container {
-          display: flex;
-          flex-direction: column;
+        .wow-hero {
+          position: relative;
+          min-height: calc(100vh - 80px);
+          isolation: isolate;
+          display: grid;
           align-items: center;
+          padding: clamp(58px, 8vw, 120px) 0 clamp(42px, 7vw, 96px);
+        }
+
+        .wow-hero::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -3;
+          background:
+            linear-gradient(115deg, rgba(255,255,255,0.04), transparent 24%),
+            repeating-linear-gradient(90deg, rgba(212,175,55,0.09) 0 1px, transparent 1px 74px);
+          mask-image: radial-gradient(circle at 58% 42%, black, transparent 72%);
+          opacity: 0.62;
+        }
+
+        .hero-light {
+          position: absolute;
+          z-index: -2;
+          pointer-events: none;
+          border-radius: 999px;
+          filter: blur(58px);
+        }
+
+        .hero-light-a {
+          width: 44vw;
+          height: 44vw;
+          left: -12vw;
+          top: 10vh;
+          background: rgba(212, 175, 55, 0.18);
+        }
+
+        .hero-light-b {
+          width: 38vw;
+          height: 38vw;
+          right: -14vw;
+          bottom: 10vh;
+          background: rgba(212, 175, 55, 0.12);
+        }
+
+        .wow-hero-inner {
+          display: grid;
+          grid-template-columns: minmax(0, 0.92fr) minmax(380px, 1.08fr);
+          gap: clamp(34px, 6vw, 88px);
+          align-items: center;
+        }
+
+        .wow-kicker {
+          display: inline-flex;
+          width: fit-content;
+          min-height: 34px;
+          align-items: center;
+          padding: 7px 14px;
+          border: 1px solid rgba(212, 175, 55, 0.42);
+          border-radius: 999px;
+          color: var(--gb-gold-light);
+          background: rgba(212, 175, 55, 0.08);
+          box-shadow: 0 0 30px rgba(212, 175, 55, 0.08);
+          font-size: 0.74rem;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .wow-hero-copy h1 {
+          max-width: 820px;
+          margin: 24px 0 16px;
+          color: #fff;
+          font-size: clamp(3.1rem, 7.8vw, 7.8rem);
+          line-height: 0.88;
+          letter-spacing: 0;
+        }
+
+        .wow-hero-copy h1 span {
+          display: block;
+        }
+
+        .gold-shimmer {
+          width: fit-content;
+          color: var(--gb-gold-light);
+          background: linear-gradient(90deg, var(--gb-gold), #fff3b2, var(--gb-gold));
+          background-size: 220% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: goldShimmer 5.6s ease-in-out infinite;
+        }
+
+        @keyframes goldShimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        .arabic-line {
+          margin: 0 0 18px;
+          color: var(--gb-gold-light);
+          font-size: clamp(1.2rem, 2.2vw, 2rem);
+          font-weight: 900;
+          line-height: 1.5;
+        }
+
+        .hero-lead {
+          max-width: 650px;
+          color: rgba(248, 249, 250, 0.7);
+          font-size: clamp(1rem, 1.45vw, 1.17rem);
+          line-height: 1.85;
+        }
+
+        .hero-actions {
+          display: flex;
           gap: 14px;
-          width: 180px;
-          z-index: 20;
+          flex-wrap: wrap;
+          margin-top: 34px;
         }
 
-        .sw-line {
-          height: 2.5px;
-          background: linear-gradient(to right, transparent, var(--gb-gold-light), transparent);
-          border-radius: 4px;
-          animation: sw-horizontal-vibrate 1.5s infinite ease-in-out;
-          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
-        }
-
-        .sw-1 { width: 80px; animation-delay: 0s; opacity: 0.4; }
-        .sw-2 { width: 130px; animation-delay: 0.1s; opacity: 0.6; }
-        .sw-3 { width: 170px; animation-delay: 0.2s; opacity: 0.9; }
-        .sw-4 { width: 140px; animation-delay: 0.3s; opacity: 0.7; }
-        .sw-5 { width: 160px; animation-delay: 0.4s; opacity: 0.8; }
-        .sw-6 { width: 110px; animation-delay: 0.5s; opacity: 0.5; }
-        .sw-7 { width: 70px; animation-delay: 0.6s; opacity: 0.3; }
-
-        @keyframes sw-horizontal-vibrate {
-          0%, 100% { transform: scaleX(1); }
-          50% { transform: scaleX(1.2); }
-        }
-
-        /* PATH SECTION */
-        .section-head { margin-bottom: 60px; }
-        .section-head h2 { font-size: 3rem; margin-top: 24px; }
-        .text-center { text-align: center; }
-        
-        .path-card { text-align: center; }
-        .path-icon { font-size: 3.5rem; margin-bottom: 24px; }
-        .path-card h3 { margin-bottom: 16px; font-size: 1.5rem; }
-        .path-card p { color: var(--gb-text-muted); margin-bottom: 30px; font-size: 0.95rem; line-height: 1.7; }
-        .path-cta { color: var(--gb-gold); font-weight: 800; font-size: 0.9rem; }
-        
-        .active-border { border-color: var(--gb-gold); }
-
-        /* COMING SOON SECTION */
-        .coming-soon-grid {
+        .hero-actions.center {
           justify-content: center;
         }
-        .coming-soon-card {
-          position: relative;
-          padding: 48px 32px 32px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          background: rgba(255, 255, 255, 0.01);
-          border: 1px solid rgba(255, 255, 255, 0.04);
-          transition: border-color 0.3s, transform 0.3s;
+
+        .hero-btn {
+          min-height: 58px;
+          min-width: 188px;
+          border-radius: 16px;
+          box-shadow: 0 16px 42px rgba(0,0,0,0.28);
         }
-        .coming-soon-card:hover {
-          border-color: rgba(212, 175, 55, 0.15);
+
+        .hero-btn:hover {
           transform: translateY(-4px);
         }
-        .coming-soon-badge-container {
+
+        .wow-stage {
+          position: relative;
+          min-height: min(70vw, 620px);
+          display: grid;
+          place-items: center;
+        }
+
+        .stage-frame {
+          position: relative;
+          width: min(100%, 740px);
+          min-height: min(68vw, 580px);
+          border-radius: clamp(28px, 5vw, 54px);
+          overflow: hidden;
+          border: 1px solid rgba(212, 175, 55, 0.22);
+          background:
+            radial-gradient(circle at 50% 46%, rgba(244, 212, 122, 0.2), transparent 26%),
+            radial-gradient(circle at 72% 22%, rgba(15, 160, 138, 0.12), transparent 28%),
+            linear-gradient(145deg, rgba(15,22,33,0.84), rgba(0,0,0,0.96));
+          box-shadow:
+            0 40px 120px rgba(0,0,0,0.55),
+            0 0 80px rgba(212,175,55,0.12),
+            inset 0 0 70px rgba(212,175,55,0.08);
+        }
+
+        .stage-frame::before {
+          content: "";
           position: absolute;
-          top: 16px;
-          right: 16px;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 28%, rgba(212,175,55,0.08));
+          pointer-events: none;
         }
-        [dir="rtl"] .coming-soon-badge-container {
-          right: auto;
-          left: 16px;
+
+        .stage-depth-lines {
+          position: absolute;
+          inset: -10% -18%;
+          opacity: 0.32;
+          background-image:
+            linear-gradient(115deg, rgba(212,175,55,0.14) 0 1px, transparent 1px),
+            linear-gradient(65deg, rgba(255,255,255,0.05) 0 1px, transparent 1px);
+          background-size: 96px 96px;
+          transform: perspective(700px) rotateX(62deg) translateY(24%);
+          transform-origin: center bottom;
         }
-        .card-icon-emoji {
-          font-size: 3rem;
-          margin-bottom: 24px;
+
+        .beat-orb {
+          position: absolute;
+          inset: 50% auto auto 50%;
+          width: min(48vw, 360px);
+          aspect-ratio: 1;
+          transform: translate(-50%, -50%);
+          display: grid;
+          place-items: center;
         }
-        .coming-soon-card h3 {
-          font-size: 1.35rem;
-          font-weight: 700;
-          margin-bottom: 12px;
-          color: #fff;
+
+        .beat-orb-core {
+          position: relative;
+          z-index: 2;
+          width: 58%;
+          aspect-ratio: 1;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          border: 2px solid rgba(244, 212, 122, 0.62);
+          background:
+            radial-gradient(circle at 34% 28%, rgba(255,255,255,0.2), transparent 18%),
+            radial-gradient(circle, rgba(212,175,55,0.18), rgba(3,5,7,1) 68%);
+          box-shadow:
+            0 0 70px rgba(212,175,55,0.25),
+            inset 0 0 44px rgba(244,212,122,0.13);
+          animation: coreBreath 4.8s ease-in-out infinite;
         }
-        .coming-soon-card p {
-          color: var(--gb-text-muted);
-          font-size: 0.9rem;
-          line-height: 1.6;
-          margin-bottom: 24px;
-          flex-grow: 1;
+
+        .beat-center {
+          width: 36%;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          background: var(--gb-gold-light);
+          box-shadow: 0 0 34px rgba(244,212,122,0.72);
         }
-        .card-status-indicator {
-          display: inline-flex;
+
+        .beat-orb-ring {
+          position: absolute;
+          inset: 10%;
+          border-radius: 50%;
+          border: 1px solid rgba(212,175,55,0.36);
+          box-shadow: 0 0 36px rgba(212,175,55,0.12);
+          animation: ringBreath 5.4s ease-in-out infinite;
+        }
+
+        .ring-two {
+          inset: -8%;
+          opacity: 0.52;
+          animation-delay: -2.7s;
+        }
+
+        @keyframes coreBreath {
+          0%, 100% { transform: scale(0.96); }
+          50% { transform: scale(1.045); }
+        }
+
+        @keyframes ringBreath {
+          0%, 100% { transform: scale(0.88); opacity: 0.28; }
+          50% { transform: scale(1.08); opacity: 0.74; }
+        }
+
+        .wave-ribbon {
+          position: absolute;
+          left: -8%;
+          right: -8%;
+          top: 50%;
+          z-index: 4;
+          transform: translateY(-50%) rotate(-8deg);
+          padding: 42px 0;
+          mask-image: linear-gradient(90deg, transparent, black 16%, black 84%, transparent);
+        }
+
+        .wow-wave {
+          display: flex;
           align-items: center;
           justify-content: center;
-          padding: 8px 20px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 99px;
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: rgba(255, 255, 255, 0.4);
-          cursor: default;
+          gap: clamp(6px, 1.1vw, 13px);
+          min-height: 160px;
+        }
+
+        .wow-wave span {
+          width: clamp(5px, 0.72vw, 10px);
+          height: 58px;
+          border-radius: 999px;
+          background: linear-gradient(180deg, transparent, var(--gb-gold-light), transparent);
+          box-shadow: 0 0 20px rgba(212,175,55,0.62);
+          transform-origin: center;
+          animation: waveAlive 1.72s ease-in-out infinite;
+        }
+
+        .wow-wave span:nth-child(2n) { animation-delay: 0.08s; height: 86px; }
+        .wow-wave span:nth-child(3n) { animation-delay: 0.16s; height: 126px; }
+        .wow-wave span:nth-child(4n) { animation-delay: 0.24s; height: 156px; }
+        .wow-wave span:nth-child(5n) { animation-delay: 0.32s; height: 108px; }
+        .wow-wave span:nth-child(7n) { animation-delay: 0.44s; height: 140px; }
+
+        @keyframes waveAlive {
+          0%, 100% { transform: scaleY(0.46); opacity: 0.42; }
+          50% { transform: scaleY(1.06); opacity: 1; }
+        }
+
+        .floating-card {
+          position: absolute;
+          z-index: 5;
+          width: min(48%, 220px);
+          padding: 16px;
+          border-radius: 20px;
+          border: 1px solid rgba(212,175,55,0.2);
+          background: rgba(3,5,7,0.72);
+          backdrop-filter: blur(18px);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.34);
+          animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        .floating-card span {
+          display: block;
+          color: rgba(248,249,250,0.54);
+          font-size: 0.75rem;
+          font-weight: 800;
+        }
+
+        .floating-card strong {
+          display: block;
+          margin-top: 6px;
+          color: var(--gb-gold-light);
+          font-size: 0.94rem;
+          line-height: 1.25;
+        }
+
+        .studio-float {
+          left: 28px;
+          bottom: 34px;
+        }
+
+        .gear-float {
+          right: 28px;
+          top: 34px;
+          animation-delay: -3s;
+        }
+
+        @keyframes cardFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-14px); }
+        }
+
+        .pathway-section,
+        .studios-cinema,
+        .gear-cinema,
+        .ecosystem-cinema,
+        .final-wow {
+          position: relative;
+          padding: clamp(72px, 10vw, 130px) 0;
+        }
+
+        .section-title-row {
+          max-width: 850px;
+          margin-bottom: 42px;
+        }
+
+        .section-title-row.centered {
+          margin-inline: auto;
+          text-align: center;
+        }
+
+        .section-title-row h2,
+        .split-heading h2,
+        .final-wow h2 {
+          margin-top: 16px;
+          color: #fff;
+          font-size: clamp(2.2rem, 5.6vw, 5rem);
+          line-height: 0.96;
+          letter-spacing: 0;
+        }
+
+        .pathway-stage {
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr 0.9fr 1.1fr;
+          gap: 18px;
+          align-items: stretch;
+        }
+
+        .pathway-card {
+          position: relative;
+          min-height: 360px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          overflow: hidden;
+          padding: 28px;
+          border-radius: 30px;
+          border: 1px solid rgba(212,175,55,0.18);
+          background:
+            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.18), transparent 32%),
+            linear-gradient(150deg, rgba(15,22,33,0.9), rgba(3,5,7,0.96));
+          box-shadow: 0 26px 72px rgba(0,0,0,0.32);
+          transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .pathway-card:nth-child(2),
+        .pathway-card:nth-child(3) {
+          transform: translateY(34px);
+        }
+
+        .pathway-card::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.08), transparent 34%),
+            repeating-linear-gradient(90deg, rgba(212,175,55,0.09) 0 2px, transparent 2px 18px);
+          opacity: 0.28;
+          mask-image: linear-gradient(to bottom, black, transparent 70%);
+        }
+
+        .pathway-card:hover {
+          color: inherit;
+          transform: translateY(-8px);
+          border-color: rgba(244,212,122,0.5);
+          box-shadow: 0 34px 90px rgba(0,0,0,0.42), 0 0 42px rgba(212,175,55,0.14);
+        }
+
+        .pathway-card:nth-child(2):hover,
+        .pathway-card:nth-child(3):hover {
+          transform: translateY(22px);
+        }
+
+        .path-index {
+          position: absolute;
+          top: 22px;
+          right: 24px;
+          color: rgba(244,212,122,0.26);
+          font-size: 3.1rem;
+          font-weight: 900;
+          line-height: 1;
+        }
+
+        [dir="rtl"] .path-index {
+          right: auto;
+          left: 24px;
+        }
+
+        .path-eyebrow {
+          position: relative;
+          width: fit-content;
+          margin-bottom: auto;
+          color: var(--gb-gold-light);
+          font-size: 0.72rem;
+          font-weight: 900;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
         }
 
-        /* TRUST SECTION */
-        .trust-section { background: #080b0e; }
-        .trust-item-compact { transition: var(--transition); }
-
-        /* STUDIO PREVIEW */
-        .bg-darker { background: #030507; }
-        .flex-between { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; }
-        .studio-thumb-placeholder { height: 220px; background: #1a222c; border-radius: 16px; }
-        .w-full { width: 100%; }
-        .mt-20 { margin-top: 20px; }
-
-        /* CATEGORY CARDS */
-        .cat-card { text-align: center; padding: 30px 20px; }
-        .cat-icon { font-size: 2rem; margin-bottom: 12px; color: var(--gb-gold); }
-
-        /* FINAL CTA */
-        .final-cta { background: linear-gradient(to bottom, #05080B, #000); }
-        .final-cta h2 { font-size: 3.5rem; max-width: 800px; margin: 0 auto; }
-
-        .btn-lg { padding: 18px 48px; font-size: 1.1rem; }
-
-        @media (max-width: 1000px) {
-          .hero-container { grid-template-columns: 1fr; text-align: center; }
-          .hero-content .lead { margin: 24px auto 48px; }
-          .hero-actions { justify-content: center; }
-          .hero-visual { height: 200px; order: -1; }
-          .hero-section { padding-top: 80px; }
-          .grid-2 { grid-template-columns: 1fr; }
-          .section-head h2 { font-size: 2.2rem; }
-          .final-cta h2 { font-size: 2.2rem; }
+        .pathway-card h3,
+        .studio-panel h3,
+        .gear-podium-card h3,
+        .dock-card h3 {
+          position: relative;
+          color: #fff;
+          margin: 22px 0 12px;
+          font-size: 1.5rem;
+          letter-spacing: 0;
         }
 
-        @media (max-width: 600px) {
-          .hero-actions { flex-direction: column; width: 100%; }
-          .cta-actions { flex-direction: column; width: 100%; }
-          .hero-content h1 { font-size: 2.2rem; }
-          .section-padding { padding: 60px 0; }
+        .pathway-card p,
+        .studio-panel p,
+        .gear-podium-card p,
+        .dock-card p {
+          position: relative;
+          color: rgba(248,249,250,0.64);
+          line-height: 1.7;
+          font-size: 0.94rem;
         }
 
-        /* RTL HELPER */
-        [dir="rtl"] .hero-container { direction: rtl; }
-        [dir="rtl"] .hero-content { text-align: right; }
-        [dir="rtl"] .section-head { text-align: right; }
-        [dir="rtl"] .text-center { text-align: center; }
-      `}} />
+        .pathway-card strong {
+          position: relative;
+          margin-top: 22px;
+          color: var(--gb-gold-light);
+        }
+
+        .studios-cinema {
+          background:
+            radial-gradient(circle at 12% 20%, rgba(212,175,55,0.1), transparent 30%),
+            rgba(0,0,0,0.24);
+          border-block: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .split-heading {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 28px;
+          margin-bottom: 36px;
+        }
+
+        .studio-showcase {
+          display: grid;
+          grid-template-columns: 1.2fr 0.9fr 0.9fr;
+          gap: 20px;
+          align-items: stretch;
+        }
+
+        .studio-panel {
+          position: relative;
+          overflow: hidden;
+          min-height: 490px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          border-radius: 34px;
+          border: 1px solid rgba(212,175,55,0.18);
+          background: #05080b;
+          box-shadow: 0 30px 90px rgba(0,0,0,0.38);
+          transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .studio-panel:hover {
+          color: inherit;
+          transform: translateY(-10px);
+          border-color: rgba(244,212,122,0.5);
+          box-shadow: 0 36px 100px rgba(0,0,0,0.48), 0 0 46px rgba(212,175,55,0.12);
+        }
+
+        .studio-visual {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+
+        .studio-room {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(to top, rgba(0,0,0,0.88), transparent 55%),
+            radial-gradient(circle at 50% 38%, rgba(212,175,55,0.24), transparent 34%),
+            linear-gradient(135deg, rgba(255,255,255,0.08), rgba(3,5,7,0.92));
+        }
+
+        .room-2 {
+          background:
+            linear-gradient(to top, rgba(0,0,0,0.9), transparent 56%),
+            radial-gradient(circle at 76% 30%, rgba(212,175,55,0.24), transparent 32%),
+            linear-gradient(135deg, rgba(15,160,138,0.08), rgba(3,5,7,0.94));
+        }
+
+        .room-3 {
+          background:
+            linear-gradient(to top, rgba(0,0,0,0.9), transparent 58%),
+            radial-gradient(circle at 28% 32%, rgba(212,175,55,0.2), transparent 34%),
+            linear-gradient(145deg, rgba(212,175,55,0.05), rgba(3,5,7,0.95));
+        }
+
+        .studio-visual .wow-wave {
+          position: absolute;
+          left: -18%;
+          right: -18%;
+          top: 30%;
+          min-height: 110px;
+          opacity: 0.32;
+          transform: rotate(-12deg) scale(0.72);
+        }
+
+        .panel-copy {
+          position: relative;
+          z-index: 2;
+          padding: 30px;
+        }
+
+        .gear-podium {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .gear-podium-card {
+          position: relative;
+          min-height: 340px;
+          overflow: hidden;
+          padding: 28px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          border-radius: 32px;
+          border: 1px solid rgba(212,175,55,0.18);
+          background:
+            radial-gradient(circle at 50% 20%, rgba(212,175,55,0.14), transparent 30%),
+            linear-gradient(180deg, rgba(15,22,33,0.86), rgba(3,5,7,0.98));
+          box-shadow: 0 28px 80px rgba(0,0,0,0.34);
+          transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .gear-podium-card:hover {
+          color: inherit;
+          transform: translateY(-10px);
+          border-color: rgba(244,212,122,0.5);
+          box-shadow: 0 34px 90px rgba(0,0,0,0.45), 0 0 42px rgba(212,175,55,0.12);
+        }
+
+        .gear-object {
+          position: absolute;
+          top: 38px;
+          left: 50%;
+          width: 112px;
+          aspect-ratio: 1;
+          transform: translateX(-50%);
+          border-radius: 28px;
+          border: 1px solid rgba(244,212,122,0.38);
+          background:
+            radial-gradient(circle at 35% 25%, rgba(255,255,255,0.24), transparent 16%),
+            radial-gradient(circle, rgba(212,175,55,0.24), rgba(0,0,0,0.9) 68%);
+          box-shadow: 0 26px 60px rgba(0,0,0,0.42), 0 0 40px rgba(212,175,55,0.18);
+          animation: objectFloat 6.2s ease-in-out infinite;
+        }
+
+        .object-2 { border-radius: 999px; animation-delay: -1.4s; }
+        .object-3 { border-radius: 20px 44px 20px 44px; animation-delay: -2.8s; }
+        .object-4 { border-radius: 44px 20px 44px 20px; animation-delay: -4.2s; }
+
+        .trust-cinema {
+          padding: 20px 0;
+        }
+
+        .trust-band {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+          padding: 14px;
+          border-radius: 26px;
+          border: 1px solid rgba(212,175,55,0.16);
+          background: rgba(255,255,255,0.035);
+          box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+        }
+
+        .trust-band span {
+          display: grid;
+          min-height: 58px;
+          place-items: center;
+          padding: 10px;
+          border-radius: 18px;
+          color: rgba(248,249,250,0.72);
+          background: rgba(0,0,0,0.22);
+          border: 1px solid rgba(255,255,255,0.06);
+          text-align: center;
+          font-size: 0.82rem;
+          font-weight: 900;
+        }
+
+        .ecosystem-cinema {
+          background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.08), transparent 36%);
+        }
+
+        .ecosystem-dock {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .dock-card {
+          position: relative;
+          min-height: 260px;
+          padding: 28px;
+          border-radius: 28px;
+          border: 1px solid rgba(212,175,55,0.14);
+          background: linear-gradient(145deg, rgba(15,22,33,0.68), rgba(3,5,7,0.92));
+          box-shadow: 0 24px 70px rgba(0,0,0,0.26);
+        }
+
+        .dock-status {
+          display: inline-flex;
+          padding: 7px 11px;
+          border-radius: 999px;
+          color: var(--gb-gold-light);
+          background: rgba(212,175,55,0.08);
+          border: 1px solid rgba(212,175,55,0.22);
+          font-size: 0.72rem;
+          font-weight: 900;
+        }
+
+        .final-wow {
+          text-align: center;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.18), transparent 46%),
+            #000;
+          border-top: 1px solid rgba(212,175,55,0.1);
+        }
+
+        .final-wow-inner {
+          max-width: 880px;
+        }
+
+        @keyframes objectFloat {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(-16px); }
+        }
+
+        .pathway-card,
+        .studio-panel,
+        .gear-podium-card,
+        .dock-card,
+        .trust-band {
+          animation: fadeInUp 0.9s ease both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .gold-shimmer,
+          .beat-orb-core,
+          .beat-orb-ring,
+          .wow-wave span,
+          .gear-object,
+          .floating-card,
+          .pathway-card,
+          .studio-panel,
+          .gear-podium-card,
+          .dock-card,
+          .trust-band {
+            animation: none !important;
+          }
+        }
+
+        @media (max-width: 1120px) {
+          .wow-hero-inner {
+            grid-template-columns: 1fr;
+          }
+
+          .wow-stage {
+            order: 2;
+            min-height: 480px;
+          }
+
+          .stage-frame {
+            min-height: 460px;
+          }
+
+          .pathway-stage,
+          .gear-podium,
+          .ecosystem-dock {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .pathway-card:nth-child(2),
+          .pathway-card:nth-child(3),
+          .pathway-card:nth-child(2):hover,
+          .pathway-card:nth-child(3):hover {
+            transform: none;
+          }
+
+          .studio-showcase {
+            grid-template-columns: 1fr;
+          }
+
+          .studio-panel {
+            min-height: 380px;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .wow-hero {
+            min-height: auto;
+            padding-top: 42px;
+          }
+
+          .wow-hero-copy h1 {
+            font-size: clamp(2.85rem, 16vw, 4.4rem);
+          }
+
+          .arabic-line {
+            max-width: 12em;
+          }
+
+          .hero-actions,
+          .hero-actions .btn {
+            width: 100%;
+          }
+
+          .wow-stage {
+            min-height: 390px;
+          }
+
+          .stage-frame {
+            min-height: 360px;
+            border-radius: 28px;
+          }
+
+          .floating-card {
+            width: min(56%, 190px);
+            padding: 12px;
+          }
+
+          .studio-float {
+            left: 14px;
+            bottom: 16px;
+          }
+
+          .gear-float {
+            right: 14px;
+            top: 16px;
+          }
+
+          .wave-ribbon {
+            left: -22%;
+            right: -22%;
+          }
+
+          .pathway-stage,
+          .gear-podium,
+          .ecosystem-dock,
+          .trust-band {
+            grid-template-columns: 1fr;
+          }
+
+          .pathway-card,
+          .gear-podium-card {
+            min-height: 280px;
+          }
+
+          .split-heading {
+            align-items: stretch;
+            flex-direction: column;
+          }
+
+          .split-heading .btn {
+            width: 100%;
+          }
+
+          .section-title-row h2,
+          .split-heading h2,
+          .final-wow h2 {
+            font-size: clamp(2.1rem, 11vw, 3.2rem);
+          }
+        }
+
+        [dir="rtl"] .wow-hero-copy,
+        [dir="rtl"] .split-heading,
+        [dir="rtl"] .section-title-row {
+          direction: rtl;
+        }
+
+        [dir="rtl"] .gold-shimmer {
+          margin-inline-start: auto;
+        }
+      `,
+        }}
+      />
     </main>
   );
 }
