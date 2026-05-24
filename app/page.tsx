@@ -3,178 +3,62 @@ import T from "../components/t";
 import AskGearBeatPreview from "../components/ask-gearbeat-preview";
 import { publicFeatureFlags } from "../lib/public-feature-flags";
 
-const featureCards = [
-  {
-    title: { en: "Book Studios", ar: "حجز الاستوديوهات" },
-    body: {
-      en: "Discover creative rooms, review studio details, and plan sessions with confidence.",
-      ar: "اكتشف المساحات الإبداعية، راجع تفاصيل الاستوديو، وخطط لجلساتك بثقة.",
-    },
-    href: "/studios",
-    label: { en: "Find a studio", ar: "ابحث عن استوديو" },
-  },
-  {
-    title: { en: "Marketplace", ar: "السوق" },
-    body: {
-      en: "Explore professional audio gear categories prepared for the GearBeat creator ecosystem.",
-      ar: "استكشف فئات معدات الصوت الاحترافية المجهزة لمنظومة GearBeat الإبداعية.",
-    },
-    href: "/marketplace",
-    label: { en: "Explore gear", ar: "استكشف المعدات" },
-  },
-  {
-    title: { en: "Certified Studios", ar: "استوديوهات موثقة" },
-    body: {
-      en: "A premium trust layer for studios that complete GearBeat review requirements.",
-      ar: "طبقة ثقة مميزة للاستوديوهات التي تستكمل متطلبات مراجعة GearBeat.",
-    },
-    href: "/gearbeat-certified",
-    label: { en: "Learn more", ar: "اعرف المزيد" },
-  },
-  {
-    title: { en: "Rewards", ar: "المكافآت" },
-    body: {
-      en: "A customer membership experience designed for future loyalty and creator benefits.",
-      ar: "تجربة عضوية للعملاء مصممة لمزايا الولاء والمبدعين في المراحل القادمة.",
-    },
-    href: "/customer/rewards",
-    label: { en: "View rewards", ar: "عرض المكافآت" },
-  },
-];
-
-const studioPreviewCards = [
-  {
-    title: { en: "Recording rooms", ar: "غرف التسجيل" },
-    body: {
-      en: "Compare room style, creative fit, and studio readiness before you plan a session.",
-      ar: "قارن أسلوب الغرفة، وملاءمتها الإبداعية، وجاهزية الاستوديو قبل التخطيط للجلسة.",
-    },
-  },
-  {
-    title: { en: "Production spaces", ar: "مساحات الإنتاج" },
-    body: {
-      en: "Browse spaces prepared for vocals, podcasts, music production, and sound design.",
-      ar: "تصفح مساحات مناسبة للأداء الصوتي، والبودكاست، والإنتاج الموسيقي، وتصميم الصوت.",
-    },
-  },
-  {
-    title: { en: "Certified network", ar: "شبكة موثقة" },
-    body: {
-      en: "Review-focused studio discovery for a more professional booking journey.",
-      ar: "اكتشاف استوديوهات قائم على المراجعة لتجربة حجز أكثر احترافية.",
-    },
-  },
-];
-
-const gearPreviewCards = [
-  {
-    title: { en: "Microphones", ar: "ميكروفونات" },
-    body: { en: "Vocal, podcast, and studio recording essentials.", ar: "أساسيات التسجيل الصوتي والبودكاست والاستوديو." },
-  },
-  {
-    title: { en: "Studio monitors", ar: "سماعات استوديو" },
-    body: { en: "Reference listening categories for creators and rooms.", ar: "فئات استماع مرجعية للمبدعين والمساحات." },
-  },
-  {
-    title: { en: "Production gear", ar: "معدات الإنتاج" },
-    body: { en: "Controllers, interfaces, and creator workflow tools.", ar: "وحدات تحكم وواجهات وأدوات لسير عمل المبدعين." },
-  },
-  {
-    title: { en: "Accessories", ar: "إكسسوارات" },
-    body: { en: "Practical add-ons for sessions, setup, and care.", ar: "إضافات عملية للجلسات والتجهيز والعناية." },
-  },
-];
-
-const trustItems = [
-  { en: "Saudi and GCC ready", ar: "جاهز للسعودية والخليج" },
-  { en: "Studio-first discovery", ar: "اكتشاف يركز على الاستوديو" },
-  { en: "Partner review flow", ar: "مسار مراجعة الشركاء" },
-  { en: "No live card claims", ar: "بدون ادعاء مدفوعات بطاقات مباشرة" },
-];
-
-function SoundWaveMotion() {
-  return (
-    <div className="cinema-wave" aria-hidden="true">
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
-    </div>
-  );
-}
-
-function PulseOrb() {
-  return (
-    <div className="pulse-orb" aria-hidden="true">
-      <div className="orb-ring orb-ring-a" />
-      <div className="orb-ring orb-ring-b" />
-      <div className="orb-core">
-        <SoundWaveMotion />
-      </div>
-    </div>
-  );
-}
-
 export default function HomePage() {
   return (
     <main className="home-root">
-      <section className="cinema-hero">
-        <div className="cinema-grid container">
-          <div className="cinema-copy">
-            <span className="cinema-kicker">
-              <T en="GearBeat creative marketplace" ar="سوق GearBeat الإبداعي" />
-            </span>
-
-            <h1>
-              <span>Book the space.</span>
-              <span>Buy the gear.</span>
-              <span>Create the sound.</span>
-            </h1>
-
-            <p className="cinema-arabic-line">
-              احجز المكان، اشترِ المعدات، وابدأ الإبداع
-            </p>
-
-            <p className="cinema-lead">
+      {/* 1. CINEMATIC HERO */}
+      <section className="hero-section">
+        <div className="container hero-container animate-up">
+          <div className="hero-content">
+            <div className="badge-gold mb-16">
+              <T en="Saudi-First Creative Marketplace" ar="منصة إبداعية صوتية سعودية أولاً" />
+            </div>
+            <h1 className="text-balance" style={{ fontWeight: 900 }}>
               <T
-                en="A premium dark-gold destination for creators to discover studios, explore audio gear, and prepare the next sound with a safer, phased marketplace experience."
-                ar="وجهة فاخرة بالأسود والذهبي للمبدعين لاكتشاف الاستوديوهات، واستكشاف معدات الصوت، والتحضير للصوت القادم عبر تجربة سوق مرحلية أكثر أمانًا."
+                en="The global pulse of studio sound."
+                ar="النبض العالمي لصوت الاستوديوهات."
+              />
+            </h1>
+            <p className="lead mb-40">
+              <T
+                en="Built for Saudi launch, GCC expansion, and global reach. Explore now. Full commercial activation coming in controlled phases. Payments and sensitive onboarding are activated only after compliance readiness."
+                ar="مصممة للإطلاق في المملكة العربية السعودية، والتوسع في الخليج، والوصول العالمي. استكشف الآن. التفعيل التجاري الكامل يأتي في مراحل خاضعة للرقابة. يتم تنشيط المدفوعات والتسجيل الحساس للمعلومات فقط بعد جاهزية الامتثال."
               />
             </p>
-
-            <div className="cinema-actions">
+            <div className="hero-actions">
               <Link href="/studios" className="btn btn-primary btn-lg shadow-gold">
                 <T en="Book a Studio" ar="احجز استوديو" />
               </Link>
               <Link href="/marketplace" className="btn btn-outline btn-lg">
-                <T en="Explore Marketplace" ar="استكشف السوق" />
+                <T en="Shop Gear" ar="تسوق معدات" />
               </Link>
             </div>
-
-            <div className="trust-strip">
-              {trustItems.map((item) => (
-                <span key={item.en}>
-                  <T en={item.en} ar={item.ar} />
-                </span>
-              ))}
+            <div style={{ marginTop: 24, fontSize: '0.8rem', color: 'var(--gb-gold-light)', display: 'flex', alignItems: 'center', gap: 8, opacity: 0.8 }}>
+              <span>🛡️</span>
+              <T 
+                en="Verified listings and partner review before full activation." 
+                ar="قوائم موثقة ومراجعة للشركاء قبل التفعيل الكامل للخدمات." 
+              />
             </div>
           </div>
-
-          <div className="cinema-visual">
-            <div className="visual-card glow-frame">
-              <div className="visual-card-topline" />
-              <PulseOrb />
-              <div className="visual-stack">
-                <span className="visual-chip">
-                  <T en="Studio pulse" ar="نبض الاستوديو" />
-                </span>
-                <span className="visual-chip muted">
-                  <T en="Marketplace layer" ar="طبقة السوق" />
-                </span>
+          <div className="hero-visual">
+            <div className="ambient-glow"></div>
+            <div className="pulse-halo halo-1"></div>
+            <div className="pulse-halo halo-2"></div>
+            <div className="pulse-ring ring-1"></div>
+            <div className="pulse-ring ring-2"></div>
+            <div className="pulse-ring ring-3"></div>
+            
+            <div className="abstract-orb">
+              <div className="orb-inner-glow"></div>
+              <div className="soundwave-container">
+                <div className="sw-line sw-1"></div>
+                <div className="sw-line sw-2"></div>
+                <div className="sw-line sw-3"></div>
+                <div className="sw-line sw-4"></div>
+                <div className="sw-line sw-5"></div>
+                <div className="sw-line sw-6"></div>
+                <div className="sw-line sw-7"></div>
               </div>
             </div>
           </div>
@@ -183,680 +67,504 @@ export default function HomePage() {
 
       <AskGearBeatPreview />
 
-      <section className="cinema-section">
+      {/* 2. CHOOSE YOUR PATH */}
+      <section className="section-padding">
         <div className="container">
-          <div className="cinema-section-head">
-            <span className="cinema-kicker">
-              <T en="Premium access paths" ar="مسارات وصول فاخرة" />
-            </span>
-            <h2>
-              <T en="Everything starts with the sound." ar="كل شيء يبدأ بالصوت." />
-            </h2>
+          <div className="section-head text-center">
+            <span className="badge-gold"><T en="Network Status: Operational" ar="حالة الشبكة: تعمل" /></span>
+            <h2><T en="Join the Ecosystem" ar="انضم إلى النظام البيئي" /></h2>
           </div>
 
-          <div className="feature-grid">
-            {featureCards.map((feature) => (
-              <Link href={feature.href} className="feature-card glow-frame" key={feature.title.en}>
-                <span className="feature-wave" aria-hidden="true" />
-                <h3>
-                  <T en={feature.title.en} ar={feature.title.ar} />
-                </h3>
-                <p>
-                  <T en={feature.body.en} ar={feature.body.ar} />
-                </p>
-                <strong>
-                  <T en={feature.label.en} ar={feature.label.ar} />
-                </strong>
-              </Link>
-            ))}
+          <div className="grid grid-3 path-grid">
+            <Link href="/studios" className="card-premium path-card hover-lift">
+              <div className="path-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+              </div>
+              <h3><T en="Creators & Artists" ar="المبدعون والفنانون" /></h3>
+              <p><T en="Discover world-class studios, browse verified equipment, and book your next session with confidence." ar="اكتشف استوديوهات عالمية، تصفح معدات موثقة، واحجز جلستك القادمة بكل ثقة." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Book a Studio" ar="احجز استوديو" /> →</span>
+            </Link>
+
+            <Link href="/join/studio" className="card-premium path-card active-border hover-lift">
+              <div className="path-icon text-gold">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2v-6H5v-3a7 7 0 0 1 14 0v3h-2v6h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/>
+                </svg>
+              </div>
+              <h3><T en="Studio Owners" ar="أصحاب الاستوديوهات" /></h3>
+              <p><T en="Monetize your space, simplify bookings, and apply for 'GearBeat Certified' status." ar="استثمر مساحتك، بسط حجوزاتك، وقدم طلباً للحصول على حالة 'GearBeat Certified'." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Become a Partner" ar="انضم كشريك" /> →</span>
+            </Link>
+
+            <Link href="/join/seller" className="card-premium path-card hover-lift">
+              <div className="path-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                </svg>
+              </div>
+              <h3><T en="Certified Vendors" ar="التجار المعتمدون" /></h3>
+              <p><T en="Join the elite marketplace. List professional audio gear with integrated logistics and verified status." ar="انضم إلى السوق المتميز. اعرض معدات الصوت الاحترافية مع خدمات لوجستية متكاملة وحالة موثقة." /></p>
+              <span className="path-cta text-gold font-bold"><T en="Become a Partner" ar="انضم كشريك" /> →</span>
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="cinema-section studio-preview-section">
+      {/* 3. TRUST / WHY GEARBEAT */}
+      <section className="trust-section border-y border-white/5" style={{ padding: '60px 0' }}>
         <div className="container">
-          <div className="cinema-split-head">
-            <div>
-              <span className="cinema-kicker">
-                <T en="Featured studios preview" ar="معاينة الاستوديوهات" />
-              </span>
-              <h2>
-                <T en="Browse the room before the session." ar="تصفح المساحة قبل الجلسة." />
-              </h2>
+          <div className="grid grid-2 items-center gap-40">
+            <div className="trust-text">
+              <div className="badge-gold mb-12"><T en="Verified Integrity" ar="نزاهة موثقة" /></div>
+              <h2 className="mb-16 text-balance" style={{ fontSize: '2.2rem' }}><T en="The benchmark for trust in audio." ar="المعيار المرجعي للثقة في عالم الصوت." /></h2>
+              <p className="text-muted leading-relaxed" style={{ maxWidth: 450, fontSize: '0.95rem' }}>
+                <T 
+                  en="GearBeat is setting the global standard for studio operations. From verified equipment to secure session booking, we ensure a seamless professional environment for every artist."
+                  ar="تضع GearBeat المعيار العالمي لعمليات الاستوديو. من المعدات الموثقة إلى حجز الجلسات الآمن، نضمن بيئة احترافية سلسة لكل فنان."
+                />
+              </p>
             </div>
-            <Link href="/studios" className="btn btn-outline">
-              <T en="View studios" ar="عرض الاستوديوهات" />
-            </Link>
-          </div>
-
-          <div className="studio-preview-grid">
-            {studioPreviewCards.map((card) => (
-              <article className="preview-card glow-frame" key={card.title.en}>
-                <div className="preview-image studio-image" aria-hidden="true">
-                  <SoundWaveMotion />
+            <div className="grid grid-3 gap-12">
+              {[
+                { icon: '🛡️', en: 'Verified Gear', ar: 'معدات موثقة' },
+                { icon: '🎚️', en: 'Studio Grade', ar: 'جودة استوديو' },
+                { icon: '⭐', en: 'Top Talent', ar: 'مواهب متميزة' },
+                { icon: '🔒', en: 'Secure Escrow', ar: 'ضمان آمن' },
+                { icon: '🌍', en: 'Global Reach', ar: 'وصول عالمي' },
+                { icon: '🏛️', en: 'Certified Network', ar: 'شبكة معتمدة' },
+              ].map(item => (
+                <div key={item.en} className="trust-item-compact hover-lift" style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  padding: '16px 12px',
+                  background: 'rgba(212, 175, 55, 0.03)',
+                  border: '1px solid rgba(212, 175, 55, 0.1)',
+                  borderRadius: '16px',
+                  textAlign: 'center'
+                }}>
+                  <div className="trust-icon-mini" style={{ fontSize: '1.2rem', marginBottom: 8 }}>{item.icon}</div>
+                  <h4 style={{ fontSize: '0.65rem', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--gb-gold-light)' }}>
+                    <T en={item.en} ar={item.ar} />
+                  </h4>
                 </div>
-                <h3>
-                  <T en={card.title.en} ar={card.title.ar} />
-                </h3>
-                <p>
-                  <T en={card.body.en} ar={card.body.ar} />
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="cinema-section">
-        <div className="container">
-          <div className="cinema-split-head">
-            <div>
-              <span className="cinema-kicker">
-                <T en="Featured gear preview" ar="معاينة المعدات" />
-              </span>
-              <h2>
-                <T en="A marketplace built for audio culture." ar="سوق مصمم لثقافة الصوت." />
-              </h2>
+              ))}
             </div>
-            <Link href="/marketplace" className="btn btn-outline">
-              <T en="Explore marketplace" ar="استكشف السوق" />
-            </Link>
           </div>
+        </div>
+      </section>
 
-          <div className="gear-preview-grid">
-            {gearPreviewCards.map((card) => (
-              <article className="gear-card glow-frame" key={card.title.en}>
-                <div className="gear-mark" aria-hidden="true" />
-                <h3>
-                  <T en={card.title.en} ar={card.title.ar} />
-                </h3>
-                <p>
-                  <T en={card.body.en} ar={card.body.ar} />
-                </p>
-              </article>
+      {/* 4. FEATURED STUDIOS PREVIEW */}
+      <section className="section-padding bg-darker overflow-hidden">
+        <div className="container">
+          <div className="flex-between section-head items-center mb-60">
+            <div>
+              <span className="badge-gold"><T en="Curated Selection" ar="مختارات مختارة" /></span>
+              <h2 className="mt-8"><T en="Elite Studios" ar="استوديوهات النخبة" /></h2>
+            </div>
+            <Link href="/studios" className="btn btn-outline btn-sm"><T en="Book a Studio" ar="احجز استوديو" /> →</Link>
+          </div>
+          <div className="grid grid-3 gap-32">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="card-premium studio-preview-card hover-lift p-0 overflow-hidden">
+                <div className="studio-thumb-placeholder relative" style={{ 
+                  height: 250, 
+                  background: 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, #080b10 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderBottom: '1px solid rgba(212, 175, 55, 0.15)'
+                }}>
+                  {/* Subtle CSS Abstract soundwave graphic inside placeholder */}
+                  <div className="abstract-card-visual" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}>
+                    <span style={{ width: 4, height: 24, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.4 }}></span>
+                    <span style={{ width: 4, height: 40, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.7 }}></span>
+                    <span style={{ width: 4, height: 64, background: 'var(--gb-gold)', borderRadius: 2, opacity: 1, filter: 'drop-shadow(0 0 8px var(--gb-gold))' }}></span>
+                    <span style={{ width: 4, height: 40, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.7 }}></span>
+                    <span style={{ width: 4, height: 24, background: 'var(--gb-gold)', borderRadius: 2, opacity: 0.4 }}></span>
+                  </div>
+                  <div className="absolute top-16 right-16" style={{ zIndex: 1 }}>
+                     <span className="badge badge-gold">Certified</span>
+                  </div>
+                </div>
+                <div style={{ padding: 24 }}>
+                  <div className="flex-between mb-8">
+                    <h4 className="m-0">Global Sound Station {i}</h4>
+                    <span className="text-gold font-bold">5.0 ★</span>
+                  </div>
+                  <p className="text-muted text-sm mb-20">Verified Partner • Riyadh</p>
+                  <Link href="/studios" className="btn btn-outline btn-sm w-full">
+                    <T en="Book a Studio" ar="احجز استوديو" />
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="cinema-section ecosystem-section">
+      {/* 5. GEAR MARKETPLACE PREVIEW */}
+      <section className="section-padding">
         <div className="container">
-          <div className="cinema-section-head">
-            <span className="cinema-kicker">
-              <T en="Ecosystem expansion" ar="توسيع المنظومة" />
+          <div className="flex-between section-head items-center mb-60">
+             <div>
+               <span className="badge-gold"><T en="Boutique Inventory" ar="مخزون فاخر" /></span>
+               <h2 className="mt-8"><T en="Verified Marketplace" ar="سوق موثق" /></h2>
+             </div>
+             <Link href="/marketplace" className="btn btn-outline btn-sm"><T en="Shop Gear" ar="تسوق معدات" /> →</Link>
+          </div>
+          <div className="grid grid-4 category-grid gap-24">
+            {[
+              { name: 'Microphones', ar: 'ميكروفونات', icon: '🎙️' },
+              { name: 'Analog Outboard', ar: 'أجهزة تماثلية', icon: '🎛️' },
+              { name: 'Studio Monitors', ar: 'سماعات استوديو', icon: '🔊' },
+              { name: 'Instruments', ar: 'آلات موسيقية', icon: '🎸' }
+            ].map((cat) => (
+              <div key={cat.name} className="card-premium cat-card hover-lift text-center" style={{ padding: 40 }}>
+                <div className="cat-icon" style={{ fontSize: '2.5rem', marginBottom: 20 }}>
+                  {cat.icon}
+                </div>
+                <h4 className="m-0"><T en={cat.name} ar={cat.ar} /></h4>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+ 
+      {/* 5B. COMING SOON PRODUCT SECTIONS */}
+      <section className="section-padding bg-darker relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--gb-gold) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+        <div className="container relative z-10">
+          <div className="section-head text-center mb-60">
+            <span className="badge-gold">
+              <T en="Ecosystem Expansion" ar="توسيع النظام البيئي" />
             </span>
-            <h2>
-              <T en="Prepared in controlled phases." ar="يتم التحضير على مراحل مضبوطة." />
+            <h2 className="mt-8">
+              <T en="Coming Soon at GearBeat" ar="قادم قريبًا في GearBeat" />
             </h2>
-            <p>
-              <T
-                en="GearBeat is expanding carefully across creative services, learning, and experiences without overclaiming unavailable live operations."
-                ar="تتوسع GearBeat بعناية عبر الخدمات الإبداعية والتعلم والتجارب دون مبالغة في ادعاء عمليات مباشرة غير متاحة."
+            <p className="text-muted mt-12" style={{ maxWidth: 600, marginInline: 'auto' }}>
+              <T 
+                en="We are building the ultimate creative home for music and sound. The following verticals are currently in active preparation and will launch in upcoming phases." 
+                ar="نحن نبني الموطن الإبداعي الأمثل للموسيقى والصوت. القطاعات التالية قيد التحضير النشط حالياً وسيتم إطلاقها في المراحل القادمة." 
               />
             </p>
           </div>
 
-          <div className="coming-soon-grid">
+          <div className="grid grid-3 gap-24 coming-soon-grid">
             {publicFeatureFlags
               .filter((flag) => flag.showOnHomepage)
               .map((flag) => (
-                <article key={flag.key} className="coming-card glow-frame">
-                  <span className="badge-gold">
-                    <T en={flag.safeStatusLabel.en} ar={flag.safeStatusLabel.ar} />
-                  </span>
+                <div key={flag.key} className="card-premium coming-soon-card">
+                  <div className="coming-soon-badge-container">
+                    <span className="badge badge-gold">
+                      <T en={flag.safeStatusLabel.en} ar={flag.safeStatusLabel.ar} />
+                    </span>
+                  </div>
+                  <div className="card-icon-emoji">{flag.iconEmoji}</div>
                   <h3>
                     <T en={flag.enLabel} ar={flag.arLabel} />
                   </h3>
                   <p>
                     <T en={flag.description.en} ar={flag.description.ar} />
                   </p>
-                  <span className="coming-status">
+                  <div className="card-status-indicator">
                     <T en={flag.safeStatusIndicator.en} ar={flag.safeStatusIndicator.ar} />
-                  </span>
-                </article>
+                  </div>
+                </div>
               ))}
           </div>
         </div>
       </section>
-
-      <section className="final-cinema-cta">
-        <div className="container">
-          <span className="cinema-kicker">
-            <T en="Start with the next session" ar="ابدأ من الجلسة القادمة" />
-          </span>
-          <h2>
-            <T en="Your sound deserves a better stage." ar="صوتك يستحق منصة أفضل." />
-          </h2>
-          <div className="cinema-actions center">
+ 
+      <section className="section-padding final-cta text-center py-120">
+        <div className="container animate-up">
+          <div className="badge-gold mb-24"><T en="Ready to Start?" ar="هل أنت مستعد للبدء؟" /></div>
+          <h2 className="mb-60 text-balance" style={{ marginInline: 'auto' }}><T en="The future of sound belongs to you." ar="مستقبل الصوت ملك لك." /></h2>
+          <div className="cta-actions" style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
             <Link href="/signup" className="btn btn-primary btn-lg shadow-gold">
               <T en="Create Account" ar="إنشاء حساب" />
             </Link>
             <Link href="/support" className="btn btn-outline btn-lg">
-              <T en="Talk to GearBeat" ar="تحدث مع GearBeat" />
+               <T en="Speak to an Expert" ar="تحدث مع خبير" />
             </Link>
           </div>
         </div>
       </section>
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .home-root {
-          overflow: hidden;
-          background:
-            radial-gradient(circle at 15% 5%, rgba(212, 175, 55, 0.12), transparent 32%),
-            radial-gradient(circle at 86% 12%, rgba(15, 160, 138, 0.08), transparent 28%),
-            linear-gradient(180deg, #030507 0%, #0b0f16 38%, #030507 100%);
-        }
 
-        .cinema-hero {
+      <style dangerouslySetInnerHTML={{ __html: `
+        .home-root { overflow-x: hidden; }
+        
+        /* HERO */
+        .hero-section {
+          padding: 140px 0 100px;
+          background: radial-gradient(circle at 80% 20%, rgba(201, 162, 77, 0.08) 0%, transparent 40%);
           position: relative;
-          min-height: calc(100vh - 80px);
+        }
+
+        .hero-container {
           display: grid;
-          align-items: center;
-          padding: clamp(72px, 10vw, 132px) 0 clamp(48px, 8vw, 96px);
-        }
-
-        .cinema-hero::before,
-        .cinema-hero::after {
-          content: "";
-          position: absolute;
-          inset: auto -10% 0;
-          height: 44%;
-          pointer-events: none;
-          background-image: repeating-linear-gradient(90deg, rgba(212,175,55,0.12) 0 1px, transparent 1px 58px);
-          mask-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-          opacity: 0.28;
-        }
-
-        .cinema-hero::after {
-          inset: 0 -10% auto;
-          transform: rotate(180deg);
-          opacity: 0.16;
-        }
-
-        .cinema-grid {
-          position: relative;
-          z-index: 1;
-          display: grid;
-          grid-template-columns: minmax(0, 1.04fr) minmax(320px, 0.76fr);
-          gap: clamp(36px, 7vw, 88px);
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 60px;
           align-items: center;
         }
 
-        .cinema-copy h1 {
-          max-width: 820px;
-          margin: 20px 0 16px;
+        .hero-content h1 {
+          font-size: clamp(2.5rem, 6vw, 4.8rem);
+          margin: 24px 0;
           color: #fff;
-          font-size: clamp(2.7rem, 7vw, 6.9rem);
-          line-height: 0.92;
-          letter-spacing: 0;
         }
 
-        .cinema-copy h1 span {
-          display: block;
+        .hero-content .lead {
+          font-size: 1.25rem;
+          color: var(--gb-text-muted);
+          margin-bottom: 48px;
+          max-width: 600px;
         }
 
-        .cinema-arabic-line {
-          color: var(--gb-gold-light);
-          font-size: clamp(1.15rem, 2.5vw, 2rem);
-          font-weight: 800;
-          margin: 0 0 22px;
+        .hero-actions { display: flex; gap: 16px; }
+
+        .hero-visual {
+          position: relative;
+          height: 450px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          perspective: 1000px;
         }
 
-        .cinema-lead {
-          max-width: 650px;
-          color: rgba(248, 249, 250, 0.7);
-          font-size: clamp(1rem, 1.7vw, 1.2rem);
-          line-height: 1.8;
+        .ambient-glow {
+          position: absolute;
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+          filter: blur(80px);
+          pointer-events: none;
         }
 
-        .cinema-kicker {
+        .pulse-halo {
+          position: absolute;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+          animation: halo-pulse 6s infinite ease-in-out;
+          pointer-events: none;
+        }
+        .halo-1 { width: 500px; height: 500px; animation-delay: 0s; }
+        .halo-2 { width: 500px; height: 500px; animation-delay: -3s; }
+
+        @keyframes halo-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.1); opacity: 0.6; }
+        }
+
+        .pulse-ring {
+          position: absolute;
+          border: 2px solid rgba(212, 175, 55, 0.3);
+          border-radius: 50%;
+          animation: elegant-pulse 8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
+          box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        .ring-1 { width: 300px; height: 300px; animation-delay: 0s; }
+        .ring-2 { width: 300px; height: 300px; animation-delay: -2.66s; }
+        .ring-3 { width: 300px; height: 300px; animation-delay: -5.33s; }
+
+        @keyframes elegant-pulse {
+          0% { transform: scale(0.8); opacity: 0; }
+          20% { opacity: 0.6; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .abstract-orb {
+          position: relative;
+          width: 280px;
+          height: 280px;
+          background: radial-gradient(circle at 30% 30%, #151c29 0%, #000 100%);
+          border: 2.5px solid rgba(212, 175, 55, 0.6);
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+          box-shadow: 
+            0 0 60px rgba(0,0,0,0.9),
+            0 0 30px rgba(212, 175, 55, 0.2),
+            inset 0 0 40px rgba(212, 175, 55, 0.15);
+          z-index: 10;
+        }
+
+        .orb-inner-glow {
+          position: absolute;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
+          animation: orb-drift 12s infinite linear;
+        }
+
+        @keyframes orb-drift {
+          0% { transform: translate(-20%, -20%); }
+          50% { transform: translate(10%, 10%); }
+          100% { transform: translate(-20%, -20%); }
+        }
+
+        .soundwave-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 14px;
+          width: 180px;
+          z-index: 20;
+        }
+
+        .sw-line {
+          height: 2.5px;
+          background: linear-gradient(to right, transparent, var(--gb-gold-light), transparent);
+          border-radius: 4px;
+          animation: sw-horizontal-vibrate 1.5s infinite ease-in-out;
+          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
+        }
+
+        .sw-1 { width: 80px; animation-delay: 0s; opacity: 0.4; }
+        .sw-2 { width: 130px; animation-delay: 0.1s; opacity: 0.6; }
+        .sw-3 { width: 170px; animation-delay: 0.2s; opacity: 0.9; }
+        .sw-4 { width: 140px; animation-delay: 0.3s; opacity: 0.7; }
+        .sw-5 { width: 160px; animation-delay: 0.4s; opacity: 0.8; }
+        .sw-6 { width: 110px; animation-delay: 0.5s; opacity: 0.5; }
+        .sw-7 { width: 70px; animation-delay: 0.6s; opacity: 0.3; }
+
+        @keyframes sw-horizontal-vibrate {
+          0%, 100% { transform: scaleX(1); }
+          50% { transform: scaleX(1.2); }
+        }
+
+        /* PATH SECTION */
+        .section-head { margin-bottom: 60px; }
+        .section-head h2 { font-size: 3rem; margin-top: 24px; }
+        .text-center { text-align: center; }
+        
+        .path-card { text-align: center; }
+        .path-icon { font-size: 3.5rem; margin-bottom: 24px; }
+        .path-card h3 { margin-bottom: 16px; font-size: 1.5rem; }
+        .path-card p { color: var(--gb-text-muted); margin-bottom: 30px; font-size: 0.95rem; line-height: 1.7; }
+        .path-cta { color: var(--gb-gold); font-weight: 800; font-size: 0.9rem; }
+        
+        .active-border { border-color: var(--gb-gold); }
+
+        /* COMING SOON SECTION */
+        .coming-soon-grid {
+          justify-content: center;
+        }
+        .coming-soon-card {
+          position: relative;
+          padding: 48px 32px 32px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid rgba(255, 255, 255, 0.04);
+          transition: border-color 0.3s, transform 0.3s;
+        }
+        .coming-soon-card:hover {
+          border-color: rgba(212, 175, 55, 0.15);
+          transform: translateY(-4px);
+        }
+        .coming-soon-badge-container {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+        }
+        [dir="rtl"] .coming-soon-badge-container {
+          right: auto;
+          left: 16px;
+        }
+        .card-icon-emoji {
+          font-size: 3rem;
+          margin-bottom: 24px;
+        }
+        .coming-soon-card h3 {
+          font-size: 1.35rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+          color: #fff;
+        }
+        .coming-soon-card p {
+          color: var(--gb-text-muted);
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin-bottom: 24px;
+          flex-grow: 1;
+        }
+        .card-status-indicator {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          min-height: 34px;
-          padding: 7px 14px;
-          border: 1px solid rgba(212, 175, 55, 0.38);
-          border-radius: 999px;
-          color: var(--gb-gold-light);
-          background: rgba(212, 175, 55, 0.08);
-          box-shadow: 0 0 26px rgba(212, 175, 55, 0.08);
-          font-size: 0.76rem;
-          font-weight: 900;
+          justify-content: center;
+          padding: 8px 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 99px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.4);
+          cursor: default;
           text-transform: uppercase;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.5px;
         }
 
-        .cinema-actions {
-          display: flex;
-          gap: 14px;
-          flex-wrap: wrap;
-          margin-top: 34px;
+        /* TRUST SECTION */
+        .trust-section { background: #080b0e; }
+        .trust-item-compact { transition: var(--transition); }
+
+        /* STUDIO PREVIEW */
+        .bg-darker { background: #030507; }
+        .flex-between { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; }
+        .studio-thumb-placeholder { height: 220px; background: #1a222c; border-radius: 16px; }
+        .w-full { width: 100%; }
+        .mt-20 { margin-top: 20px; }
+
+        /* CATEGORY CARDS */
+        .cat-card { text-align: center; padding: 30px 20px; }
+        .cat-icon { font-size: 2rem; margin-bottom: 12px; color: var(--gb-gold); }
+
+        /* FINAL CTA */
+        .final-cta { background: linear-gradient(to bottom, #05080B, #000); }
+        .final-cta h2 { font-size: 3.5rem; max-width: 800px; margin: 0 auto; }
+
+        .btn-lg { padding: 18px 48px; font-size: 1.1rem; }
+
+        @media (max-width: 1000px) {
+          .hero-container { grid-template-columns: 1fr; text-align: center; }
+          .hero-content .lead { margin: 24px auto 48px; }
+          .hero-actions { justify-content: center; }
+          .hero-visual { height: 200px; order: -1; }
+          .hero-section { padding-top: 80px; }
+          .grid-2 { grid-template-columns: 1fr; }
+          .section-head h2 { font-size: 2.2rem; }
+          .final-cta h2 { font-size: 2.2rem; }
         }
 
-        .cinema-actions.center {
-          justify-content: center;
+        @media (max-width: 600px) {
+          .hero-actions { flex-direction: column; width: 100%; }
+          .cta-actions { flex-direction: column; width: 100%; }
+          .hero-content h1 { font-size: 2.2rem; }
+          .section-padding { padding: 60px 0; }
         }
 
-        .btn-lg {
-          min-height: 56px;
-          padding: 16px 28px;
-        }
-
-        .trust-strip {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 10px;
-          max-width: 760px;
-          margin-top: 34px;
-        }
-
-        .trust-strip span {
-          min-height: 54px;
-          display: grid;
-          place-items: center;
-          padding: 10px;
-          border-radius: 14px;
-          border: 1px solid rgba(255,255,255,0.08);
-          background: rgba(255,255,255,0.035);
-          color: rgba(248,249,250,0.72);
-          font-size: 0.78rem;
-          font-weight: 800;
-          text-align: center;
-        }
-
-        .cinema-visual {
-          display: grid;
-          place-items: center;
-          min-height: 480px;
-        }
-
-        .glow-frame {
-          position: relative;
-          overflow: hidden;
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          background:
-            radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.14), transparent 38%),
-            linear-gradient(145deg, rgba(15,22,33,0.84), rgba(3,5,7,0.96));
-          box-shadow: 0 24px 80px rgba(0,0,0,0.38), 0 0 34px rgba(212,175,55,0.07);
-        }
-
-        .glow-frame::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 36%, rgba(212,175,55,0.06));
-          opacity: 0.72;
-        }
-
-        .visual-card {
-          width: min(100%, 470px);
-          min-height: 520px;
-          display: grid;
-          place-items: center;
-          border-radius: 30px;
-        }
-
-        .visual-card-topline {
-          position: absolute;
-          top: 28px;
-          left: 28px;
-          right: 28px;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(212,175,55,0.7), transparent);
-        }
-
-        .pulse-orb {
-          position: relative;
-          width: min(72vw, 320px);
-          aspect-ratio: 1;
-          display: grid;
-          place-items: center;
-        }
-
-        .orb-core {
-          width: 72%;
-          aspect-ratio: 1;
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          border: 2px solid rgba(212, 175, 55, 0.56);
-          background:
-            radial-gradient(circle at 35% 25%, rgba(244,212,122,0.32), transparent 22%),
-            radial-gradient(circle, rgba(212,175,55,0.1), rgba(3,5,7,1) 72%);
-          box-shadow: inset 0 0 44px rgba(212,175,55,0.16), 0 0 48px rgba(212,175,55,0.16);
-        }
-
-        .orb-ring {
-          position: absolute;
-          inset: 7%;
-          border-radius: 50%;
-          border: 1px solid rgba(212,175,55,0.32);
-          animation: orbPulse 5.8s ease-in-out infinite;
-        }
-
-        .orb-ring-b {
-          inset: -8%;
-          animation-delay: -2.9s;
-          opacity: 0.65;
-        }
-
-        @keyframes orbPulse {
-          0%, 100% { transform: scale(0.88); opacity: 0.24; }
-          50% { transform: scale(1.08); opacity: 0.68; }
-        }
-
-        .cinema-wave {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          min-height: 120px;
-        }
-
-        .cinema-wave span {
-          width: 5px;
-          height: 34px;
-          border-radius: 999px;
-          background: linear-gradient(180deg, transparent, var(--gb-gold-light), transparent);
-          box-shadow: 0 0 15px rgba(212,175,55,0.4);
-          animation: waveLift 1.9s ease-in-out infinite;
-        }
-
-        .cinema-wave span:nth-child(2) { animation-delay: 0.08s; height: 56px; }
-        .cinema-wave span:nth-child(3) { animation-delay: 0.16s; height: 88px; }
-        .cinema-wave span:nth-child(4) { animation-delay: 0.24s; height: 112px; }
-        .cinema-wave span:nth-child(5) { animation-delay: 0.32s; height: 92px; }
-        .cinema-wave span:nth-child(6) { animation-delay: 0.4s; height: 70px; }
-        .cinema-wave span:nth-child(7) { animation-delay: 0.48s; height: 46px; }
-        .cinema-wave span:nth-child(8) { animation-delay: 0.56s; height: 30px; }
-
-        @keyframes waveLift {
-          0%, 100% { transform: scaleY(0.72); opacity: 0.48; }
-          50% { transform: scaleY(1.12); opacity: 1; }
-        }
-
-        .visual-stack {
-          position: absolute;
-          left: 24px;
-          right: 24px;
-          bottom: 24px;
-          display: flex;
-          gap: 10px;
-          justify-content: space-between;
-          flex-wrap: wrap;
-        }
-
-        .visual-chip {
-          padding: 9px 12px;
-          border-radius: 999px;
-          border: 1px solid rgba(212,175,55,0.26);
-          color: var(--gb-gold-light);
-          background: rgba(0,0,0,0.36);
-          font-size: 0.76rem;
-          font-weight: 900;
-        }
-
-        .visual-chip.muted {
-          color: rgba(248,249,250,0.68);
-          border-color: rgba(255,255,255,0.1);
-        }
-
-        .cinema-section {
-          padding: clamp(64px, 9vw, 116px) 0;
-        }
-
-        .cinema-section-head {
-          max-width: 780px;
-          margin: 0 auto 38px;
-          text-align: center;
-        }
-
-        .cinema-section-head h2,
-        .cinema-split-head h2,
-        .final-cinema-cta h2 {
-          margin-top: 18px;
-          color: #fff;
-          font-size: clamp(2rem, 5vw, 4.2rem);
-          letter-spacing: 0;
-        }
-
-        .cinema-section-head p {
-          margin: 16px auto 0;
-          color: rgba(248,249,250,0.66);
-          max-width: 720px;
-        }
-
-        .cinema-split-head {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 24px;
-          margin-bottom: 32px;
-        }
-
-        .feature-grid,
-        .studio-preview-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 18px;
-        }
-
-        .feature-card,
-        .preview-card,
-        .gear-card,
-        .coming-card {
-          min-height: 270px;
-          padding: 24px;
-          border-radius: 22px;
-        }
-
-        .feature-card {
-          display: grid;
-          align-content: space-between;
-        }
-
-        .feature-card h3,
-        .preview-card h3,
-        .gear-card h3,
-        .coming-card h3 {
-          position: relative;
-          color: #fff;
-          margin: 18px 0 12px;
-          font-size: 1.28rem;
-          letter-spacing: 0;
-        }
-
-        .feature-card p,
-        .preview-card p,
-        .gear-card p,
-        .coming-card p {
-          position: relative;
-          color: rgba(248,249,250,0.65);
-          line-height: 1.7;
-          font-size: 0.92rem;
-        }
-
-        .feature-card strong {
-          position: relative;
-          color: var(--gb-gold-light);
-          font-size: 0.86rem;
-        }
-
-        .feature-wave {
-          position: relative;
-          width: 82px;
-          height: 28px;
-          display: block;
-          border-radius: 999px;
-          background: repeating-linear-gradient(90deg, rgba(212,175,55,0.25) 0 4px, transparent 4px 10px);
-          box-shadow: 0 0 22px rgba(212,175,55,0.12);
-        }
-
-        .studio-preview-section {
-          background: rgba(0,0,0,0.28);
-          border-block: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .preview-card {
-          min-height: 360px;
-        }
-
-        .preview-image {
-          position: relative;
-          height: 170px;
-          border-radius: 18px;
-          overflow: hidden;
-          border: 1px solid rgba(212,175,55,0.16);
-          background:
-            linear-gradient(135deg, rgba(255,255,255,0.05), transparent),
-            radial-gradient(circle at 50% 50%, rgba(212,175,55,0.16), transparent 46%),
-            #05080b;
-        }
-
-        .preview-image .cinema-wave {
-          transform: scale(0.62);
-          min-height: 170px;
-        }
-
-        .gear-preview-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 16px;
-        }
-
-        .gear-card {
-          min-height: 230px;
-        }
-
-        .gear-mark {
-          position: relative;
-          width: 62px;
-          aspect-ratio: 1;
-          border-radius: 18px;
-          background:
-            radial-gradient(circle, rgba(244,212,122,0.28), transparent 54%),
-            linear-gradient(135deg, rgba(212,175,55,0.28), rgba(15,160,138,0.08));
-          border: 1px solid rgba(212,175,55,0.32);
-        }
-
-        .coming-soon-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 18px;
-        }
-
-        .coming-card {
-          min-height: 300px;
-          display: grid;
-          align-content: start;
-          gap: 12px;
-        }
-
-        .coming-status {
-          position: relative;
-          width: fit-content;
-          margin-top: auto;
-          padding: 8px 12px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,0.1);
-          color: rgba(248,249,250,0.55);
-          font-size: 0.78rem;
-          font-weight: 800;
-        }
-
-        .final-cinema-cta {
-          padding: clamp(78px, 12vw, 142px) 0;
-          text-align: center;
-          background:
-            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.16), transparent 42%),
-            #000;
-          border-top: 1px solid rgba(212,175,55,0.1);
-        }
-
-        .final-cinema-cta h2 {
-          max-width: 820px;
-          margin-inline: auto;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .orb-ring,
-          .cinema-wave span {
-            animation: none;
-          }
-        }
-
-        @media (max-width: 1100px) {
-          .cinema-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .cinema-visual {
-            min-height: 380px;
-            order: -1;
-          }
-
-          .visual-card {
-            min-height: 390px;
-          }
-
-          .feature-grid,
-          .studio-preview-grid,
-          .gear-preview-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .coming-soon-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-
-        @media (max-width: 700px) {
-          .cinema-hero {
-            min-height: auto;
-            padding-top: 42px;
-          }
-
-          .cinema-copy h1 {
-            font-size: clamp(2.45rem, 16vw, 4rem);
-          }
-
-          .cinema-actions,
-          .cinema-actions .btn {
-            width: 100%;
-          }
-
-          .trust-strip,
-          .feature-grid,
-          .studio-preview-grid,
-          .gear-preview-grid,
-          .coming-soon-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .cinema-split-head {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .cinema-split-head .btn {
-            width: 100%;
-          }
-
-          .visual-card {
-            border-radius: 24px;
-          }
-        }
-
-        [dir="rtl"] .cinema-copy,
-        [dir="rtl"] .cinema-split-head {
-          direction: rtl;
-        }
-      `,
-        }}
-      />
+        /* RTL HELPER */
+        [dir="rtl"] .hero-container { direction: rtl; }
+        [dir="rtl"] .hero-content { text-align: right; }
+        [dir="rtl"] .section-head { text-align: right; }
+        [dir="rtl"] .text-center { text-align: center; }
+      `}} />
     </main>
   );
 }
