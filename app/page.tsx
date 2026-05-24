@@ -102,6 +102,12 @@ const trustItems = [
   { en: "Support-ready journey", ar: "مسار جاهز للدعم" },
 ];
 
+const discoveryPrompts = [
+  { en: "Find a vocal room", ar: "ابحث عن غرفة صوت" },
+  { en: "Compare studio gear", ar: "قارن تجهيز الاستوديو" },
+  { en: "Plan a podcast setup", ar: "خطط لتجهيز بودكاست" },
+];
+
 function CinematicWave() {
   return (
     <div className="wow-wave" aria-hidden="true">
@@ -130,6 +136,8 @@ export default function HomePage() {
       <section className="wow-hero">
         <div className="hero-light hero-light-a" />
         <div className="hero-light hero-light-b" />
+        <div className="studio-atmosphere atmosphere-left" aria-hidden="true" />
+        <div className="studio-atmosphere atmosphere-right" aria-hidden="true" />
 
         <div className="container wow-hero-inner">
           <div className="wow-hero-copy">
@@ -160,9 +168,33 @@ export default function HomePage() {
                 <T en="Explore Marketplace" ar="استكشف السوق" />
               </Link>
             </div>
+
+            <div className="hero-discovery-layer" aria-label="GearBeat guided discovery preview">
+              <div>
+                <span className="discovery-label">
+                  <T en="Ask GearBeat discovery" ar="اكتشاف عبر GearBeat" />
+                </span>
+                <p>
+                  <T
+                    en="Start with a creative goal, then move into studios, gear, and services with a clearer path."
+                    ar="ابدأ بهدفك الإبداعي، ثم انتقل إلى الاستوديوهات والمعدات والخدمات بمسار أوضح."
+                  />
+                </p>
+              </div>
+              <div className="discovery-prompts">
+                {discoveryPrompts.map((prompt) => (
+                  <span key={prompt.en}>
+                    <T en={prompt.en} ar={prompt.ar} />
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="wow-stage">
+            <div className="hero-wave-field" aria-hidden="true">
+              <CinematicWave />
+            </div>
             <div className="stage-frame">
               <div className="stage-depth-lines" aria-hidden="true" />
               <PulseOrb />
@@ -356,11 +388,35 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{
           __html: `
         .wow-home {
+          position: relative;
           overflow: hidden;
+          --home-display: clamp(3.35rem, 7.4vw, 7.35rem);
+          --home-section-title: clamp(2.35rem, 4.8vw, 4.65rem);
+          --home-card-title: clamp(1.35rem, 1.65vw, 1.68rem);
+          --home-body: clamp(1rem, 1.1vw, 1.1rem);
           background:
             radial-gradient(circle at 20% -10%, rgba(212, 175, 55, 0.16), transparent 34%),
             radial-gradient(circle at 88% 10%, rgba(15, 160, 138, 0.08), transparent 32%),
             linear-gradient(180deg, #020304 0%, #080b10 42%, #020304 100%);
+        }
+
+        .wow-home::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 0;
+          background:
+            linear-gradient(115deg, transparent 0 14%, rgba(212,175,55,0.055) 14.2%, transparent 14.7% 42%, rgba(255,255,255,0.035) 42.2%, transparent 42.8%),
+            repeating-linear-gradient(90deg, rgba(212,175,55,0.035) 0 1px, transparent 1px 92px);
+          mask-image: linear-gradient(to bottom, black 0%, transparent 86%);
+          opacity: 0.68;
+          animation: atmosphereDrift 22s ease-in-out infinite alternate;
+        }
+
+        .wow-home > * {
+          position: relative;
+          z-index: 1;
         }
 
         .wow-hero {
@@ -378,10 +434,11 @@ export default function HomePage() {
           inset: 0;
           z-index: -3;
           background:
-            linear-gradient(115deg, rgba(255,255,255,0.04), transparent 24%),
-            repeating-linear-gradient(90deg, rgba(212,175,55,0.09) 0 1px, transparent 1px 74px);
-          mask-image: radial-gradient(circle at 58% 42%, black, transparent 72%);
-          opacity: 0.62;
+            radial-gradient(ellipse at 63% 42%, rgba(212,175,55,0.13), transparent 38%),
+            linear-gradient(115deg, rgba(255,255,255,0.05), transparent 24%),
+            repeating-linear-gradient(90deg, rgba(212,175,55,0.08) 0 1px, transparent 1px 74px);
+          mask-image: radial-gradient(circle at 58% 42%, black, transparent 74%);
+          opacity: 0.72;
         }
 
         .hero-light {
@@ -408,6 +465,55 @@ export default function HomePage() {
           background: rgba(212, 175, 55, 0.12);
         }
 
+        .studio-atmosphere {
+          position: absolute;
+          z-index: -1;
+          pointer-events: none;
+          opacity: 0.38;
+          filter: blur(0.2px);
+        }
+
+        .studio-atmosphere::before,
+        .studio-atmosphere::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border: 1px solid rgba(212,175,55,0.1);
+          transform: skewY(-10deg);
+        }
+
+        .atmosphere-left {
+          width: min(34vw, 420px);
+          height: min(52vw, 620px);
+          left: 4vw;
+          top: 18%;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.04), transparent 26%),
+            repeating-linear-gradient(180deg, rgba(212,175,55,0.08) 0 1px, transparent 1px 34px);
+          animation: studioSweep 18s ease-in-out infinite alternate;
+        }
+
+        .atmosphere-right {
+          width: min(38vw, 520px);
+          height: min(48vw, 560px);
+          right: 2vw;
+          bottom: 8%;
+          background:
+            linear-gradient(270deg, rgba(244,212,122,0.08), transparent 30%),
+            repeating-linear-gradient(180deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 42px);
+          animation: studioSweep 21s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes atmosphereDrift {
+          0% { transform: translate3d(-1.5%, 0, 0); opacity: 0.54; }
+          100% { transform: translate3d(1.5%, -1%, 0); opacity: 0.76; }
+        }
+
+        @keyframes studioSweep {
+          0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.26; }
+          100% { transform: translate3d(0, -18px, 0) scale(1.04); opacity: 0.44; }
+        }
+
         .wow-hero-inner {
           display: grid;
           grid-template-columns: minmax(0, 0.92fr) minmax(380px, 1.08fr);
@@ -418,26 +524,26 @@ export default function HomePage() {
         .wow-kicker {
           display: inline-flex;
           width: fit-content;
-          min-height: 34px;
+          min-height: 36px;
           align-items: center;
-          padding: 7px 14px;
+          padding: 8px 15px;
           border: 1px solid rgba(212, 175, 55, 0.42);
           border-radius: 999px;
           color: var(--gb-gold-light);
           background: rgba(212, 175, 55, 0.08);
           box-shadow: 0 0 30px rgba(212, 175, 55, 0.08);
-          font-size: 0.74rem;
+          font-size: 0.82rem;
           font-weight: 900;
-          letter-spacing: 0.12em;
+          letter-spacing: 0;
           text-transform: uppercase;
         }
 
         .wow-hero-copy h1 {
           max-width: 820px;
-          margin: 24px 0 16px;
+          margin: 26px 0 18px;
           color: #fff;
-          font-size: clamp(3.1rem, 7.8vw, 7.8rem);
-          line-height: 0.88;
+          font-size: var(--home-display);
+          line-height: 0.92;
           letter-spacing: 0;
         }
 
@@ -466,14 +572,14 @@ export default function HomePage() {
           color: var(--gb-gold-light);
           font-size: clamp(1.2rem, 2.2vw, 2rem);
           font-weight: 900;
-          line-height: 1.5;
+          line-height: 1.42;
         }
 
         .hero-lead {
           max-width: 650px;
           color: rgba(248, 249, 250, 0.7);
-          font-size: clamp(1rem, 1.45vw, 1.17rem);
-          line-height: 1.85;
+          font-size: clamp(1.05rem, 1.3vw, 1.18rem);
+          line-height: 1.78;
         }
 
         .hero-actions {
@@ -498,6 +604,70 @@ export default function HomePage() {
           transform: translateY(-4px);
         }
 
+        .hero-discovery-layer {
+          position: relative;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 18px;
+          align-items: center;
+          max-width: 720px;
+          margin-top: 24px;
+          padding: 18px;
+          overflow: hidden;
+          border-radius: 24px;
+          border: 1px solid rgba(212,175,55,0.18);
+          background:
+            linear-gradient(120deg, rgba(212,175,55,0.1), transparent 34%),
+            rgba(255,255,255,0.035);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.28), inset 0 0 36px rgba(212,175,55,0.035);
+          backdrop-filter: blur(18px);
+        }
+
+        .hero-discovery-layer::before {
+          content: "";
+          position: absolute;
+          inset: auto -12% 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(244,212,122,0.62), transparent);
+          box-shadow: 0 0 26px rgba(212,175,55,0.4);
+        }
+
+        .discovery-label {
+          display: block;
+          margin-bottom: 6px;
+          color: var(--gb-gold-light);
+          font-size: 0.9rem;
+          font-weight: 900;
+        }
+
+        .hero-discovery-layer p {
+          margin: 0;
+          color: rgba(248,249,250,0.68);
+          font-size: 0.98rem;
+          line-height: 1.65;
+        }
+
+        .discovery-prompts {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          gap: 8px;
+          max-width: 300px;
+        }
+
+        .discovery-prompts span {
+          display: inline-flex;
+          min-height: 34px;
+          align-items: center;
+          border-radius: 999px;
+          padding: 7px 11px;
+          color: rgba(248,249,250,0.82);
+          background: rgba(0,0,0,0.28);
+          border: 1px solid rgba(255,255,255,0.08);
+          font-size: 0.86rem;
+          font-weight: 800;
+        }
+
         .wow-stage {
           position: relative;
           min-height: min(70vw, 620px);
@@ -505,34 +675,53 @@ export default function HomePage() {
           place-items: center;
         }
 
+        .hero-wave-field {
+          position: absolute;
+          left: -18%;
+          right: -18%;
+          top: 48%;
+          z-index: 1;
+          transform: translateY(-50%) rotate(-7deg);
+          opacity: 0.34;
+          filter: blur(0.2px);
+          mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
+        }
+
+        .hero-wave-field .wow-wave {
+          min-height: 240px;
+        }
+
         .stage-frame {
           position: relative;
           width: min(100%, 740px);
           min-height: min(68vw, 580px);
+          overflow: visible;
+          border: 0;
           border-radius: clamp(28px, 5vw, 54px);
-          overflow: hidden;
-          border: 1px solid rgba(212, 175, 55, 0.22);
           background:
-            radial-gradient(circle at 50% 46%, rgba(244, 212, 122, 0.2), transparent 26%),
-            radial-gradient(circle at 72% 22%, rgba(15, 160, 138, 0.12), transparent 28%),
-            linear-gradient(145deg, rgba(15,22,33,0.84), rgba(0,0,0,0.96));
+            radial-gradient(circle at 50% 47%, rgba(244, 212, 122, 0.2), transparent 28%),
+            radial-gradient(circle at 72% 22%, rgba(15, 160, 138, 0.1), transparent 30%);
           box-shadow:
-            0 40px 120px rgba(0,0,0,0.55),
-            0 0 80px rgba(212,175,55,0.12),
-            inset 0 0 70px rgba(212,175,55,0.08);
+            0 42px 130px rgba(0,0,0,0.46),
+            0 0 110px rgba(212,175,55,0.14);
         }
 
         .stage-frame::before {
           content: "";
           position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 28%, rgba(212,175,55,0.08));
+          inset: 10% 4% 8%;
+          border-radius: 50%;
+          border: 1px solid rgba(244,212,122,0.12);
+          background:
+            radial-gradient(circle at 50% 46%, rgba(212,175,55,0.12), transparent 46%),
+            linear-gradient(135deg, rgba(255,255,255,0.08), transparent 28%, rgba(212,175,55,0.05));
+          box-shadow: inset 0 0 90px rgba(212,175,55,0.06);
           pointer-events: none;
         }
 
         .stage-depth-lines {
           position: absolute;
-          inset: -10% -18%;
+          inset: 8% -18% -4%;
           opacity: 0.32;
           background-image:
             linear-gradient(115deg, rgba(212,175,55,0.14) 0 1px, transparent 1px),
@@ -550,6 +739,7 @@ export default function HomePage() {
           transform: translate(-50%, -50%);
           display: grid;
           place-items: center;
+          z-index: 3;
         }
 
         .beat-orb-core {
@@ -565,7 +755,8 @@ export default function HomePage() {
             radial-gradient(circle at 34% 28%, rgba(255,255,255,0.2), transparent 18%),
             radial-gradient(circle, rgba(212,175,55,0.18), rgba(3,5,7,1) 68%);
           box-shadow:
-            0 0 70px rgba(212,175,55,0.25),
+            0 0 86px rgba(212,175,55,0.31),
+            0 0 150px rgba(212,175,55,0.16),
             inset 0 0 44px rgba(244,212,122,0.13);
           animation: coreBreath 4.8s ease-in-out infinite;
         }
@@ -605,8 +796,8 @@ export default function HomePage() {
 
         .wave-ribbon {
           position: absolute;
-          left: -8%;
-          right: -8%;
+          left: -18%;
+          right: -18%;
           top: 50%;
           z-index: 4;
           transform: translateY(-50%) rotate(-8deg);
@@ -711,8 +902,8 @@ export default function HomePage() {
         .final-wow h2 {
           margin-top: 16px;
           color: #fff;
-          font-size: clamp(2.2rem, 5.6vw, 5rem);
-          line-height: 0.96;
+          font-size: var(--home-section-title);
+          line-height: 1.02;
           letter-spacing: 0;
         }
 
@@ -788,9 +979,9 @@ export default function HomePage() {
           width: fit-content;
           margin-bottom: auto;
           color: var(--gb-gold-light);
-          font-size: 0.72rem;
+          font-size: 0.84rem;
           font-weight: 900;
-          letter-spacing: 0.14em;
+          letter-spacing: 0;
           text-transform: uppercase;
         }
 
@@ -801,7 +992,8 @@ export default function HomePage() {
           position: relative;
           color: #fff;
           margin: 22px 0 12px;
-          font-size: 1.5rem;
+          font-size: var(--home-card-title);
+          line-height: 1.15;
           letter-spacing: 0;
         }
 
@@ -811,14 +1003,15 @@ export default function HomePage() {
         .dock-card p {
           position: relative;
           color: rgba(248,249,250,0.64);
-          line-height: 1.7;
-          font-size: 0.94rem;
+          line-height: 1.72;
+          font-size: var(--home-body);
         }
 
         .pathway-card strong {
           position: relative;
           margin-top: 22px;
           color: var(--gb-gold-light);
+          font-size: 0.98rem;
         }
 
         .studios-cinema {
@@ -984,7 +1177,7 @@ export default function HomePage() {
           background: rgba(0,0,0,0.22);
           border: 1px solid rgba(255,255,255,0.06);
           text-align: center;
-          font-size: 0.82rem;
+          font-size: 0.95rem;
           font-weight: 900;
         }
 
@@ -1015,14 +1208,15 @@ export default function HomePage() {
           color: var(--gb-gold-light);
           background: rgba(212,175,55,0.08);
           border: 1px solid rgba(212,175,55,0.22);
-          font-size: 0.72rem;
+          font-size: 0.84rem;
           font-weight: 900;
         }
 
         .final-wow {
           text-align: center;
           background:
-            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.18), transparent 46%),
+            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.2), transparent 46%),
+            repeating-linear-gradient(90deg, rgba(212,175,55,0.045) 0 1px, transparent 1px 86px),
             #000;
           border-top: 1px solid rgba(212,175,55,0.1);
         }
@@ -1045,6 +1239,8 @@ export default function HomePage() {
         }
 
         @media (prefers-reduced-motion: reduce) {
+          .wow-home::before,
+          .studio-atmosphere,
           .gold-shimmer,
           .beat-orb-core,
           .beat-orb-ring,
@@ -1068,6 +1264,15 @@ export default function HomePage() {
           .wow-stage {
             order: 2;
             min-height: 480px;
+          }
+
+          .hero-discovery-layer {
+            grid-template-columns: 1fr;
+          }
+
+          .discovery-prompts {
+            max-width: none;
+            justify-content: flex-start;
           }
 
           .stage-frame {
@@ -1104,10 +1309,12 @@ export default function HomePage() {
 
           .wow-hero-copy h1 {
             font-size: clamp(2.85rem, 16vw, 4.4rem);
+            line-height: 0.98;
           }
 
           .arabic-line {
-            max-width: 12em;
+            max-width: 13em;
+            font-size: clamp(1.16rem, 5.8vw, 1.42rem);
           }
 
           .hero-actions,
@@ -1116,12 +1323,32 @@ export default function HomePage() {
           }
 
           .wow-stage {
-            min-height: 390px;
+            min-height: 410px;
           }
 
           .stage-frame {
-            min-height: 360px;
+            min-height: 370px;
             border-radius: 28px;
+          }
+
+          .hero-wave-field {
+            left: -42%;
+            right: -42%;
+            opacity: 0.22;
+          }
+
+          .hero-discovery-layer {
+            padding: 15px;
+            border-radius: 20px;
+          }
+
+          .discovery-prompts {
+            gap: 7px;
+          }
+
+          .discovery-prompts span {
+            min-height: 32px;
+            font-size: 0.82rem;
           }
 
           .floating-card {
@@ -1169,6 +1396,7 @@ export default function HomePage() {
           .split-heading h2,
           .final-wow h2 {
             font-size: clamp(2.1rem, 11vw, 3.2rem);
+            line-height: 1.05;
           }
         }
 
