@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import T from "../components/t";
 import { publicFeatureFlags } from "../lib/public-feature-flags";
 
@@ -160,9 +161,13 @@ function VerticalAiDiscoveryRail() {
   );
 }
 
+function CinematicJourneyShell({ children }: { children: ReactNode }) {
+  return <main className="home-root wow-home cinematic-journey-shell">{children}</main>;
+}
+
 export default function HomePage() {
   return (
-    <main className="home-root wow-home">
+    <CinematicJourneyShell>
       <section className="wow-hero">
         <div className="hero-light hero-light-a" />
         <div className="hero-light hero-light-b" />
@@ -180,8 +185,6 @@ export default function HomePage() {
               <span className="gold-shimmer">Buy the gear.</span>
               <span>Create the sound.</span>
             </h1>
-
-            <p className="arabic-line">احجز المكان، اشترِ المعدات، وابدأ الإبداع</p>
 
             <p className="hero-lead">
               <T
@@ -385,8 +388,9 @@ export default function HomePage() {
         .wow-home {
           position: relative;
           overflow: hidden;
-          --home-display: clamp(3rem, 5.7vw, 4.75rem);
-          --home-section-title: clamp(2rem, 3.7vw, 3.75rem);
+          isolation: isolate;
+          --home-display: 2.65rem;
+          --home-section-title: clamp(1.95rem, 3.45vw, 3.45rem);
           --home-card-title: clamp(1.35rem, 1.65vw, 1.68rem);
           --home-body: clamp(1rem, 1.1vw, 1.1rem);
           background:
@@ -395,9 +399,23 @@ export default function HomePage() {
             linear-gradient(180deg, #070a0b 0%, #030506 55%, #010203 100%);
         }
 
+        .wow-home::after {
+          content: "";
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(90deg, rgba(3,5,7,0.92), rgba(3,5,7,0.78) 44%, rgba(3,5,7,0.9)),
+            linear-gradient(180deg, rgba(3,5,7,0.82), rgba(3,5,7,0.94) 42%, #030506 100%),
+            url("/brand/studio-placeholder.jpg") center / cover no-repeat;
+          opacity: 0.22;
+          filter: saturate(0.76) contrast(1.08);
+        }
+
         .wow-home::before {
           content: "";
-          position: absolute;
+          position: fixed;
           inset: 0;
           pointer-events: none;
           z-index: 0;
@@ -405,9 +423,9 @@ export default function HomePage() {
             linear-gradient(115deg, transparent 0 14%, rgba(242,201,76,0.08) 14.2%, transparent 14.9% 42%, rgba(255,255,255,0.045) 42.2%, transparent 42.9%),
             linear-gradient(90deg, transparent, rgba(242,201,76,0.09), transparent),
             repeating-linear-gradient(90deg, rgba(242,201,76,0.035) 0 1px, transparent 1px 72px),
-            repeating-linear-gradient(0deg, rgba(212,175,55,0.026) 0 1px, transparent 1px 72px);
-          mask-image: linear-gradient(to bottom, black 0%, transparent 86%);
-          opacity: 0.76;
+            repeating-linear-gradient(0deg, rgba(212,175,55,0.026) 0 1px, transparent 1px 96px),
+            radial-gradient(ellipse at center 42vh, rgba(212,175,55,0.08), transparent 62%);
+          opacity: 0.72;
           animation: atmosphereDrift 22s ease-in-out infinite alternate, gbHaze 12s ease-in-out infinite;
         }
 
@@ -422,7 +440,7 @@ export default function HomePage() {
           isolation: isolate;
           display: grid;
           align-items: center;
-          padding: clamp(58px, 8vw, 120px) 0 clamp(42px, 7vw, 96px);
+          padding: clamp(56px, 8vw, 96px) 0 clamp(48px, 7vw, 88px);
         }
 
         .wow-hero::before {
@@ -439,16 +457,7 @@ export default function HomePage() {
         }
 
         .wow-hero::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: -4;
-          background:
-            linear-gradient(90deg, rgba(3,5,7,0.92), rgba(3,5,7,0.72) 44%, rgba(3,5,7,0.86)),
-            linear-gradient(180deg, rgba(3,5,7,0.76), rgba(3,5,7,0.98)),
-            url("/brand/studio-placeholder.jpg") center / cover no-repeat;
-          opacity: 0.34;
-          filter: saturate(0.72) contrast(1.1);
+          content: none;
         }
 
         .hero-light {
@@ -554,12 +563,13 @@ export default function HomePage() {
         }
 
         .wow-hero-copy h1 {
-          max-width: 820px;
+          max-width: 42rem;
           margin: 26px 0 18px;
           color: #fff;
           font-size: var(--home-display);
+          font-weight: 900;
           line-height: 0.96;
-          letter-spacing: 0;
+          letter-spacing: -0.055em;
         }
 
         .wow-hero-copy h1 span {
@@ -580,14 +590,6 @@ export default function HomePage() {
         @keyframes goldShimmer {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
-        }
-
-        .arabic-line {
-          margin: 0 0 18px;
-          color: var(--gb-gold-light);
-          font-size: clamp(1.2rem, 2.2vw, 2rem);
-          font-weight: 900;
-          line-height: 1.42;
         }
 
         .hero-lead {
@@ -939,7 +941,21 @@ export default function HomePage() {
         .ecosystem-cinema,
         .final-wow {
           position: relative;
-          padding: clamp(72px, 10vw, 130px) 0;
+          padding: clamp(56px, 8vw, 96px) 0;
+        }
+
+        .pathway-section::before,
+        .studios-cinema::before,
+        .gear-cinema::before,
+        .ecosystem-cinema::before,
+        .final-wow::before {
+          content: "";
+          position: absolute;
+          inset: -96px 0 auto;
+          height: 192px;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent, rgba(212,175,55,0.045), transparent);
+          opacity: 0.75;
         }
 
         .section-title-row {
@@ -1071,9 +1087,8 @@ export default function HomePage() {
 
         .studios-cinema {
           background:
-            radial-gradient(circle at 12% 20%, rgba(212,175,55,0.1), transparent 30%),
-            rgba(0,0,0,0.24);
-          border-block: 1px solid rgba(255,255,255,0.06);
+            radial-gradient(circle at 12% 20%, rgba(212,175,55,0.08), transparent 34%),
+            linear-gradient(180deg, transparent, rgba(0,0,0,0.14), transparent);
         }
 
         .split-heading {
@@ -1208,7 +1223,7 @@ export default function HomePage() {
         .object-4 { border-radius: 44px 20px 44px 20px; animation-delay: -4.2s; }
 
         .trust-cinema {
-          padding: 20px 0;
+          padding: clamp(56px, 7vw, 88px) 0;
         }
 
         .trust-band {
@@ -1237,7 +1252,7 @@ export default function HomePage() {
         }
 
         .ecosystem-cinema {
-          background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.08), transparent 36%);
+          background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.055), transparent 40%);
         }
 
         .ecosystem-dock {
@@ -1270,10 +1285,8 @@ export default function HomePage() {
         .final-wow {
           text-align: center;
           background:
-            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.2), transparent 46%),
-            repeating-linear-gradient(90deg, rgba(212,175,55,0.045) 0 1px, transparent 1px 86px),
-            #000;
-          border-top: 1px solid rgba(212,175,55,0.1);
+            radial-gradient(circle at 50% 0%, rgba(212,175,55,0.16), transparent 48%),
+            repeating-linear-gradient(90deg, rgba(212,175,55,0.03) 0 1px, transparent 1px 86px);
         }
 
         .final-wow-inner {
@@ -1353,20 +1366,33 @@ export default function HomePage() {
           }
         }
 
+        @media (min-width: 640px) {
+          .wow-home {
+            --home-display: 3rem;
+          }
+        }
+
+        @media (min-width: 768px) {
+          .wow-home {
+            --home-display: 3.75rem;
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .wow-home {
+            --home-display: 4.7rem;
+          }
+        }
+
         @media (max-width: 720px) {
           .wow-hero {
             min-height: auto;
-            padding-top: 42px;
+            padding: 56px 0;
           }
 
           .wow-hero-copy h1 {
-            font-size: clamp(2.9rem, 13vw, 3.55rem);
+            font-size: var(--home-display);
             line-height: 0.98;
-          }
-
-          .arabic-line {
-            max-width: 13em;
-            font-size: clamp(1.16rem, 5.8vw, 1.42rem);
           }
 
           .hero-actions,
@@ -1453,6 +1479,6 @@ export default function HomePage() {
       `,
         }}
       />
-    </main>
+    </CinematicJourneyShell>
   );
 }
