@@ -421,7 +421,7 @@ export default function HomePage() {
           position: relative;
           overflow: hidden;
           isolation: isolate;
-          --home-display: 2.65rem;
+          --home-display: 2.1rem;
           --home-section-title: clamp(1.95rem, 3.45vw, 3.45rem);
           --home-card-title: clamp(1.35rem, 1.65vw, 1.68rem);
           --home-body: clamp(1rem, 1.1vw, 1.1rem);
@@ -599,9 +599,9 @@ export default function HomePage() {
           margin: 26px 0 18px;
           color: #fff;
           font-size: var(--home-display);
-          font-weight: 900;
-          line-height: 0.96;
-          letter-spacing: -0.055em;
+          font-weight: 800;
+          line-height: 1.15;
+          letter-spacing: -0.035em;
         }
 
         .wow-hero-copy h1 span {
@@ -1411,19 +1411,19 @@ export default function HomePage() {
 
         @media (min-width: 640px) {
           .wow-home {
-            --home-display: 3rem;
+            --home-display: 2.4rem;
           }
         }
 
         @media (min-width: 768px) {
           .wow-home {
-            --home-display: 3.75rem;
+            --home-display: 3.15rem;
           }
         }
 
         @media (min-width: 1280px) {
           .wow-home {
-            --home-display: 4.7rem;
+            --home-display: 4.15rem;
           }
         }
 
@@ -1435,7 +1435,7 @@ export default function HomePage() {
 
           .wow-hero-copy h1 {
             font-size: var(--home-display);
-            line-height: 0.98;
+            line-height: 1.15;
           }
 
           .hero-actions,
