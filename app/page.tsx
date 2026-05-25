@@ -421,7 +421,7 @@ export default function HomePage() {
           position: relative;
           overflow: hidden;
           isolation: isolate;
-          --home-display: 2.1rem;
+          --home-display: 1.85rem;
           --home-section-title: clamp(1.95rem, 3.45vw, 3.45rem);
           --home-card-title: clamp(1.35rem, 1.65vw, 1.68rem);
           --home-body: clamp(1rem, 1.1vw, 1.1rem);
@@ -572,8 +572,8 @@ export default function HomePage() {
 
         .wow-hero-inner {
           display: grid;
-          grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.15fr) minmax(240px, 0.66fr);
-          gap: clamp(24px, 4vw, 56px);
+          grid-template-columns: 1.2fr 0.95fr 0.85fr;
+          gap: clamp(20px, 3.2vw, 44px);
           align-items: center;
         }
 
@@ -635,7 +635,7 @@ export default function HomePage() {
           display: flex;
           gap: 14px;
           flex-wrap: wrap;
-          margin-top: 34px;
+          margin-top: 24px;
         }
 
         .hero-actions.center {
@@ -643,10 +643,10 @@ export default function HomePage() {
         }
 
         .hero-btn {
-          min-height: 58px;
-          min-width: 188px;
-          border-radius: 16px;
-          box-shadow: 0 16px 42px rgba(0,0,0,0.28);
+          min-height: 52px;
+          min-width: 168px;
+          border-radius: 14px;
+          box-shadow: 0 12px 36px rgba(0,0,0,0.24);
         }
 
         .hero-btn:hover {
@@ -657,7 +657,7 @@ export default function HomePage() {
           position: relative;
           overflow: hidden;
           align-self: center;
-          padding: 18px;
+          padding: 24px;
           border-radius: 28px;
           border: 1px solid rgba(242,201,76,0.2);
           background:
@@ -706,17 +706,17 @@ export default function HomePage() {
 
         .ai-rail-items {
           display: grid;
-          gap: 10px;
-          margin-top: 18px;
+          gap: 12px;
+          margin-top: 22px;
         }
 
         .ai-rail-items span {
           display: flex;
-          min-height: 48px;
+          min-height: 52px;
           align-items: center;
           justify-content: space-between;
           border-radius: 18px;
-          padding: 12px 14px;
+          padding: 12px 18px;
           color: rgba(248,249,250,0.82);
           background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.1);
@@ -748,7 +748,7 @@ export default function HomePage() {
 
         .wow-stage {
           position: relative;
-          min-height: min(54vw, 540px);
+          min-height: min(44vw, 440px);
           display: grid;
           place-items: center;
         }
@@ -771,8 +771,8 @@ export default function HomePage() {
 
         .stage-frame {
           position: relative;
-          width: min(100%, 620px);
-          min-height: min(52vw, 520px);
+          width: min(100%, 460px);
+          min-height: min(42vw, 420px);
           overflow: visible;
           border: 0;
           border-radius: 999px;
@@ -780,8 +780,8 @@ export default function HomePage() {
             radial-gradient(circle at 50% 47%, rgba(242, 201, 76, 0.18), transparent 28%),
             radial-gradient(circle at 72% 22%, rgba(212, 175, 55, 0.1), transparent 30%);
           box-shadow:
-            0 0 120px rgba(242,201,76,0.14),
-            0 40px 130px rgba(0,0,0,0.38);
+            0 0 100px rgba(242,201,76,0.12),
+            0 30px 100px rgba(0,0,0,0.38);
         }
 
         .stage-frame::before {
@@ -1411,19 +1411,19 @@ export default function HomePage() {
 
         @media (min-width: 640px) {
           .wow-home {
-            --home-display: 2.4rem;
+            --home-display: 2.15rem;
           }
         }
 
         @media (min-width: 768px) {
           .wow-home {
-            --home-display: 3.15rem;
+            --home-display: 2.75rem;
           }
         }
 
         @media (min-width: 1280px) {
           .wow-home {
-            --home-display: 4.15rem;
+            --home-display: 3.45rem;
           }
         }
 
