@@ -24,7 +24,18 @@ const cairo = Cairo({
   fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
+function getMetadataBase() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gearbeat.app";
+
+  try {
+    return new URL(siteUrl);
+  } catch {
+    return new URL("https://gearbeat.app");
+  }
+}
+
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: {
     default: "GearBeat | The Global Pulse of Studio Sound",
     template: "%s | GearBeat"
