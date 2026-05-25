@@ -181,9 +181,9 @@ export default function HomePage() {
             </span>
 
             <h1>
-              <span>Book the space.</span>
-              <span className="gold-shimmer">Buy the gear.</span>
-              <span>Create the sound.</span>
+              <span><T en="Book the space." ar="احجز المكان." /></span>
+              <span className="gold-shimmer"><T en="Buy the gear." ar="اشترِ المعدات." /></span>
+              <span><T en="Create the sound." ar="اصنع الصوت." /></span>
             </h1>
 
             <p className="hero-lead">
