@@ -280,31 +280,47 @@ export default async function MarketplacePage({
             margin-top: 24px;
             display: grid;
             grid-template-columns: minmax(0, 1fr);
-            gap: 18px;
+            gap: 14px;
           }
-          .trust-badge-item {
-            padding: 10px 14px;
-            background: rgba(212, 175, 55, 0.04);
-            border: 1px solid rgba(212, 175, 55, 0.12);
-            border-radius: var(--gb-radius-md);
+          .marketplace-trust-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+          }
+          .marketplace-trust-badge {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
           }
-          .trust-badge-icon {
-            font-size: 1.4rem;
+          .filter-panel {
+            padding: 14px !important;
+            margin-top: 4px !important;
+            margin-bottom: 16px !important;
+            border-radius: 12px !important;
           }
-          .trust-badge-text {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.5px;
+          .filter-panel label {
+            margin-bottom: 4px !important;
+            font-size: 0.72rem !important;
+            letter-spacing: 0.5px !important;
+          }
+          .filter-panel .input {
+            height: 38px !important;
+            padding: 6px 12px !important;
+            font-size: 0.85rem !important;
+            border-radius: 8px !important;
+          }
+          .filter-panel .grid {
+            gap: 12px !important;
           }
           .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 18px;
-            margin-top: 26px;
+            margin-top: 20px;
           }
           select.input {
             padding-inline-end: 32px !important;
@@ -316,7 +332,7 @@ export default async function MarketplacePage({
           }
           @media (max-width: 600px) {
             .marketplace-page { padding: 0 16px; }
-            .marketplace-trust-grid { grid-template-columns: 1fr 1fr !important; }
+            .marketplace-trust-row { gap: 12px !important; }
           }
         `}} />
         <section className="marketplace-header">
@@ -329,86 +345,50 @@ export default async function MarketplacePage({
               {lang === "en" ? "Gear Marketplace Preview" : "معاينة متجر المعدات"}
             </h1>
 
-            <p style={{ color: "var(--muted)", lineHeight: 1.8, maxWidth: 780 }}>
+            <p style={{ color: "var(--muted)", lineHeight: 1.6, maxWidth: 780, fontSize: "1.05rem", marginTop: 8 }}>
               {lang === "en" 
-                ? "Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
-                : "تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."}
+                ? "Discover curated audio gear. Browse selected gear categories as GearBeat prepares trusted marketplace partners."
+                : "اكتشف معدات صوت مختارة. تصفح فئات معدات مختارة بينما نجهز شركاء المتجر الموثوقين."}
             </p>
+
+            {/* MARKETPLACE TRUST LAYER */}
+            <div className="marketplace-trust-row">
+              {[
+                { icon: "🛡️", en: "Listings Preview", ar: "معاينة القوائم" },
+                { icon: "💳", en: "Payment Sandbox", ar: "دفع تجريبي" },
+                { icon: "🤝", en: "Partner Prep", ar: "تجهيز الشركاء" },
+                { icon: "⚡", en: "Fulfillment Testing", ar: "اختبار التوريد" },
+              ].map(item => (
+                <div key={item.en} className="marketplace-trust-badge">
+                  <span>{item.icon}</span>
+                  <span>{lang === "en" ? item.en : item.ar}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* CONSOLIDATED SECURITY & FILTER PREVIEW BANNER */}
+          {/* CONSOLIDATED PILOT & SECURITY BANNER */}
           <div className="card-premium" style={{ 
-            padding: '14px 18px', 
-            background: 'rgba(212,175,55,0.02)', 
-            border: '1px solid rgba(212,175,55,0.14)', 
-            borderRadius: '16px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 16,
-            marginTop: 14,
-            marginBottom: 6
+            padding: '12px 16px', 
+            background: 'rgba(212,175,55,0.01)', 
+            border: '1px solid rgba(212,175,55,0.1)', 
+            borderRadius: '12px',
+            fontSize: '0.78rem',
+            lineHeight: 1.5,
+            color: 'rgba(255, 255, 255, 0.65)',
+            marginTop: 4,
+            marginBottom: 4
           }}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '1.2rem', marginTop: 2 }}>🛡️</span>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1rem', marginTop: 2 }}>🛡️</span>
               <div>
-                <h4 style={{ margin: 0, fontSize: '0.82rem', color: '#fff', fontWeight: 800 }}>
-                  <T en="Secure Checkout & Sandbox Policy" ar="سياسة الدفع الآمن والنطاق التجريبي" />
-                </h4>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.66)', marginTop: 4, lineHeight: 1.45 }}>
-                  <T 
-                    en="All checkouts are verified by GearBeat backend. Live Tap payments are deferred (Patch 104B) and manual overrides are disabled (Patch 104A) for safety."
-                    ar="يتم التحقق من كافة عمليات الدفع بواسطة خوادم جيربيت. تم تأجيل بوابة Tap الحية (Patch 104B) وتعطيل التجاوزات اليدوية (Patch 104A) للأمان."
-                  />
-                </p>
+                <strong><T en="Pilot Marketplace Experience:" ar="تجربة متجر تجريبية:" /></strong>{" "}
+                <T 
+                  en="Payment and fulfillment flows are being validated before live commercial rollout. Live Tap payments are deferred (Patch 104B) and manual status modifications are disabled (Patch 104A) for safety."
+                  ar="يتم التحقق من مسارات الدفع والتوريد قبل الإطلاق التجاري المباشر. المدفوعات الحية مؤجلة (Patch 104B) والتعديلات اليدوية معطلة (Patch 104A) للأمان."
+                />
               </div>
             </div>
-
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '1.2rem', marginTop: 2 }}>🎛️</span>
-              <div>
-                <h4 style={{ margin: 0, fontSize: '0.82rem', color: '#fff', fontWeight: 800 }}>
-                  <T en="Advanced Filtering & Search Preview" ar="معاينة البحث والتصفية المتقدمة" />
-                </h4>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.66)', marginTop: 4, lineHeight: 1.45 }}>
-                  <T 
-                    en="Smart search queries and mobile filter drawers are currently being optimized to simplify your catalog discovery experience."
-                    ar="يتم تحسين فلاتر التصفية الذكية ودرج التصفية للهواتف لتبسيط عملية اكتشاف وتصفح المعدات."
-                  />
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* MARKETPLACE TRUST LAYER */}
-          <div className="marketplace-trust-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 12,
-            marginBottom: 8
-          }}>
-            {[
-              { icon: '🛡️', en: 'Authentic Gear', ar: 'معدات أصلية' },
-              { icon: '💳', en: 'Secure Payment', ar: 'دفع آمن' },
-              { icon: '🤝', en: 'Trusted Seller', ar: 'بائع موثوق' },
-              { icon: '⚡', en: 'Fast Shipping', ar: 'شحن سريع' },
-            ].map(item => (
-              <div key={item.en} className="trust-badge-item">
-                <span className="trust-badge-icon">{item.icon}</span>
-                <span className="trust-badge-text">
-                  {lang === "en" ? item.en : item.ar}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <SmartDiscoveryPreview vertical="marketplace" />
-
-          <div style={{ marginTop: 24, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--gb-gold)', textTransform: 'uppercase', letterSpacing: 1 }}>
-              {lang === "en" ? "Manual Advanced Filters" : "فلاتر يدوية متقدمة"}
-            </span>
-            <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
           </div>
 
           <form
@@ -505,14 +485,15 @@ export default async function MarketplacePage({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 12,
+                  gap: 8,
                   background: 'rgba(212, 175, 55, 0.05)',
-                  padding: '10px 16px',
-                  borderRadius: '10px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
                   border: '1px solid var(--gb-border)',
                   cursor: 'pointer',
                   margin: 0,
-                  width: 'fit-content'
+                  width: 'fit-content',
+                  height: 38
                 }}
               >
                 <input
@@ -520,19 +501,19 @@ export default async function MarketplacePage({
                   name="in_stock"
                   value="1"
                   defaultChecked={inStock}
-                  style={{ width: 18, height: 18, accentColor: 'var(--gb-gold)' }}
+                  style={{ width: 16, height: 16, accentColor: 'var(--gb-gold)' }}
                 />
-                <span style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'none' }}>
+                <span style={{ color: '#fff', fontSize: '0.82rem', textTransform: 'none' }}>
                   {lang === "en" ? "In stock only" : "المتوفر فقط"}
                 </span>
               </label>
 
-              <div style={{ display: "flex", gap: 10 }}>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 2, height: 38, padding: '0 16px', borderRadius: 8, fontSize: '0.85rem' }}>
                   {lang === "en" ? "Apply filters" : "تطبيق الفلتر"}
                 </button>
 
-                <Link href="/marketplace" className="btn btn-outline" style={{ flex: 1 }}>
+                <Link href="/marketplace" className="btn btn-outline" style={{ flex: 1, height: 38, padding: '0 16px', borderRadius: 8, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   {lang === "en" ? "Reset" : "إعادة ضبط"}
                 </Link>
               </div>
@@ -566,40 +547,41 @@ export default async function MarketplacePage({
             <div
               className="card-premium animate-up"
               style={{
-                padding: "80px 40px",
+                padding: "48px 24px",
                 textAlign: "center",
-                background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
-                border: "1px dashed rgba(212,175,55,0.2)",
+                background: "linear-gradient(180deg, rgba(212,175,55,0.03), rgba(0,0,0,0))",
+                border: "1px dashed rgba(212,175,55,0.15)",
+                borderRadius: "16px",
                 gridColumn: "1 / -1"
               }}
             >
-              <div style={{ fontSize: "4rem", marginBottom: 24 }}>🛡️</div>
-              <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
-                {lang === "en" ? "Marketplace Discovery" : "اكتشاف المتجر"}
+              <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>🛡️</div>
+              <h2 style={{ fontSize: "1.6rem", marginBottom: "0.75rem", color: "var(--gb-gold)" }}>
+                {lang === "en" ? "Marketplace Under Preparation" : "المتجر قيد التجهيز"}
               </h2>
 
-              <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
+              <p style={{ color: "var(--gb-text-muted)", marginBottom: "1.5rem", maxWidth: 500, marginInline: 'auto', fontSize: "0.95rem", lineHeight: 1.55 }}>
                 {lang === "en" 
-                  ? "No exact matches found. We are currently in a pilot phase with a curated selection of elite gear. Our catalog is expanding daily."
-                  : "لم يتم العثور على نتائج تطابق طلبك. نحن حالياً في مرحلة تجريبية مع مجموعة مختارة من المعدات النخبة. كتالوجنا يتوسع يومياً."}
+                  ? "We are actively working to add curated audio gear from trusted partners. The pilot catalog is expanding daily."
+                  : "نعمل على إضافة معدات صوت مختارة من شركاء موثوقين. كتالوجنا يتوسع يومياً."}
               </p>
 
-              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-                <Link href="/join/seller" className="btn btn-primary">
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+                <Link href="/join/seller" className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem', borderRadius: 8 }}>
                   {lang === "en" ? "Become a Partner" : "انضم كشريك"}
                 </Link>
-                <Link href="/support" className="btn btn-outline">
+                <Link href="/support" className="btn btn-outline" style={{ padding: '10px 20px', fontSize: '0.85rem', borderRadius: 8 }}>
                   {lang === "en" ? "Contact Support" : "اتصل بالدعم"}
                 </Link>
-                <Link href="/marketplace" className="btn btn-outline">
+                <Link href="/marketplace" className="btn btn-outline" style={{ padding: '10px 20px', fontSize: '0.85rem', borderRadius: 8 }}>
                   {lang === "en" ? "Shop Gear" : "تسوق معدات"}
                 </Link>
               </div>
 
-              <p style={{ marginTop: "2rem", color: "var(--gb-gold)", fontWeight: 600, fontSize: "0.9rem" }}>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontWeight: 500, fontSize: "0.8rem", margin: 0 }}>
                 {lang === "en" 
-                  ? "Pilot‑Ready – listings are provisional and no live payments are processed."
-                  : "في مرحلة التجريب – القوائم تجريبية ولا يتم معالجة المدفوعات الحية."}
+                  ? "Pilot Ready — listings are provisional and no live payments are processed."
+                  : "في مرحلة التجريب — القوائم تجريبية ولا يتم معالجة المدفوعات الحية."}
               </p>
             </div>
           ) : (
@@ -613,8 +595,29 @@ export default async function MarketplacePage({
               />
             ))}
             </>
-        )}
-      </section>
+          )}
+        </section>
+
+        {/* SECONDARY AI DISCOVERY AREA */}
+        <section style={{ marginTop: 40, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 30 }}>
+          <div style={{ maxWidth: 720, margin: '0 auto', opacity: 0.85 }}>
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <span className="badge badge-gold" style={{ fontSize: '0.65rem' }}>
+                <T en="AI Assistant Preview" ar="معاينة مساعد الذكاء الاصطناعي" />
+              </span>
+              <h3 style={{ fontSize: '1.2rem', marginTop: 10, marginBottom: 6, color: '#fff' }}>
+                <T en="Looking for a custom setup?" ar="تبحث عن تجهيز مخصص؟" />
+              </h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--gb-text-muted)', margin: 0 }}>
+                <T 
+                  en="Describe your requirements and let our experimental AI guide your studio discovery." 
+                  ar="صف احتياجاتك ودع ذكاءنا الاصطناعي التجريبي يوجه استكشاف الاستوديو الخاص بك."
+                />
+              </p>
+            </div>
+            <SmartDiscoveryPreview vertical="marketplace" />
+          </div>
+        </section>
 
       {/* MARKETPLACE MOBILE READINESS */}
       <section style={{ marginTop: 60, marginBottom: 40 }}>
