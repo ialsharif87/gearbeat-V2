@@ -523,6 +523,120 @@ export default async function StudiosPage({
 
     return (
       <section>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .studios-hero-head {
+            margin-bottom: 16px !important;
+          }
+          .studio-trust-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+          }
+          .studio-trust-badge {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(212, 175, 55, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            border-radius: var(--gb-radius-sm);
+            padding: 6px 12px;
+          }
+          .filter-panel {
+            padding: 14px !important;
+            margin-top: 10px !important;
+            margin-bottom: 16px !important;
+            border-radius: 12px !important;
+          }
+          .filter-panel label {
+            margin-bottom: 4px !important;
+            font-size: 0.72rem !important;
+            letter-spacing: 0.5px !important;
+          }
+          .filter-panel .input {
+            height: 38px !important;
+            padding: 6px 12px !important;
+            font-size: 0.85rem !important;
+            border-radius: 8px !important;
+          }
+          .filter-panel .grid {
+            gap: 12px !important;
+          }
+          .filter-panel .btn {
+            padding: 0 16px !important;
+            font-size: 0.85rem !important;
+            border-radius: 8px !important;
+            height: 38px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .studio-cover {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            border-radius: var(--gb-radius-md) var(--gb-radius-md) 0 0;
+          }
+          .studio-card-floating-badges {
+            position: absolute;
+            top: 12px;
+            inset-inline-start: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            z-index: 2;
+          }
+          .studio-card-metadata-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+          }
+          .studio-card-meta-item {
+            font-size: 0.72rem;
+            color: var(--gb-text-muted);
+            background: rgba(255,255,255,0.05);
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+          }
+          .studio-rating-text {
+            font-size: 0.75rem;
+            color: var(--gb-gold);
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          }
+          select.input {
+            padding-inline-end: 32px !important;
+          }
+          [dir="rtl"] .studios-hero-head,
+          [dir="rtl"] .filter-panel,
+          [dir="rtl"] .studio-results-bar,
+          [dir="rtl"] .studio-card-body {
+            direction: rtl;
+            text-align: start;
+          }
+          [dir="rtl"] .filter-panel input,
+          [dir="rtl"] .filter-panel select {
+            text-align: start !important;
+          }
+          @media (max-width: 600px) {
+            .studio-trust-row { gap: 10px !important; }
+            .studio-cover { height: 160px; }
+          }
+        `}} />
         <div className="section-head studios-hero-head">
           <span className="badge">
             <T en="Browse Studios" ar="تصفح الاستوديوهات" />
@@ -543,67 +657,21 @@ export default async function StudiosPage({
           </p>
 
           {/* STUDIO TRUST LAYER */}
-          <div className="studio-trust-grid" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: 16,
-            marginTop: 40,
-            marginBottom: 8 
-          }}>
+          <div className="studio-trust-row">
             {[
               { icon: '🎙️', en: 'Studio Tested', ar: 'مختبر في الاستوديو' },
               { icon: '🎚️', en: 'Pro Audio Grade', ar: 'جودة صوت احترافية' },
               { icon: '⭐', en: 'Top Rated', ar: 'الأعلى تقييماً' },
               { icon: '💎', en: 'Premium Quality', ar: 'جودة ممتازة' },
             ].map(item => (
-              <div key={item.en} style={{ 
-                padding: '16px 20px', 
-                background: 'rgba(212, 175, 55, 0.04)', 
-                border: '1px solid rgba(212, 175, 55, 0.12)', 
-                borderRadius: 'var(--gb-radius-md)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12
-              }}>
-                <span style={{ fontSize: '1.4rem' }}>{item.icon}</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
+              <div key={item.en} className="studio-trust-badge">
+                <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
                   <T en={item.en} ar={item.ar} />
                 </span>
               </div>
             ))}
           </div>
-
-          <div style={{ marginTop: 24 }}>
-            <Link href="/studios/near-me" className="btn btn-secondary">
-              <T en="Studios near me" ar="استوديوهات قريبة مني" />
-            </Link>
-          </div>
-        </div>
-
-        {/* ADVANCED FILTERS READINESS */}
-        <div className="hide-app" style={{ marginBottom: 24 }}>
-          <div className="card-premium" style={{ padding: 16, background: 'rgba(212,175,55,0.05)', border: '1px dashed rgba(212,175,55,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: '1.5rem' }}>🎛️</span>
-              <div>
-                <h4 style={{ margin: 0, fontSize: '0.9rem' }}><T en="Advanced Filtering & Mobile Drawer" ar="تصفية متقدمة ودرج الهاتف المحمول" /></h4>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
-                  <T en="Advanced equipment, rating, and real-time availability filters are being optimized." ar="يتم تحسين فلاتر المعدات المتقدمة والتقييم والتوافر في الوقت الفعلي." />
-                </p>
-              </div>
-            </div>
-            <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>ENHANCED SEARCH</span>
-          </div>
-        </div>
-
-        <SmartDiscoveryPreview vertical="studios" />
-
-        <div style={{ marginTop: 40, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
-          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--gb-gold)', textTransform: 'uppercase', letterSpacing: 1 }}>
-            <T en="Manual Advanced Filters" ar="فلاتر يدوية متقدمة" />
-          </span>
-          <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
         </div>
 
         <StudioFilter
@@ -674,7 +742,7 @@ export default async function StudiosPage({
                           alt={studio.name}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{ objectFit: "cover", borderRadius: 'var(--gb-radius-md) var(--gb-radius-md) 0 0' }}
+                          style={{ objectFit: "cover" }}
                         />
                       </div>
                     ) : (
@@ -684,63 +752,22 @@ export default async function StudiosPage({
                           alt={studio.name}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{ objectFit: "cover", borderRadius: 'var(--gb-radius-md) var(--gb-radius-md) 0 0' }}
+                          style={{ objectFit: "cover" }}
                         />
                       </div>
                     )}
 
                     <div className="studio-card-floating-badges">
-                      {studio.is_boosted ? (
+                      {(studio.is_boosted || studio.is_featured) ? (
                         <span
                           className="badge"
                           style={{
                             borderColor: "var(--gb-gold)",
-                            background: "var(--gb-surface)",
+                            background: "var(--gb-card)",
                             color: "var(--gb-gold)",
                           }}
                         >
                           <T en="Featured" ar="مميز" />
-                        </span>
-                      ) : studio.is_featured ? (
-                        <span
-                          className="badge"
-                          style={{
-                            borderColor: "var(--gb-gold)",
-                            background: "var(--gb-surface)",
-                            color: "var(--gb-gold)",
-                          }}
-                        >
-                          <T en="Featured" ar="مميز" />
-                        </span>
-                      ) : null}
-
-                      <span className="badge studio-bookable-badge">
-                        <T en="Pilot Partner" ar="شريك تجريبي" />
-                      </span>
-
-                      <span className="badge">
-                        <T en="Verified" ar="موثق" />
-                      </span>
-
-                      {studio.instant_booking_enabled ? (
-                        <span className="badge badge-success">
-                          <T en="Direct Access" ar="وصول مباشر" />
-                        </span>
-                      ) : null}
-
-                      {studio.verified_location ? (
-                        <span className="badge badge-success">
-                          <T en="Location verified" ar="الموقع موثق" />
-                        </span>
-                      ) : null}
-
-                      {studio.google_rating ? (
-                        <span className="badge">{studio.google_rating} <T en="★ Google" ar="★ جوجل" /></span>
-                      ) : null}
-
-                      {studio.tripadvisor_rating ? (
-                        <span className="badge">
-                          {studio.tripadvisor_rating} <T en="★ TripAdvisor" ar="★ تريب أدفايزر" />
                         </span>
                       ) : null}
                     </div>
@@ -748,29 +775,42 @@ export default async function StudiosPage({
 
                   <div className="studio-card-body">
                     <div>
-                      <span className="badge">
-                        <T en="Active Pilot Studio" ar="استوديو تجريبي نشط" />
-                      </span>
-
                       <h2>{studio.name}</h2>
 
-                      <p>
+                      <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--gb-text-muted)" }}>
                         {displayCity}
                         {displayDistrict ? ` · ${displayDistrict}` : ""}
                       </p>
 
-                      <div className="studio-trust-mini">
-                        {studio.google_user_ratings_total ? (
-                          <span>
-                            Google: {studio.google_user_ratings_total}{" "}
-                            <T en="reviews" ar="تقييم" />
+                      {/* RATINGS IN CARD BODY */}
+                      {(studio.google_rating || studio.tripadvisor_rating) ? (
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}>
+                          {studio.google_rating ? (
+                            <span className="studio-rating-text">
+                              ⭐ {studio.google_rating} <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.7rem' }}>(Google: {studio.google_user_ratings_total || 0})</span>
+                            </span>
+                          ) : null}
+                          {studio.tripadvisor_rating ? (
+                            <span className="studio-rating-text" style={{ color: 'var(--gb-teal)' }}>
+                              🦉 {studio.tripadvisor_rating} <span style={{ color: 'var(--gb-text-muted)', fontSize: '0.7rem' }}>(TripAdvisor: {studio.tripadvisor_reviews_total || 0})</span>
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      {/* SECONDARY TRUST INFO IN CARD BODY */}
+                      <div className="studio-card-metadata-row">
+                        <span className="studio-card-meta-item">
+                          🛡️ <T en="Pilot Partner" ar="شريك تجريبي" />
+                        </span>
+                        {studio.verified_location ? (
+                          <span className="studio-card-meta-item">
+                            📍 <T en="Verified Location" ar="الموقع موثق" />
                           </span>
                         ) : null}
-
-                        {studio.tripadvisor_reviews_total ? (
-                          <span>
-                            TripAdvisor: {studio.tripadvisor_reviews_total}{" "}
-                            <T en="reviews" ar="تقييم" />
+                        {studio.instant_booking_enabled ? (
+                          <span className="studio-card-meta-item" style={{ color: '#0fa08a', background: 'rgba(15,160,138,0.08)' }}>
+                            ⚡ <T en="Direct Access" ar="وصول مباشر" />
                           </span>
                         ) : null}
                       </div>
@@ -795,14 +835,15 @@ export default async function StudiosPage({
               className="card-premium animate-up"
               style={{ 
                 textAlign: "center", 
-                padding: "80px 40px",
-                background: "linear-gradient(180deg, rgba(212,175,55,0.05), rgba(0,0,0,0))",
-                border: "1px dashed rgba(212,175,55,0.2)",
+                padding: "48px 24px",
+                background: "linear-gradient(180deg, rgba(212,175,55,0.03), rgba(0,0,0,0))",
+                border: "1px dashed rgba(212,175,55,0.15)",
+                borderRadius: "16px",
                 gridColumn: "1 / -1"
               }}
             >
-              <div style={{ fontSize: "4rem", marginBottom: 24 }}>🎙️</div>
-              <h2 style={{ fontSize: "2.2rem", marginBottom: "1rem", color: "var(--gb-gold)" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>🎙️</div>
+              <h2 style={{ fontSize: "1.6rem", marginBottom: "0.75rem", color: "var(--gb-gold)" }}>
                 <T en="Ready to join GearBeat?" ar="هل أنت مستعد للانضمام إلى GearBeat؟" />
               </h2>
               <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
@@ -832,6 +873,27 @@ export default async function StudiosPage({
               </p>
             </div>
           )}
+        </div>
+
+        {/* SECONDARY AI DISCOVERY AREA */}
+        <div style={{ marginTop: 40, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 30 }}>
+          <div style={{ maxWidth: 720, margin: '0 auto', opacity: 0.85 }}>
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <span className="badge" style={{ fontSize: '0.65rem', borderColor: 'var(--gb-gold)', color: 'var(--gb-gold)' }}>
+                <T en="AI Assistant Preview" ar="معاينة مساعد الذكاء الاصطناعي" />
+              </span>
+              <h3 style={{ fontSize: '1.2rem', marginTop: 10, marginBottom: 6, color: '#fff' }}>
+                <T en="Looking for a specific room?" ar="تبحث عن غرفة تسجيل معينة؟" />
+              </h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--gb-text-muted)', margin: 0 }}>
+                <T 
+                  en="Describe your production requirements and let our experimental AI guide your studio discovery." 
+                  ar="صف احتياجاتك الإنتاجية ودع ذكاءنا الاصطناعي التجريبي يوجه استكشاف الاستوديو الخاص بك."
+                />
+              </p>
+            </div>
+            <SmartDiscoveryPreview vertical="studios" />
+          </div>
         </div>
       </section>
     );

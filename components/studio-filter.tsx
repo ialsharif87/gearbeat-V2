@@ -137,7 +137,7 @@ export default function StudioFilter({
         </div>
       </div>
 
-      <div className="grid grid-4" style={{ marginTop: 20, alignItems: 'end' }}>
+      <div className="grid grid-4" style={{ marginTop: 12, alignItems: 'end' }}>
         <div className="grid grid-2" style={{ gap: 10 }}>
           <div>
             <label><T en="Min Price" ar="أقل سعر" /></label>
@@ -187,7 +187,7 @@ export default function StudioFilter({
 
       {/* ADVANCED SECTION */}
       {showAdvanced && (
-        <div className="advanced-filter-content animate-up" style={{ marginTop: 30, paddingTop: 30, borderTop: '1px solid var(--gb-border)' }}>
+        <div className="advanced-filter-content animate-up" style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--gb-border)' }}>
           <div className="grid grid-4">
             <div>
               <label><T en="Studio Type" ar="نوع الاستوديو" /></label>
@@ -223,9 +223,10 @@ export default function StudioFilter({
               display: 'flex', 
               alignItems: 'center', 
               gap: 12, 
-              marginTop: 28, 
+              marginTop: 0, 
               background: 'rgba(212, 175, 55, 0.05)',
-              padding: '10px 16px',
+              padding: '0 16px',
+              height: 38,
               borderRadius: '10px',
               border: '1px solid var(--gb-border)',
               cursor: 'pointer'
@@ -242,9 +243,9 @@ export default function StudioFilter({
           </div>
 
           {/* FEATURES ACCORDIONS */}
-          <div style={{ marginTop: 30 }}>
+          <div style={{ marginTop: 16 }}>
             <label style={{ marginBottom: 16 }}><T en="Features & Amenities" ar="المميزات والخدمات" /></label>
-            <div className="grid grid-3" style={{ gap: 15 }}>
+            <div className="grid grid-3" style={{ gap: 12 }}>
               {Object.entries(groupedFeatures).map(([category, groupItems]) => {
                 const label = featureGroupLabels[category] || featureGroupLabels.general;
                 return (
