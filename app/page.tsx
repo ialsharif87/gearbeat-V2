@@ -181,9 +181,9 @@ export default function HomePage() {
             </span>
 
             <h1>
-              <span>Book the space.</span>
-              <span className="gold-shimmer">Buy the gear.</span>
-              <span>Create the sound.</span>
+              <span><T en="Book the space." ar="احجز المكان." /></span>
+              <span className="gold-shimmer"><T en="Buy the gear." ar="اشترِ المعدات." /></span>
+              <span><T en="Create the sound." ar="اصنع الصوت." /></span>
             </h1>
 
             <p className="hero-lead">
@@ -309,7 +309,39 @@ export default function HomePage() {
           <div className="gear-podium">
             {gearPreviews.map((gear, index) => (
               <Link href={gear.href} className="gear-podium-card" key={gear.title.en}>
-                <span className={`gear-object object-${index + 1}`} />
+                <span className={`gear-object object-${index + 1}`}>
+                  {index === 0 && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="gear-icon" aria-hidden="true">
+                      <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                      <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+                      <line x1="12" y1="18" x2="12" y2="22" />
+                      <line x1="10" y1="22" x2="14" y2="22" />
+                    </svg>
+                  )}
+                  {index === 1 && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="gear-icon" aria-hidden="true">
+                      <rect x="4" y="2" width="16" height="20" rx="2" />
+                      <circle cx="12" cy="7" r="2" />
+                      <circle cx="12" cy="15" r="4" />
+                    </svg>
+                  )}
+                  {index === 2 && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="gear-icon" aria-hidden="true">
+                      <rect x="2" y="5" width="20" height="14" rx="2" />
+                      <circle cx="6" cy="12" r="1.5" />
+                      <circle cx="12" cy="12" r="1.5" />
+                      <line x1="16" y1="9" x2="19" y2="9" />
+                      <line x1="16" y1="12" x2="18" y2="12" />
+                      <line x1="16" y1="15" x2="19" y2="15" />
+                    </svg>
+                  )}
+                  {index === 3 && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="gear-icon" aria-hidden="true">
+                      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                    </svg>
+                  )}
+                </span>
                 <h3>
                   <T en={gear.title.en} ar={gear.title.ar} />
                 </h3>
@@ -389,7 +421,7 @@ export default function HomePage() {
           position: relative;
           overflow: hidden;
           isolation: isolate;
-          --home-display: 2.65rem;
+          --home-display: 1.85rem;
           --home-section-title: clamp(1.95rem, 3.45vw, 3.45rem);
           --home-card-title: clamp(1.35rem, 1.65vw, 1.68rem);
           --home-body: clamp(1rem, 1.1vw, 1.1rem);
@@ -540,8 +572,8 @@ export default function HomePage() {
 
         .wow-hero-inner {
           display: grid;
-          grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.15fr) minmax(240px, 0.66fr);
-          gap: clamp(24px, 4vw, 56px);
+          grid-template-columns: 1.2fr 0.95fr 0.85fr;
+          gap: clamp(20px, 3.2vw, 44px);
           align-items: center;
         }
 
@@ -567,9 +599,9 @@ export default function HomePage() {
           margin: 26px 0 18px;
           color: #fff;
           font-size: var(--home-display);
-          font-weight: 900;
-          line-height: 0.96;
-          letter-spacing: -0.055em;
+          font-weight: 800;
+          line-height: 1.15;
+          letter-spacing: -0.035em;
         }
 
         .wow-hero-copy h1 span {
@@ -603,7 +635,7 @@ export default function HomePage() {
           display: flex;
           gap: 14px;
           flex-wrap: wrap;
-          margin-top: 34px;
+          margin-top: 24px;
         }
 
         .hero-actions.center {
@@ -611,10 +643,10 @@ export default function HomePage() {
         }
 
         .hero-btn {
-          min-height: 58px;
-          min-width: 188px;
-          border-radius: 16px;
-          box-shadow: 0 16px 42px rgba(0,0,0,0.28);
+          min-height: 52px;
+          min-width: 168px;
+          border-radius: 14px;
+          box-shadow: 0 12px 36px rgba(0,0,0,0.24);
         }
 
         .hero-btn:hover {
@@ -625,7 +657,7 @@ export default function HomePage() {
           position: relative;
           overflow: hidden;
           align-self: center;
-          padding: 18px;
+          padding: 24px;
           border-radius: 28px;
           border: 1px solid rgba(242,201,76,0.2);
           background:
@@ -674,17 +706,17 @@ export default function HomePage() {
 
         .ai-rail-items {
           display: grid;
-          gap: 10px;
-          margin-top: 18px;
+          gap: 12px;
+          margin-top: 22px;
         }
 
         .ai-rail-items span {
           display: flex;
-          min-height: 48px;
+          min-height: 52px;
           align-items: center;
           justify-content: space-between;
           border-radius: 18px;
-          padding: 12px 14px;
+          padding: 12px 18px;
           color: rgba(248,249,250,0.82);
           background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.1);
@@ -716,7 +748,7 @@ export default function HomePage() {
 
         .wow-stage {
           position: relative;
-          min-height: min(54vw, 540px);
+          min-height: min(44vw, 440px);
           display: grid;
           place-items: center;
         }
@@ -739,8 +771,8 @@ export default function HomePage() {
 
         .stage-frame {
           position: relative;
-          width: min(100%, 620px);
-          min-height: min(52vw, 520px);
+          width: min(100%, 460px);
+          min-height: min(42vw, 420px);
           overflow: visible;
           border: 0;
           border-radius: 999px;
@@ -748,8 +780,8 @@ export default function HomePage() {
             radial-gradient(circle at 50% 47%, rgba(242, 201, 76, 0.18), transparent 28%),
             radial-gradient(circle at 72% 22%, rgba(212, 175, 55, 0.1), transparent 30%);
           box-shadow:
-            0 0 120px rgba(242,201,76,0.14),
-            0 40px 130px rgba(0,0,0,0.38);
+            0 0 100px rgba(242,201,76,0.12),
+            0 30px 100px rgba(0,0,0,0.38);
         }
 
         .stage-frame::before {
@@ -1218,6 +1250,17 @@ export default function HomePage() {
           animation: objectFloat 6.2s ease-in-out infinite;
         }
 
+        .gear-icon {
+          width: 44px;
+          height: 44px;
+          color: var(--gb-gold-light);
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          filter: drop-shadow(0 0 8px rgba(244, 212, 122, 0.4));
+        }
+
         .object-2 { border-radius: 999px; animation-delay: -1.4s; }
         .object-3 { border-radius: 20px 44px 20px 44px; animation-delay: -2.8s; }
         .object-4 { border-radius: 44px 20px 44px 20px; animation-delay: -4.2s; }
@@ -1368,19 +1411,19 @@ export default function HomePage() {
 
         @media (min-width: 640px) {
           .wow-home {
-            --home-display: 3rem;
+            --home-display: 2.15rem;
           }
         }
 
         @media (min-width: 768px) {
           .wow-home {
-            --home-display: 3.75rem;
+            --home-display: 2.75rem;
           }
         }
 
         @media (min-width: 1280px) {
           .wow-home {
-            --home-display: 4.7rem;
+            --home-display: 3.45rem;
           }
         }
 
@@ -1392,7 +1435,7 @@ export default function HomePage() {
 
           .wow-hero-copy h1 {
             font-size: var(--home-display);
-            line-height: 0.98;
+            line-height: 1.15;
           }
 
           .hero-actions,
@@ -1465,12 +1508,32 @@ export default function HomePage() {
             font-size: clamp(1.95rem, 9vw, 2.6rem);
             line-height: 1.05;
           }
+
+          /* Mobile Animation Dampening */
+          .wow-home::before,
+          .studio-atmosphere,
+          .gold-shimmer,
+          .beat-orb-core,
+          .beat-orb-ring,
+          .wow-wave span,
+          .wave-ribbon,
+          .gear-object,
+          .ai-rail-items span,
+          .floating-card {
+            animation: none !important;
+          }
         }
 
         [dir="rtl"] .wow-hero-copy,
         [dir="rtl"] .split-heading,
-        [dir="rtl"] .section-title-row {
+        [dir="rtl"] .section-title-row,
+        [dir="rtl"] .panel-copy,
+        [dir="rtl"] .gear-podium-card,
+        [dir="rtl"] .pathway-card,
+        [dir="rtl"] .dock-card,
+        [dir="rtl"] .ai-rail-heading {
           direction: rtl;
+          text-align: start;
         }
 
         [dir="rtl"] .gold-shimmer {
