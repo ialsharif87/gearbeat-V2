@@ -1,8 +1,30 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
+function isTapLivePaymentsEnabled() {
+  return process.env.TAP_LIVE_PAYMENTS_ENABLED === "true";
+}
+
+function createTapWebhookDisabledResponse() {
+  return NextResponse.json(
+    {
+      received: true,
+      ignored: true,
+      code: "TAP_LIVE_PAYMENTS_DISABLED",
+      livePaymentsEnabled: false,
+      message:
+        "Tap webhook processing is not enabled yet. Payment status changes remain blocked until webhook verification, idempotency, and explicit approval are complete.",
+    },
+    { status: 200 }
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
+    if (!isTapLivePaymentsEnabled()) {
+      return createTapWebhookDisabledResponse();
+    }
+
     const body = await request.json();
     const { id, status, metadata } = body;
 
