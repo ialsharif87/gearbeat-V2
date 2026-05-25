@@ -283,10 +283,10 @@ export default async function MarketplacePage({
             gap: 18px;
           }
           .trust-badge-item {
-            padding: 16px 20px;
+            padding: 10px 14px;
             background: rgba(212, 175, 55, 0.04);
             border: 1px solid rgba(212, 175, 55, 0.12);
-            borderRadius: var(--gb-radius-md);
+            border-radius: var(--gb-radius-md);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -305,6 +305,14 @@ export default async function MarketplacePage({
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 18px;
             margin-top: 26px;
+          }
+          select.input {
+            padding-inline-end: 32px !important;
+          }
+          [dir="rtl"] .marketplace-header,
+          [dir="rtl"] .filter-panel {
+            direction: rtl;
+            text-align: start;
           }
           @media (max-width: 600px) {
             .marketplace-page { padding: 0 16px; }
@@ -326,26 +334,48 @@ export default async function MarketplacePage({
                 ? "Browse approved products from trusted GearBeat vendors. Search by product, category, brand, price, and stock availability."
                 : "تصفح المنتجات المعتمدة من تجار GearBeat. ابحث حسب المنتج، التصنيف، العلامة، السعر، والتوفر."}
             </p>
+          </div>
 
-            <div 
-              style={{ 
-                marginTop: 16,
-                background: 'rgba(0, 255, 136, 0.05)', 
-                border: '1px solid rgba(0, 255, 136, 0.2)',
-                padding: '10px 14px',
-                borderRadius: 10,
-                fontSize: '0.8rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                color: '#baffd7'
-              }}
-            >
-              <span>🛡️</span>
-              <T 
-                en="Secure Checkout: All payments are verified by GearBeat backend. Live Tap integration is currently deferred (Patch 104B), and manual customer status overrides are disabled for security (Patch 104A)."
-                ar="دفع آمن: يتم التحقق من جميع المدفوعات بواسطة أنظمة جيربيت. تم تأجيل تكامل Tap الحي حالياً (Patch 104B)، وتم تعطيل تجاوزات الحالة يدوياً من قبل العميل للأمان (Patch 104A)."
-              />
+          {/* CONSOLIDATED SECURITY & FILTER PREVIEW BANNER */}
+          <div className="card-premium" style={{ 
+            padding: '14px 18px', 
+            background: 'rgba(212,175,55,0.02)', 
+            border: '1px solid rgba(212,175,55,0.14)', 
+            borderRadius: '16px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 16,
+            marginTop: 14,
+            marginBottom: 6
+          }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.2rem', marginTop: 2 }}>🛡️</span>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', color: '#fff', fontWeight: 800 }}>
+                  <T en="Secure Checkout & Sandbox Policy" ar="سياسة الدفع الآمن والنطاق التجريبي" />
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.66)', marginTop: 4, lineHeight: 1.45 }}>
+                  <T 
+                    en="All checkouts are verified by GearBeat backend. Live Tap payments are deferred (Patch 104B) and manual overrides are disabled (Patch 104A) for safety."
+                    ar="يتم التحقق من كافة عمليات الدفع بواسطة خوادم جيربيت. تم تأجيل بوابة Tap الحية (Patch 104B) وتعطيل التجاوزات اليدوية (Patch 104A) للأمان."
+                  />
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.2rem', marginTop: 2 }}>🎛️</span>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', color: '#fff', fontWeight: 800 }}>
+                  <T en="Advanced Filtering & Search Preview" ar="معاينة البحث والتصفية المتقدمة" />
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.66)', marginTop: 4, lineHeight: 1.45 }}>
+                  <T 
+                    en="Smart search queries and mobile filter drawers are currently being optimized to simplify your catalog discovery experience."
+                    ar="يتم تحسين فلاتر التصفية الذكية ودرج التصفية للهواتف لتبسيط عملية اكتشاف وتصفح المعدات."
+                  />
+                </p>
+              </div>
             </div>
           </div>
 
@@ -353,7 +383,7 @@ export default async function MarketplacePage({
           <div className="marketplace-trust-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 16,
+            gap: 12,
             marginBottom: 8
           }}>
             {[
@@ -371,27 +401,9 @@ export default async function MarketplacePage({
             ))}
           </div>
 
-          {/* ADVANCED FILTERS READINESS */}
-          <div className="hide-app" style={{ marginTop: 24, marginBottom: 24 }}>
-            <div className="card-premium" style={{ padding: 16, background: 'rgba(212,175,55,0.05)', border: '1px dashed rgba(212,175,55,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: '1.5rem' }}>🎛️</span>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '0.9rem' }}>
-                    {lang === "en" ? "Advanced Filtering & Mobile Drawer" : "تصفية متقدمة ودرج الهاتف المحمول"}
-                  </h4>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
-                    {lang === "en" ? "Enhanced search and filtering capabilities are being optimized to improve your shopping experience." : "يتم تحسين قدرات البحث والتصفية المتقدمة لتحسين تجربة التسوق الخاصة بك."}
-                  </p>
-                </div>
-              </div>
-              <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>ENHANCED SEARCH</span>
-            </div>
-          </div>
-
           <SmartDiscoveryPreview vertical="marketplace" />
 
-          <div style={{ marginTop: 40, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ marginTop: 24, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }}></span>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--gb-gold)', textTransform: 'uppercase', letterSpacing: 1 }}>
               {lang === "en" ? "Manual Advanced Filters" : "فلاتر يدوية متقدمة"}
