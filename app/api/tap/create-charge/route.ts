@@ -2,8 +2,29 @@ import { createTapCharge } from "@/lib/tap/charge";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+function isTapLivePaymentsEnabled() {
+  return process.env.TAP_LIVE_PAYMENTS_ENABLED === "true";
+}
+
+function createTapDisabledResponse() {
+  return NextResponse.json(
+    {
+      error: "Tap payments are not enabled yet.",
+      code: "TAP_LIVE_PAYMENTS_DISABLED",
+      livePaymentsEnabled: false,
+      message:
+        "GearBeat is in pre-live payment mode. Tap checkout remains disabled until payment hardening and explicit approval are complete.",
+    },
+    { status: 403 }
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
+    if (!isTapLivePaymentsEnabled()) {
+      return createTapDisabledResponse();
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
