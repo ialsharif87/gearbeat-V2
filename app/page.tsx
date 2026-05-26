@@ -125,8 +125,17 @@ function PulseOrb() {
     <div className="beat-orb" aria-hidden="true">
       <div className="beat-orb-ring ring-one" />
       <div className="beat-orb-ring ring-two" />
-      <div className="beat-orb-core">
-        <div className="beat-center" />
+      <div className="beat-orb-video-container">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="beat-orb-video"
+        >
+          <source src="/assets/videos/gearbeat-vinyl-core.webm" type="video/webm" />
+          <source src="/assets/videos/gearbeat-vinyl-core.mp4" type="video/mp4" />
+        </video>
       </div>
     </div>
   );
@@ -839,6 +848,34 @@ export default function HomePage() {
           animation: coreBreath 4.8s ease-in-out infinite;
         }
 
+        .beat-orb-video-container {
+          position: relative;
+          z-index: 2;
+          width: 58%;
+          aspect-ratio: 1;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          border: 2px solid rgba(244, 212, 122, 0.62);
+          background:
+            radial-gradient(circle at 34% 28%, rgba(255,255,255,0.15), transparent 18%),
+            radial-gradient(circle, rgba(212,175,55,0.18), rgba(3,5,7,1) 68%);
+          box-shadow:
+            0 0 86px rgba(212,175,55,0.31),
+            0 0 150px rgba(212,175,55,0.16),
+            inset 0 0 44px rgba(244,212,122,0.13);
+          animation: coreBreath 4.8s ease-in-out infinite;
+          overflow: hidden;
+        }
+
+        .beat-orb-video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+          pointer-events: none;
+        }
+
         .beat-center {
           width: 36%;
           aspect-ratio: 1;
@@ -1354,6 +1391,7 @@ export default function HomePage() {
           .studio-atmosphere,
           .gold-shimmer,
           .beat-orb-core,
+          .beat-orb-video-container,
           .beat-orb-ring,
           .wow-wave span,
           .wave-ribbon,
