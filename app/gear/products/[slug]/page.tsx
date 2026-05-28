@@ -65,9 +65,8 @@ export default async function ProductDetailsPage({
           </div>
 
           <div className="product-actions" style={{ display: 'grid', gap: 15 }}>
-            <AddToCartButton product={product} />
-            <button className="btn btn-secondary btn-large">
-              <T en="Buy Now" ar="شراء الآن" />
+            <button className="btn btn-primary btn-large" style={{ opacity: 0.6, cursor: 'not-allowed' }} disabled>
+              <T en="Request Availability (Coming Soon)" ar="طلب توفر (قريباً)" />
             </button>
           </div>
 

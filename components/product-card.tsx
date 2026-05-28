@@ -52,7 +52,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="product-price">
             <strong>{product.base_price}</strong> <small>SAR</small>
           </div>
-          <AddToCartButton product={product} />
+          <Link href={`/gear/products/${product.slug}`} className="btn btn-secondary btn-small">
+            <T en="View Details" ar="عرض التفاصيل" />
+          </Link>
         </div>
       </div>
     </article>
