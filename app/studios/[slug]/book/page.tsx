@@ -134,14 +134,14 @@ export default async function StudioBookPage({
         style={{
           marginTop: 24,
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 420px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
           gap: 24,
           alignItems: "start",
         }}
       >
         <div className="card">
           <span className="badge badge-gold">
-            <T en="Book Studio" ar="احجز الاستوديو" />
+            <T en="Request Studio" ar="اطلب الاستوديو" />
           </span>
 
           <h1 style={{ marginTop: 10 }}>{getStudioName(studio)}</h1>
@@ -150,7 +150,7 @@ export default async function StudioBookPage({
             {studio.description_en ||
               studio.description ||
               studio.description_ar ||
-              "Choose your booking details and confirm a manual test payment."}
+              "Choose your preferred session details and send a booking request."}
           </p>
 
           <div
@@ -175,7 +175,7 @@ export default async function StudioBookPage({
                 <T en="Price" ar="السعر" />
               </strong>
               <p style={{ color: "var(--muted)", marginBottom: 0 }}>
-                {formatMoney(studioPrice, currencyCode)} / hour
+                {studioPrice > 0 ? `${formatMoney(studioPrice, currencyCode)} / hour` : <T en="Request quote" ar="اطلب السعر" />}
               </p>
             </div>
 
@@ -184,7 +184,7 @@ export default async function StudioBookPage({
                 <T en="Status" ar="الحالة" />
               </strong>
               <p style={{ color: "var(--muted)", marginBottom: 0 }}>
-                {studio.verified ? "Verified" : studio.status || "Available"}
+                <T en="Request based" ar="حسب الطلب" />
               </p>
             </div>
           </div>
@@ -195,24 +195,9 @@ export default async function StudioBookPage({
             </h2>
 
             <ul style={{ color: "var(--muted)", lineHeight: 1.9 }}>
-              <li>
-                <T
-                  en="This booking uses manual test payment for now."
-                  ar="هذا الحجز يستخدم الدفع التجريبي اليدوي حاليًا."
-                />
-              </li>
-              <li>
-                <T
-                  en="Advanced availability calendar will be improved in the next patches."
-                  ar="سيتم تطوير تقويم التوفر في الباتشات القادمة."
-                />
-              </li>
-              <li>
-                <T
-                  en="Paid bookings will appear in customer and owner dashboards."
-                  ar="الحجوزات المدفوعة ستظهر في لوحة العميل وصاحب الاستوديو."
-                />
-              </li>
+              <li><T en="Requests start as Pending." ar="تبدأ الطلبات بحالة معلق." /></li>
+              <li><T en="The studio reviews the requested date and time before confirmation." ar="يراجع الاستوديو التاريخ والوقت المطلوبين قبل التأكيد." /></li>
+              <li><T en="No payment is collected when you send this request." ar="لا يتم تحصيل أي دفعة عند إرسال هذا الطلب." /></li>
             </ul>
           </div>
         </div>

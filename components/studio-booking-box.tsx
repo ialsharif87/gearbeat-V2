@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import T from "@/components/t";
-import StudioAvailableSlotsPicker from "./studio-available-slots-picker";
 
 type StudioBookingBoxProps = {
   studioId: string;
@@ -16,38 +16,19 @@ type BookingResult = {
   ok?: boolean;
   bookingId?: string;
   bookingNumber?: string;
-  checkoutSessionId?: string;
   amount?: number;
   currencyCode?: string;
   bookingDate?: string;
   startTime?: string;
   endTime?: string;
   durationHours?: number;
-  message?: string;
-  error?: string;
-};
-
-type PaymentResult = {
-  ok?: boolean;
-  checkoutSessionId?: string;
-  paymentTransactionId?: string;
-  status?: string;
-  amount?: number;
-  currencyCode?: string;
-  message?: string;
   error?: string;
 };
 
 function formatMoney(value: unknown, currency = "SAR") {
-  const numberValue = Number(value || 0);
-
-  if (!Number.isFinite(numberValue)) {
-    return `0.00 ${currency}`;
-  }
-
-  return `${numberValue.toFixed(2)} ${currency}`;
+  const amount = Number(value || 0);
+  return `${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"} ${currency}`;
 }
-
 function getTodayValue() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -58,47 +39,28 @@ export default function StudioBookingBox({
   hourlyPrice,
   currencyCode = "SAR",
 }: StudioBookingBoxProps) {
+  const pathname = usePathname();
+  const studioSlug = pathname.split("/")[2] || "";
   const [bookingDate, setBookingDate] = useState(getTodayValue());
   const [startTime, setStartTime] = useState("10:00");
-  const [currentPrice, setCurrentPrice] = useState(hourlyPrice);
   const [durationHours, setDurationHours] = useState(1);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-  const [paying, setPaying] = useState(false);
   const [booking, setBooking] = useState<BookingResult | null>(null);
-  const [payment, setPayment] = useState<PaymentResult | null>(null);
-  const router = useRouter();
-
-  const studioSlug = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    const parts = window.location.pathname.split("/");
-    // Expecting /studios/[slug] or /studios/[slug]/book
-    return parts[2] || "";
-  }, []);
 
   const estimatedTotal = useMemo(() => {
-    const price = Number(currentPrice || hourlyPrice || 0);
-    const duration = Number(durationHours || 0);
+    const price = Number(hourlyPrice || 0);
+    return Number.isFinite(price) ? price * durationHours : 0;
+  }, [hourlyPrice, durationHours]);
 
-    if (!Number.isFinite(price) || !Number.isFinite(duration)) {
-      return 0;
-    }
-
-    return price * duration;
-  }, [currentPrice, hourlyPrice, durationHours]);
-
-  async function createBooking() {
+  async function createBookingRequest() {
     setLoading(true);
     setBooking(null);
-    setPayment(null);
 
     try {
       const response = await fetch("/api/studios/bookings/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        headers: { "Content-Type": "application/json" },        body: JSON.stringify({
           studioId,
           bookingDate,
           startTime,
@@ -113,317 +75,132 @@ export default function StudioBookingBox({
       }
 
       const data = await response.json().catch(() => null);
-
       if (!response.ok) {
-        throw new Error(data?.error || "Could not create booking.");
+        throw new Error(data?.error || "Could not send booking request.");
       }
 
       setBooking(data);
     } catch (error) {
       setBooking({
         ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Could not create booking.",
+        error: error instanceof Error ? error.message : "Could not send booking request.",
       });
     } finally {
       setLoading(false);
     }
   }
 
-  async function confirmManualPayment() {
-    if (!booking?.checkoutSessionId) {
-      setPayment({
-        ok: false,
-        error: "Checkout session id is missing.",
-      });
-      return;
-    }
-
-    setPaying(true);
-    setPayment(null);
-
-    try {
-      // 1. Try Tap Payment first
-      const tapResponse = await fetch("/api/tap/create-charge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingId: booking.bookingId,
-          amount: booking.amount,
-          studioId,
-        }),
-      });
-
-      const tapData = await tapResponse.json().catch(() => ({}));
-
-      if (tapData.chargeUrl) {
-        window.location.href = tapData.chargeUrl;
-        return;
-      }
-
-      // 2. Fallback to manual payment if Tap is not configured or fails to provide a URL
-      const response = await fetch("/api/checkout/manual-confirm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          checkoutSessionId: booking.checkoutSessionId,
-        }),
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Could not confirm manual payment.");
-      }
-
-      setPayment(data);
-
-      if (data.ok && booking?.bookingId) {
-        router.push(
-          `/studios/${studioSlug}/booking-confirmation?bookingId=${booking.bookingId}`
-        );
-      }
-    } catch (error) {
-      setPayment({
-        ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Could not confirm payment.",
-      });
-    } finally {
-      setPaying(false);
-    }
-  }
-
-  return (
-    <div className="card" style={{ display: "grid", gap: 16 }}>
-      <div>
-        <span className="badge badge-gold">
-          <T en="Studio Booking" ar="حجز الاستوديو" />
-        </span>
-
-        <h2 style={{ marginTop: 10 }}>{studioName}</h2>
-
-        <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+  if (booking?.ok) {
+    return (
+      <div className="card booking-request-success">
+        <span className="badge badge-gold"><T en="Pending" ar="معلق" /></span>
+        <h2><T en="Booking request sent" ar="تم إرسال طلب الحجز" /></h2>        <p className="booking-request-copy">
           <T
-            en="Select your booking date, start time, and duration."
-            ar="اختر تاريخ الحجز ووقت البداية والمدة."
+            en="The studio will review your preferred date and time. No payment has been collected."
+            ar="سيقوم الاستوديو بمراجعة التاريخ والوقت المطلوبين. لم يتم تحصيل أي دفعة."
+          />
+        </p>
+        <div className="booking-request-summary">
+          <div><span><T en="Reference" ar="المرجع" /></span><strong>{booking.bookingNumber || "—"}</strong></div>
+          <div><span><T en="Date" ar="التاريخ" /></span><strong>{booking.bookingDate || bookingDate}</strong></div>
+          <div><span><T en="Time" ar="الوقت" /></span><strong>{booking.startTime || startTime} – {booking.endTime || "—"}</strong></div>
+          <div><span><T en="Estimated total" ar="الإجمالي المتوقع" /></span><strong>{formatMoney(booking.amount ?? estimatedTotal, booking.currencyCode || currencyCode)}</strong></div>
+        </div>
+        <div className="booking-request-actions">
+          <Link href="/customer/bookings" className="btn btn-primary">
+            <T en="View my bookings" ar="عرض حجوزاتي" />
+          </Link>
+          <Link href={`/studios/${studioSlug}`} className="btn btn-outline">
+            <T en="Back to studio" ar="العودة للاستوديو" />
+          </Link>
+        </div>
+        <style jsx>{`
+          .booking-request-success { display: grid; gap: 16px; }
+          .booking-request-copy { color: var(--gb-text-muted); line-height: 1.7; margin: 0; }
+          .booking-request-summary { display: grid; gap: 10px; }
+          .booking-request-summary div { display: flex; justify-content: space-between; gap: 16px; padding: 12px; border-radius: 10px; background: rgba(255,255,255,.035); }
+          .booking-request-summary span { color: var(--gb-text-muted); }
+          .booking-request-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+          @media (max-width: 600px) { .booking-request-summary div { flex-direction: column; gap: 4px; } .booking-request-actions .btn { width: 100%; } }
+        `}</style>
+      </div>
+    );
+  }
+  return (
+    <div className="card booking-request-card">
+      <div>
+        <span className="badge badge-gold"><T en="Booking request" ar="طلب حجز" /></span>
+        <h2>{studioName}</h2>
+        <p className="booking-request-copy">
+          <T
+            en="Choose your preferred session details. The studio will review the request before it is confirmed."
+            ar="اختر تفاصيل الجلسة المفضلة. سيقوم الاستوديو بمراجعة الطلب قبل تأكيده."
           />
         </p>
       </div>
 
-      <div className="grid grid-2">
+      <div className="booking-request-grid">
         <div>
-          <label>
-            <T en="Booking date" ar="تاريخ الحجز" />
-          </label>
-          <input
-            className="input"
-            type="date"
-            min={getTodayValue()}
-            value={bookingDate}
-            onChange={(event) => setBookingDate(event.target.value)}
-            disabled={Boolean(booking?.ok)}
-          />
+          <label><T en="Preferred date" ar="التاريخ المفضل" /></label>
+          <input className="input" type="date" min={getTodayValue()} value={bookingDate} onChange={(event) => setBookingDate(event.target.value)} />
         </div>
-
         <div>
-          <label>
-            <T en="Start time" ar="وقت البداية" />
-          </label>
-          <input
-            className="input"
-            type="time"
-            value={startTime}
-            onChange={(event) => setStartTime(event.target.value)}
-            disabled={Boolean(booking?.ok)}
-          />
+          <label><T en="Preferred start time" ar="وقت البداية المفضل" /></label>
+          <input className="input" type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
         </div>
-      </div>
-
-      <StudioAvailableSlotsPicker
-        studioId={studioId}
-        selectedDate={bookingDate}
-        selectedStartTime={startTime}
-        onSlotSelect={(slot) => {
-          // Extracts HH:mm from "YYYY-MM-DDTHH:mm:00"
-          const timePart = slot.startTime.split("T")[1]?.slice(0, 5);
-          if (timePart) {
-            setStartTime(timePart);
-          }
-          if (slot.pricePerHour) {
-            setCurrentPrice(slot.pricePerHour);
-          }
-        }}
-      />
-
-      <div className="grid grid-2">
         <div>
-          <label>
-            <T en="Duration hours" ar="عدد الساعات" />
-          </label>
-          <select
-            className="input"
-            value={durationHours}
-            onChange={(event) => setDurationHours(Number(event.target.value))}
-            disabled={Boolean(booking?.ok)}
-          >
-            {[1, 2, 3, 4, 5, 6, 8, 10, 12].map((hour) => (
-              <option key={hour} value={hour}>
-                {hour}
-              </option>
-            ))}
+          <label><T en="Duration" ar="المدة" /></label>
+          <select className="input" value={durationHours} onChange={(event) => setDurationHours(Number(event.target.value))}>
+            {[1, 2, 3, 4, 5, 6, 8].map((hour) => <option key={hour} value={hour}>{hour} h</option>)}
           </select>
-        </div>
-
-        <div>
-          <label>
-            <T en="Estimated total" ar="الإجمالي المتوقع" />
-          </label>
-          <div
-            className="input"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              fontWeight: 900,
-            }}
-          >
-            {formatMoney(estimatedTotal, currencyCode)}
-          </div>
+        </div>        <div>
+          <label><T en="Estimated total" ar="الإجمالي المتوقع" /></label>
+          <div className="input booking-request-total">{formatMoney(estimatedTotal, currencyCode)}</div>
         </div>
       </div>
 
       <div>
-        <label>
-          <T en="Notes" ar="ملاحظات" />
-        </label>
+        <label><T en="Notes" ar="ملاحظات" /></label>
         <textarea
           className="input"
           rows={3}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
-          disabled={Boolean(booking?.ok)}
-          placeholder="Session notes, setup requests, or special requirements"
+          placeholder="Session setup or special requirements"
         />
       </div>
 
-      <button
-        type="button"
-        className="btn btn-primary btn-large"
-        onClick={createBooking}
-        disabled={loading || Boolean(booking?.ok) || estimatedTotal <= 0}
-      >
-        {loading ? (
-          <T en="Creating booking..." ar="جاري إنشاء الحجز..." />
-        ) : booking?.ok ? (
-          <T en="Booking created" ar="تم إنشاء الحجز" />
-        ) : (
-          <T en="Create booking" ar="إنشاء الحجز" />
-        )}
+      <div className="booking-request-notice">
+        <strong><T en="Request only" ar="طلب فقط" /></strong>
+        <span>
+          <T
+            en="Submitting this form does not confirm the session and does not collect payment."
+            ar="إرسال هذا النموذج لا يؤكد الجلسة ولا يقوم بتحصيل أي دفعة."
+          />
+        </span>
+      </div>
+
+      <button type="button" className="btn btn-primary btn-large" onClick={createBookingRequest} disabled={loading || estimatedTotal <= 0}>
+        {loading ? <T en="Sending request..." ar="جاري إرسال الطلب..." /> : <T en="Send booking request" ar="إرسال طلب الحجز" />}
       </button>
-
-      {booking ? (
-        <div
-          className="card"
-          style={{
-            borderColor: booking.ok
-              ? "rgba(0,255,136,0.25)"
-              : "rgba(255,77,77,0.25)",
-            background: booking.ok
-              ? "rgba(0,255,136,0.06)"
-              : "rgba(255,77,77,0.06)",
-          }}
-        >
-          {booking.ok ? (
-            <div style={{ display: "grid", gap: 8 }}>
-              <strong style={{ color: "#baffd7" }}>
-                {booking.message || "Booking created."}
-              </strong>
-
-              <div>
-                <T en="Booking number" ar="رقم الحجز" />:{" "}
-                <strong>{booking.bookingNumber}</strong>
-              </div>
-
-              <div>
-                <T en="Date" ar="التاريخ" />: {booking.bookingDate}
-              </div>
-
-              <div>
-                <T en="Time" ar="الوقت" />: {booking.startTime} -{" "}
-                {booking.endTime}
-              </div>
-
-              <div>
-                <T en="Amount" ar="المبلغ" />:{" "}
-                <strong>
-                  {formatMoney(booking.amount, booking.currencyCode)}
-                </strong>
-              </div>
-
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={confirmManualPayment}
-                disabled={paying || Boolean(payment?.ok)}
-                style={{ marginTop: 8 }}
-              >
-                {paying ? (
-                  <T en="Confirming payment..." ar="جاري تأكيد الدفع..." />
-                ) : payment?.ok ? (
-                  <T en="Payment confirmed" ar="تم تأكيد الدفع" />
-                ) : (
-                  <T en="Confirm manual test payment" ar="تأكيد الدفع التجريبي" />
-                )}
-              </button>
-            </div>
-          ) : (
-            <strong style={{ color: "#ffb0b0" }}>
-              {booking.error || "Booking failed."}
-            </strong>
-          )}
+      {booking && !booking.ok ? (
+        <div className="booking-request-error">
+          {booking.error || <T en="Could not send booking request." ar="تعذر إرسال طلب الحجز." />}
         </div>
       ) : null}
 
-      {payment ? (
-        <div
-          className="card"
-          style={{
-            borderColor: payment.ok
-              ? "rgba(0,255,136,0.25)"
-              : "rgba(255,77,77,0.25)",
-            background: payment.ok
-              ? "rgba(0,255,136,0.06)"
-              : "rgba(255,77,77,0.06)",
-          }}
-        >
-          {payment.ok ? (
-            <div style={{ display: "grid", gap: 8 }}>
-              <strong style={{ color: "#baffd7" }}>
-                {payment.message || "Payment confirmed."}
-              </strong>
-
-              <div>
-                <T en="Payment transaction" ar="عملية الدفع" />:{" "}
-                <code>{payment.paymentTransactionId || "—"}</code>
-              </div>
-
-              <a href="/customer" className="btn">
-                <T en="Go to customer dashboard" ar="الذهاب للوحة العميل" />
-              </a>
-            </div>
-          ) : (
-            <strong style={{ color: "#ffb0b0" }}>
-              {payment.error || "Payment failed."}
-            </strong>
-          )}
-        </div>
-      ) : null}
+      <style jsx>{`
+        .booking-request-card { display: grid; gap: 18px; }
+        .booking-request-card h2 { margin-top: 10px; }
+        .booking-request-copy { color: var(--gb-text-muted); line-height: 1.7; margin: 8px 0 0; }
+        .booking-request-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .booking-request-total { display: flex; align-items: center; font-weight: 900; }
+        .booking-request-notice { display: grid; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid rgba(212,175,55,.2); background: rgba(212,175,55,.06); }
+        .booking-request-notice strong { color: var(--gb-gold-light); }
+        .booking-request-notice span { color: var(--gb-text-muted); font-size: .88rem; line-height: 1.6; }
+        .booking-request-error { padding: 14px; border-radius: 12px; color: #ffb0b0; background: rgba(255,77,77,.07); border: 1px solid rgba(255,77,77,.2); }
+        @media (max-width: 600px) { .booking-request-grid { grid-template-columns: 1fr; } }
+      `}</style>
     </div>
   );
 }

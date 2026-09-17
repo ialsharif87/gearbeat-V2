@@ -64,7 +64,7 @@ export default async function StudioDashboardPage() {
   let pendingBookings = 0;
   let totalRevenue = 0;
   let recentBookings: any[] = [];
-  let avgRating = "5.0";
+  let avgRating = "—";
 
   if (studioIds.length > 0) {
     const [monthRes, pendingRes, revRes, recentRes, ratingsRes] = await Promise.all([
@@ -73,7 +73,7 @@ export default async function StudioDashboardPage() {
         .select("id", { count: "exact", head: true })
         .in("studio_id", studioIds)
         .gte("created_at", firstDayOfMonth.toISOString()),
-      
+
       supabase
         .from("bookings")
         .select("id", { count: "exact", head: true })
@@ -90,10 +90,10 @@ export default async function StudioDashboardPage() {
       supabase
         .from("bookings")
         .select(`
-          id, 
-          created_at, 
-          total_amount, 
-          status, 
+          id,
+          created_at,
+          total_amount,
+          status,
           start_time,
           profiles:customer_id(full_name),
           studios(name)
@@ -112,7 +112,7 @@ export default async function StudioDashboardPage() {
     pendingBookings = pendingRes.count || 0;
     totalRevenue = (revRes.data || []).reduce((acc, b) => acc + (b.total_amount || 0), 0);
     recentBookings = recentRes.data || [];
-    
+
     const ratings = ratingsRes.data || [];
     if (ratings.length > 0) {
       avgRating = (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1);
@@ -140,9 +140,9 @@ export default async function StudioDashboardPage() {
             <T en="Almost there!" ar="أوشكنا على الانتهاء!" />
           </h1>
           <p style={{ fontSize: '1.2rem', color: '#888', lineHeight: 1.6, marginBottom: 48 }}>
-            <T 
-              en="Your application is approved. Now, please review your customized contract, sign it, and upload it here to activate your full dashboard." 
-              ar="لقد تمت الموافقة على طلبك. الآن، يرجى مراجعة عقدك المخصص، توقيعه، ورفعه هنا لتفعيل لوحة التحكم الخاصة بك." 
+            <T
+              en="Your application is approved. Now, please review your customized contract, sign it, and upload it here to activate your full dashboard."
+              ar="لقد تمت الموافقة على طلبك. الآن، يرجى مراجعة عقدك المخصص، توقيعه، ورفعه هنا لتفعيل لوحة التحكم الخاصة بك."
             />
           </p>
 
@@ -170,7 +170,7 @@ export default async function StudioDashboardPage() {
               <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: 20 }}>
                 <T en="Please upload a scanned PDF or high-quality image of the signed contract." ar="يرجى رفع نسخة PDF ممسوحة ضوئياً أو صورة عالية الجودة للعقد الموقع." />
               </p>
-              
+
               <ContractUploader appId={studioApp.id} currentUrl={studioApp.contract_url} />
             </div>
           </div>
@@ -188,7 +188,7 @@ export default async function StudioDashboardPage() {
 
   // Render the view
   return (
-    <StudioDashboardView 
+    <StudioDashboardView
       user={user}
       ownerName={ownerName}
       totalBookingsMonth={totalBookingsMonth}

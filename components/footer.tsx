@@ -24,24 +24,18 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             </Link>
             <p className="footer-tagline">
               STUDIO. SOUND. CONNECTED.
-              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.6, letterSpacing: '1px' }}>
-                {lang === "en" ? "ACTIVE PILOT PHASE — INVESTOR & GOVERNANCE DEMO" : "المرحلة التجريبية النشطة — عرض المستثمرين والحوكمة"}
-              </span>
-              <span style={{ display: 'block', fontSize: '0.65rem', marginTop: 4, opacity: 0.8, color: 'var(--gb-gold)' }}>
-                {lang === "en" ? "MANUAL BANK TRANSFER VERIFICATION ONLY — NO LIVE CARD TRANSACTIONS" : "التحقق عبر التحويل البنكي اليدوي فقط — لا توجد معاملات بطاقات مباشرة"}
-              </span>
             </p>
             <p className="footer-desc">
-              {lang === "en" 
-                ? "The global marketplace for audio creators, music studios, and gear vendors."
-                : "المنصة العالمية لمبدعي الصوت، استوديوهات الموسيقى، وتجار المعدات."}
+              {lang === "en"
+                ? "A premium marketplace for booking studios and discovering sound services across Saudi Arabia and the GCC."
+                : "سوق مميز لحجز الاستوديوهات واكتشاف الخدمات الصوتية في السعودية والخليج."}
             </p>
           </div>
 
           <div className="footer-col">
             <h4>{lang === "en" ? "Experiences" : "التجارب"}</h4>
-            <Link href="/studios">{lang === "en" ? "Book a Studio" : "احجز استوديو"}</Link>
-            <Link href="/marketplace">{lang === "en" ? "Shop Gear" : "تسوق معدات"}</Link>
+            <Link href="/studios">{lang === "en" ? "Find a Studio" : "ابحث عن استوديو"}</Link>
+            <Link href="/marketplace">{lang === "en" ? "Gear Catalog" : "كتالوج المعدات"}</Link>
             <span className="footer-coming-soon">{lang === "en" ? "Book Services (Coming Soon)" : "احجز خدمات (قريباً)"}</span>
             <span className="footer-coming-soon">{lang === "en" ? "Join Academy (Coming Soon)" : "انضم للأكاديمية (قريباً)"}</span>
             <span className="footer-coming-soon">{lang === "en" ? "Explore Experiences (Coming Soon)" : "استكشف التجارب (قريباً)"}</span>
@@ -50,7 +44,8 @@ export default function Footer({ lang = "ar" }: FooterProps) {
 
           <div className="footer-col">
             <h4>{lang === "en" ? "Partner Network" : "شبكة الشركاء"}</h4>
-            <span className="footer-coming-soon">{lang === "en" ? "Partner Programs (Coming Soon)" : "برامج الشركاء (قريباً)"}</span>
+            <Link href="/join/studio">{lang === "en" ? "List Your Studio" : "أضف استوديوك"}</Link>
+            <span className="footer-coming-soon">{lang === "en" ? "More partner programs (Coming Soon)" : "برامج شركاء إضافية (قريباً)"}</span>
             <Link href="/support">{lang === "en" ? "Operations Support" : "دعم العمليات"}</Link>
           </div>
 
@@ -62,7 +57,7 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             <Link href="/legal/marketplace-policy">{lang === "en" ? "Marketplace Policy" : "سياسة السوق"}</Link>
             <Link href="/legal/academy-policy">{lang === "en" ? "Academy Policy" : "سياسة الأكاديمية"}</Link>
             <Link href="/legal/booking-policy">{lang === "en" ? "Booking Policy" : "سياسة الحجز"}</Link>
-            <Link href="/gearbeat-certified">{lang === "en" ? "Get Certified" : "احصل على التوثيق"}</Link>
+            <Link href="/gearbeat-certified">{lang === "en" ? "Certification Preview" : "معاينة التوثيق"}</Link>
           </div>
         </div>
 
@@ -160,18 +155,18 @@ export default function Footer({ lang = "ar" }: FooterProps) {
             padding: 40px 0 24px !important;
             margin-top: 40px !important;
           }
-          .footer-grid { 
-            grid-template-columns: 1fr; 
-            text-align: center; 
-            gap: 32px !important; 
-            margin-bottom: 32px !important; 
+          .footer-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 32px !important;
+            margin-bottom: 32px !important;
           }
           .logo-img-sm { margin-inline: auto; margin-bottom: 16px; }
-          .footer-bottom { 
-            flex-direction: column; 
-            gap: 16px; 
-            text-align: center; 
-            padding-top: 24px !important; 
+          .footer-bottom {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+            padding-top: 24px !important;
           }
         }
       `}} />

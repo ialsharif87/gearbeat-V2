@@ -64,37 +64,13 @@ function getBookingStatus(booking: any) {
 }
 
 function getStatusLabel(status: string) {
-  switch (status) {
-    case "draft":
-      return <T en="Draft" ar="مسودة" />;
-    case "pending_payment":
-    case "pending":
-      return <T en="Awaiting Payment" ar="بانتظار الدفع" />;
-    case "payment_review":
-      return <T en="Payment Review" ar="مراجعة الدفع" />;
-    case "confirmed":
-    case "accepted":
-      return <T en="Confirmed" ar="مؤكد" />;
-    case "in_progress":
-    case "active":
-      return <T en="In Progress" ar="قيد التنفيذ" />;
-    case "completed":
-    case "done":
-      return <T en="Completed" ar="مكتمل" />;
-    case "cancelled":
-    case "canceled":
-    case "declined":
-    case "rejected":
-      return <T en="Cancelled" ar="ملغى" />;
-    case "failed":
-      return <T en="Failed" ar="فشل" />;
-    case "refunded":
-      return <T en="Refunded" ar="تم الاسترداد" />;
-    case "disputed":
-      return <T en="Disputed" ar="قيد النزاع" />;
-    default:
-      return status;
+  if (["cancelled", "canceled", "declined", "rejected", "failed", "refunded"].includes(status)) {
+    return <T en="Cancelled" ar="ملغى" />;
   }
+  if (["confirmed", "accepted", "active", "in_progress", "checked_in", "completed", "done"].includes(status)) {
+    return <T en="Confirmed" ar="مؤكد" />;
+  }
+  return <T en="Pending" ar="معلق" />;
 }
 
 function isCancelledBooking(booking: any) {
@@ -258,7 +234,7 @@ function BookingCard({
 
         <div style={{ textAlign: "right" }}>
           <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-            <T en="Total" ar="الإجمالي" />
+            <T en="Estimated total" ar="الإجمالي المتوقع" />
           </div>
 
           <strong style={{ fontSize: "1.25rem" }}>
@@ -445,7 +421,7 @@ export default async function CustomerBookingsPage() {
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Link href="/studios" className="btn btn-primary">
-            <T en="Book a studio" ar="احجز استوديو" />
+            <T en="Find a studio" ar="ابحث عن استوديو" />
           </Link>
 
           <Link href="/customer" className="btn">
@@ -462,8 +438,8 @@ export default async function CustomerBookingsPage() {
             </h2>
             <p>
               <T
-                en="Discover verified studios and reserve your first creative session."
-                ar="استكشف الاستوديوهات الموثقة واحجز أول جلسة إبداعية لك."
+                en="Discover studios and send your first booking request."
+                ar="استكشف الاستوديوهات وأرسل أول طلب حجز لجلسة إبداعية."
               />
             </p>
             <Link href="/studios" className="btn btn-primary" style={{ marginTop: 18 }}>
@@ -529,8 +505,8 @@ export default async function CustomerBookingsPage() {
           <BookingSection
             titleEn="Upcoming bookings"
             titleAr="الحجوزات القادمة"
-            descriptionEn="Your confirmed and pending future studio sessions."
-            descriptionAr="جلسات الاستوديو القادمة المؤكدة أو المعلقة."
+            descriptionEn="Your Pending or Confirmed future studio requests."
+            descriptionAr="طلبات الاستوديو القادمة بحالة معلق أو مؤكد."
             bookings={upcomingBookings}
             currency={currency}
             emptyEn="No upcoming bookings yet."
