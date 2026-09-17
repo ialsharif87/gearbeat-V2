@@ -1267,7 +1267,7 @@ export default async function CustomerDashboardPage() {
 
             <p className="gb-trust-desc">
               <T
-                en="Members can manage booking requests, account details, and available platform benefits from one place."
+                en="Verified members secure instant booking approvals, exclusive platform trust, and elite rewards tier access."
                 ar="الأعضاء الموثقون يحصلون على موافقة فورية للحجوزات، وثقة إضافية في المنصة، ومكافآت حصرية."
               />
             </p>
@@ -1298,9 +1298,9 @@ export default async function CustomerDashboardPage() {
 
                 {!user.phone_confirmed_at && (
                   <div style={{ marginTop: 4 }}>
-                    <PhoneVerificationManager
-                      phone={profile.phone_e164 || profile.phone || user.phone || ""}
-                      isVerified={false}
+                    <PhoneVerificationManager 
+                      phone={profile.phone_e164 || profile.phone || user.phone || ""} 
+                      isVerified={false} 
                     />
                   </div>
                 )}

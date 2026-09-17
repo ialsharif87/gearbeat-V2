@@ -42,8 +42,8 @@ export const publicFeatureFlags: FeatureFlag[] = [
     },
     iconEmoji: "🎓",
     description: {
-      en: "Planned learning experiences for music and audio creators. Details will be announced when the Academy is ready.",
-      ar: "تجارب تعليمية مخطط لها لمبدعي الموسيقى والصوت. سيتم إعلان التفاصيل عند جاهزية الأكاديمية.",
+      en: "Unlock masterclasses, certified sound training, and direct mentoring from industry-leading producers.",
+      ar: "استكشف ورش العمل، التدريب الصوتي المعتمد، والتوجيه المباشر من منتجي الصوت الرائدين في المجال.",
     },
     safeStatusIndicator: {
       en: "Stay tuned",
@@ -66,8 +66,8 @@ export const publicFeatureFlags: FeatureFlag[] = [
     },
     iconEmoji: "🎚️",
     description: {
-      en: "A planned directory for sound and creative services. This feature is still under development.",
-      ar: "دليل مخطط للخدمات الصوتية والإبداعية. هذه الميزة ما زالت قيد التطوير.",
+      en: "Hire verified mixing engineers, session musicians, voice talent, and master producers directly.",
+      ar: "وظّف مهندسي مزج صوتي موثقين، عازفين، مؤدي أصوات، ومنتجين محترفين مباشرة لمشروعك القادم.",
     },
     safeStatusIndicator: {
       en: "Launching in Phase 2",
@@ -90,8 +90,8 @@ export const publicFeatureFlags: FeatureFlag[] = [
     },
     iconEmoji: "🎫",
     description: {
-      en: "Event discovery and ticketing are planned for a later release.",
-      ar: "اكتشاف الفعاليات وحجز التذاكر مخطط لهما في إصدار لاحق.",
+      en: "Browse and book entry to live recording sessions, gear demo workshops, and local sound experiences.",
+      ar: "تصفح واحجز تذاكر حضور جلسات التسجيل الحية، وورش عمل تجربة المعدات، والتجارب الصوتية المحلية.",
     },
     safeStatusIndicator: {
       en: "Stay tuned",
@@ -114,8 +114,8 @@ export const publicFeatureFlags: FeatureFlag[] = [
     },
     iconEmoji: "🎧",
     description: {
-      en: "Creative experiences and community activities are planned for a later release.",
-      ar: "التجارب الإبداعية والأنشطة المجتمعية مخطط لها في إصدار لاحق.",
+      en: "Immerse yourself in specialized listening sessions, community meetups, and studio tours across the region.",
+      ar: "انغمس في جلسات استماع متخصصة، لقاءات مجتمعية، وجولات استوديو فريدة من نوعها في المنطقة.",
     },
     safeStatusIndicator: {
       en: "Stay tuned",
@@ -137,8 +137,8 @@ export const publicFeatureFlags: FeatureFlag[] = [
     },
     iconEmoji: "🤝",
     description: {
-      en: "Additional partner programs are being prepared and will open gradually.",
-      ar: "يتم تجهيز برامج شركاء إضافية وسيتم فتحها تدريجيًا.",
+      en: "Unified registration for hardware vendors, educators, and organizers to offer products and services.",
+      ar: "تسجيل موحد لموردي الأجهزة والمعلمين ومنظمي الفعاليات لتقديم منتجاتهم وخدماتهم الإبداعية.",
     },
     safeStatusIndicator: {
       en: "Launching soon",

@@ -4,11 +4,12 @@ import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Find a Studio",
-  description: "Find recording, podcast, rehearsal, and production studios across Saudi Arabia and the GCC. Compare services and starting prices before sending a booking request.",
+  title: "Discover Elite Studios",
+  description: "Browse and book world-class music and recording studios. Filter by equipment, rating, and location across Saudi Arabia and the GCC.",
 };
 import T from "@/components/t";
 import StudioFilter from "@/components/studio-filter";
+import SmartDiscoveryPreview from "@/components/smart-discovery-preview";
 import { getActiveCountries } from "@/lib/countries-server";
 import { getActiveCities } from "@/lib/locations-server";
 import { sanitizeStudioListing, SanitizedStudioListing } from "@/lib/studios-server";
@@ -641,14 +642,36 @@ export default async function StudiosPage({
             <T en="Browse Studios" ar="تصفح الاستوديوهات" />
           </span>
 
-          <h1><T en="Find the right studio for your next session." ar="ابحث عن الاستوديو المناسب لجلستك القادمة." /></h1>
+          <h1>
+            <T en="Explore elite studios in our" ar="استكشف استوديوهات النخبة في" />{" "}
+            <span className="neon-text">
+              <T en="pilot network." ar="شبكتنا التجريبية." />
+            </span>
+          </h1>
 
           <p className="text-balance" style={{ maxWidth: 700, marginInline: 'auto' }}>
             <T
-              en="Compare city, services, and starting prices, then open a studio profile to send a booking request."
-              ar="قارن المدينة والخدمات والأسعار المبدئية، ثم افتح صفحة الاستوديو لإرسال طلب الحجز."
+              en="Search, filter, and compare premium recording rooms, podcast spaces, rehearsal studios, and production suites."
+              ar="ابحث، فلتر، وقارن بين غرف التسجيل، مساحات البودكاست، استوديوهات التدريب، وغرف الإنتاج."
             />
           </p>
+
+          {/* STUDIO TRUST LAYER */}
+          <div className="studio-trust-row">
+            {[
+              { icon: '🎙️', en: 'Studio Tested', ar: 'مختبر في الاستوديو' },
+              { icon: '🎚️', en: 'Pro Audio Grade', ar: 'جودة صوت احترافية' },
+              { icon: '⭐', en: 'Top Rated', ar: 'الأعلى تقييماً' },
+              { icon: '💎', en: 'Premium Quality', ar: 'جودة ممتازة' },
+            ].map(item => (
+              <div key={item.en} className="studio-trust-badge">
+                <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
+                  <T en={item.en} ar={item.ar} />
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <StudioFilter
@@ -774,16 +797,33 @@ export default async function StudiosPage({
                           ) : null}
                         </div>
                       ) : null}
+
+                      {/* SECONDARY TRUST INFO IN CARD BODY */}
+                      <div className="studio-card-metadata-row">
+                        <span className="studio-card-meta-item">
+                          🛡️ <T en="Pilot Partner" ar="شريك تجريبي" />
+                        </span>
+                        {studio.verified_location ? (
+                          <span className="studio-card-meta-item">
+                            📍 <T en="Verified Location" ar="الموقع موثق" />
+                          </span>
+                        ) : null}
+                        {studio.instant_booking_enabled ? (
+                          <span className="studio-card-meta-item" style={{ color: '#0fa08a', background: 'rgba(15,160,138,0.08)' }}>
+                            ⚡ <T en="Direct Access" ar="وصول مباشر" />
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
 
                     <div className="studio-card-footer">
                       <p>
                         <T en="From" ar="من" />{" "}
-                        <strong>{studio.price_from ? <>{studio.price_from} <T en="SAR" ar="ر.س" /></> : <T en="Request quote" ar="اطلب السعر" />}</strong>
+                        <strong>{studio.price_from ?? 0} <T en="SAR" ar="ر.س" /></strong>
                       </p>
 
                       <Link href={`/studios/${studio.slug}`} className="btn btn-small">
-                        <T en="View studio" ar="عرض الاستوديو" />
+                        <T en="Book a Studio" ar="احجز استوديو" />
                       </Link>
                     </div>
                   </div>
@@ -793,8 +833,8 @@ export default async function StudiosPage({
           ) : (
             <div
               className="card-premium animate-up"
-              style={{
-                textAlign: "center",
+              style={{ 
+                textAlign: "center", 
                 padding: "48px 24px",
                 background: "linear-gradient(180deg, rgba(212,175,55,0.03), rgba(0,0,0,0))",
                 border: "1px dashed rgba(212,175,55,0.15)",
@@ -804,18 +844,18 @@ export default async function StudiosPage({
             >
               <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>🎙️</div>
               <h2 style={{ fontSize: "1.6rem", marginBottom: "0.75rem", color: "var(--gb-gold)" }}>
-                <T en="No studios match these filters" ar="لا توجد استوديوهات تطابق هذه الفلاتر" />
+                <T en="Ready to join GearBeat?" ar="هل أنت مستعد للانضمام إلى GearBeat؟" />
               </h2>
               <p style={{ color: "var(--gb-text-muted)", marginBottom: "2.5rem", maxWidth: 600, marginInline: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
-                <T
-                  en="Try changing the city, service, or price filter. Studio owners can also submit a listing for review."
-                  ar="جرّب تغيير المدينة أو الخدمة أو السعر. ويمكن لأصحاب الاستوديوهات إرسال استوديو للمراجعة."
+                <T 
+                  en="We couldn't find studios matching your current filters. Become a part of our elite network of verified studios today." 
+                  ar="لم نتمكن من العثور على استوديوهات تطابق فلاتر البحث. كن جزءًا من شبكتنا النخبة من الاستوديوهات الموثقة اليوم." 
                 />
               </p>
-
+              
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
                 <Link href="/join/studio" className="btn btn-primary">
-                  <T en="List Your Studio" ar="أضف استوديوك" />
+                  <T en="Become a Partner" ar="انضم كشريك" />
                 </Link>
                 <Link href="/studios" className="btn btn-outline">
                   <T en="Reset Filters" ar="إعادة ضبط الفلاتر" />
@@ -824,13 +864,37 @@ export default async function StudiosPage({
                   <T en="Request a Location" ar="طلب موقع" />
                 </Link>
                 <Link href="/marketplace" className="btn btn-outline">
-                  <T en="Gear Catalog" ar="كتالوج المعدات" />
+                  <T en="Shop Gear" ar="تسوق معدات" />
                 </Link>
               </div>
+
+              <p style={{ marginTop: "2rem", color: "var(--gb-gold)", fontWeight: 600, fontSize: "0.9rem" }}>
+                <T en="Pilot‑Ready – listings are provisional and no live payments are processed." ar="في مرحلة التجريب – القوائم تجريبية ولا يتم معالجة المدفوعات الحية." />
+              </p>
             </div>
           )}
         </div>
 
+        {/* SECONDARY AI DISCOVERY AREA */}
+        <div style={{ marginTop: 40, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 30 }}>
+          <div style={{ maxWidth: 720, margin: '0 auto', opacity: 0.85 }}>
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <span className="badge" style={{ fontSize: '0.65rem', borderColor: 'var(--gb-gold)', color: 'var(--gb-gold)' }}>
+                <T en="AI Assistant Preview" ar="معاينة مساعد الذكاء الاصطناعي" />
+              </span>
+              <h3 style={{ fontSize: '1.2rem', marginTop: 10, marginBottom: 6, color: '#fff' }}>
+                <T en="Looking for a specific room?" ar="تبحث عن غرفة تسجيل معينة؟" />
+              </h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--gb-text-muted)', margin: 0 }}>
+                <T 
+                  en="Describe your production requirements and let our experimental AI guide your studio discovery." 
+                  ar="صف احتياجاتك الإنتاجية ودع ذكاءنا الاصطناعي التجريبي يوجه استكشاف الاستوديو الخاص بك."
+                />
+              </p>
+            </div>
+            <SmartDiscoveryPreview vertical="studios" />
+          </div>
+        </div>
       </section>
     );
   } catch (err: any) {
@@ -842,7 +906,7 @@ export default async function StudiosPage({
           {isTimeout ? (
             <T en="Connection Timeout" ar="انتهت مهلة الاتصال" />
           ) : (
-            <T en="Studios unavailable" ar="الاستوديوهات غير متاحة" />
+            <T en="Unexpected Error" ar="حدث خطأ غير متوقع" />
           )}
         </h2>
         <p style={{ color: "var(--gb-steel)", marginBottom: "2rem" }}>
@@ -853,8 +917,8 @@ export default async function StudiosPage({
             />
           ) : (
             <T
-              en="We could not load the studio list right now. Please try again."
-              ar="تعذر تحميل قائمة الاستوديوهات الآن. يرجى المحاولة مرة أخرى."
+              en="Something went wrong while fetching studios. Please try again later."
+              ar="حدث خطأ ما أثناء جلب الاستوديوهات. يرجى المحاولة مرة أخرى لاحقاً."
             />
           )}
         </p>

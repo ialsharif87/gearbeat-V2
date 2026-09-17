@@ -19,7 +19,8 @@ export default function AboutPage() {
 
           <p>
             <T
-              en="GearBeat helps creators discover studios and creative spaces through a clear booking-request experience." ar="تساعد GearBeat المبدعين على اكتشاف الاستوديوهات والمساحات الإبداعية من خلال تجربة واضحة لطلبات الحجز."
+              en="GearBeat connects musicians, podcasters, producers, and creators with trusted studios and creative spaces through a simple, transparent, and secure booking experience."
+              ar="GearBeat تربط الموسيقيين، صناع البودكاست، المنتجين، والمبدعين باستوديوهات ومساحات إبداعية موثوقة من خلال تجربة حجز سهلة، واضحة، وآمنة."
             />
           </p>
 
@@ -155,7 +156,8 @@ export default function AboutPage() {
           </h2>
           <p>
             <T
-              en="A direct flow for booking requests, customer details, and follow-up." ar="مسار واضح لطلبات الحجز وبيانات العميل والمتابعة."
+              en="A direct flow for bookings, payment status, customer details, and review requests."
+              ar="مسار واضح للحجوزات، حالة الدفع، بيانات العميل، وطلبات التقييم."
             />
           </p>
         </div>
@@ -163,7 +165,7 @@ export default function AboutPage() {
         <div className="card about-feature-card">
           <div className="about-feature-icon">⭐</div>
           <h2>
-            <T en="Booking-linked reviews" ar="تقييمات مرتبطة بالحجز" />
+            <T en="Verified Reviews" ar="تقييمات موثقة" />
           </h2>
           <p>
             <T
@@ -191,7 +193,8 @@ export default function AboutPage() {
 
           <p>
             <T
-              en="Creators can browse spaces, compare what each studio offers, send booking requests, and share feedback after real visits." ar="يستطيع المبدعون تصفح المساحات ومقارنة ما يقدمه كل استوديو وإرسال طلبات الحجز ومشاركة تجربتهم بعد زيارات حقيقية."
+              en="Creators can browse spaces, compare what each studio offers, book sessions, and share feedback after real visits."
+              ar="يستطيع المبدعون تصفح المساحات، مقارنة ما يقدمه كل استوديو، حجز الجلسات، ومشاركة تجربتهم بعد زيارات حقيقية."
             />
           </p>
 
@@ -282,7 +285,7 @@ export default function AboutPage() {
           <div>
             <strong>03</strong>
             <span>
-              <T en="Booking-linked reviews" ar="تقييمات مرتبطة بالحجز" />
+              <T en="Verified reviews" ar="تقييمات موثقة" />
             </span>
           </div>
 

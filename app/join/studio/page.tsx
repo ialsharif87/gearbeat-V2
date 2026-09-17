@@ -17,9 +17,9 @@ export default function JoinStudioPage() {
             <T en="Elevate Your Studio Business" ar="ارتقِ بأعمال استوديو الصوت الخاص بك" />
           </h1>
           <p className="hero-desc">
-            <T
-              en="Apply to list your studio on GearBeat and prepare your profile for booking requests from creators."
-              ar="قدّم طلبك لإضافة استوديوك على GearBeat وجهّز ملفك لاستقبال طلبات الحجز من المبدعين."
+            <T 
+              en="Join the region's premium music and audio marketplace. List your rooms, control your schedule, and connect with thousands of artists and creators." 
+              ar="انضم إلى منصة استوديوهات الصوت والموسيقى الفاخرة في المنطقة. اعرض غرفك، وتحكم بجدول حوزاتك، وتواصل مع آلاف الفنانين والمبدعين." 
             />
           </p>
           <div className="hero-actions">
@@ -44,22 +44,22 @@ export default function JoinStudioPage() {
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon">📅</div>
-            <h3><T en="Booking Request Management" ar="إدارة طلبات الحجز" /></h3>
+            <h3><T en="Automated Booking Management" ar="إدارة حجوزات مؤتمتة" /></h3>
             <p>
-              <T
-                en="Review incoming booking requests and manage session details from your partner workspace as the MVP evolves."
-                ar="راجع طلبات الحجز الواردة وأدر تفاصيل الجلسات من مساحة الشريك مع تطور النسخة الأولية."
+              <T 
+                en="Say goodbye to double bookings. Our calendar system handles reservations, availability, and session planning in real time." 
+                ar="وداعاً للحجوزات المزدوجة. يتولى نظام التقويم لدينا إدارة الحجوزات والتوافر وتخطيط الجلسات في الوقت الفعلي." 
               />
             </p>
           </div>
 
           <div className="feature-card">
             <div className="feature-icon">💰</div>
-            <h3><T en="Commercial Tools — Coming Later" ar="أدوات تجارية — لاحقًا" /></h3>
+            <h3><T en="Secure Invoicing & Payouts" ar="فواتير ومدفوعات آمنة" /></h3>
             <p>
-              <T
-                en="Online payments and automated payouts are not enabled in the MVP. Commercial tools will only launch after the required operational and compliance work is complete."
-                ar="المدفوعات عبر الإنترنت والتحويلات التلقائية غير مفعلة في النسخة الأولية. لن يتم إطلاق الأدوات التجارية إلا بعد اكتمال المتطلبات التشغيلية والامتثال اللازمة."
+              <T 
+                en="Accept online payments securely. Automated payouts are wired directly to your local Saudi business bank account." 
+                ar="اقبل المدفوعات عبر الإنترنت بشكل آمن. يتم تحويل المدفوعات التلقائية مباشرة إلى حسابك البنكي التجاري السعودي المحلي." 
               />
             </p>
           </div>
@@ -68,20 +68,20 @@ export default function JoinStudioPage() {
             <div className="feature-icon">📈</div>
             <h3><T en="Grow Your Audience" ar="نمو قاعدة عملائك" /></h3>
             <p>
-              <T
-                en="Build a clear studio profile so creators can discover your space and send booking requests."
-                ar="أنشئ ملفًا واضحًا لاستوديوك ليتمكن المبدعون من اكتشاف مساحتك وإرسال طلبات الحجز."
+              <T 
+                en="Get discovered by musicians, podcasters, and voice actors. Boost your studio's occupancy rate with our targeted marketing." 
+                ar="اجعل الموسيقيين وصانعي البودكاست ومؤدي الأصوات يكتشفون استوديوهاتك. ضاعف نسبة إشغال غرفك عبر تسويقنا المستهدف." 
               />
             </p>
           </div>
 
           <div className="feature-card">
             <div className="feature-icon">🛡️</div>
-            <h3><T en="Privacy-Aware Onboarding" ar="تسجيل يراعي الخصوصية" /></h3>
+            <h3><T en="Saudi PDPL Compliance First" ar="الامتثال لنظام حماية البيانات السعودي أولاً" /></h3>
             <p>
-              <T
-                en="Partner onboarding is being reviewed against applicable privacy and operational requirements before broader launch."
-                ar="تتم مراجعة تسجيل الشركاء وفق متطلبات الخصوصية والتشغيل المطبقة قبل الإطلاق الأوسع."
+              <T 
+                en="Rest easy knowing partner verification and contract data comply strictly with Saudi PDPL and financial guidelines." 
+                ar="اطمئن تماماً؛ حيث تتوافق عملية التحقق من الشركاء وبيانات العقود بدقة مع نظام حماية البيانات الشخصية السعودي (PDPL) والأنظمة المالية." 
               />
             </p>
           </div>
@@ -92,11 +92,11 @@ export default function JoinStudioPage() {
       <section className="compliance-section">
         <div className="compliance-card">
           <div className="badge badge-gold">🛡️ <T en="Pre-Launch Phase Notice" ar="تنويه مرحلة ما قبل الإطلاق" /></div>
-          <h3><T en="Pre-Launch Data Handling" ar="معالجة البيانات قبل الإطلاق" /></h3>
+          <h3><T en="Saudi-First Secure Compliance" ar="امتثال آمن ذو أولوية سعودية" /></h3>
           <p>
-            <T
-              en="Do not submit sensitive government, tax, banking, or identity documents through general public pages. Any future verification flow will be introduced only with dedicated controls and clear instructions."
-              ar="لا ترسل مستندات حكومية أو ضريبية أو بنكية أو وثائق هوية حساسة عبر الصفحات العامة. سيتم تقديم أي مسار تحقق مستقبلي فقط مع ضوابط مخصصة وتعليمات واضحة."
+            <T 
+              en="To protect sensitive partner credentials, GearBeat does not collect official government IDs, CR, VAT certificates, or IBAN numbers on public web pages. Commercial verification and contracting happen through a secure, direct process." 
+              ar="لحماية مستندات الشركاء الحساسة، لا يقوم GearBeat بجمع الهويات الحكومية الرسمية، أو السجل التجاري، أو شهادات القيمة المضافة، أو أرقام الآيبان على الصفحات العامة. سيتم التحقق والتعاقد لاحقاً عبر قنوات آمنة ومباشرة." 
             />
           </p>
         </div>
@@ -107,7 +107,7 @@ export default function JoinStudioPage() {
         <div className="cta-card">
           <h2><T en="Ready to List Your Studio?" ar="هل أنت جاهز لعرض الاستوديو الخاص بك؟" /></h2>
           <p>
-            <T en="Create your partner account and prepare your studio profile for review." ar="أنشئ حساب الشريك وجهّز ملف استوديوك للمراجعة." />
+            <T en="Create your free partner account today and start listing in under 10 minutes." ar="أنشئ حسابك المجاني كشريك اليوم وابدأ في إدراج غرفك خلال أقل من 10 دقائق." />
           </p>
           <Link href="/studio-owner/signup" className="gb-button btn-large">
             <T en="Join as a Studio Partner Now" ar="انضم كشريك استوديو الآن" />
@@ -126,7 +126,7 @@ export default function JoinStudioPage() {
           flex-direction: column;
           gap: 100px;
         }
-
+        
         .hero-section {
           max-width: 900px;
           margin: 0 auto;
@@ -155,7 +155,7 @@ export default function JoinStudioPage() {
           max-width: 700px;
           margin: 0 auto 40px;
         }
-
+        
         .gb-button {
           display: inline-flex;
           align-items: center;

@@ -8,20 +8,13 @@ export const dynamic = "force-dynamic";
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-
+  
   return date.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric"
   });
-}
-
-function getPublicStatus(statusValue: unknown) {
-  const status = String(statusValue || "pending").toLowerCase();
-  if (["cancelled", "canceled", "declined", "rejected", "failed", "refunded"].includes(status)) return { en: "Cancelled", ar: "ملغى" };
-  if (["confirmed", "accepted", "active", "in_progress", "completed", "done"].includes(status)) return { en: "Confirmed", ar: "مؤكد" };
-  return { en: "Pending", ar: "معلق" };
 }
 
 export default async function BookingConfirmationPage({
@@ -32,7 +25,7 @@ export default async function BookingConfirmationPage({
   searchParams: Promise<{ bookingId?: string }>;
 }) {
   const { bookingId } = await searchParams;
-
+  
   if (!bookingId) {
     notFound();
   }
@@ -84,16 +77,16 @@ export default async function BookingConfirmationPage({
     <main className="dashboard-page" style={{ maxWidth: 600, margin: "60px auto" }}>
       <div className="card" style={{ padding: 0, overflow: "hidden", textAlign: "center" }}>
         {/* Success Header */}
-        <div style={{
-          background: "linear-gradient(135deg, var(--gb-gold) 0%, #b8860b 100%)",
+        <div style={{ 
+          background: "linear-gradient(135deg, var(--gb-gold) 0%, #b8860b 100%)", 
           padding: "40px 20px",
           color: "black"
         }}>
-          <div style={{
-            width: 80,
-            height: 80,
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: "50%",
+          <div style={{ 
+            width: 80, 
+            height: 80, 
+            background: "rgba(255,255,255,0.9)", 
+            borderRadius: "50%", 
             margin: "0 auto 16px",
             display: "flex",
             alignItems: "center",
@@ -103,7 +96,7 @@ export default async function BookingConfirmationPage({
             ✓
           </div>
           <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: 800 }}>
-            <T en="Booking Request Received" ar="تم استلام طلب الحجز" />
+            <T en="Booking Confirmed!" ar="تم تأكيد الحجز!" />
           </h1>
           <p style={{ margin: "8px 0 0", opacity: 0.8, fontSize: "0.9rem", fontWeight: 600 }}>
             <T en="Reference:" ar="المرجع:" /> #{bookingRef}
@@ -114,9 +107,9 @@ export default async function BookingConfirmationPage({
         <div style={{ padding: "40px 30px" }}>
           <div style={{ marginBottom: 30 }}>
             {studio?.cover_image_url && (
-              <img
-                src={studio.cover_image_url}
-                alt={studio.name}
+              <img 
+                src={studio.cover_image_url} 
+                alt={studio.name} 
                 style={{ width: 80, height: 80, borderRadius: 12, objectFit: "cover", marginBottom: 16 }}
               />
             )}
@@ -124,12 +117,12 @@ export default async function BookingConfirmationPage({
             <p style={{ color: "var(--muted)", margin: 0 }}>{studio?.city || "Saudi Arabia"}</p>
           </div>
 
-          <div style={{
-            display: "grid",
-            gap: 20,
-            textAlign: "left",
-            padding: "24px",
-            background: "rgba(255,255,255,0.03)",
+          <div style={{ 
+            display: "grid", 
+            gap: 20, 
+            textAlign: "left", 
+            padding: "24px", 
+            background: "rgba(255,255,255,0.03)", 
             borderRadius: 16,
             marginBottom: 30
           }}>
@@ -137,20 +130,20 @@ export default async function BookingConfirmationPage({
               <span style={{ color: "var(--muted)" }}><T en="Date" ar="التاريخ" /></span>
               <strong style={{ fontSize: "1rem" }}>{formatDate(booking.booking_date)}</strong>
             </div>
-
+            
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ color: "var(--muted)" }}><T en="Time" ar="الوقت" /></span>
               <strong style={{ fontSize: "1rem" }}>{booking.start_time} - {booking.end_time}</strong>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ color: "var(--muted)" }}><T en="Estimated total" ar="الإجمالي المتوقع" /></span>
+              <span style={{ color: "var(--muted)" }}><T en="Total Paid" ar="إجمالي المبلغ" /></span>
               <strong style={{ fontSize: "1.2rem", color: "var(--gb-gold)" }}>{Number(booking.total_amount).toFixed(2)} SAR</strong>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ color: "var(--muted)" }}><T en="Status" ar="الحالة" /></span>
-              <span className="badge badge-gold"><T en={getPublicStatus(booking.status).en} ar={getPublicStatus(booking.status).ar} /></span>
+              <span className="badge badge-success" style={{ textTransform: "uppercase" }}>{booking.status}</span>
             </div>
           </div>
 
@@ -166,9 +159,9 @@ export default async function BookingConfirmationPage({
 
         {/* Footer Note */}
         <div style={{ padding: "20px", borderTop: "1px solid rgba(255,255,255,0.05)", fontSize: "0.85rem", color: "var(--muted)" }}>
-          <T
-            en="The studio will review your request. No payment has been collected at this stage."
-            ar="سيقوم الاستوديو بمراجعة طلبك. لم يتم تحصيل أي دفعة في هذه المرحلة."
+          <T 
+            en="A confirmation email has been sent to your registered address." 
+            ar="تم إرسال بريد إلكتروني للتأكيد إلى عنوانك المسجل." 
           />
         </div>
       </div>

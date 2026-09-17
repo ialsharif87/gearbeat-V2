@@ -3,6 +3,7 @@ import Image from "next/image";
 import LanguageSwitcher from "./language-switcher";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import CartBadge from "./cart-badge";
 import { createClient } from "@/lib/supabase/client";
 
 type SiteHeaderProps = {
@@ -153,8 +154,8 @@ export default function SiteHeader({
   }, []);
 
   const navLinks = [
-    { href: "/studios", en: "Find a Studio", ar: "ابحث عن استوديو" },
-    { href: "/marketplace", en: "Gear Catalog", ar: "كتالوج المعدات" },
+    { href: "/studios", en: "Book a Studio", ar: "احجز استوديو" },
+    { href: "/marketplace", en: "Shop Gear", ar: "تسوق معدات" },
     { href: "/support", en: "Support", ar: "الدعم" },
   ];
 
@@ -197,7 +198,7 @@ export default function SiteHeader({
     <header className="site-header glass">
       <div className="container header-shell">
         <div className="header-left">
-          <button
+          <button 
             className="mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle Menu"
@@ -210,8 +211,8 @@ export default function SiteHeader({
               )}
             </svg>
           </button>
-
-
+          
+          
           <Link href="/" className="header-logo">
             <Image
               src="/brand/logo-horizontal.svg"
@@ -222,7 +223,7 @@ export default function SiteHeader({
               priority
             />
           </Link>
-
+          
           {/* Spacer for mobile centering */}
           <div className="mobile-spacer" aria-hidden="true" />
         </div>
@@ -237,10 +238,11 @@ export default function SiteHeader({
 
         <div className="header-actions">
           {!isAppMode && <LanguageSwitcher />}
+          <CartBadge />
 
           {effectiveIsLoggedIn ? (
             <div className="user-dropdown-container" ref={dropdownRef}>
-              <button
+              <button 
                 className="user-menu-trigger"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               >
@@ -332,7 +334,7 @@ export default function SiteHeader({
               </>
             )}
           </nav>
-
+          
           {isAppMode && (
             <div className="drawer-footer">
               <p className="app-version">GearBeat Mobile v1.0.4</p>
@@ -607,8 +609,8 @@ export default function SiteHeader({
 
         @media (max-width: 1000px) {
           .header-nav { display: none; }
-          .mobile-menu-toggle {
-            display: block;
+          .mobile-menu-toggle { 
+            display: block; 
           }
           .header-logo {
             position: absolute;
@@ -628,31 +630,31 @@ export default function SiteHeader({
           .hide-mobile { display: none; }
           .site-header { height: 70px; }
           .mobile-drawer { top: 70px; }
-
+          
           .drawer-header {
             padding: 0 16px 24px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             margin-bottom: 24px;
           }
-
+          
           .drawer-title {
             font-size: 0.7rem;
             color: var(--gb-gold);
             letter-spacing: 4px;
             font-weight: 900;
           }
-
+          
           .mobile-nav {
             gap: 8px;
           }
-
+          
           .mobile-nav-link {
             padding: 16px 20px;
             border-radius: 12px;
             font-size: 1rem;
             letter-spacing: 1px;
           }
-
+          
           .auth-link {
             border-color: rgba(201, 162, 77, 0.3);
             color: var(--gb-gold);
@@ -670,13 +672,13 @@ export default function SiteHeader({
             color: #000 !important;
             opacity: 0.6 !important;
           }
-
+          
           .drawer-footer {
             margin-top: auto;
             padding: 40px 0 20px;
             text-align: center;
           }
-
+          
           .app-version {
             font-size: 0.6rem;
             color: #333;

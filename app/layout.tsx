@@ -16,7 +16,7 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
 });
-
+ 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
   variable: "--font-arabic",
@@ -37,10 +37,10 @@ function getMetadataBase() {
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
   title: {
-    default: "GearBeat | Premium Studio Marketplace",
+    default: "GearBeat | The Global Pulse of Studio Sound",
     template: "%s | GearBeat"
   },
-  description: "GearBeat is a premium marketplace for discovering recording studios and sound services across Saudi Arabia and the GCC. Request bookings with clear, professional studio information.",
+  description: "GearBeat is the ultimate ecosystem for audio professionals. Discover world-class studios, shop elite verified gear, and secure tickets to exclusive industry experiences across Saudi Arabia and the GCC.",
   keywords: ["music studio", "recording studio", "audio gear", "music production", "Saudi Arabia", "GCC", "GearBeat"],
   authors: [{ name: "GearBeat Team" }],
   openGraph: {
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://gearbeat.app",
     siteName: "GearBeat",
-    title: "GearBeat | Premium Studio Marketplace",
-    description: "Find premium music and audio studios across Saudi Arabia and the GCC, then send a booking request.",
+    title: "GearBeat | The Global Pulse of Studio Sound",
+    description: "Book premium music and audio studios across Saudi Arabia and the GCC.",
     images: [
       {
         url: "/brand/og-image.jpg",
@@ -61,8 +61,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GearBeat | Premium Studio Marketplace",
-    description: "Find premium music and audio studios across Saudi Arabia and the GCC, then send a booking request.",
+    title: "GearBeat | The Global Pulse of Studio Sound",
+    description: "Book premium music and audio studios across Saudi Arabia and the GCC.",
     images: ["/brand/og-image.jpg"],
   },
   robots: {
@@ -157,9 +157,9 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const userInitials = profile?.full_name
+  const userInitials = profile?.full_name 
     ? profile.full_name.trim().charAt(0).toUpperCase()
-    : user?.email
+    : user?.email 
       ? user.email.trim().charAt(0).toUpperCase()
       : "U";
 

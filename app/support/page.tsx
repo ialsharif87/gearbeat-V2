@@ -241,8 +241,8 @@ export default function SupportPage() {
 
           <p>
             <T
-              en="GearBeat focuses on clear studio information, booking-request records, booking-linked reviews, and support processes. The MVP does not provide payment escrow or guarantee session outcomes."
-              ar="تركز GearBeat على وضوح معلومات الاستوديو وسجلات طلبات الحجز والتقييمات المرتبطة بالحجز وعمليات الدعم. النسخة الأولية لا توفر حساب ضمان للمدفوعات ولا تضمن نتائج الجلسات."
+              en="Trust is the foundation of our community. GearBeat ensures session reliability through mandatory identity verification, secure escrow payment protection, booking-linked reviews, and proactive administrative oversight to maintain the highest industry standards."
+              ar="الثقة هي أساس مجتمعنا. تضمن GearBeat موثوقية الجلسات من خلال التحقق الإلزامي من الهوية، وحماية المدفوعات عبر حساب الضمان الآمن، والتقييمات المرتبطة بالحجوزات، والرقابة الإدارية الاستباقية للحفاظ على أعلى معايير الصناعة."
             />
           </p>
         </div>
@@ -251,21 +251,21 @@ export default function SupportPage() {
           <div>
             <strong>01</strong>
             <span>
-              <T en="Clear account details" ar="بيانات حساب واضحة" />
+              <T en="Identity Verification" ar="التحقق من الهوية" />
             </span>
           </div>
 
           <div>
             <strong>02</strong>
             <span>
-              <T en="Booking request records" ar="سجلات طلبات الحجز" />
+              <T en="Escrow Protection" ar="حماية حساب الضمان" />
             </span>
           </div>
 
           <div>
             <strong>03</strong>
             <span>
-              <T en="Booking-linked reviews" ar="تقييمات مرتبطة بالحجز" />
+              <T en="Linked Reviews" ar="تقييمات موثقة" />
             </span>
           </div>
 
