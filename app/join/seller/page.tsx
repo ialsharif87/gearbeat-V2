@@ -166,7 +166,7 @@ export default function JoinSellerPage() {
           <T en="Vendor Onboarding Program" ar="برنامج انضمام التجار" />
         </div>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: 16 }}>
-          <T en="Apply as a Certified Vendor" ar="قدم كتاجر معتمد" />
+          <T en="Apply as a Catalog Partner" ar="قدّم كشريك كتالوج" />
         </h1>
         <p style={{ color: "#888", fontSize: "1.1rem" }}>
           <T en="Submit your business documents for verification. Our team will review your application within 2 business days." ar="قدم مستندات عملك للتحقق. سيقوم فريقنا بمراجعة طلبك خلال يومي عمل." />
@@ -232,11 +232,11 @@ export default function JoinSellerPage() {
                     ))}
                   </select>
                 ) : (
-                  <input 
-                    className="input" 
-                    value={city} 
-                    onChange={(e) => setCity(e.target.value)} 
-                    required 
+                  <input
+                    className="input"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
                     placeholder={country === "SA" ? "أدخل اسم المدينة" : "Enter city name"}
                   />
                 )}
@@ -263,7 +263,7 @@ export default function JoinSellerPage() {
             <p style={{ color: "#666", fontSize: "0.85rem", marginBottom: 20 }}>
               <T en="Upload clear photos or PDF files" ar="ارفع صوراً واضحة أو ملفات PDF" />
             </p>
-            
+
             <div style={{ display: "grid", gap: 16 }}>
               <UploadField labelEn="Commercial Registration" labelAr="السجل التجاري" file={crFile} onChange={setCrFile} required />
               <UploadField labelEn="VAT Certificate" labelAr="شهادة ضريبة القيمة المضافة" file={vatFile} onChange={setVatFile} optional />
@@ -318,13 +318,13 @@ export default function JoinSellerPage() {
   );
 }
 
-function UploadField({ labelEn, labelAr, file, onChange, required, optional }: { 
-  labelEn: string; 
-  labelAr: string; 
-  file: File | null; 
-  onChange: (file: File | null) => void; 
-  required?: boolean; 
-  optional?: boolean; 
+function UploadField({ labelEn, labelAr, file, onChange, required, optional }: {
+  labelEn: string;
+  labelAr: string;
+  file: File | null;
+  onChange: (file: File | null) => void;
+  required?: boolean;
+  optional?: boolean;
 }) {
   return (
     <div style={{ display: "grid", gap: 8 }}>

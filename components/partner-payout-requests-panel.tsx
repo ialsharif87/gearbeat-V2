@@ -121,8 +121,8 @@ export default function PartnerPayoutRequestsPanel({
             <p className="gb-eyebrow"><T en="Payout Requests" ar="طلبات البياوت" /></p>
             <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'white' }}><T en="Available Balance" ar="الرصيد المتاح" /></h2>
             <p className="gb-muted-text" style={{ maxWidth: '600px' }}>
-              <T 
-                en="Submit payout requests for your available internal payable balance. This does not trigger automatic bank transfer." 
+              <T
+                en="Submit payout requests for your available internal payable balance. This does not trigger automatic bank transfer."
                 ar="أرسل طلبات تحويل للرصيد المتاح في حسابك. هذا الإجراء لا ينفذ تحويلاً بنكياً تلقائياً."
               />
             </p>
@@ -182,7 +182,7 @@ export default function PartnerPayoutRequestsPanel({
                 value={payoutMethod}
                 onChange={(event) => setPayoutMethod(event.target.value)}
               >
-                <option value="manual_bank_transfer">Manual bank transfer</option>
+                <option value="manual_bank_transfer">Manual bank transfer (not active in MVP)</option>
                 <option value="wallet">Wallet</option>
                 <option value="other">Other</option>
               </select>

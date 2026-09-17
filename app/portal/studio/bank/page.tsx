@@ -294,13 +294,13 @@ export default async function OwnerBankPage({
       </section>
 
       {params?.saved && (
-        <div 
-          className="gb-card" 
-          style={{ 
-            marginBottom: '32px', 
-            borderInlineStart: '4px solid var(--gb-teal)', 
-            background: 'rgba(15, 160, 138, 0.05)', 
-            padding: '16px 24px' 
+        <div
+          className="gb-card"
+          style={{
+            marginBottom: '32px',
+            borderInlineStart: '4px solid var(--gb-teal)',
+            background: 'rgba(15, 160, 138, 0.05)',
+            padding: '16px 24px'
           }}
         >
           <p style={{ margin: 0, color: 'var(--gb-teal)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -325,7 +325,7 @@ export default async function OwnerBankPage({
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'white', margin: '0 0 8px' }}>{defaultBankAccount.bank_name}</h2>
                 <span
                   className="gb-dash-badge"
-                  style={{ 
+                  style={{
                     padding: '4px 12px',
                     fontSize: '0.7rem',
                     ...bankStatusStyle(defaultBankAccount.account_status)
@@ -362,7 +362,7 @@ export default async function OwnerBankPage({
               </h2>
               <p className="gb-muted-text">
                 <T
-                  en="Add your bank details to enable manual bank settlements for your bookings."
+                  en="Bank settlement features are not active in the MVP. Keep account details up to date only where the partner portal explicitly requests them."
                   ar="أضف بيانات البنك لتفعيل التسويات البنكية اليدوية لحجوزاتك."
                 />
               </p>

@@ -8,7 +8,6 @@ import FavoriteButton from "@/components/favorite-button";
 import StudioPhotoGallery from "@/components/studio-photo-gallery";
 import GoogleMapsLink from "@/components/google-maps-link";
 import StudioPhotoRequirements from "@/components/studio-photo-requirements";
-import StudioOwnerTrustCard from "@/components/studio-owner-trust-card";
 import { publishStudioOverride } from "@/app/admin/admin-actions";
 import { sanitizeStudioDetail, sanitizeOwnerProfile } from "@/lib/studios-server";
 
@@ -190,7 +189,7 @@ export default async function StudioDetailsPage({
 
   const studio = sanitizeStudioDetail(studioRaw)!;
 
-  const { data: ownerProfileRaw } = studioRaw.owner_auth_user_id 
+  const { data: ownerProfileRaw } = studioRaw.owner_auth_user_id
     ? await supabaseAdmin
       .from("profiles")
       .select("auth_user_id, full_name, email, phone_verified, email_verified, identity_verification_status")
@@ -275,11 +274,11 @@ export default async function StudioDetailsPage({
   return (
     <main className="dashboard-page" style={{ maxWidth: 1240, margin: "0 auto" }}>
       {isSuperAdmin && (
-        <div style={{ 
-          background: 'rgba(212, 175, 55, 0.1)', 
-          border: '1px solid #D4AF37', 
-          padding: '16px 24px', 
-          borderRadius: 12, 
+        <div style={{
+          background: 'rgba(212, 175, 55, 0.1)',
+          border: '1px solid #D4AF37',
+          padding: '16px 24px',
+          borderRadius: 12,
           marginTop: 24,
           display: 'flex',
           justifyContent: 'space-between',
@@ -298,14 +297,14 @@ export default async function StudioDetailsPage({
               "use server";
               await publishStudioOverride(studio.id);
             }}>
-              <button style={{ 
-                background: '#D4AF37', 
-                color: '#000', 
-                border: 'none', 
-                padding: '10px 20px', 
-                borderRadius: 8, 
-                fontWeight: 900, 
-                cursor: 'pointer' 
+              <button style={{
+                background: '#D4AF37',
+                color: '#000',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: 8,
+                fontWeight: 900,
+                cursor: 'pointer'
               }}>
                 ✅ Admin Override: Publish
               </button>
@@ -315,11 +314,11 @@ export default async function StudioDetailsPage({
       )}
 
       {studioRaw.status === 'approved' && studioRaw.completion_score < 70 && (
-        <div style={{ 
-          background: 'rgba(239, 68, 68, 0.1)', 
-          border: '1px solid #ef4444', 
-          padding: '8px 16px', 
-          borderRadius: 8, 
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid #ef4444',
+          padding: '8px 16px',
+          borderRadius: 8,
           marginTop: 12,
           fontSize: '0.8rem',
           color: '#ef4444',
@@ -333,9 +332,9 @@ export default async function StudioDetailsPage({
           {/* Pilot Ready Banner */}
           <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '12px 16px', borderRadius: 8, marginBottom: 16, border: '1px solid rgba(212, 175, 55, 0.3)', textAlign: 'center' }}>
             <strong style={{ color: '#D4AF37' }}>
-              <T 
-                en="Pilot‑Ready – bookings are provisional and no live payments are processed." 
-                ar="جاهز للمرحلة التجريبية – الحجوزات مؤقتة ولا يتم معالجة أي مدفوعات حية." 
+              <T
+                en="Booking requests are reviewed by the studio before confirmation. No payment is collected when you send a request."
+                ar="تتم مراجعة طلبات الحجز من قبل الاستوديو قبل التأكيد. لا يتم تحصيل أي دفعة عند إرسال الطلب."
               />
             </strong>
           </div>
@@ -372,12 +371,6 @@ export default async function StudioDetailsPage({
               {studio.verified_location ? (
                 <span className="badge badge-success">
                   <T en="Location verified" ar="الموقع موثق" />
-                </span>
-              ) : null}
-
-              {studio.instant_booking_enabled ? (
-                <span className="badge">
-                  <T en="Instant booking" ar="حجز فوري" />
                 </span>
               ) : null}
             </div>
@@ -434,7 +427,7 @@ export default async function StudioDetailsPage({
         style={{
           marginTop: 30,
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 360px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
           gap: 24,
           alignItems: "start",
         }}
@@ -469,7 +462,7 @@ export default async function StudioDetailsPage({
                   <T en="Starting price" ar="السعر يبدأ من" />
                 </span>
                 <strong style={{ display: "block", marginTop: 6 }}>
-                  {Number(studio.price_from || 0).toFixed(2)} SAR
+                  {studio.price_from ? `${Number(studio.price_from).toFixed(2)} SAR` : <T en="Request quote" ar="اطلب السعر" />}
                 </strong>
               </div>
             </div>
@@ -537,7 +530,7 @@ export default async function StudioDetailsPage({
                         justifyContent: "center",
                       }}
                     >
-                      {item.feature?.slug === "mixing" ? "🎚️" : 
+                      {item.feature?.slug === "mixing" ? "🎚️" :
                        item.feature?.slug === "mastering" ? "📀" :
                        item.feature?.slug === "recording" ? "🎙️" : "🧑‍💻"}
                     </div>
@@ -580,21 +573,13 @@ export default async function StudioDetailsPage({
             </div>
           </div>
 
-          <StudioOwnerTrustCard
-            ownerName={ownerProfile?.full_name}
-            ownerEmail={ownerProfile?.has_email ? "owner@gearbeat.com" : null}
-            ownerRole="Studio Owner"
-            phoneVerified={ownerProfile?.phone_verified}
-            emailVerified={ownerProfile?.email_verified}
-            identityVerificationStatus={ownerProfile?.identity_verification_status}
-            studioVerified={studio.verified}
-            locationVerified={studio.verified_location}
-            businessVerified={
-              studioRaw.owner_compliance_status === "approved" ||
-              studioRaw.owner_compliance_status === "verified"
-            }
-            ownerTrustSummary={studio.owner_trust_summary}
-          />
+
+          <div className="card">
+            <h2><T en="Booking policy" ar="سياسة الحجز" /></h2>
+            <p style={{ color: "var(--muted)", lineHeight: 1.8 }}>
+              <T en="Requests start as Pending. The studio confirms or cancels the request after reviewing the requested schedule. Any final commercial terms are confirmed before the session." ar="تبدأ الطلبات بحالة معلق. يقوم الاستوديو بتأكيد الطلب أو إلغائه بعد مراجعة الموعد المطلوب. ويتم تأكيد أي شروط تجارية نهائية قبل الجلسة." />
+            </p>
+          </div>
 
           {reviewCount > 0 && (
             <div className="card">
@@ -602,7 +587,7 @@ export default async function StudioDetailsPage({
               <div className="gearbeat-rating-mini" style={{ marginBottom: 20 }}>
                 <strong style={{ fontSize: '2rem' }}>{formatRating(timeWeightedAverage)} ★</strong>
                 <p style={{ color: 'var(--muted)', marginTop: 4 }}>
-                  <T en="GearBeat weighted rating" ar="تقييم GearBeat المرجّح" /> · {reviewCount} <T en="verified reviews" ar="تقييم موثق" />
+                  <T en="GearBeat weighted rating" ar="تقييم GearBeat المرجّح" /> · {reviewCount} <T en="reviews" ar="تقييمات" />
                 </p>
               </div>
 
@@ -636,7 +621,7 @@ export default async function StudioDetailsPage({
           </div>
 
           <div style={{ fontSize: "2rem", fontWeight: 800, marginTop: 6 }}>
-            {Number(studio.price_from || 0).toFixed(2)} SAR
+            {studio.price_from ? `${Number(studio.price_from).toFixed(2)} SAR` : <T en="Request quote" ar="اطلب السعر" />}
           </div>
 
           <p style={{ color: "var(--muted)", marginTop: 6 }}>
@@ -649,7 +634,7 @@ export default async function StudioDetailsPage({
                 href={`/studios/${studio.slug || studio.id}/book`}
                 className="btn btn-primary btn-large"
               >
-                <T en="Reserve (Pilot)" ar="احجز (تجريبي)" />
+                <T en="Send booking request" ar="إرسال طلب الحجز" />
               </Link>
             ) : (
               <div
@@ -681,8 +666,8 @@ export default async function StudioDetailsPage({
 
           <p style={{ color: "var(--muted)", marginTop: 18, fontSize: "0.9rem", lineHeight: 1.7 }}>
             <T
-              en="GearBeat helps verify studios and owners to create a safer creative booking experience."
-              ar="تساعد GearBeat في توثيق الاستوديوهات والملاك لتجربة حجز إبداعية أكثر أمانًا."
+              en="Send a request with your preferred date and time. The studio confirms availability before the session is finalized."
+              ar="أرسل طلبًا بالتاريخ والوقت المفضلين. يؤكد الاستوديو التوفر قبل اعتماد الجلسة نهائيًا."
             />
           </p>
         </aside>
